@@ -2,6 +2,7 @@
 
 using Abstractions.Messaging;
 using Core.Abstractions.Repositories;
+using Core.Models.Identifiers;
 using Core.Shared;
 using Interfaces.Repositories;
 using Models;
@@ -38,7 +39,7 @@ internal sealed class GetInactiveCasualsQueryHandler
         {
             string schoolName = string.Empty;
 
-            if (!string.IsNullOrWhiteSpace(casual.SchoolCode))
+            if (casual.SchoolCode != SchoolCode.Empty)
             {
                 var school = await _schoolRepository.GetById(casual.SchoolCode, cancellationToken);
                 if (school is not null)

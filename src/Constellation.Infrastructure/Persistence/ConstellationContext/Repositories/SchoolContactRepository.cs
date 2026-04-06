@@ -2,6 +2,7 @@
 
 using Core.Abstractions.Clock;
 using Core.Enums;
+using Core.Models.Identifiers;
 using Core.Models.SchoolContacts;
 using Core.Models.SchoolContacts.Enums;
 using Core.Models.SchoolContacts.Identifiers;
@@ -23,7 +24,7 @@ public class SchoolContactRepository : ISchoolContactRepository
         _dateTime = dateTime;
     }
 
-    public void Insert(SchoolContact contact) => _context.Set<SchoolContact>().Add(contact);
+    public void Insert(SchoolContact schoolContact) => _context.Set<SchoolContact>().Add(schoolContact);
 
     public async Task<List<SchoolContact>> GetAll(
         CancellationToken cancellationToken = default) =>
@@ -57,20 +58,31 @@ public class SchoolContactRepository : ISchoolContactRepository
 
     public async Task<SchoolContact?> GetByNameAndSchool(
         string name,
-        string schoolCode,
-        CancellationToken cancellationToken = default) =>
-        _context
+        SchoolCode schoolCode,
+        CancellationToken cancellationToken = default)
+    {
+        List<SchoolContact> entries = await _context
             .Set<SchoolContact>()
-            .Where(entry => 
+            .Where(entry =>
                 entry.Assignments.Any(role =>
                     !role.IsDeleted &&
                     role.SchoolCode == schoolCode))
-            .AsEnumerable()
-            .Where(entry => entry.Name.DisplayName == name)
-            .SingleOrDefault();
-    
+            .ToListAsync(cancellationToken);
+
+        return entries
+            .SingleOrDefault(entry => entry.Name.DisplayName == name);
+    }
+
+    public async Task<SchoolContact?> GetByPhoneNumber(
+        PhoneNumber number,
+        CancellationToken cancellationToken = default) =>
+        await _context
+            .Set<SchoolContact>()
+            .Where(contact => contact.PhoneNumber == number)
+            .FirstOrDefaultAsync(cancellationToken);
+
     public async Task<List<SchoolContact>> GetPrincipalsForSchool(
-        string schoolCode,
+        SchoolCode schoolCode,
         CancellationToken cancellationToken = default) =>
         await _context
             .Set<SchoolContact>()
@@ -91,7 +103,7 @@ public class SchoolContactRepository : ISchoolContactRepository
             .FirstOrDefaultAsync(cancellationToken);
 
     public async Task<List<SchoolContact>> GetWithRolesBySchool(
-        string schoolCode,
+        SchoolCode schoolCode,
         CancellationToken cancellationToken = default) =>
         await _context
             .Set<SchoolContact>()
@@ -108,7 +120,7 @@ public class SchoolContactRepository : ISchoolContactRepository
     {
         DateOnly today = DateOnly.FromDateTime(DateTime.Today);
 
-        List<string> schoolCodes = await _context
+        List<SchoolCode> schoolCodes = await _context
             .Set<Student>()
             .Where(student => !student.IsDeleted)
             .SelectMany(student => student.SchoolEnrolments.Where(enrolment => 
@@ -129,7 +141,7 @@ public class SchoolContactRepository : ISchoolContactRepository
     }
 
     public async Task<List<SchoolContact>> GetBySchoolAndRole(
-        string schoolCode,
+        SchoolCode schoolCode,
         Position selectedRole,
         CancellationToken cancellationToken = default) =>
         await _context
@@ -158,7 +170,7 @@ public class SchoolContactRepository : ISchoolContactRepository
         Position selectedRole,
         CancellationToken cancellationToken = default)
     {
-        List<string> schoolCodes = await _context
+        List<SchoolCode> schoolCodes = await _context
             .Set<Student>()
             .Where(student => !student.IsDeleted)
             .SelectMany(student => student.SchoolEnrolments.Where(enrolment =>

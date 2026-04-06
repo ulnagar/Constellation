@@ -3,6 +3,7 @@
 using Core.Enums;
 using Core.Models.Attendance.Checkin;
 using Core.Models.Attendance.Repositories;
+using Core.Models.Identifiers;
 using Core.Models.Offerings.Identifiers;
 using Core.Models.Subjects.Identifiers;
 using Microsoft.EntityFrameworkCore;
@@ -50,7 +51,7 @@ internal sealed class CheckInRepository : ICheckInRepository
             .ToListAsync(cancellationToken);
     
     public async Task<List<CheckInResponse>> GetFromSchool(
-        string schoolCode, 
+        SchoolCode schoolCode, 
         CancellationToken cancellationToken = default) =>
         await _context
             .Set<CheckInResponse>()

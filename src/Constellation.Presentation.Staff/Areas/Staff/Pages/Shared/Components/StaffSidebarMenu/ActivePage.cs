@@ -6,10 +6,14 @@
 internal static class ActivePage
 {
     public const string Staff_Dashboard = "Dashboard..";
-    public const string Admin_Emergency_Console = "Admin.Emergency.Console";
-    public const string Admin_Emergency_Templates = "Admin.Emergency.Templates";
-    public const string Admin_Emergency_Sent = "Admin.Emergency.Sent";
-    public const string Admin_Emergency_Contacts = "Admin.Emergency.Contacts";
+
+    public const string Messaging_Contacts_List = "Messaging.Contacts.List";
+    public const string Messaging_History_List = "Messaging.History.List";
+    public const string Messaging_Drafts = "Messaging.Drafts.";
+    public const string Messaging_Emergency_Console = "Messaging.Emergency.Console";
+    public const string Messaging_Drafts_Templates = "Messaging.Drafts.Templates";
+    public const string Messaging_Emergency_Sent = "Messaging.Emergency.Sent";
+    public const string Messaging_Emergency_Contacts = "Messaging.Emergency.Contacts";
 
     public const string Equipment_Assets_Assets = "Equipment.Assets.Assets";
     public const string Equipment_Assets_Allocations = "Equipment.Assets.Allocations";
@@ -19,7 +23,6 @@ internal static class ActivePage
     public const string Equipment_Stocktake_List = "Equipment.Stocktake.List";
     public const string Equipment_Devices_Devices = "Equipment.Devices.Devices";
 
-    public const string Partner_Contacts_List = "Partner.Contacts.List";
     public const string Partner_Schools_Schools = "Partner.Schools.Schools";
     public const string Partner_Schools_Contacts = "Partner.Schools.Contacts";
     public const string Partner_Schools_ContactReports = "Partner.Schools.ContactReports";

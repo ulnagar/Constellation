@@ -48,12 +48,10 @@ internal sealed class EmailTrackingEventConfiguration : IEntityTypeConfiguration
 
         // Supports queries like "get all open events for this message"
         builder
-            .HasIndex(e => new { e.EmailId, e.EventType })
-            .HasDatabaseName("IX_EmailTrackingEvents_EmailMessageId_EventType");
+            .HasIndex(e => new { e.EmailId, e.EventType });
 
         // Supports queries like "get all events in a time range"
         builder
-            .HasIndex(e => e.OccurredAt)
-            .HasDatabaseName("IX_EmailTrackingEvents_OccurredAt");
+            .HasIndex(e => e.OccurredAt);
     }
 }

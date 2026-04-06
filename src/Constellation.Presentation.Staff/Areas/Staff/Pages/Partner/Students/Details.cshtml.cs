@@ -24,6 +24,7 @@ using Constellation.Core.Shared;
 using Constellation.Presentation.Shared.Helpers.Attributes;
 using Constellation.Presentation.Staff.Areas;
 using Core.Abstractions.Services;
+using Core.Models.Identifiers;
 using Core.Models.Offerings.Identifiers;
 using Core.Models.Students.Enums;
 using Core.Models.Students.Identifiers;
@@ -435,7 +436,7 @@ public class DetailsModel : BasePageModel
             error,
             _linkGenerator.GetPathByPage("/Partner/Students/Index", values: new { area = "Staff" }));
         
-        Student = new(StudentId.Empty, StudentReferenceNumber.Empty, Name.Create("John", "", "Doe").Value, Gender.NonBinary, Core.Enums.Grade.SpecialProgram, EmailAddress.None, "", "", false, false);
+        Student = new(StudentId.Empty, StudentReferenceNumber.Empty, Name.Create("John", "", "Doe").Value, Gender.NonBinary, Core.Enums.Grade.SpecialProgram, EmailAddress.None, "", SchoolCode.Empty, false, false);
     }
 
     private int CalculateTotalSessionDuration()

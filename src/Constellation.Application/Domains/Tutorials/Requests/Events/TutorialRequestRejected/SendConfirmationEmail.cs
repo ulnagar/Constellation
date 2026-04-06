@@ -7,6 +7,7 @@ using Constellation.Core.Models.Tutorials.Errors;
 using Constellation.Core.Shared;
 using Core.Abstractions.Repositories;
 using Core.Models.Families;
+using Core.Models.Identifiers;
 using Core.Models.SchoolContacts;
 using Core.Models.SchoolContacts.Enums;
 using Core.Models.SchoolContacts.Repositories;
@@ -15,7 +16,6 @@ using Core.Models.Tutorials;
 using Core.Models.Tutorials.Events;
 using Core.Models.Tutorials.Repositories;
 using Core.ValueObjects;
-using Interfaces.Gateways;
 using Interfaces.Services;
 using Serilog;
 using System.Collections.Generic;
@@ -52,7 +52,7 @@ internal sealed class SendConfirmationEmail
 
     public async Task Handle(TutorialRequestRejectedDomainEvent notification, CancellationToken cancellationToken)
     {
-        Request tutorialRequest = await _tutorialRepository.GetRequestById(notification.RequestId, cancellationToken);
+        Request? tutorialRequest = await _tutorialRepository.GetRequestById(notification.RequestId, cancellationToken);
 
         if (tutorialRequest is null)
         {
@@ -66,7 +66,7 @@ internal sealed class SendConfirmationEmail
         
         List<EmailRecipient> recipients = [];
         
-        Student student = await _studentRepository.GetById(tutorialRequest.StudentId, cancellationToken);
+        Student? student = await _studentRepository.GetById(tutorialRequest.StudentId, cancellationToken);
 
         if (student is null)
         {
@@ -87,7 +87,7 @@ internal sealed class SendConfirmationEmail
 
         foreach (var family in families)
         {
-            StudentFamilyMembership studentLink = family.Students.FirstOrDefault(link => link.StudentId == student.Id);
+            StudentFamilyMembership? studentLink = family.Students.FirstOrDefault(link => link.StudentId == student.Id);
 
             if (studentLink is null || !studentLink.IsResidentialFamily)
                 continue;
@@ -112,17 +112,20 @@ internal sealed class SendConfirmationEmail
                 recipients.Add(familyRecipient.Value);
         }
 
-        List<SchoolContact> contacts = await _contactRepository.GetBySchoolAndRole(student.CurrentEnrolment?.SchoolCode, Position.Coordinator, cancellationToken);
-
-        foreach (var contact in contacts)
+        if (student.CurrentEnrolment is not null && student.CurrentEnrolment.SchoolCode != SchoolCode.Empty)
         {
-            if (recipients.Any(entry => entry.Email == contact.EmailAddress.Email))
-                continue;
+            List<SchoolContact> contacts = await _contactRepository.GetBySchoolAndRole(student.CurrentEnrolment.SchoolCode, Position.Coordinator, cancellationToken);
 
-            Result<EmailRecipient> contactRecipient = contact.GetEmailRecipient();
+            foreach (var contact in contacts)
+            {
+                if (recipients.Any(entry => entry.Email == contact.EmailAddress.Email))
+                    continue;
 
-            if (contactRecipient.IsSuccess)
-                recipients.Add(contactRecipient.Value);
+                Result<EmailRecipient> contactRecipient = contact.GetEmailRecipient();
+
+                if (contactRecipient.IsSuccess)
+                    recipients.Add(contactRecipient.Value);
+            }
         }
 
         Result result = await _emailService.SendTutorialRequestRejectedEmail(recipients, tutorialRequest, cancellationToken);

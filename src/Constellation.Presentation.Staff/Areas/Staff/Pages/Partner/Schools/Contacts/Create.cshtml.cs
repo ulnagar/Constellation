@@ -13,6 +13,7 @@ using Constellation.Core.Shared;
 using Constellation.Presentation.Shared.Helpers.Attributes;
 using Constellation.Presentation.Staff.Areas;
 using Core.Abstractions.Services;
+using Core.Models.Identifiers;
 using Core.Models.SchoolContacts.Enums;
 using Core.ValueObjects;
 using MediatR;
@@ -76,7 +77,8 @@ public class CreateModel : BasePageModel
     public PhoneNumber? PhoneNumber { get; set; } = PhoneNumber.Empty;
 
     [BindProperty]
-    public string? SchoolCode { get; set; }
+    public SchoolCode SchoolCode { get; set; } = SchoolCode.Empty;
+
     [BindProperty]
     public Position Role { get; set; } = Position.Empty;
     [BindProperty]
@@ -164,7 +166,7 @@ public class CreateModel : BasePageModel
         
         Note = string.IsNullOrWhiteSpace(Note) ? Note : Note.Trim();
         
-        if (string.IsNullOrWhiteSpace(SchoolCode))
+        if (SchoolCode == SchoolCode.Empty)
         {
             CreateContactCommand createCommand = new(
                 FirstName,

@@ -15,6 +15,7 @@ using Constellation.Core.Models.Students.Errors;
 using Constellation.Core.Models.Students.Identifiers;
 using Constellation.Core.Models.Students.Repositories;
 using Core.Errors;
+using Core.Models.Identifiers;
 using Core.Shared;
 using Core.ValueObjects;
 using DTOs.EmailRequests;
@@ -95,7 +96,7 @@ internal sealed class SendNotificationsForAssessmentProvisionsCommandHandler
                         ccRecipients.Add(recipient.Value);
                 }
 
-                Student student = await _studentRepository.GetById(studentProvision.StudentId, cancellationToken);
+                Student? student = await _studentRepository.GetById(studentProvision.StudentId, cancellationToken);
 
                 if (student is null)
                 {
@@ -151,17 +152,20 @@ internal sealed class SendNotificationsForAssessmentProvisionsCommandHandler
 
         List<Student> students = await _studentRepository.GetListFromIds(studentIds, cancellationToken);
 
-        IEnumerable<IGrouping<string, Student>> studentsBySchool = students.GroupBy(student => student.CurrentEnrolment?.SchoolCode);
+        IEnumerable<IGrouping<SchoolCode?, Student>> studentsBySchool = students.GroupBy(student => student.CurrentEnrolment?.SchoolCode);
 
-        foreach (IGrouping<string, Student> schoolGroup in studentsBySchool)
+        foreach (IGrouping<SchoolCode?, Student> schoolGroup in studentsBySchool)
         {
+            if (!schoolGroup.Key.HasValue)
+                continue;
+
             List<StudentId> schoolStudentIds = schoolGroup.Select(student => student.Id).ToList();
 
             List<StudentProvisions> schoolAdjustmentsList = studentProvisions
                 .Where(adjustment => schoolStudentIds.Contains(adjustment.StudentId))
                 .ToList();
 
-            List<SchoolContact> contacts = await _contactRepository.GetBySchoolAndRole(schoolGroup.Key, Position.Coordinator, cancellationToken);
+            List<SchoolContact> contacts = await _contactRepository.GetBySchoolAndRole(schoolGroup.Key.Value, Position.Coordinator, cancellationToken);
 
             foreach (SchoolContact contact in contacts)
             {

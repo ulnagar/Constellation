@@ -34,9 +34,11 @@ public sealed class StaffNavBarViewComponent : ViewComponent
 
         AuthorizationResult parentPortal = await _authService.AuthorizeAsync(UserClaimsPrincipal, AuthPolicies.IsParent);
         AuthorizationResult schoolPortal = await _authService.AuthorizeAsync(UserClaimsPrincipal, AuthPolicies.IsSchoolContact);
+        AuthorizationResult emergencyConsole = await _authService.AuthorizeAsync(UserClaimsPrincipal, AuthPermission.Messaging_EmergencyConsole_Edit_Value);
 
         viewModel.CanAccessParentPortal = parentPortal.Succeeded;
         viewModel.CanAccessSchoolPortal = schoolPortal.Succeeded;
+        viewModel.CanAccessEmergencyConsole = emergencyConsole.Succeeded;
 
         Result<List<TeacherOfferingResponse>> query =
             await _mediator.Send(new GetCurrentOfferingsForTeacherQuery(StaffId.Empty, username));

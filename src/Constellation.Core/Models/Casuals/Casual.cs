@@ -15,7 +15,7 @@ public sealed class Casual : AggregateRoot, IAuditableEntity
     private Casual(
         Name name,
         EmailAddress emailAddress,
-        string schoolCode)
+        SchoolCode schoolCode)
     {
         Id = new();
         Name = name;
@@ -27,7 +27,7 @@ public sealed class Casual : AggregateRoot, IAuditableEntity
     public Name Name { get; private set; }
     public EmailAddress EmailAddress { get; private set; }
     public string EdvalTeacherId { get; private set; }
-    public string SchoolCode { get; private set; }
+    public SchoolCode SchoolCode { get; private set; }
 
     public string? CreatedBy { get; set; }
     public DateTime CreatedAt { get; set; }
@@ -40,7 +40,7 @@ public sealed class Casual : AggregateRoot, IAuditableEntity
     public static Casual Create(
         Name name,
         EmailAddress email,
-        string schoolCode)
+        SchoolCode schoolCode)
     {
         Casual casual = new Casual(name, email, schoolCode);
 
@@ -64,7 +64,7 @@ public sealed class Casual : AggregateRoot, IAuditableEntity
     public void Update(
         Name name,
         string edvalTeacherId,
-        string schoolCode)
+        SchoolCode schoolCode)
     {
         Name = name;
         EdvalTeacherId = edvalTeacherId;

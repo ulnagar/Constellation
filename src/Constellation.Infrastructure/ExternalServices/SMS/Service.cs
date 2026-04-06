@@ -3,10 +3,11 @@
 using Application.Domains.Attendance.Absences.Commands.ConvertAbsenceToAbsenceEntry;
 using Application.Domains.Messaging.Sms.Dtos;
 using Application.Interfaces.Gateways;
+using Azure.Messaging;
 using Constellation.Application.Interfaces.Services;
 using Core.Errors;
+using Core.Models.Messaging.Enums;
 using Core.Models.Messaging.Sms;
-using Core.Models.Messaging.Sms.Enums;
 using Core.Models.Messaging.Sms.Repositories;
 using Core.Models.Students;
 using Core.Shared;
@@ -42,15 +43,49 @@ public sealed class Service : ISMSService
                 values: null);
     }
     
-    public async Task<Result<List<OutgoingSmsConfirmation>>> SendMessage(
-        OutgoingSms message,
-        CancellationToken cancellationToken) =>
-        await _gateway.SendSms(message, cancellationToken);
+    public async Task<Result> SendQueuedMessage(
+        MessageSender sender,
+        SmsRecipient receiver,
+        string messageBody,
+        CancellationToken cancellationToken = default)
+    {
+        OutgoingSms message = new()
+        {
+            origin = sender.Destination, 
+            destinations = [receiver.Number], 
+            message = messageBody
+        };
+
+        if (!string.IsNullOrWhiteSpace(_deliveryReceiptUri))
+            message.notifyUrl = $"json+{_deliveryReceiptUri}";
+
+        Result<List<OutgoingSmsConfirmation>> results = await _gateway.SendSms(message, cancellationToken);
+
+        if (results.IsFailure)
+            return results;
+
+        foreach (OutgoingSmsConfirmation confirmation in results.Value)
+        {
+            SmsMessage messageRecord = new(
+                "Messaging",
+                confirmation.Id ?? string.Empty,
+                sender,
+                receiver,
+                confirmation.Message ?? string.Empty,
+                MessageDirection.Outbound,
+                MessageStatus.Sent,
+                confirmation.DateTime) { OutgoingId = confirmation.OutgoingId ?? string.Empty, };
+
+            _smsRepository.Insert(messageRecord);
+        }
+
+        return results;
+    }
 
     public async Task<Result<List<OutgoingSmsConfirmation>>> SendAbsenceNotification(
         List<AbsenceEntry> absences,
         Student student,
-        List<PhoneNumber> phoneNumbers,
+        List<SmsRecipient> recipients,
         CancellationToken cancellationToken = default)
     {
         string classListString = string.Empty;
@@ -60,15 +95,8 @@ public sealed class Service : ISMSService
         string link = $"http://edu.nsw.link/aurora";
 
         string messageText = $"{student.Name.PreferredName} was absent from the following classes on {absences.First().Date.ToShortDateString()}\r\n{classListString}To explain these absences, please click here {link}";
-        
-        List<string> destinations = [];
-        foreach (var number in phoneNumbers)
-        {
-            if (number == PhoneNumber.Empty)
-                continue;
 
-            destinations.Add(number.ToString(PhoneNumber.Format.None));
-        }
+        List<string> destinations = recipients.Select(recipient => recipient.Number).ToList();
 
         OutgoingSms messageContent = new()
         {
@@ -87,17 +115,32 @@ public sealed class Service : ISMSService
 
         foreach (OutgoingSmsConfirmation confirmation in results.Value)
         {
-            SmsMessage message = new()
+            SmsRecipient sender = SmsRecipient.Unknown;
+
+            if (confirmation.Origin == SmsRecipient.AuroraNoReply.Number)
+                sender = SmsRecipient.AuroraNoReply;
+
+            if (confirmation.Origin == SmsRecipient.Aurora.Number)
+                sender = SmsRecipient.Aurora;
+
+            Result<PhoneNumber> recipientPhoneNumber = PhoneNumber.Create(confirmation.Destination ?? string.Empty);
+
+            SmsRecipient receiver = recipients
+                .FirstOrDefault(recipient => 
+                    recipient.Number == recipientPhoneNumber.Value.ToString(PhoneNumber.Format.None)) 
+                ?? SmsRecipient.Unknown;
+
+            SmsMessage message = new(
+                "Absences",
+                confirmation.Id ?? string.Empty,
+                sender,
+                receiver,
+                confirmation.Message ?? string.Empty,
+                MessageDirection.Outbound,
+                MessageStatus.Sent,
+                confirmation.DateTime)
             {
-                SmsGlobalId = confirmation.Id ?? string.Empty,
-                SendingModule = "Absences",
                 OutgoingId = confirmation.OutgoingId ?? string.Empty,
-                From = confirmation.Origin ?? string.Empty,
-                To = confirmation.Destination ?? string.Empty,
-                Message = confirmation.Message ?? string.Empty,
-                Direction = MessageDirection.Outbound,
-                Status = SmsStatus.Sent,
-                CreatedAt = confirmation.DateTime
             };
 
             _smsRepository.Insert(message);
@@ -127,31 +170,5 @@ public sealed class Service : ISMSService
             messageContent.notifyUrl = $"json+{_deliveryReceiptUri}";
 
         return await _gateway.SendSms(messageContent, cancellationToken);
-    }
-
-    public async Task<Result<string?>> SendEmergencyConsoleSms(
-        AlertRecipient recipient,
-        string message,
-        CancellationToken cancellationToken = default)
-    {
-        if (recipient.PhoneNumber == PhoneNumber.Empty)
-            return Result.Failure<string?>(SmsRecipientErrors.NumberEmpty);
-
-        OutgoingSms messageContent = new()
-        {
-            origin = _configuration.OutgoingNumber,
-            destinations = [recipient.PhoneNumber.ToString(PhoneNumber.Format.None)],
-            message = message
-        };
-
-        if (!string.IsNullOrWhiteSpace(_deliveryReceiptUri))
-            messageContent.notifyUrl = $"json+{_deliveryReceiptUri}";
-
-        Result<List<OutgoingSmsConfirmation>> result = await _gateway.SendSms(messageContent, cancellationToken);
-
-        if (result.IsFailure)
-            return Result.Failure<string?>(result.Error);
-
-        return Result.Success(result.Value.First().OutgoingId);
     }
 }

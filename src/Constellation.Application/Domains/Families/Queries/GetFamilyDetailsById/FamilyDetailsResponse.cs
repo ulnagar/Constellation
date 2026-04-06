@@ -28,7 +28,7 @@ public sealed record FamilyDetailsResponse(
         StudentId StudentId,
         Name Name,
         EmailAddress EmailAddress,
-        string SchoolCode,
+        SchoolCode SchoolCode,
         string SchoolName,
         Grade CurrentGrade);
 };

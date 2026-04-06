@@ -17,7 +17,7 @@ public sealed partial class Service : IEmailService
         await BuildAndSendEmail(
             body,
             submitter,
-            $"[Aurora College] MasterFile Consistency Report - {DateTime.Today.ToLongDateString()}",
+            subject,
             [ EmailRecipient.InfoTechTeam, EmailRecipient.SupportQueue ],
             cancellationToken: cancellationToken);
     }

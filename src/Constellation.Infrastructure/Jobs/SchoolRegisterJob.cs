@@ -8,6 +8,7 @@ using Application.Interfaces.Repositories;
 using Constellation.Application.Interfaces.Jobs;
 using Core.Abstractions.Clock;
 using Core.Models;
+using Core.Models.Identifiers;
 using Core.Models.SchoolContacts;
 using Core.Models.SchoolContacts.Enums;
 using Core.Models.SchoolContacts.Repositories;
@@ -58,17 +59,22 @@ internal sealed class SchoolRegisterJob : ISchoolRegisterJob
                 return;
 
             _logger.Information("{id}: Processing School {Name} ({SchoolCode})", jobId, csvSchool.Name, csvSchool.SchoolCode);
-            School dbSchool = dbSchools.SingleOrDefault(school => school.Code == csvSchool.SchoolCode);
-            CeseSchoolResponse ceseSchool = ceseSchools.SingleOrDefault(school => school.Code == csvSchool.SchoolCode);
+            School? dbSchool = dbSchools.SingleOrDefault(school => school.Code.ToString() == csvSchool.SchoolCode);
+            CeseSchoolResponse? ceseSchool = ceseSchools.SingleOrDefault(school => school.Code == csvSchool.SchoolCode);
 
             if (dbSchool == null)
             {
                 _logger.Information("{id}: School {Name} ({SchoolCode}): Not found - Adding to database", jobId, csvSchool.Name, csvSchool.SchoolCode);
                 // Doesn't exist in database! Create!
 
+                Result<SchoolCode> schoolCode = SchoolCode.TryFromValue(csvSchool.SchoolCode);
+
+                if (schoolCode.IsFailure)
+                    continue;
+
                 UpsertSchoolCommand command = new()
                 {
-                    Code = csvSchool.SchoolCode,
+                    Code = schoolCode.Value,
                     Name = csvSchool.Name,
                     Address = csvSchool.Address,
                     Town = csvSchool.Town,
@@ -181,12 +187,17 @@ internal sealed class SchoolRegisterJob : ISchoolRegisterJob
         foreach (DataCollectionsSchoolResponse csvSchool in openSchools)
         {
             _logger.Information("{id}: Processing School {Name} ({SchoolCode})", jobId, csvSchool.Name, csvSchool.SchoolCode);
-            School dbSchool = dbSchools.SingleOrDefault(school => school.Code == csvSchool.SchoolCode);
+            School? dbSchool = dbSchools.SingleOrDefault(school => school.Code.ToString() == csvSchool.SchoolCode);
 
             if (dbSchool == null)
                 continue;
 
-            bool hasStudents = await _schoolRepository.IsPartnerSchoolWithStudents(csvSchool.SchoolCode, cancellationToken);
+            Result<SchoolCode> schoolCode = SchoolCode.TryFromValue(csvSchool.SchoolCode);
+
+            if (schoolCode.IsFailure)
+                continue;
+
+            bool hasStudents = await _schoolRepository.IsPartnerSchoolWithStudents(schoolCode.Value, cancellationToken);
 
             if (!hasStudents)
                 continue;
@@ -212,8 +223,8 @@ internal sealed class SchoolRegisterJob : ISchoolRegisterJob
                 emailAddress.IsSuccess ? emailAddress.Value : EmailAddress.None,
                 PhoneNumber.Empty,
                 Position.Principal, 
-                csvSchool.SchoolCode,
-                $"{_dateTime.Today.ToString("dd/MM/yy")} - Principal created from CESE Data Source",
+                schoolCode.Value,
+                $"{_dateTime.Today.ToString("yyyy-MM-dd")} - Principal created from CESE Data Source",
                 false),
                 cancellationToken);
         }

@@ -1,0 +1,438 @@
+@page
+@model Constellation.Presentation.Staff.Areas.Staff.Pages.Messaging.Drafts.IndexModel
+
+@using Constellation.Core.Models.Messaging.Drafts.Enums
+@using Constellation.Core.Models.Messaging.Enums
+@using Constellation.Core.ValueObjects
+
+@inject IAuthorizationService AuthorizationService
+
+@{
+    var canAccessEmergencyFunctions = await AuthorizationService.AuthorizeAsync(User, AuthPermission.Messaging_EmergencyConsole_Edit_Value);
+}
+
+<h2>Message Draft</h2>
+
+<div class="page-menu">
+    <a asp-page-handler="ClearDraft" class="btn btn-warning">Reset Draft</a>
+</div>
+
+<hr />
+
+<form method="post">
+    <div class="mb-3 row">
+        <label asp-for="Type" class="col-md-2"></label>
+        <div class="col-md-3">
+            <div class="btn-group" role="group">
+                <input type="radio" class="btn-check" asp-for="Type" value="@MessageType.Email.Value" id="type-@MessageType.Email.Value" />
+                <label class="btn btn-outline-success" for="type-@MessageType.Email.Value">@MessageType.Email.Name</label>
+                
+                @if (Model.CanSendSms)
+                {
+                    <input type="radio" class="btn-check" asp-for="Type" value="@MessageType.SMS.Value" id="type-@MessageType.SMS.Value" />
+                    <label class="btn btn-outline-success" for="type-@MessageType.SMS.Value">@MessageType.SMS.Name</label>
+                }
+                else
+                {
+                    <input type="radio" class="btn-check" disabled="disabled" asp-for="Type" value="@MessageType.SMS.Value" id="type-@MessageType.SMS.Value" />
+                    <label class="btn btn-outline-success" disabled="disabled" for="type-@MessageType.SMS.Value">@MessageType.SMS.Name</label>
+                }
+                
+            </div>
+            <span asp-validation-for="Type" class="text-danger"></span>
+        </div>
+    </div>
+
+    <div class="mb-3 row">
+        <label class="col-md-2 col-form-label">Sender</label>
+        <div class="col-md-6">
+
+            <select id="sender-email" class="form-select @(Model.Type != MessageType.Email ? "d-none" : "")">
+                <option value="">-- Select sender --</option>
+                @foreach (var sender in Model.EmailSenders)
+                {
+                    <option value="@sender.Destination"
+                            data-name="@sender.Name"
+                            selected="@(Model.Sender?.Destination == sender.Destination)">
+                        @sender.Name (@sender.Destination)
+                    </option>
+                }
+            </select>
+
+            <select id="sender-sms" class="form-select @(Model.Type != MessageType.SMS ? "d-none" : "")">
+                <option value="">-- Select sender --</option>
+                @foreach (var sender in Model.SmsSenders)
+                {
+                    <option value="@sender.Destination"
+                            data-name="@sender.Name"
+                            selected="@(Model.Sender?.Destination == sender.Destination)">
+                        @sender.Name (@sender.Destination)
+                    </option>
+                }
+            </select>
+
+        </div>
+    </div>
+
+    <div class="mb-3 row" id="recipients-row">
+        <div class="col-md-2">
+            <label asp-for="Recipients"></label>
+            <div class="float-end">
+                <span id="recipients-overflow" class="badge text-bg-secondary d-none"></span>
+                <button type="button"
+                        id="recipients-toggle"
+                        class="btn btn-sm btn-link p-0 me-1 d-none"
+                        aria-expanded="false"
+                        aria-controls="recipients-container"
+                        title="Show all recipients">
+                    <i class="fas fa-chevron-down"></i>
+                </button>
+            </div>
+                    
+            <div class="w-100 d-grid mt-2">
+                <button type="button" data-bs-toggle="modal" data-bs-target="#ManualRecipientModal" class="btn btn-secondary">Add</button>
+            </div>
+        </div>
+        <div class="col-md-8">
+            <div id="recipients-container">
+                @foreach (var recipient in Model.Recipients)
+                {
+                    <span class="badge text-bg-warning mb-1" data-recipient="@recipient.Id">
+                        <span class="align-text-top">@recipient.Name</span>
+                        <span class="ms-2 me-2">
+                            @if (recipient.HasEmail)
+                            {
+                                <i class="fas fa-envelope-square large" title="@recipient.EmailAddress.Email"></i>
+                            }
+                            @if (recipient.HasPhone)
+                            {
+                                <i class="fas fa-phone-square-alt large" title="@recipient.PhoneNumber.ToString(PhoneNumber.Format.None)"></i>
+                            }
+                        </span>
+                        <button type="button" class="btn-close" aria-label="Close"></button>
+                    </span>
+                }
+            </div>
+        </div>
+    </div>
+    
+    @if (canAccessEmergencyFunctions.Succeeded)
+    {
+        <div class="mb-3 row">
+            <label asp-for="Templates" class="col-md-2">Template</label>
+            <div class="col-md-6">
+                <select id="template-select" class="form-select">
+                    <option value="">-- Select template --</option>
+                    @foreach (var template in Model.Templates.OrderBy(entry => entry.Name))
+                    {
+                        <option value="@template.Id">@template.Name (@template.TemplateType.Name)</option>
+                    }
+                </select>
+            </div>
+        </div>
+
+        <div class="mb-3 row">
+            <label class="col-md-2">Priority</label>
+            <div class="col-md-6">
+                <select name="priority" class="form-select">
+                    @foreach (var priority in Enum.GetValues<MessagePriority>().OrderBy(entry => entry))
+                    {
+                        if (priority == MessagePriority.Normal)
+                        {
+                            <option value="@priority" selected="selected">@priority.ToString()</option>
+                        }
+                        else
+                        {
+                            <option value="@priority">@priority.ToString()</option>
+                        }
+                    }
+                </select>
+            </div>
+        </div>
+    }
+
+    <div class="mb-3 row @(Model.Type == MessageType.SMS ? "d-none" : "")" id="subject-row">
+        <label asp-for="Subject" class="col-md-2"></label>
+        <div class="col-md-6">
+            <input asp-for="Subject" class="form-control"/>
+            <span asp-validation-for="Subject" class="text-danger"></span>
+        </div>
+    </div>
+
+    <div class="mb-3 row">
+        <label asp-for="Body" class="col-md-2"></label>
+        <div class="col-md-6">
+            <textarea id="@Html.IdFor(m => m.Body)" name="@Html.NameFor(m => m.Body)" rows="20" cols="150" class="form-control summernote">@Model.Body</textarea>
+            <span class="d-block d-none text-danger message-counter">The message contains <span id="character-count">@Model.Body.Count()</span> characters. Messages sent via SMS will be split into 160 character blocks and sent separately.</span>
+            <span asp-validation-for="Body" class="text-danger"></span>
+            <span id="autosave-status" style="font-size: 0.85em; color: grey;"></span>
+        </div>
+    </div>
+
+    <div class="mb-3">
+        <div class="col-md-offset-2 col-md-3 d-grid">
+            <button type="button" onclick="sendMessage()" class="btn btn-primary btn-lg">Send</button>
+        </div>
+    </div>
+</form>
+
+<form asp-page-handler="AddRecipient">
+    <div class="modal" id="ManualRecipientModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title">Enter Manual Recipient</h4>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="container-fluid">
+                        <div class="row mb-2">
+                            <label class="col-md-12">Name</label>
+                            <div class="col-md-12">
+                                <input name="Name" type="text" class="form-control" required="required" autofocus />
+                                <span class="text-danger">(Required) Enter the name of the contact</span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-2">
+                            <label class="col-md-12">Email</label>
+                            <div class="col-md-12">
+                                <input name="Email" type="email" class="form-control" />
+                                <span class="text-danger">(Optional) Enter a valid email address</span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-2">
+                            <label class="col-md-12">Phone Number</label>
+                            <div class="col-md-12">
+                                <input name="Phone" type="tel" pattern="^(\s*\d\s*){10}$" class="form-control" />
+                                <span class="text-danger">(Optional) Enter a ten-digit mobile number</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-success">Add</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+
+@section Scripts
+{
+    <script>
+        $(document).ready(function() {
+            $.validator.setDefaults({
+                ignore: '.note-editable, .note-editor *'
+            });
+
+            collapseRecipients();
+        });
+    </script>
+
+    <partial name="_ValidationScriptsPartial" />
+    
+    <script>
+        $('textarea').on("input", function() {
+          var currentLength = $(this).val().length;
+          $('#character-count').text(currentLength);
+        }); 
+
+        $('#template-select').on('change', async function() {
+            toggleLoader();
+            const templateId = $(this).val();
+
+            $.ajax({
+                url: `?handler=AjaxLoadTemplate&templateId=${templateId}`,
+                type: 'POST',
+                headers: {
+                    'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
+                }
+            }).done(function (result) {
+                $('.summernote').summernote('code', result);
+            }).always(function () {
+                toggleLoader();
+            });
+        });
+
+        function getActiveSenderSelect() {
+            return $('input[name="Type"]:checked').val() === 'Email' ? $('#sender-email') : $('#sender-sms');
+        }
+
+        function saveSender() {
+            const type = $('input[name="Type"]:checked').val()
+            const active = getActiveSenderSelect();
+            const selected = active.find('option:selected');
+
+            return fetch('?handler=AjaxAutoSaveSender', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
+                },
+                body: JSON.stringify({
+                    messageType:        type,
+                    senderName:         selected.data('name') ?? '',
+                    senderDestination:  selected.val() ?? ''
+                })
+            });
+        }
+
+        // Switch visible dropdown when type changes
+        $('input[name="Type"]').on('change', async function() {
+            const value = $(this).val();
+            const isEmail = value === 'Email';
+
+            document.startViewTransition(() => {
+                $('#sender-email').toggleClass('d-none', !isEmail);
+                $('#sender-sms').toggleClass('d-none', isEmail);
+                $('#subject-row').toggleClass('d-none', !isEmail);
+            });
+
+            // Reset the now-hidden dropdown selection
+            (isEmail ? $('#sender-sms') : $('#sender-email')).val('');
+
+            await saveSender();
+        });
+
+        // Autosave when sender selection changes
+        $('#sender-email, #sender-sms').on('change', async function() {
+            await saveSender();
+        });
+
+        $('#recipients-container').on('click', '.btn-close', async function() {
+            var badge = $(this).parent();
+            var recipientId = badge.attr('data-recipient');
+
+            try {
+                const response = await fetch('?handler=AjaxRemoveRecipient&recipientId=' + recipientId, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
+                    }
+                });
+
+                if (response.ok) {
+                    document.startViewTransition(() => {
+                        badge.remove();
+                        collapseRecipients();
+                    });
+                }
+                else {
+                    badge.addClass('badge-flash');
+                    badge.one('animationend', () => badge.removeClass('badge-flash'));
+                }
+            } catch {
+                badge.addClass('badge-flash');
+                badge.one('animationend', () => badge.removeClass('badge-flash'));
+            }
+        });
+
+        async function sendMessage() {
+            try {
+                const [draftResponse, senderResponse] = await Promise.all([saveDraft(), saveSender()]);
+
+                if (!draftResponse?.ok || !senderResponse?.ok) {
+                    $('#autosave-status').text('Failed to save before sending. Please try again.');
+                    return;
+                }
+
+                document.querySelector('form').submit();
+            } catch {
+                $('#autosave-status').text('Failed to save before sending. Please try again.');
+            }
+        }
+
+        function debounce(fn, delay) {
+            let timer;
+            return function(...args) {
+                clearTimeout(timer);
+                timer = setTimeout(() => fn.apply(this, args), delay);
+            };
+        }
+
+        async function saveDraft() {
+            const subject = $('#Subject').val();
+            // const body    = $('#Body').val();
+            const body = $('.summernote').summernote('code')
+
+            try {
+                const response = await fetch('?handler=AjaxAutoSave', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
+                    },
+                    body: JSON.stringify({ subject, body })
+                });
+
+                $('#autosave-status').text(response.ok ? 'Draft saved' : 'Save failed');
+                return response;
+            } catch {
+                $('#autosave-status').text('Save failed');
+            }
+        }
+
+        const waitSaveDraft = debounce(saveDraft, 800); // wait 800ms after last keypress before saving
+
+        $('#Subject').on('input', waitSaveDraft);
+
+        $('.summernote').on('summernote.keyup', waitSaveDraft);
+
+        $('#recipients-toggle').on('click', function() {
+            const expanded   = $(this).attr('aria-expanded') === 'true';
+            const container  = document.getElementById('recipients-container');
+            const badges     = [...container.querySelectorAll('.badge[data-recipient]')];
+
+            if (expanded) {
+                // Collapse — re-measure and hide overflow
+                $(this).attr('aria-expanded', 'false')
+                       .find('i').removeClass('fa-chevron-up').addClass('fa-chevron-down');
+                collapseRecipients();
+            } else {
+                // Expand — show everything
+                badges.forEach(b => b.classList.remove('d-none'));
+                $('#recipients-overflow').addClass('d-none');
+                $(this).attr('aria-expanded', 'true')
+                       .find('i').removeClass('fa-chevron-down').addClass('fa-chevron-up');
+            }
+        });
+
+        // Re-run if the container is resized (e.g. responsive layout shift)
+        new ResizeObserver(() => {
+            if ($('#recipients-toggle').attr('aria-expanded') === 'false') {
+                collapseRecipients();
+            }
+        }).observe(document.getElementById('recipients-container'));
+
+        function collapseRecipients() {
+            const container  = document.getElementById('recipients-container');
+            const overflow   = document.getElementById('recipients-overflow');
+            const toggle     = document.getElementById('recipients-toggle');
+            const badges     = [...container.querySelectorAll('.badge[data-recipient]')];
+
+            if (badges.length === 0) return;
+
+            // Make all visible first so we can measure real positions
+            badges.forEach(b => b.classList.remove('d-none'));
+            overflow.classList.add('d-none');
+            toggle.classList.add('d-none');
+
+            const firstRowTop = badges[0].offsetTop;
+            const hidden      = badges.filter(b => b.offsetTop > firstRowTop);
+
+            if (hidden.length === 0) return;
+
+            // Only hide if we're in collapsed state
+            if (toggle.getAttribute('aria-expanded') === 'false') {
+                hidden.forEach(b => b.classList.add('d-none'));
+                overflow.textContent = `+${hidden.length} more`;
+                overflow.classList.remove('d-none');
+                toggle.classList.remove('d-none');
+            }
+        }
+    </script>
+}

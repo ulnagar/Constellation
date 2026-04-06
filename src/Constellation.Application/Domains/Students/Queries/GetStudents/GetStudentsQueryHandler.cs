@@ -5,7 +5,7 @@ using Constellation.Application.Domains.Students.Models;
 using Constellation.Core.Models.Students.Errors;
 using Constellation.Core.Models.Students.Repositories;
 using Constellation.Core.Shared;
-using Core.Models.Offerings.Identifiers;
+using Core.Models.Identifiers;
 using Core.Models.Students;
 using Core.Models.Students.Identifiers;
 using System;
@@ -42,7 +42,7 @@ internal sealed class GetStudentsQueryHandler
 
         foreach (Student student in students)
         {
-            SchoolEnrolment enrolment = student.CurrentEnrolment;
+            SchoolEnrolment? enrolment = student.CurrentEnrolment;
 
             bool currentEnrolment = true;
 
@@ -55,10 +55,10 @@ internal sealed class GetStudentsQueryHandler
                 {
                     int maxYear = student.SchoolEnrolments.Max(item => item.Year);
 
-                    SchoolEnrolmentId enrolmentId = student.SchoolEnrolments
+                    SchoolEnrolmentId? enrolmentId = student.SchoolEnrolments
                         .Where(entry => entry.Year == maxYear)
                         .Select(entry => new { entry.Id, Date = entry.EndDate ?? DateOnly.MaxValue })
-                        .MaxBy(entry => entry.Date)
+                        .MaxBy(entry => entry.Date)?
                         .Id;
 
                     enrolment = student.SchoolEnrolments.FirstOrDefault(entry => entry.Id == enrolmentId);
@@ -72,8 +72,8 @@ internal sealed class GetStudentsQueryHandler
                 student.PreferredGender,
                 enrolment?.Grade,
                 student.EmailAddress,
-                enrolment?.SchoolName,
-                enrolment?.SchoolCode,
+                enrolment?.SchoolName ?? string.Empty,
+                enrolment?.SchoolCode ?? SchoolCode.Empty,
                 currentEnrolment,
                 student.IsDeleted));
         }

@@ -1,8 +1,8 @@
 ﻿namespace Constellation.Application.Domains.Students.Queries.GetFilteredStudents;
 
 using Constellation.Application.Abstractions.Messaging;
-using Core.Enums;
 using Core.Models.Enrolments.Repositories;
+using Core.Models.Identifiers;
 using Core.Models.Students;
 using Core.Models.Students.Identifiers;
 using Core.Models.Students.Repositories;
@@ -46,7 +46,7 @@ internal sealed class GetFilteredStudentsQueryHandler
         {
             int enrolmentCount = await _enrolmentRepository.GetCurrentCountByStudentId(student.Id, cancellationToken);
 
-            SchoolEnrolment enrolment = student.CurrentEnrolment;
+            SchoolEnrolment? enrolment = student.CurrentEnrolment;
             
             if (enrolment is null)
             {
@@ -55,10 +55,10 @@ internal sealed class GetFilteredStudentsQueryHandler
                 {
                     int maxYear = student.SchoolEnrolments.Max(item => item.Year);
 
-                    SchoolEnrolmentId enrolmentId = student.SchoolEnrolments
+                    SchoolEnrolmentId? enrolmentId = student.SchoolEnrolments
                         .Where(entry => entry.Year == maxYear)
                         .Select(entry => new { entry.Id, Date = entry.EndDate ?? DateOnly.MaxValue })
-                        .MaxBy(entry => entry.Date)
+                        .MaxBy(entry => entry.Date)?
                         .Id;
 
                     enrolment = student.SchoolEnrolments.FirstOrDefault(entry => entry.Id == enrolmentId);
@@ -70,8 +70,8 @@ internal sealed class GetFilteredStudentsQueryHandler
                     student.Name,
                     student.PreferredGender,
                     enrolment?.Grade,
-                    enrolment?.SchoolName,
-                    enrolment?.SchoolCode,
+                    enrolment?.SchoolName ?? string.Empty,
+                    enrolment?.SchoolCode ?? SchoolCode.Empty,
                     enrolmentCount,
                     false,
                     student.IsDeleted));

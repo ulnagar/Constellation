@@ -20,7 +20,7 @@ public sealed record LessonDetailsResponse(
 
     public sealed record LessonRollSummary(
         SciencePracRollId RollId,
-        string SchoolCode,
+        SchoolCode SchoolCode,
         string SchoolName,
         LessonStatus Status,
         int PresentStudents,

@@ -15,6 +15,7 @@ using Constellation.Core.Models.StaffMembers.Repositories;
 using Constellation.Core.Models.Students;
 using Constellation.Core.Models.Students.Repositories;
 using Constellation.Core.Shared;
+using Core.Models.Identifiers;
 using Core.Models.StaffMembers;
 using Serilog;
 using System;
@@ -166,10 +167,10 @@ internal sealed class ImportAssetsFromFileCommandHandler
                 {
                     _logger
                         .ForContext(nameof(ImportAssetDto), importAsset, true)
-                        .ForContext(nameof(Error), DomainErrors.Partners.School.NotFound(""), true)
+                        .ForContext(nameof(Error), DomainErrors.Partners.School.NotFound(SchoolCode.Empty), true)
                         .Warning("Failed to import Asset");
 
-                    response.Add(new(importAsset.RowNumber, false, DomainErrors.Partners.School.NotFound("")));
+                    response.Add(new(importAsset.RowNumber, false, DomainErrors.Partners.School.NotFound(SchoolCode.Empty)));
 
                     continue;
                 }
@@ -223,7 +224,7 @@ internal sealed class ImportAssetsFromFileCommandHandler
 
             if (!string.IsNullOrWhiteSpace(importAsset.ResponsibleOfficer))
             {
-                School? allocationSchool = schools.FirstOrDefault(entry => entry.Code == importAsset.ResponsibleOfficer);
+                School? allocationSchool = schools.FirstOrDefault(entry => entry.Code.ToString() == importAsset.ResponsibleOfficer);
                 StaffMember? staffMember = staff.FirstOrDefault(entry => entry.Id.ToString() == importAsset.ResponsibleOfficer);
                 Student? student = students.FirstOrDefault(entry => entry.StudentReferenceNumber.ToString() == importAsset.ResponsibleOfficer);
 

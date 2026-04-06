@@ -46,6 +46,7 @@ public class StaffSidebarMenuViewComponent : ViewComponent
             ? await _staffRepository.GetCurrentByEmailAddress(staffEmailAddress.Value) 
             : null;
         StaffId staffId = staffMember?.Id ?? StaffId.Empty;
+        bool showEmergencyConsole = (await _authService.AuthorizeAsync(UserClaimsPrincipal, AuthPermission.Messaging_EmergencyConsole_Edit_Value)).Succeeded;
 
         string[] segments = activePage.Split('.');
         string module = segments[0];
@@ -53,7 +54,7 @@ public class StaffSidebarMenuViewComponent : ViewComponent
         return module switch
         {
             "Dashboard" => View("Dashboard", await GenerateDashboardData(staffId)),
-            "Admin" => View("/Areas/Staff/Pages/Shared/Components/StaffSidebarMenu/Admin.cshtml", activePage),
+            "Messaging" => View("Messaging", (activePage, showEmergencyConsole)),
             "Equipment" => View("Equipment", activePage),
             "Partner" => View("Partner", activePage),
             "ShortTerm" => View("ShortTerm", activePage),
@@ -68,7 +69,7 @@ public class StaffSidebarMenuViewComponent : ViewComponent
     {
         DashboardModel model = new();
 
-        AuthorizationResult emergencyConsole = await _authService.AuthorizeAsync(UserClaimsPrincipal, AuthPermission.Admin_EmergencyConsole_Edit_Value);
+        AuthorizationResult emergencyConsole = await _authService.AuthorizeAsync(UserClaimsPrincipal, AuthPermission.Messaging_EmergencyConsole_Edit_Value);
         AuthorizationResult siteAdmin = await _authService.AuthorizeAsync(UserClaimsPrincipal, AuthPolicies.IsSiteAdmin);
         model.ShowEmergencyConsole = emergencyConsole.Succeeded || siteAdmin.Succeeded;
 

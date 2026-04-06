@@ -4,6 +4,7 @@ using Abstractions.Messaging;
 using Core.Abstractions.Clock;
 using Core.Errors;
 using Core.Models;
+using Core.Models.Identifiers;
 using Core.Models.StaffMembers;
 using Core.Models.StaffMembers.Errors;
 using Core.Models.StaffMembers.Repositories;
@@ -67,9 +68,9 @@ internal sealed class CreateStaffMemberCommandHandler
             return Result.Failure(staffMember.Error);
         }
 
-        if (!string.IsNullOrWhiteSpace(request.SchoolCode))
+        if (request.SchoolCode != SchoolCode.Empty)
         {
-            School school = await _schoolRepository.GetById(request.SchoolCode, cancellationToken);
+            School? school = await _schoolRepository.GetById(request.SchoolCode, cancellationToken);
 
             if (school is null)
             {

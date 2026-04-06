@@ -2,8 +2,9 @@
 
 using Constellation.Core.Primitives;
 using System;
+using System.Text.RegularExpressions;
 
-public record struct CasualId(Guid Value)
+public readonly record struct CasualId(Guid Value)
     : IStronglyTypedId
 {
     public static CasualId Empty => new(Guid.Empty);

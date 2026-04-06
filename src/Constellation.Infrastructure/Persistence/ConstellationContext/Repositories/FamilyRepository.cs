@@ -84,6 +84,14 @@ internal sealed class FamilyRepository : IFamilyRepository
             .Include(family => family.Students)
             .FirstOrDefaultAsync(family => family.Id == Id, cancellationToken);
 
+    public async Task<Parent?> GetParentById(
+        ParentId id,
+        CancellationToken cancellationToken = default) =>
+        await _context
+            .Set<Parent>()
+            .Where(parent => parent.Id == id)
+            .SingleOrDefaultAsync(cancellationToken);
+
     public async Task<List<Family>> GetFamiliesByStudentId(
         StudentId studentId,
         CancellationToken cancellationToken = default) =>
@@ -121,6 +129,16 @@ internal sealed class FamilyRepository : IFamilyRepository
         await _context
             .Set<Parent>()
             .CountAsync(parent => parent.EmailAddress == email, cancellationToken);
+
+    public async Task<Parent?> GetParentByMobileNumber(
+        PhoneNumber phoneNumber,
+        CancellationToken cancellationToken = default) =>
+        await _context
+            .Set<Parent>()
+            .Where(parent =>
+                parent.MobileNumber == phoneNumber)
+            .FirstOrDefaultAsync(cancellationToken);
+
 
     public void Insert(Family family) =>
         _context.Set<Family>().Add(family);

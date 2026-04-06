@@ -38,7 +38,7 @@ internal sealed class ReinstateStudentCommandHandler
 
     public async Task<Result> Handle(ReinstateStudentCommand request, CancellationToken cancellationToken)
     {
-        Student student = await _studentRepository.GetById(request.StudentId, cancellationToken);
+        Student? student = await _studentRepository.GetById(request.StudentId, cancellationToken);
 
         if (student is null)
         {
@@ -55,7 +55,7 @@ internal sealed class ReinstateStudentCommandHandler
             return Result.Success();
         }
 
-        School school = await _schoolRepository.GetById(request.SchoolCode, cancellationToken);
+        School? school = await _schoolRepository.GetById(request.SchoolCode, cancellationToken);
 
         if (school is null)
         {

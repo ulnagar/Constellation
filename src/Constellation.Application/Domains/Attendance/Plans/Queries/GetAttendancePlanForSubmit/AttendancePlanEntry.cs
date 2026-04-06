@@ -3,6 +3,7 @@
 using Core.Enums;
 using Core.Models.Attendance.Enums;
 using Core.Models.Attendance.Identifiers;
+using Core.Models.Identifiers;
 using Core.Models.Students.Identifiers;
 using Core.Models.Timetables.Enums;
 using Core.Models.Timetables.ValueObjects;
@@ -16,7 +17,7 @@ public sealed record AttendancePlanEntry(
     StudentId StudentId,
     Name Student,
     Grade Grade,
-    string SchoolCode,
+    SchoolCode SchoolCode,
     string School,
     List<AttendancePlanEntry.PlanPeriod> Periods,
     List<AttendancePlanEntry.FreePeriod> FreePeriods,

@@ -5,6 +5,7 @@ using Constellation.Application.Domains.AppSettings.Models;
 using Constellation.Core.Models.AppSettings.Enums;
 using Core.Models.Faculties;
 using Core.Models.Faculties.Repositories;
+using Core.Models.Identifiers;
 using Core.Models.SchoolContacts;
 using Core.Models.SchoolContacts.Repositories;
 using Core.Models.StaffMembers;
@@ -122,7 +123,7 @@ internal sealed class SendTrainingNotificationEmailToRecipients
         {
             foreach (var reviewer in reviewers.Contacts)
             {
-                Result<EmailRecipient> reviewerEmail = reviewer.Key.GetEmailRecipient();
+                Result<EmailRecipient> reviewerEmail = reviewer.Key.GetEmailRecipient;
 
                 if (reviewerEmail.IsFailure)
                 {
@@ -175,9 +176,9 @@ internal sealed class SendTrainingNotificationEmailToRecipients
 
             if (assignee.IsShared)
             {
-                string? schoolCode = assignee.CurrentAssignment?.SchoolCode ?? null;
+                SchoolCode schoolCode = assignee.CurrentAssignment?.SchoolCode ?? SchoolCode.Empty;
 
-                if (schoolCode is not null)
+                if (schoolCode != SchoolCode.Empty)
                 {
                     List<SchoolContact> sharedSchoolPrincipals = await _contactRepository.GetPrincipalsForSchool(schoolCode, cancellationToken);
 
@@ -209,7 +210,7 @@ internal sealed class SendTrainingNotificationEmailToRecipients
             {
                 foreach (var principal in principals.Contacts)
                 {
-                    Result<EmailRecipient> principalEmail = principal.Key.GetEmailRecipient();
+                    Result<EmailRecipient> principalEmail = principal.Key.GetEmailRecipient;
 
                     if (principalEmail.IsFailure)
                     {

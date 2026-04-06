@@ -11,6 +11,7 @@ using Constellation.Core.Shared;
 using Constellation.Presentation.Shared.Helpers.ModelBinders;
 using Core.Abstractions.Services;
 using Core.Models;
+using Core.Models.Identifiers;
 using Core.Models.StaffMembers.Identifiers;
 using Core.Models.Students.Enums;
 using MediatR;
@@ -69,7 +70,7 @@ public class UpsertModel : BasePageModel
     public string EmailAddress { get; set; } = string.Empty;
 
     [BindProperty]
-    public string SchoolCode { get; set; } = string.Empty;
+    public SchoolCode SchoolCode { get; set; } = SchoolCode.Empty;
 
     [BindProperty]
     public bool IsShared { get; set; }

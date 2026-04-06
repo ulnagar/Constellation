@@ -19,8 +19,6 @@
                 <li class="nav-item dropdown">
                     <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">Partners <span class="caret"></span></a>
                     <div class="dropdown-menu">
-                        <a class="dropdown-item" asp-area="Staff" asp-page="/Messaging/Contacts/Index">Contacts</a>
-                        <div class="dropdown-divider"></div>
                         <a class="dropdown-item" asp-area="Staff" asp-page="/Partner/Schools/Index">Schools</a>
                         <a class="dropdown-item" asp-area="Staff" asp-page="/Partner/Schools/Contacts/Index">School Contacts</a>
                         <div class="dropdown-divider"></div>
@@ -29,6 +27,20 @@
                         <div class="dropdown-divider"></div>
                         <a class="dropdown-item" asp-area="Staff" asp-page="/Partner/Students/Index">Students</a>
                         <a class="dropdown-item" asp-area="Staff" asp-page="/Partner/Students/Families/Index">Families</a>
+                    </div>
+                </li>
+                
+                <li class="nav-item dropdown">
+                    <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="False">Messaging <span class="caret"></span></a>
+                    <div class="dropdown-menu">
+                        <a class="dropdown-item" asp-area="Staff" asp-page="/Messaging/Contacts/Index">Contacts</a>
+                        <div class="dropdown-divider"></div>
+                        <a class="dropdown-item" asp-area="Staff" asp-page="/Messaging/Drafts/Index">Drafts</a>
+                        @if (Model.CanAccessEmergencyConsole)
+                        {
+                            <a class="dropdown-item" asp-area="Staff" asp-page="/Messaging/Drafts/Templates/Index">Templates</a>
+                        }
+                        <a class="dropdown-item" asp-area="Staff" asp-page="/Messaging/History/Recent">Recent</a>
                     </div>
                 </li>
 

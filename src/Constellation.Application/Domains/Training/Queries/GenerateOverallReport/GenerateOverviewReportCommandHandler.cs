@@ -5,6 +5,7 @@ using Core.Errors;
 using Core.Models;
 using Core.Models.Faculties;
 using Core.Models.Faculties.Repositories;
+using Core.Models.Identifiers;
 using Core.Models.StaffMembers;
 using Core.Models.StaffMembers.Errors;
 using Core.Models.StaffMembers.Repositories;
@@ -94,7 +95,7 @@ internal sealed class GenerateOverviewReportCommandHandler
 
         foreach (StaffMember member in staff)
         {
-            School school = member.CurrentAssignment is not null
+            School? school = member.CurrentAssignment is not null
                 ? schools.FirstOrDefault(entry => entry.Code == member.CurrentAssignment.SchoolCode)
                 : null;
 
@@ -102,7 +103,7 @@ internal sealed class GenerateOverviewReportCommandHandler
             {
                 _logger
                     .ForContext(nameof(StaffMember), member, true)
-                    .ForContext(nameof(Error), DomainErrors.Partners.School.NotFound(member.CurrentAssignment?.SchoolCode), true)
+                    .ForContext(nameof(Error), DomainErrors.Partners.School.NotFound(member.CurrentAssignment?.SchoolCode ?? SchoolCode.Empty), true)
                     .Warning("Could not include staff member in report");
             }
 
@@ -136,7 +137,7 @@ internal sealed class GenerateOverviewReportCommandHandler
             staffStatuses.Add(new(
                 member.Id,
                 member.Name,
-                school?.Code ?? string.Empty,
+                school?.Code ?? SchoolCode.Empty,
                 school?.Name ?? string.Empty,
                 memberFaculties.Select(entry => entry.Name).ToArray(),
                 moduleStatuses));

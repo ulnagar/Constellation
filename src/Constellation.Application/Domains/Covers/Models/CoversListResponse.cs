@@ -13,6 +13,6 @@ public sealed record CoversListResponse(
     CoverTeacherType TeacherType,
     DateOnly StartDate,
     DateOnly EndDate,
-    CoverType CoverType,
+    CoverType? CoverType,
     bool IsCurrent,
     bool IsFuture);

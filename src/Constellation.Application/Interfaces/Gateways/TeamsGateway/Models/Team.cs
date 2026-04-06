@@ -1,82 +1,82 @@
 ﻿namespace Constellation.Application.Interfaces.Gateways.TeamsGateway.Models;
 
-using Newtonsoft.Json;
 using System;
+using System.Text.Json.Serialization;
 
 public sealed class Team
 {
-    [JsonProperty("AllowAddRemoveApps")]
+    [JsonPropertyName("AllowAddRemoveApps")]
     public bool AllowAddRemoveApps { get; internal set; }
 
-    [JsonProperty("AllowChannelMentions")]
+    [JsonPropertyName("AllowChannelMentions")]
     public bool AllowChannelMentions { get; internal set; }
 
-    [JsonProperty("AllowCreatePrivateChannels")]
+    [JsonPropertyName("AllowCreatePrivateChannels")]
     public bool AllowCreatePrivateChannels { get; internal set; }
 
-    [JsonProperty("AllowCreateUpdateChannels")]
+    [JsonPropertyName("AllowCreateUpdateChannels")]
     public bool AllowCreateUpdateChannels { get; internal set; }
 
-    [JsonProperty("AllowCreateUpdateRemoveConnectors")]
+    [JsonPropertyName("AllowCreateUpdateRemoveConnectors")]
     public bool AllowCreateUpdateRemoveConnectors { get; internal set; }
 
-    [JsonProperty("AllowCreateUpdateRemoveTabs")]
+    [JsonPropertyName("AllowCreateUpdateRemoveTabs")]
     public bool AllowCreateUpdateRemoveTabs { get; internal set; }
 
-    [JsonProperty("AllowCustomMemes")]
+    [JsonPropertyName("AllowCustomMemes")]
     public bool AllowCustomMemes { get; internal set; }
 
-    [JsonProperty("AllowDeleteChannels")]
+    [JsonPropertyName("AllowDeleteChannels")]
     public bool AllowDeleteChannels { get; internal set; }
 
-    [JsonProperty("AllowGiphy")]
+    [JsonPropertyName("AllowGiphy")]
     public bool AllowGiphy { get; internal set; }
 
-    [JsonProperty("AllowGuestCreateUpdateChannels")]
+    [JsonPropertyName("AllowGuestCreateUpdateChannels")]
     public bool AllowGuestCreateUpdateChannels { get; internal set; }
 
-    [JsonProperty("AllowGuestDeleteChannels")]
+    [JsonPropertyName("AllowGuestDeleteChannels")]
     public bool AllowGuestDeleteChannels { get; internal set; }
 
-    [JsonProperty("AllowOwnerDeleteMessages")]
+    [JsonPropertyName("AllowOwnerDeleteMessages")]
     public bool AllowOwnerDeleteMessages { get; internal set; }
 
-    [JsonProperty("AllowStickersAndMemes")]
+    [JsonPropertyName("AllowStickersAndMemes")]
     public bool AllowStickersAndMemes { get; internal set; }
 
-    [JsonProperty("AllowTeamMentions")]
+    [JsonPropertyName("AllowTeamMentions")]
     public bool AllowTeamMentions { get; internal set; }
 
-    [JsonProperty("AllowUserDeleteMessages")]
+    [JsonPropertyName("AllowUserDeleteMessages")]
     public bool AllowUserDeleteMessages { get; internal set; }
 
-    [JsonProperty("AllowUserEditMessages")]
+    [JsonPropertyName("AllowUserEditMessages")]
     public bool AllowUserEditMessages { get; internal set; }
 
-    [JsonProperty("Archived")]
+    [JsonPropertyName("Archived")]
     public bool Archived { get; internal set; }
 
-    [JsonProperty("Classification")]
+    [JsonPropertyName("Classification")]
     public string Classification { get; internal set; } = string.Empty;
 
-    [JsonProperty("Description")]
+    [JsonPropertyName("Description")]
     public string Description { get; internal set; } = string.Empty;
 
-    [JsonProperty("DisplayName")]
+    [JsonPropertyName("DisplayName")]
     public string DisplayName { get; internal set; } = string.Empty;
     
-    [JsonProperty("GroupId")]
+    [JsonPropertyName("GroupId")]
     public Guid GroupId { get; internal set; }
 
-    [JsonProperty("InternalId")]
+    [JsonPropertyName("InternalId")]
     public string InternalId { get; internal set; } = string.Empty;
 
-    [JsonProperty("MailNickName")]
+    [JsonPropertyName("MailNickName")]
     public string MailNickName { get; internal set; } = string.Empty;
 
-    [JsonProperty("ShowInTeamsSearchAndSuggestions")]
+    [JsonPropertyName("ShowInTeamsSearchAndSuggestions")]
     public bool ShowInTeamsSearchAndSuggestions { get; internal set; }
 
-    [JsonProperty("Visibility")]
+    [JsonPropertyName("Visibility")]
     public string Visibility { get; internal set; } = string.Empty;
 }

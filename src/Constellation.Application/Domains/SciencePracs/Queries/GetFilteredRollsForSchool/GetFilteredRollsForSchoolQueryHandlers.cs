@@ -47,7 +47,7 @@ internal sealed class GetFilteredRollsForSchoolQueryHandlers
 
             foreach (SciencePracRoll roll in schoolRolls)
             {
-                Course course = await _courseRepository.GetByOfferingId(lesson.Offerings.First().OfferingId, cancellationToken);
+                Course? course = await _courseRepository.GetByOfferingId(lesson.Offerings[0].OfferingId, cancellationToken);
 
                 if (course is null)
                 {
@@ -64,7 +64,7 @@ internal sealed class GetFilteredRollsForSchoolQueryHandlers
                     lesson.DueDate,
                     roll.Status,
                     roll.Attendance.Count(entry => entry.Present),
-                    roll.Attendance.Count(),
+                    roll.Attendance.Count,
                     lesson.DueDate < _dateTime.Today && roll.Status == LessonStatus.Active));
             }
         }

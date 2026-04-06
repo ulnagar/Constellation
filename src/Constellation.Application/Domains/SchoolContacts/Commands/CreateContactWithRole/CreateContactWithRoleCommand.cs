@@ -1,6 +1,7 @@
 ﻿namespace Constellation.Application.Domains.SchoolContacts.Commands.CreateContactWithRole;
 
 using Abstractions.Messaging;
+using Core.Models.Identifiers;
 using Core.Models.SchoolContacts.Enums;
 using Core.ValueObjects;
 
@@ -10,7 +11,7 @@ public sealed record CreateContactWithRoleCommand(
     EmailAddress EmailAddress,
     PhoneNumber PhoneNumber,
     Position Position,
-    string SchoolCode,
+    SchoolCode SchoolCode,
     string Note,
     bool SelfRegistered)
     : ICommand;

@@ -1,8 +1,4 @@
-﻿.select-button {
-    margin: 2.5px;
-}
-
-.modal-dialog {
+﻿.modal-dialog {
     max-width: 70vw !important;
 }
 
@@ -57,9 +53,9 @@ div.hidden {
     background-color: lightgoldenrodyellow;
 }
 
-.fa-child:before {
-    margin-left: 15%
-}
+    .fa-child:before {
+        margin-left: 15%
+    }
 
 .fa-chalkboard-teacher {
     background-color: lightsteelblue;

@@ -14,6 +14,8 @@ public sealed class Position : StringEnumeration<Position>
     public static readonly Position TimetableOfficer = new("Timetable Officer", true, 2);
     public static readonly Position NESACoordinator = new("NESA Coordinator", true, 3);
     public static readonly Position TechnologyOfficer = new("Technology Support Officer", true, 6);
+    public static readonly Position AboriginalEducationOfficer = new("Aboriginal Education Officer (AEO)", false, 7);
+    public static readonly Position AboriginalCommunityLiaisonOfficer = new("Aboriginal Community Liaison Officer (ACLO)", false, 8);
 
     public bool IsRestricted { get; init; }
     public int SortOrder { get; init; }

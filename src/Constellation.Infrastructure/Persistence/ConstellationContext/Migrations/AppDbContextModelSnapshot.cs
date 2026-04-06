@@ -307,7 +307,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                     b.HasIndex("JobName")
                         .IsUnique();
 
-                    b.ToTable("JobActivations", (string)null);
+                    b.ToTable("JobActivations");
                 });
 
             modelBuilder.Entity("Constellation.Core.Models.Absences.Absence", b =>
@@ -1760,7 +1760,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
 
                     b.HasIndex("SerialNumber");
 
-                    b.ToTable("DeviceNotes", (string)null);
+                    b.ToTable("DeviceNotes");
                 });
 
             modelBuilder.Entity("Constellation.Core.Models.Edval.Difference", b =>
@@ -2007,125 +2007,6 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                     b.HasKey("Id");
 
                     b.ToTable("Timetable", "Edval");
-                });
-
-            modelBuilder.Entity("Constellation.Core.Models.EmergencyConsole.MessageEvent", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("Message")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("SentAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("SentBy")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("MessageEvents", "EmergencyConsole");
-                });
-
-            modelBuilder.Entity("Constellation.Core.Models.EmergencyConsole.MessageEventRecipient", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("EventId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("RecipientAddress")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("RecipientName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Type")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("EventId");
-
-                    b.ToTable("MessageRecipients", "EmergencyConsole");
-                });
-
-            modelBuilder.Entity("Constellation.Core.Models.EmergencyConsole.MessageTemplate", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Template")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("TemplateType")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Templates", "EmergencyConsole");
-                });
-
-            modelBuilder.Entity("Constellation.Core.Models.EmergencyConsole.QueuedMessage", b =>
-                {
-                    b.Property<Guid>("EventId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("MessageId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.ComplexProperty(typeof(Dictionary<string, object>), "AlertRecipient", "Constellation.Core.Models.EmergencyConsole.QueuedMessage.AlertRecipient#AlertRecipient", b1 =>
-                        {
-                            b1.IsRequired();
-
-                            b1.Property<string>("EmailAddress")
-                                .HasColumnType("nvarchar(max)")
-                                .HasColumnName("EmailAddress");
-
-                            b1.Property<string>("PhoneNumber")
-                                .HasColumnType("nvarchar(max)")
-                                .HasColumnName("PhoneNumber");
-
-                            b1.ComplexProperty(typeof(Dictionary<string, object>), "Name", "Constellation.Core.Models.EmergencyConsole.QueuedMessage.AlertRecipient#AlertRecipient.Name#Name", b2 =>
-                                {
-                                    b2.IsRequired();
-
-                                    b2.Property<string>("FirstName")
-                                        .IsRequired()
-                                        .HasColumnType("nvarchar(max)")
-                                        .HasColumnName("FirstName");
-
-                                    b2.Property<string>("LastName")
-                                        .IsRequired()
-                                        .HasColumnType("nvarchar(max)")
-                                        .HasColumnName("LastName");
-
-                                    b2.Property<string>("PreferredName")
-                                        .HasColumnType("nvarchar(max)")
-                                        .HasColumnName("PreferredName");
-                                });
-                        });
-
-                    b.HasKey("EventId", "MessageId");
-
-                    b.ToTable("Queue", "EmergencyConsole");
                 });
 
             modelBuilder.Entity("Constellation.Core.Models.Enrolments.Enrolment", b =>
@@ -2626,6 +2507,98 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                     b.ToTable("LinkedSystems_Teams", (string)null);
                 });
 
+            modelBuilder.Entity("Constellation.Core.Models.Messaging.Drafts.MessageDraft", b =>
+                {
+                    b.Property<Guid>("UserId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Body")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Subject")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.HasKey("UserId");
+
+                    b.ToTable("Drafts", "Messages");
+                });
+
+            modelBuilder.Entity("Constellation.Core.Models.Messaging.Drafts.QueuedMessage", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Body")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ErrorsJson")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("Errors");
+
+                    b.Property<bool>("HasErrors")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Priority")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTimeOffset?>("ProcessedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<DateTimeOffset>("QueuedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("Subject")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Queue", "Messages");
+                });
+
+            modelBuilder.Entity("Constellation.Core.Models.Messaging.Email.EmailLink", b =>
+                {
+                    b.Property<Guid>("EmailId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("DestinationUrl")
+                        .HasMaxLength(2000)
+                        .HasColumnType("nvarchar(2000)");
+
+                    b.Property<int>("ClickCount")
+                        .HasColumnType("int");
+
+                    b.Property<DateTimeOffset?>("FirstClickedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<DateTimeOffset?>("LastClickedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.HasKey("EmailId", "DestinationUrl");
+
+                    b.HasIndex("EmailId");
+
+                    b.ToTable("EmailLinks", "Messages");
+                });
+
             modelBuilder.Entity("Constellation.Core.Models.Messaging.Email.EmailMessage", b =>
                 {
                     b.Property<Guid>("Id")
@@ -2639,6 +2612,9 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int>("ClickCount")
+                        .HasColumnType("int");
+
                     b.Property<DateTimeOffset>("CreatedAt")
                         .HasColumnType("datetimeoffset");
 
@@ -2646,7 +2622,13 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                         .HasMaxLength(2000)
                         .HasColumnType("nvarchar(2000)");
 
+                    b.Property<DateTimeOffset?>("FirstClickedAt")
+                        .HasColumnType("datetimeoffset");
+
                     b.Property<DateTimeOffset?>("FirstOpenedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<DateTimeOffset?>("LastClickedAt")
                         .HasColumnType("datetimeoffset");
 
                     b.Property<DateTimeOffset?>("LastOpenedAt")
@@ -2695,14 +2677,11 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ProviderMessageId")
-                        .HasDatabaseName("IX_Messages_Email_ProviderMessageId");
+                    b.HasIndex("ProviderMessageId");
 
-                    b.HasIndex("SentAt")
-                        .HasDatabaseName("IX_Messages_Email_SentAt");
+                    b.HasIndex("SentAt");
 
-                    b.HasIndex("Status")
-                        .HasDatabaseName("IX_Messages_Email_Status");
+                    b.HasIndex("Status");
 
                     b.ToTable("Email", "Messages");
                 });
@@ -2717,6 +2696,12 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                         .HasColumnType("nvarchar(320)")
                         .HasColumnName("Email");
 
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)")
+                        .HasColumnName("Name");
+
                     b.Property<string>("RecipientType")
                         .IsRequired()
                         .HasMaxLength(10)
@@ -2724,11 +2709,9 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
 
                     b.HasKey("EmailId", "Email");
 
-                    b.HasIndex("Email")
-                        .HasDatabaseName("IX_Messages_EmailRecipients_Email");
+                    b.HasIndex("Email");
 
-                    b.HasIndex("EmailId", "RecipientType")
-                        .HasDatabaseName("IX_Messages_EmailRecipients_EmailId_RecipientType");
+                    b.HasIndex("EmailId", "RecipientType");
 
                     b.ToTable("EmailRecipients", "Messages");
                 });
@@ -2766,13 +2749,130 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
 
                     b.HasKey("Id");
 
-                    b.HasIndex("OccurredAt")
-                        .HasDatabaseName("IX_EmailTrackingEvents_OccurredAt");
+                    b.HasIndex("OccurredAt");
 
-                    b.HasIndex("EmailId", "EventType")
-                        .HasDatabaseName("IX_EmailTrackingEvents_EmailMessageId_EventType");
+                    b.HasIndex("EmailId", "EventType");
 
                     b.ToTable("EmailTrackingEvents", "Messages");
+                });
+
+            modelBuilder.Entity("Constellation.Core.Models.Messaging.EmergencyConsole.MessageEvent", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Message")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("SentAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("SentBy")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("MessageEvents", "EmergencyConsole");
+                });
+
+            modelBuilder.Entity("Constellation.Core.Models.Messaging.EmergencyConsole.MessageEventRecipient", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("EventId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("RecipientAddress")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("RecipientName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("EventId");
+
+                    b.ToTable("MessageRecipients", "EmergencyConsole");
+                });
+
+            modelBuilder.Entity("Constellation.Core.Models.Messaging.EmergencyConsole.MessageTemplate", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Template")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("TemplateType")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Templates", "EmergencyConsole");
+                });
+
+            modelBuilder.Entity("Constellation.Core.Models.Messaging.EmergencyConsole.QueuedMessage", b =>
+                {
+                    b.Property<Guid>("EventId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("MessageId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.ComplexProperty(typeof(Dictionary<string, object>), "AlertRecipient", "Constellation.Core.Models.Messaging.EmergencyConsole.QueuedMessage.AlertRecipient#AlertRecipient", b1 =>
+                        {
+                            b1.IsRequired();
+
+                            b1.Property<string>("EmailAddress")
+                                .HasColumnType("nvarchar(max)")
+                                .HasColumnName("EmailAddress");
+
+                            b1.Property<string>("PhoneNumber")
+                                .HasColumnType("nvarchar(max)")
+                                .HasColumnName("PhoneNumber");
+
+                            b1.ComplexProperty(typeof(Dictionary<string, object>), "Name", "Constellation.Core.Models.Messaging.EmergencyConsole.QueuedMessage.AlertRecipient#AlertRecipient.Name#Name", b2 =>
+                                {
+                                    b2.IsRequired();
+
+                                    b2.Property<string>("FirstName")
+                                        .IsRequired()
+                                        .HasColumnType("nvarchar(max)")
+                                        .HasColumnName("FirstName");
+
+                                    b2.Property<string>("LastName")
+                                        .IsRequired()
+                                        .HasColumnType("nvarchar(max)")
+                                        .HasColumnName("LastName");
+
+                                    b2.Property<string>("PreferredName")
+                                        .HasColumnType("nvarchar(max)")
+                                        .HasColumnName("PreferredName");
+                                });
+                        });
+
+                    b.HasKey("EventId", "MessageId");
+
+                    b.ToTable("Queue", "EmergencyConsole");
                 });
 
             modelBuilder.Entity("Constellation.Core.Models.Messaging.Sms.SmsMessage", b =>
@@ -2786,11 +2886,6 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                     b.Property<string>("Direction")
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("From")
-                        .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
 
                     b.Property<string>("Message")
                         .IsRequired()
@@ -2814,14 +2909,6 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
-                    b.Property<DateTimeOffset?>("StatusUpdatedAt")
-                        .HasColumnType("datetimeoffset");
-
-                    b.Property<string>("To")
-                        .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
-
                     b.HasKey("Id");
 
                     b.HasIndex("OutgoingId");
@@ -2829,8 +2916,6 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                     b.HasIndex("SmsGlobalId");
 
                     b.HasIndex("Status", "Direction");
-
-                    b.HasIndex("From", "To", "CreatedAt");
 
                     b.ToTable("Sms", "Messages");
                 });
@@ -3328,6 +3413,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("SchoolCode")
+                        .IsRequired()
                         .HasColumnType("nvarchar(4)");
 
                     b.Property<Guid>("SchoolContactId")
@@ -3427,6 +3513,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                         .HasColumnType("int");
 
                     b.Property<string>("SchoolCode")
+                        .IsRequired()
                         .HasColumnType("nvarchar(4)");
 
                     b.Property<int>("Status")
@@ -6045,15 +6132,6 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                     b.Navigation("Device");
                 });
 
-            modelBuilder.Entity("Constellation.Core.Models.EmergencyConsole.MessageEventRecipient", b =>
-                {
-                    b.HasOne("Constellation.Core.Models.EmergencyConsole.MessageEvent", null)
-                        .WithMany("Recipients")
-                        .HasForeignKey("EventId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
             modelBuilder.Entity("Constellation.Core.Models.Enrolments.Enrolment", b =>
                 {
                     b.HasOne("Constellation.Core.Models.Students.Student", null)
@@ -6161,14 +6239,143 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("Constellation.Core.Models.Messaging.Drafts.MessageDraft", b =>
+                {
+                    b.OwnsMany("Constellation.Core.Models.Messaging.Drafts.MessageRecipient", "Recipients", b1 =>
+                        {
+                            b1.Property<Guid>("MessageDraftUserId");
+
+                            b1.Property<int>("__synthesizedOrdinal")
+                                .ValueGeneratedOnAddOrUpdate();
+
+                            b1.Property<string>("EmailAddress")
+                                .IsRequired();
+
+                            b1.Property<Guid>("Id");
+
+                            b1.Property<string>("Name")
+                                .IsRequired();
+
+                            b1.Property<string>("PhoneNumber")
+                                .IsRequired();
+
+                            b1.HasKey("MessageDraftUserId", "__synthesizedOrdinal");
+
+                            b1.ToTable("Drafts", "Messages");
+
+                            b1
+                                .ToJson("Recipients")
+                                .HasColumnType("nvarchar(max)");
+
+                            b1.WithOwner()
+                                .HasForeignKey("MessageDraftUserId");
+                        });
+
+                    b.OwnsOne("Constellation.Core.ValueObjects.MessageSender", "Sender", b1 =>
+                        {
+                            b1.Property<Guid>("MessageDraftUserId")
+                                .HasColumnType("uniqueidentifier");
+
+                            b1.Property<string>("Destination")
+                                .IsRequired()
+                                .HasColumnType("nvarchar(max)")
+                                .HasColumnName("SenderDestination");
+
+                            b1.Property<string>("Name")
+                                .IsRequired()
+                                .HasColumnType("nvarchar(max)")
+                                .HasColumnName("SenderName");
+
+                            b1.HasKey("MessageDraftUserId");
+
+                            b1.ToTable("Drafts", "Messages");
+
+                            b1.WithOwner()
+                                .HasForeignKey("MessageDraftUserId");
+                        });
+
+                    b.Navigation("Recipients");
+
+                    b.Navigation("Sender");
+                });
+
+            modelBuilder.Entity("Constellation.Core.Models.Messaging.Drafts.QueuedMessage", b =>
+                {
+                    b.OwnsMany("Constellation.Core.Models.Messaging.Drafts.MessageRecipient", "Recipients", b1 =>
+                        {
+                            b1.Property<Guid>("QueuedMessageId");
+
+                            b1.Property<int>("__synthesizedOrdinal")
+                                .ValueGeneratedOnAddOrUpdate();
+
+                            b1.Property<string>("EmailAddress")
+                                .IsRequired();
+
+                            b1.Property<Guid>("Id");
+
+                            b1.Property<string>("Name")
+                                .IsRequired();
+
+                            b1.Property<string>("PhoneNumber")
+                                .IsRequired();
+
+                            b1.HasKey("QueuedMessageId", "__synthesizedOrdinal");
+
+                            b1.ToTable("Queue", "Messages");
+
+                            b1
+                                .ToJson("Recipients")
+                                .HasColumnType("nvarchar(max)");
+
+                            b1.WithOwner()
+                                .HasForeignKey("QueuedMessageId");
+                        });
+
+                    b.OwnsOne("Constellation.Core.ValueObjects.MessageSender", "Sender", b1 =>
+                        {
+                            b1.Property<Guid>("QueuedMessageId")
+                                .HasColumnType("uniqueidentifier");
+
+                            b1.Property<string>("Destination")
+                                .IsRequired()
+                                .HasColumnType("nvarchar(max)")
+                                .HasColumnName("SenderDestination");
+
+                            b1.Property<string>("Name")
+                                .IsRequired()
+                                .HasColumnType("nvarchar(max)")
+                                .HasColumnName("SenderName");
+
+                            b1.HasKey("QueuedMessageId");
+
+                            b1.ToTable("Queue", "Messages");
+
+                            b1.WithOwner()
+                                .HasForeignKey("QueuedMessageId");
+                        });
+
+                    b.Navigation("Recipients");
+
+                    b.Navigation("Sender");
+                });
+
+            modelBuilder.Entity("Constellation.Core.Models.Messaging.Email.EmailLink", b =>
+                {
+                    b.HasOne("Constellation.Core.Models.Messaging.Email.EmailMessage", null)
+                        .WithMany("Links")
+                        .HasForeignKey("EmailId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("Constellation.Core.Models.Messaging.Email.EmailMessage", b =>
                 {
-                    b.OwnsOne("Constellation.Core.ValueObjects.EmailRecipient", "From", b1 =>
+                    b.OwnsOne("Constellation.Core.ValueObjects.MessageSender", "From", b1 =>
                         {
                             b1.Property<Guid>("EmailMessageId")
                                 .HasColumnType("uniqueidentifier");
 
-                            b1.Property<string>("Email")
+                            b1.Property<string>("Destination")
                                 .IsRequired()
                                 .HasMaxLength(320)
                                 .HasColumnType("nvarchar(320)")
@@ -6188,12 +6395,12 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                                 .HasForeignKey("EmailMessageId");
                         });
 
-                    b.OwnsOne("Constellation.Core.ValueObjects.EmailRecipient", "ReplyTo", b1 =>
+                    b.OwnsOne("Constellation.Core.ValueObjects.MessageSender", "ReplyTo", b1 =>
                         {
                             b1.Property<Guid>("EmailMessageId")
                                 .HasColumnType("uniqueidentifier");
 
-                            b1.Property<string>("Email")
+                            b1.Property<string>("Destination")
                                 .IsRequired()
                                 .HasMaxLength(320)
                                 .HasColumnType("nvarchar(320)")
@@ -6226,38 +6433,6 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                         .HasForeignKey("EmailId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.OwnsOne("Constellation.Core.ValueObjects.EmailRecipient", "Recipient", b1 =>
-                        {
-                            b1.Property<Guid>("EmailMessageRecipientEmailId")
-                                .HasColumnType("uniqueidentifier");
-
-                            b1.Property<string>("EmailMessageRecipientEmail")
-                                .HasColumnType("nvarchar(320)");
-
-                            b1.Property<string>("Email")
-                                .IsRequired()
-                                .ValueGeneratedOnUpdateSometimes()
-                                .HasMaxLength(320)
-                                .HasColumnType("nvarchar(320)")
-                                .HasColumnName("Email");
-
-                            b1.Property<string>("Name")
-                                .IsRequired()
-                                .HasMaxLength(200)
-                                .HasColumnType("nvarchar(200)")
-                                .HasColumnName("Name");
-
-                            b1.HasKey("EmailMessageRecipientEmailId", "EmailMessageRecipientEmail");
-
-                            b1.ToTable("EmailRecipients", "Messages");
-
-                            b1.WithOwner()
-                                .HasForeignKey("EmailMessageRecipientEmailId", "EmailMessageRecipientEmail");
-                        });
-
-                    b.Navigation("Recipient")
-                        .IsRequired();
                 });
 
             modelBuilder.Entity("Constellation.Core.Models.Messaging.Email.EmailTrackingEvent", b =>
@@ -6266,6 +6441,78 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                         .WithMany("TrackingEvents")
                         .HasForeignKey("EmailId")
                         .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Constellation.Core.Models.Messaging.EmergencyConsole.MessageEventRecipient", b =>
+                {
+                    b.HasOne("Constellation.Core.Models.Messaging.EmergencyConsole.MessageEvent", null)
+                        .WithMany("Recipients")
+                        .HasForeignKey("EventId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Constellation.Core.Models.Messaging.Sms.SmsMessage", b =>
+                {
+                    b.OwnsOne("Constellation.Core.ValueObjects.SmsRecipient", "Recipient", b1 =>
+                        {
+                            b1.Property<Guid>("SmsMessageId")
+                                .HasColumnType("uniqueidentifier");
+
+                            b1.Property<string>("Name")
+                                .IsRequired()
+                                .HasMaxLength(200)
+                                .HasColumnType("nvarchar(200)")
+                                .HasColumnName("Recipient_Name");
+
+                            b1.Property<string>("Number")
+                                .IsRequired()
+                                .HasMaxLength(320)
+                                .HasColumnType("nvarchar(320)")
+                                .HasColumnName("Recipient_Number");
+
+                            b1.HasKey("SmsMessageId");
+
+                            b1.HasIndex("Number");
+
+                            b1.ToTable("Sms", "Messages");
+
+                            b1.WithOwner()
+                                .HasForeignKey("SmsMessageId");
+                        });
+
+                    b.OwnsOne("Constellation.Core.ValueObjects.SmsRecipient", "Sender", b1 =>
+                        {
+                            b1.Property<Guid>("SmsMessageId")
+                                .HasColumnType("uniqueidentifier");
+
+                            b1.Property<string>("Name")
+                                .IsRequired()
+                                .HasMaxLength(200)
+                                .HasColumnType("nvarchar(200)")
+                                .HasColumnName("Sender_Name");
+
+                            b1.Property<string>("Number")
+                                .IsRequired()
+                                .HasMaxLength(320)
+                                .HasColumnType("nvarchar(320)")
+                                .HasColumnName("Sender_Number");
+
+                            b1.HasKey("SmsMessageId");
+
+                            b1.HasIndex("Number");
+
+                            b1.ToTable("Sms", "Messages");
+
+                            b1.WithOwner()
+                                .HasForeignKey("SmsMessageId");
+                        });
+
+                    b.Navigation("Recipient")
+                        .IsRequired();
+
+                    b.Navigation("Sender")
                         .IsRequired();
                 });
 
@@ -6346,7 +6593,8 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                     b.HasOne("Constellation.Core.Models.School", null)
                         .WithMany("StaffAssignments")
                         .HasForeignKey("SchoolCode")
-                        .OnDelete(DeleteBehavior.Cascade);
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("Constellation.Core.Models.SchoolContacts.SchoolContact", null)
                         .WithMany("Assignments")
@@ -6395,7 +6643,9 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
 
                     b.HasOne("Constellation.Core.Models.School", null)
                         .WithMany()
-                        .HasForeignKey("SchoolCode");
+                        .HasForeignKey("SchoolCode")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("Constellation.Core.Models.StaffMembers.SchoolAssignment", b =>
@@ -6812,7 +7062,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
 
                             b1.HasKey("SendEmailActionId");
 
-                            b1.ToTable("WorkFlows_Actions", (string)null);
+                            b1.ToTable("WorkFlows_Actions");
 
                             b1.WithOwner()
                                 .HasForeignKey("SendEmailActionId");
@@ -6876,11 +7126,6 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                     b.Navigation("Notes");
                 });
 
-            modelBuilder.Entity("Constellation.Core.Models.EmergencyConsole.MessageEvent", b =>
-                {
-                    b.Navigation("Recipients");
-                });
-
             modelBuilder.Entity("Constellation.Core.Models.Faculties.Faculty", b =>
                 {
                     b.Navigation("Members");
@@ -6909,9 +7154,16 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
 
             modelBuilder.Entity("Constellation.Core.Models.Messaging.Email.EmailMessage", b =>
                 {
+                    b.Navigation("Links");
+
                     b.Navigation("Recipients");
 
                     b.Navigation("TrackingEvents");
+                });
+
+            modelBuilder.Entity("Constellation.Core.Models.Messaging.EmergencyConsole.MessageEvent", b =>
+                {
+                    b.Navigation("Recipients");
                 });
 
             modelBuilder.Entity("Constellation.Core.Models.Offerings.Offering", b =>

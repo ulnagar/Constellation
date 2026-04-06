@@ -6,6 +6,7 @@ using Constellation.Core.Models.Timetables.Repositories;
 using Core.Abstractions.Services;
 using Core.Models.Enrolments;
 using Core.Models.Enrolments.Repositories;
+using Core.Models.Identifiers;
 using Core.Models.StaffMembers;
 using Core.Models.StaffMembers.Identifiers;
 using Core.Models.StaffMembers.Repositories;
@@ -54,7 +55,7 @@ internal sealed class GetTutorialDetailsQueryHandler
 
     public async Task<Result<TutorialDetailsResponse>> Handle(GetTutorialDetailsQuery request, CancellationToken cancellationToken)
     {
-        Tutorial tutorial = await _tutorialRepository.GetById(request.Id, cancellationToken);
+        Tutorial? tutorial = await _tutorialRepository.GetById(request.Id, cancellationToken);
 
         if (tutorial is null)
         {
@@ -92,9 +93,9 @@ internal sealed class GetTutorialDetailsQueryHandler
             if (session.IsDeleted)
                 continue;
 
-            StaffMember teacher = teachers.FirstOrDefault(teacher => teacher.Id == session.StaffId);
+            StaffMember? teacher = teachers.FirstOrDefault(teacher => teacher.Id == session.StaffId);
 
-            Period period = await _periodRepository.GetById(session.PeriodId, cancellationToken);
+            Period? period = await _periodRepository.GetById(session.PeriodId, cancellationToken);
 
             if (period is null)
             {
@@ -115,7 +116,7 @@ internal sealed class GetTutorialDetailsQueryHandler
                 period.EndTime,
                 period.Duration,
                 new(
-                    teacher.Id,
+                    teacher!.Id,
                     teacher.EmployeeId,
                     teacher.Name)));
         }
@@ -130,8 +131,8 @@ internal sealed class GetTutorialDetailsQueryHandler
                 student.Gender,
                 student.Name,
                 student.CurrentEnrolment?.Grade,
-                student.CurrentEnrolment?.SchoolCode,
-                student.CurrentEnrolment?.SchoolName,
+                student.CurrentEnrolment?.SchoolCode ?? SchoolCode.Empty,
+                student.CurrentEnrolment?.SchoolName ?? string.Empty,
                 student.CurrentEnrolment is not null));
         }
 

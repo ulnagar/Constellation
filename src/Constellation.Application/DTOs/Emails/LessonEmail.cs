@@ -5,7 +5,7 @@ using System;
 using System.Collections.Generic;
 
 public sealed record LessonEmail(
-    string SchoolCode,
+    SchoolCode SchoolCode,
     string SchoolName,
     List<LessonEmail.LessonItem> Lessons)
 {

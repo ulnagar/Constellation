@@ -1,7 +1,9 @@
 ﻿namespace Constellation.Application.Domains.Schools.Queries.GetSchoolContactDetails;
 
+using Core.Models.Identifiers;
+
 public sealed record SchoolContactDetailsResponse(
-    string Code,
+    SchoolCode Code,
     string Name,
     string Address,
     string Town,

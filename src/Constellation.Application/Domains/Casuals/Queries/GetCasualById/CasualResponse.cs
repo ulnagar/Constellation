@@ -7,5 +7,5 @@ public sealed record CasualResponse(
     string FirstName,
     string LastName,
     string EmailAddress,
-    string SchoolCode,
+    SchoolCode SchoolCode,
     string EdvalTeacherCode);

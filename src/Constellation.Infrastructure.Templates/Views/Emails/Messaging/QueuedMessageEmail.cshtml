@@ -1,0 +1,13 @@
+﻿@using Constellation.Infrastructure.Templates.Views.Emails.Messaging
+@model QueuedMessageEmailViewModel
+
+@{
+    Layout = "/Views/Shared/EmailLayout.cshtml";
+
+    ViewData["Preheader"] = Model.Preheader;
+    ViewData["Title"] = Model.Title;
+    ViewData["SenderName"] = Model.SenderName;
+    ViewData["SenderTitle"] = Model.SenderTitle;
+}
+
+@Html.Raw(Model.Message)

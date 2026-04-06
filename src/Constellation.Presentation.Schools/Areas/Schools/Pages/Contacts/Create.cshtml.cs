@@ -6,6 +6,7 @@ using Application.Domains.Schools.Queries.GetSchoolById;
 using Application.Models.Auth;
 using Constellation.Presentation.Shared.Helpers.Attributes;
 using Core.Abstractions.Services;
+using Core.Models.Identifiers;
 using Core.Models.SchoolContacts.Enums;
 using Core.Shared;
 using Core.ValueObjects;
@@ -67,7 +68,7 @@ public class CreateModel : BasePageModel
     public Position Position { get; set; }
 
     [BindProperty]
-    public string SchoolCode { get; set; }
+    public SchoolCode SchoolCode { get; set; }
 
     public string SchoolName { get; set; }
 

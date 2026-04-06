@@ -3,9 +3,10 @@
 using Constellation.Application.DTOs.EmailRequests;
 using Constellation.Application.Helpers;
 using Constellation.Application.Interfaces.Services;
+using Constellation.Core.Models.Messaging.Sms;
 using Core.ValueObjects;
 using System;
-using System.Collections.Generic;
+using System.Globalization;
 using System.Net.Mail;
 using System.Threading.Tasks;
 
@@ -39,12 +40,14 @@ public sealed partial class Service : IEmailService
     {
         string viewModel = $"<p>Parent Contact Change Report for {DateTime.Today.ToLongDateString()} is attached.</p>";
 
+        using Attachment attachment = new(report, "Change Report.xlsx", FileContentTypes.ExcelModernFile);
+
         await BuildAndSendEmail(
             viewModel,
             EmailRecipient.NoReply,
             $"[Aurora College] Parent Contact Change Report - {DateTime.Today.ToLongDateString()}",
             [EmailRecipient.InfoTechTeam, EmailRecipient.AbsencesMailbox, EmailRecipient.AuroraCollege],
-            attachments: new List<Attachment> { new Attachment(report, "Change Report.xlsx", FileContentTypes.ExcelModernFile) },
+            attachments: [ attachment ],
             cancellationToken: cancellationToken);
     }
 
@@ -66,12 +69,14 @@ public sealed partial class Service : IEmailService
     {
         string viewModel = $"<p>MasterFile Consistency Report generated {DateTime.Today.ToLongDateString()} is attached.</p>";
 
+        using Attachment attachment = new(report, "Consistency Report.xlsx", FileContentTypes.ExcelModernFile);
+
         await BuildAndSendEmail(
             viewModel,
             EmailRecipient.NoReply,
             $"[Aurora College] MasterFile Consistency Report - {DateTime.Today.ToLongDateString()}",
             [ emailAddress ],
-            attachments: new List<Attachment> { new Attachment(report, "Consistency Report.xlsx", FileContentTypes.ExcelModernFile) },
+            attachments: [ attachment ],
             cancellationToken: cancellationToken);
     }
 
@@ -89,4 +94,24 @@ public sealed partial class Service : IEmailService
             $"[Aurora College] Service Log Output - {notification.Source}",
             notification.Recipients);
     }
+
+    public async Task SendIncomingSmsAlert(
+        SmsMessage message,
+        CancellationToken cancellationToken = default)
+    {
+        string viewModel = $"""
+                            The following message was received as an SMS<br />
+                            <strong>Sender: </strong>{message.Sender.Name} ({message.Sender.Number})<br />
+                            <strong>Message: </strong>{message.Message}<br />
+                            <strong>Received: </strong>{message.CreatedAt.LocalDateTime.ToString("F", DateTimeFormatInfo.InvariantInfo)}
+                            """;
+
+        await BuildAndSendEmail(
+            viewModel,
+            EmailRecipient.NoReply,
+            $"[Aurora College] SMS Received from {message.Sender.Name}",
+            [EmailRecipient.AuroraCollege],
+            cancellationToken: cancellationToken);
+    }
+
 }

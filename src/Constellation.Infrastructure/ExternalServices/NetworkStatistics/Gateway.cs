@@ -2,9 +2,9 @@
 
 using Constellation.Application.DTOs;
 using Constellation.Application.Extensions;
-using Constellation.Application.Helpers;
 using Constellation.Application.Interfaces.Gateways;
 using Constellation.Infrastructure.ExternalServices.NetworkStatistics.Models;
+using Core.Models.Identifiers;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json.Linq;
 using System.Data;
@@ -50,7 +50,7 @@ internal sealed class Gateway : INetworkStatisticsGateway
         return sr.ReadToEnd();
     }
 
-    public async Task<NetworkStatisticsSiteDto> GetSiteDetails(string schoolCode)
+    public async Task<NetworkStatisticsSiteDto> GetSiteDetails(SchoolCode schoolCode)
     {
         var queryUri = $"{_urlBase}/sites/{schoolCode}";
 

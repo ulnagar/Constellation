@@ -1,17 +1,17 @@
 ﻿namespace Constellation.Infrastructure.Persistence.ConstellationContext.Repositories;
 
-using Constellation.Core.Abstractions.Clock;
-using Constellation.Core.Enums;
-using Constellation.Core.Models.Absences.Enums;
-using Constellation.Core.Models.Offerings;
-using Constellation.Core.Models.Offerings.Identifiers;
-using Constellation.Core.Models.Students;
 using Constellation.Core.Models.Students.Repositories;
-using Constellation.Core.Models.Subjects.Identifiers;
-using Core.Models.Absences;
+using Core.Abstractions.Clock;
+using Core.Enums;
+using Core.Models.Absences.Enums;
 using Core.Models.Enrolments;
+using Core.Models.Identifiers;
+using Core.Models.Offerings;
+using Core.Models.Offerings.Identifiers;
+using Core.Models.Students;
 using Core.Models.Students.Identifiers;
 using Core.Models.Students.ValueObjects;
+using Core.Models.Subjects.Identifiers;
 using Core.ValueObjects;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
@@ -35,7 +35,7 @@ public class StudentRepository : IStudentRepository
             .Set<Student>()
             .ToListAsync(cancellationToken);
 
-    public async Task<Student> GetById(
+    public async Task<Student?> GetById(
         StudentId studentId, 
         CancellationToken cancellationToken = default) => 
         await _context
@@ -167,7 +167,7 @@ public class StudentRepository : IStudentRepository
 
             foreach (OfferingEnrolment enrolment in studentEnrolments)
             {
-                Offering offering = offerings
+                Offering? offering = offerings
                     .FirstOrDefault(entry => entry.Id == enrolment.OfferingId);
 
                 if (offering is null)
@@ -208,9 +208,11 @@ public class StudentRepository : IStudentRepository
         List<OfferingId> offeringIds,
         List<CourseId> courseIds,
         List<Grade> grades,
-        List<string> schoolCodes,
+        List<SchoolCode> schoolCodes,
         CancellationToken cancellationToken = default)
     {
+        List<OfferingId> selectedOfferingIds = offeringIds.ToList();
+
         List<SchoolEnrolment> schoolEnrolments = await _context
             .Set<SchoolEnrolment>()
             .Where(enrolment => 
@@ -223,7 +225,7 @@ public class StudentRepository : IStudentRepository
             .Set<Student>()
             .Where(student => !student.IsDeleted)
             .ToListAsync(cancellationToken);
-
+        
         if (courseIds.Count > 0)
         {
             List<OfferingId> currentOfferingIds = await _context.Set<Offering>()
@@ -234,15 +236,15 @@ public class StudentRepository : IStudentRepository
                 .Select(offering => offering.Id)
                 .ToListAsync(cancellationToken);
 
-            offeringIds.AddRange(currentOfferingIds);
-            offeringIds = offeringIds.Distinct().ToList();
+            selectedOfferingIds.AddRange(currentOfferingIds);
+            selectedOfferingIds = selectedOfferingIds.Distinct().ToList();
         }
 
-        if (offeringIds.Count > 0)
+        if (selectedOfferingIds.Count > 0)
         {
             List<OfferingId> currentOfferingIds = await _context.Set<Offering>()
                 .Where(offering =>
-                    offeringIds.Contains(offering.Id) &&
+                    selectedOfferingIds.Contains(offering.Id) &&
                     offering.StartDate <= _dateTime.Today &&
                     offering.EndDate >= _dateTime.Today)
                 .Select(offering => offering.Id)
@@ -284,7 +286,7 @@ public class StudentRepository : IStudentRepository
     }
 
     public async Task<List<Student>> GetCurrentStudentsFromSchool(
-        string schoolCode,
+        SchoolCode schoolCode,
         CancellationToken cancellationToken = default) =>
         await _context
             .Set<Student>()
@@ -298,7 +300,7 @@ public class StudentRepository : IStudentRepository
             .ToListAsync(cancellationToken);
 
     public async Task<int> GetCountCurrentStudentsFromSchool(
-        string schoolCode,
+        SchoolCode schoolCode,
         CancellationToken cancellationToken = default) =>
         await _context
             .Set<Student>()
@@ -404,13 +406,15 @@ public class StudentRepository : IStudentRepository
                 student.Name.LastName.Contains(name));
         }
 
-        if (matchedStudents.Count() == 0)
+        if (matchedStudents.Any())
             return StudentId.Empty;
 
         if (matchedStudents.Count() > 1)
             return StudentId.Empty;
 
-        return matchedStudents.First().Id;
+        Student firstEntry = await matchedStudents.FirstAsync(cancellationToken);
+
+        return firstEntry.Id;
     }
 
     public async Task<List<Student>> GetEnrolledForDates(

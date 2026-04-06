@@ -3,6 +3,7 @@
 using Constellation.Core.Enums;
 using Constellation.Core.ValueObjects;
 using Identifiers;
+using Models.Identifiers;
 using Offerings.Identifiers;
 using Subjects.Identifiers;
 using System;
@@ -22,8 +23,8 @@ public interface IStudentRepository
     Task<List<Student>> GetCurrentEnrolmentsForOffering(OfferingId offeringId, CancellationToken cancellationToken = default);
     Task<List<Student>> GetCurrentEnrolmentsForCourse(CourseId courseId, CancellationToken cancellationToken = default);
     Task<bool> IsValidStudentId(StudentId studentId, CancellationToken cancellationToken = default);
-    Task<List<Student>> GetFilteredStudents(List<OfferingId> offeringIds, List<CourseId> courseIds, List<Grade> grades, List<string> schoolCodes, CancellationToken cancellationToken = default);
-    Task<List<Student>> GetCurrentStudentsFromSchool(string schoolCode, CancellationToken cancellationToken = default);
+    Task<List<Student>> GetFilteredStudents(List<OfferingId> offeringIds, List<CourseId> courseIds, List<Grade> grades, List<SchoolCode> schoolCodes, CancellationToken cancellationToken = default);
+    Task<List<Student>> GetCurrentStudentsFromSchool(SchoolCode schoolCode, CancellationToken cancellationToken = default);
     Task<List<Student>> GetCurrentStudentFromGrade(Grade grade, CancellationToken cancellationToken = default);
 
     /// <summary>
@@ -48,7 +49,7 @@ public interface IStudentRepository
     Task<List<Student>> GetCurrentStudentsWithoutSentralId(CancellationToken cancellationToken = default);
     Task<int> GetCountCurrentStudentsWithAwardOverages(CancellationToken cancellationToken = default);
     Task<int> GetCountCurrentStudentsWithPendingAwards(CancellationToken cancellationToken = default);
-    Task<int> GetCountCurrentStudentsFromSchool(string schoolCode, CancellationToken cancellationToken = default);
+    Task<int> GetCountCurrentStudentsFromSchool(SchoolCode schoolCode, CancellationToken cancellationToken = default);
     Task<StudentId> GetStudentIdFromNameFragments(string[] names, CancellationToken cancellationToken = default);
     Task<Dictionary<string, List<Student>>> GetCurrentEnrolmentsForCourseWithOfferingName(CourseId courseId, CancellationToken cancellationToken = default);
     Task<List<Student>> GetEnrolledForDates(DateOnly startDate, DateOnly endDate, CancellationToken cancellationToken = default);

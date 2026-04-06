@@ -22,7 +22,6 @@ using Core.Models.Students.Identifiers;
 using Core.Models.Students.Repositories;
 using Core.Models.Subjects;
 using Core.Models.Subjects.Repositories;
-using Core.Models.Tutorials.Enums;
 using Core.Shared;
 using Core.ValueObjects;
 using Interfaces;
@@ -74,17 +73,17 @@ internal sealed class GetContactListQueryHandler
 
         List<Student> students = await _studentRepository
             .GetFilteredStudents(
-                request.OfferingCodes,
-                request.CourseIds,
-                request.Grades,
-                request.SchoolCodes,
+                request.Filter.OfferingIds,
+                request.Filter.CourseIds,
+                request.Filter.Grades,
+                request.Filter.SchoolCodes,
                 cancellationToken);
 
-        if (request.Flags.Any())
+        if (request.Filter.Flags.Count > 0)
         {
             List<StudentId> studentIds = [];
 
-            foreach (string flag in request.Flags)
+            foreach (StudentFlag flag in request.Filter.Flags)
             {
                 List<StudentId> idsWithFlag = await _flagCache.GetStudentsWithFlag(flag);
                 studentIds.AddRange(idsWithFlag);
@@ -123,6 +122,7 @@ internal sealed class GetContactListQueryHandler
                 enrolment.Grade,
                 enrolment.SchoolName,
                 ContactCategory.Student,
+                student.Id,
                 student.Name.DisplayName,
                 student.EmailAddress,
                 PhoneNumber.Empty,
@@ -145,9 +145,10 @@ internal sealed class GetContactListQueryHandler
                     enrolment.Grade,
                     enrolment.SchoolName,
                     ContactCategory.PartnerSchoolSchool,
+                    school.Code,
                     enrolment.SchoolName,
                     schoolEmail.Value,
-                    schoolPhone.IsSuccess ? schoolPhone.Value : PhoneNumber.Empty,
+                    schoolPhone.IsSuccess && schoolPhone.Value.IsMobile() ? schoolPhone.Value : PhoneNumber.Empty,
                     string.Empty));
             }
 
@@ -178,9 +179,10 @@ internal sealed class GetContactListQueryHandler
                         enrolment.Grade,
                         enrolment.SchoolName,
                         category,
+                        contact.Id,
                         contact.Name.DisplayName,
                         contact.EmailAddress,
-                        contact.PhoneNumber,
+                        contact.PhoneNumber.IsMobile() ? contact.PhoneNumber : PhoneNumber.Empty,
                         role.Note));
                 }
             }
@@ -204,6 +206,7 @@ internal sealed class GetContactListQueryHandler
                         enrolment.Grade,
                         enrolment.SchoolName,
                         ContactCategory.ResidentialFamily,
+                        family.Id,
                         family.FamilyTitle,
                         familyEmail.Value,
                         PhoneNumber.Empty,
@@ -224,9 +227,10 @@ internal sealed class GetContactListQueryHandler
                             enrolment.Grade,
                             enrolment.SchoolName,
                             category,
+                            parent.Id,
                             parent.Name.DisplayName,
                             parent.EmailAddress,
-                            parent.MobileNumber,
+                            parent.MobileNumber.IsMobile() ? parent.MobileNumber : PhoneNumber.Empty,
                             string.Empty));
                     }
                 }
@@ -238,6 +242,7 @@ internal sealed class GetContactListQueryHandler
                         enrolment.Grade,
                         enrolment.SchoolName,
                         ContactCategory.NonResidentialFamily,
+                        family.Id,
                         family.FamilyTitle,
                         familyEmail.Value,
                         PhoneNumber.Empty,
@@ -251,9 +256,10 @@ internal sealed class GetContactListQueryHandler
                             enrolment.Grade,
                             enrolment.SchoolName,
                             ContactCategory.NonResidentialParent,
+                            parent.Id,
                             parent.Name.DisplayName,
                             parent.EmailAddress,
-                            parent.MobileNumber,
+                            parent.MobileNumber.IsMobile() ? parent.MobileNumber : PhoneNumber.Empty,
                             string.Empty));
                     }
                 }
@@ -284,9 +290,10 @@ internal sealed class GetContactListQueryHandler
                         enrolment.Grade,
                         enrolment.SchoolName,
                         ContactCategory.AuroraTeacher,
+                        teacher.Id,
                         teacherName,
                         teacher.EmailAddress,
-                        PhoneNumber.Empty,
+                        teacher.PhoneNumber.IsMobile() ? teacher.PhoneNumber : PhoneNumber.Empty,
                         string.Empty));
                 }
 
@@ -325,19 +332,20 @@ internal sealed class GetContactListQueryHandler
                         enrolment.Grade,
                         enrolment.SchoolName,
                         ContactCategory.AuroraHeadTeacher,
+                        headTeacher.Id,
                         teacherName,
                         headTeacher.EmailAddress,
-                        PhoneNumber.Empty, 
+                        headTeacher.PhoneNumber.IsMobile() ? headTeacher.PhoneNumber : PhoneNumber.Empty,
                         string.Empty));
                 }
             }
         }
 
-        if (request.ContactCategories.Count > 0)
+        if (request.Filter.Categories.Count > 0)
         {
             result = result
                 .Where(entry => 
-                    request.ContactCategories.Contains(entry.Category))
+                    request.Filter.Categories.Contains(entry.Category))
                 .ToList();
         }
 

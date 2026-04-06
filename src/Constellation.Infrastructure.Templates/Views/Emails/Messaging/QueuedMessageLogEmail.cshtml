@@ -1,0 +1,41 @@
+@using Constellation.Core.Models.Messaging.Drafts
+@using Constellation.Infrastructure.Templates.Views.Emails.Messaging
+@model QueuedMessageLogEmailViewModel
+
+@{
+    Layout = "/Views/Shared/EmailLayout.cshtml";
+
+    ViewData["Preheader"] = Model.Preheader;
+    ViewData["Title"] = Model.Title;
+    ViewData["SenderName"] = Model.SenderName;
+    ViewData["SenderTitle"] = Model.SenderTitle;
+}
+
+<p>Below is a list of the errors that occurred when sending the email:</p>
+<p>
+    <strong>Email Id</strong>: <span>@Model.Message.Id</span><br/>
+    <strong>Subject</strong>: <span>@Model.Message.Subject</span>
+</p>
+
+<p>
+    <strong>Errors</strong>:
+    <br/>
+    <br/>
+
+    @foreach (var error in Model.Message.Errors)
+    {
+        <span>@error.Error</span><br />
+        @if (error is RecipientError recipientError)
+        {
+            <strong>Name</strong>@: <span>@recipientError.Recipient.Name</span><br />
+            <strong>Email</strong>@: <span>@recipientError.Recipient.EmailAddress</span><br/>
+            <strong>Phone</strong>@: <span>@recipientError.Recipient.PhoneNumber</span><br />
+        }
+        else if (error is ExceptionError exceptionError)
+        {
+            <span>@exceptionError.Details</span><br />
+        }
+
+        <br />
+    }
+</p>

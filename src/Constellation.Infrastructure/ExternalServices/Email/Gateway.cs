@@ -7,11 +7,11 @@ using Core.Models.Messaging.Email.Enums;
 using Core.Models.Messaging.Email.Identifiers;
 using Core.Shared;
 using Extensions;
+using Infrastructure.Services;
 using MailKit.Security;
 using Microsoft.Extensions.Options;
 using MimeKit;
 using MimeKit.Text;
-using System.Drawing;
 using System.Net.Mail;
 using SmtpClient = MailKit.Net.Smtp.SmtpClient;
 
@@ -91,9 +91,9 @@ public class Gateway : IEmailGateway
         {
             _logger
                 .Information("{id}: Adding {name} ({email}) to {type} field.",
-                message.Id, recipient.Recipient.Name, recipient.Email, recipient.RecipientType);
+                message.Id, recipient.Name, recipient.Email, recipient.RecipientType);
 
-            MailboxAddress mailbox = recipient.Recipient.ToMailboxAddress();
+            MailboxAddress mailbox = recipient.ToMailboxAddress();
 
             switch (recipient.RecipientType)
             {
@@ -108,11 +108,14 @@ public class Gateway : IEmailGateway
         mime.Subject = message.Subject;
         mime.Priority = priority;
 
-        string trackedHtml = _trackingInjector.InjectTrackingPixel(message.BodyHtml, message.Id);
+        InjectionResult injection = _trackingInjector.InjectTracking(message.BodyHtml, message.Id);
+
+        foreach (var link in injection.DiscoveredLinks)
+            message.RegisterLink(link);
 
         TextPart textPartBody = new(TextFormat.Html)
         {
-            Text = trackedHtml
+            Text = injection.Html
         };
 
         if (attachments.Count > 0 || !string.IsNullOrWhiteSpace(calendarInfo))

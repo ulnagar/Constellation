@@ -1,11 +1,10 @@
 ﻿namespace Constellation.Infrastructure.Persistence.ConstellationContext.Repositories;
 
 using Core.Models.Messaging.Sms;
-using Core.Models.Messaging.Sms.Enums;
 using Core.Models.Messaging.Sms.Identifiers;
 using Core.Models.Messaging.Sms.Repositories;
+using Core.ValueObjects;
 using Microsoft.EntityFrameworkCore;
-using System;
 
 internal sealed class SmsRepository : ISmsRepository
 {
@@ -32,21 +31,24 @@ internal sealed class SmsRepository : ISmsRepository
             .Where(message => message.OutgoingId == outgoingId)
             .FirstOrDefaultAsync(cancellationToken);
 
-    public async Task<SmsMessage?> GetMostRecentOutboundToNumber(
-        string phoneNumber, 
-        CancellationToken cancellationToken = default)
-    {
-        var windowStart = DateTimeOffset.UtcNow.AddHours(-24);
-        var originalMessage = await _context
+    public async Task<List<SmsMessage>> GetByNumber(
+        PhoneNumber phoneNumber,
+        CancellationToken cancellationToken = default) =>
+        await _context
             .Set<SmsMessage>()
-            .Where(message => message.To == phoneNumber
-                        && message.CreatedAt >= windowStart
-                        && message.Direction == MessageDirection.Outbound)
-            .OrderByDescending(m => m.CreatedAt)
-            .FirstOrDefaultAsync(cancellationToken);
+            .Where(message => 
+                message.Sender.Number == phoneNumber.ToString(PhoneNumber.Format.None) ||
+                message.Recipient.Number == phoneNumber.ToString(PhoneNumber.Format.None))
+            .ToListAsync(cancellationToken);
 
-        return originalMessage;
-    }
+    public async Task<List<SmsMessage>> GetRecent(
+        int count,
+        CancellationToken cancellationToken = default) =>
+        await _context
+            .Set<SmsMessage>()
+            .OrderByDescending(message => message.CreatedAt)
+            .Take(count)
+            .ToListAsync(cancellationToken);
 
     public void Insert(SmsMessage message) => _context.Set<SmsMessage>().Add(message);
 }

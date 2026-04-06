@@ -85,7 +85,7 @@ public class UpdateModel : BasePageModel
         if (UserType.Equals(UserType.School))
         {
             UserName = school.Value.Name;
-            UserCode = school.Value.SchoolCode;
+            UserCode = school.Value.SchoolCode.ToString();
         }
 
         RegisterSightingWithAssetRecordUpdatesCommand command = new(
@@ -93,7 +93,7 @@ public class UpdateModel : BasePageModel
             AssetNumber,
             LocationCategory.PublicSchool,
             school.Value.Name,
-            school.Value.SchoolCode,
+            school.Value.SchoolCode.ToString(),
             UserType,
             UserName,
             UserCode,

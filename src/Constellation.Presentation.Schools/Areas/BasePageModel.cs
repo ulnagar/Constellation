@@ -6,6 +6,7 @@ using Constellation.Application.Common.PresentationModels;
 using Constellation.Application.Models.Auth;
 using Constellation.Application.Models.Identity;
 using Constellation.Core.Shared;
+using Core.Models.Identifiers;
 using Core.Models.SchoolContacts.Identifiers;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -38,12 +39,20 @@ public class BasePageModel : PageModel, IBaseModel
         bool success = httpContextAccessor.HttpContext.Session.TryGetValue(nameof(CurrentSchoolCode), out byte[]? currentSchoolCode);
 
         if (success && currentSchoolCode.Length > 0)
-            CurrentSchoolCode = System.Text.Encoding.Default.GetString(currentSchoolCode);
+        {
+            var stringCode = System.Text.Encoding.Default.GetString(currentSchoolCode);
+
+            var schoolCode = SchoolCode.TryFromValue(stringCode);
+
+            CurrentSchoolCode = schoolCode.IsSuccess
+                ? schoolCode.Value
+                : SetDefaultSchool();
+        }
         else
             CurrentSchoolCode = SetDefaultSchool();
     }
 
-    public string? CurrentSchoolCode { get; set; }
+    public SchoolCode CurrentSchoolCode { get; set; } = SchoolCode.Empty;
 
     public ModalContent? ModalContent { get; set; }
 
@@ -51,12 +60,12 @@ public class BasePageModel : PageModel, IBaseModel
     {
         CurrentSchoolCode = viewModel.NewSchoolCode;
 
-        _httpContextAccessor.HttpContext?.Session.SetString(nameof(BasePageModel.CurrentSchoolCode), viewModel.NewSchoolCode);
+        _httpContextAccessor.HttpContext?.Session.SetString(nameof(BasePageModel.CurrentSchoolCode), viewModel.NewSchoolCode.ToString());
 
         return RedirectToPage();
     }
 
-    public string SetDefaultSchool()
+    public SchoolCode SetDefaultSchool()
     {
         using IServiceScope scope = _serviceFactory.CreateScope();
         ISender mediator = scope.ServiceProvider.GetRequiredService<ISender>();
@@ -65,7 +74,7 @@ public class BasePageModel : PageModel, IBaseModel
         ClaimsPrincipal? httpContextUser = _httpContextAccessor.HttpContext?.User;
 
         if (httpContextUser is null)
-            return string.Empty;
+            return SchoolCode.Empty;
 
         AppUser? user = userManager.FindByNameAsync(httpContextUser.Identity?.Name ?? string.Empty).Result;
 
@@ -74,7 +83,7 @@ public class BasePageModel : PageModel, IBaseModel
         AppUserLink? contactLink = user?.Links.FirstOrDefault(link => !link.IsDeleted && link.Type == LinkType.Contact);
 
         if (contactLink is null && !isAdminTest.Succeeded)
-            return string.Empty;
+            return SchoolCode.Empty;
 
         SchoolContactId contactId = contactLink is not null
             ? SchoolContactId.FromValue(contactLink.LinkId)
@@ -85,11 +94,11 @@ public class BasePageModel : PageModel, IBaseModel
             : mediator.Send(new GetSchoolsForContactQuery(contactId)).Result;
 
         if (schoolsRequest.IsFailure || schoolsRequest.Value.Count == 0)
-            return string.Empty;
+            return SchoolCode.Empty;
 
-        SchoolResponse school = schoolsRequest.Value.MinBy(school => school.SchoolCode)!;
+        SchoolResponse school = schoolsRequest.Value.MinBy(school => school.SchoolCode.ToString())!;
 
-        _httpContextAccessor.HttpContext?.Session.SetString(nameof(CurrentSchoolCode), school!.SchoolCode);
+        _httpContextAccessor.HttpContext?.Session.SetString(nameof(CurrentSchoolCode), school!.SchoolCode.ToString());
 
         return school.SchoolCode;
     }

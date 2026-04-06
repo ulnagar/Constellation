@@ -3,7 +3,7 @@
 using Enums;
 using Identifiers;
 
-public class EmailTrackingEvent
+public sealed class EmailTrackingEvent
 {
     public EmailTrackingEventId Id { get; set; }
     public EmailId EmailId { get; set; }

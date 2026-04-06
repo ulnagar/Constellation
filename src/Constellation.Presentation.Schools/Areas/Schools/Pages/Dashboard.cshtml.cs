@@ -9,6 +9,7 @@ using Constellation.Presentation.Shared.Helpers.Attributes;
 using Constellation.Presentation.Shared.Helpers.Logging;
 using Core.Abstractions.Services;
 using Core.Errors;
+using Core.Models.Identifiers;
 using Core.Shared;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -52,7 +53,7 @@ public class DashboardModel : BasePageModel
 
     public async Task OnGet()
     {
-        if (string.IsNullOrWhiteSpace(CurrentSchoolCode))
+        if (CurrentSchoolCode == SchoolCode.Empty)
         {
             ModalContent = ErrorDisplay.Create(ApplicationErrors.SchoolInvalid);
 

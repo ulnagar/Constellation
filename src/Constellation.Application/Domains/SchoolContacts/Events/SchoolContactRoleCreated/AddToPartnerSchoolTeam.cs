@@ -1,6 +1,7 @@
 ﻿namespace Constellation.Application.Domains.SchoolContacts.Events.SchoolContactRoleCreated;
 
 using Abstractions.Messaging;
+using Core.Models.Identifiers;
 using Core.Models.Operations;
 using Core.Models.Operations.Enums;
 using Core.Models.Operations.Repositories;
@@ -55,7 +56,7 @@ internal sealed class AddToPartnerSchoolTeam
             return;
         }
 
-        List<string> schoolCodes = contact.Assignments
+        List<SchoolCode> schoolCodes = contact.Assignments
             .Where(role => !role.IsDeleted)
             .Select(role => role.SchoolCode)
             .Distinct()
@@ -64,7 +65,7 @@ internal sealed class AddToPartnerSchoolTeam
         bool isPrimary = false;
         bool isSecondary = false;
 
-        foreach (string schoolCode in schoolCodes)
+        foreach (SchoolCode schoolCode in schoolCodes)
         {
             SchoolType type = await _schoolRepository.GetSchoolType(schoolCode, cancellationToken);
 

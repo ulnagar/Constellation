@@ -1,6 +1,7 @@
 ﻿namespace Constellation.Application.Domains.Students.Models;
 
 using Constellation.Core.Enums;
+using Core.Models.Identifiers;
 using Core.Models.Students.Enums;
 using Core.Models.Students.Identifiers;
 using Core.Models.Students.ValueObjects;
@@ -14,6 +15,6 @@ public sealed record StudentResponse(
     Grade? Grade,
     EmailAddress EmailAddress,
     string School,
-    string SchoolCode,
+    SchoolCode SchoolCode,
     bool CurrentEnrolment,
     bool IsDeleted);

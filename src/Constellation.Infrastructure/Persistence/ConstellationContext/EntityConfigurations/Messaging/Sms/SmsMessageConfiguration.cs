@@ -1,7 +1,8 @@
 ﻿namespace Constellation.Infrastructure.Persistence.ConstellationContext.EntityConfigurations.Messaging.Sms;
 
+using Constellation.Core.ValueObjects;
+using Core.Models.Messaging.Enums;
 using Core.Models.Messaging.Sms;
-using Core.Models.Messaging.Sms.Enums;
 using Core.Models.Messaging.Sms.Identifiers;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
@@ -22,14 +23,44 @@ internal class SmsMessageConfiguration : IEntityTypeConfiguration<SmsMessage>
                 value => SmsId.FromValue(value));
 
         builder
-            .Property(message => message.From)
-            .IsRequired()
-            .HasMaxLength(20);
+            .OwnsOne(message => message.Sender, owned =>
+            {
+                owned.WithOwner();
+
+                owned
+                    .Property(r => r.Name)
+                    .HasColumnName($"{nameof(SmsMessage.Sender)}_{nameof(SmsRecipient.Name)}")
+                    .IsRequired()
+                    .HasMaxLength(200);
+
+                owned
+                    .Property(r => r.Number)
+                    .HasColumnName($"{nameof(SmsMessage.Sender)}_{nameof(SmsRecipient.Number)}")
+                    .IsRequired()
+                    .HasMaxLength(320);
+
+                owned.HasIndex(r => r.Number);
+            }); 
 
         builder
-            .Property(message => message.To)
-            .IsRequired()
-            .HasMaxLength(20);
+            .OwnsOne(message => message.Recipient, owned =>
+            {
+                owned.WithOwner();
+
+                owned
+                    .Property(r => r.Name)
+                    .HasColumnName($"{nameof(SmsMessage.Recipient)}_{nameof(SmsRecipient.Name)}")
+                    .IsRequired()
+                    .HasMaxLength(200);
+
+                owned
+                    .Property(r => r.Number)
+                    .HasColumnName($"{nameof(SmsMessage.Recipient)}_{nameof(SmsRecipient.Number)}")
+                    .IsRequired()
+                    .HasMaxLength(320);
+
+                owned.HasIndex(r => r.Number);
+            });
 
         builder
             .Property(message => message.Message)
@@ -46,7 +77,7 @@ internal class SmsMessageConfiguration : IEntityTypeConfiguration<SmsMessage>
             .Property(message => message.Status)
             .HasConversion(
                 status => status.Value,
-                value => SmsStatus.FromValue(value));
+                value => MessageStatus.FromValue(value));
         
         // Indexes to support the common lookup patterns discussed earlier
         builder
@@ -54,14 +85,6 @@ internal class SmsMessageConfiguration : IEntityTypeConfiguration<SmsMessage>
 
         builder
             .HasIndex(message => message.OutgoingId);
-
-        builder
-            .HasIndex(message => new
-            {
-                message.From, 
-                message.To, 
-                message.CreatedAt
-            }); // conversation lookup
 
         builder
             .HasIndex(message => new

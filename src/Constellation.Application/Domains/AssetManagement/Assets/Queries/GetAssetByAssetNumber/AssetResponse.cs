@@ -4,6 +4,7 @@ namespace Constellation.Application.Domains.AssetManagement.Assets.Queries.GetAs
 using Constellation.Core.Models.Assets.Enums;
 using Constellation.Core.Models.Assets.Identifiers;
 using Constellation.Core.Models.Assets.ValueObjects;
+using Core.Models.Identifiers;
 using System;
 using System.Collections.Generic;
 
@@ -27,7 +28,7 @@ public sealed record AssetResponse(
     LocationId? LocationId,
     LocationCategory? LocationCategory,
     string Site,
-    string SchoolCode,
+    SchoolCode SchoolCode,
     string Room,
     DateOnly ArrivalDate,
     SightingId? SightingId,
@@ -51,7 +52,7 @@ public sealed record AssetResponse(
         LocationId LocationId,
         LocationCategory Category,
         string Site,
-        string SchoolCode,
+        SchoolCode SchoolCode,
         string Room,
         bool CurrentLocation,
         DateOnly ArrivalDate,

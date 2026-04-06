@@ -4,6 +4,7 @@ using Constellation.Application.Abstractions.Messaging;
 using Constellation.Core.Models.Assets;
 using Constellation.Core.Models.Assets.Repositories;
 using Constellation.Core.Shared;
+using Core.Models.Identifiers;
 using Serilog;
 using System;
 using System.Collections.Generic;
@@ -108,7 +109,7 @@ internal sealed class GetAssetByAssetNumberQueryHandler
             lastLocation?.Id,
             lastLocation?.Category,
             lastLocation?.Site ?? string.Empty,
-            lastLocation?.SchoolCode ?? string.Empty,
+            lastLocation?.SchoolCode ?? SchoolCode.Empty,
             lastLocation?.Room ?? string.Empty,
             lastLocation?.ArrivalDate ?? DateOnly.MinValue,
             lastSighting?.Id,

@@ -88,7 +88,7 @@ internal sealed class RollMarkingReportJob : IRollMarkingReportJob
 
             foreach (var contact in absenceSettings.RollMarkingReportRecipients)
             {
-                Result<EmailRecipient> recipient = contact.Key.GetEmailRecipient();
+                Result<EmailRecipient> recipient = contact.Key.GetEmailRecipient;
 
                 if (recipient.IsFailure)
                     continue;
@@ -156,7 +156,7 @@ internal sealed class RollMarkingReportJob : IRollMarkingReportJob
 
             if (teacher is not null)
             {
-                Result<EmailRecipient> recipient = teacher.GetEmailRecipient();
+                Result<EmailRecipient> recipient = teacher.GetEmailRecipient;
 
                 if (recipient.IsFailure)
                     return;
@@ -182,7 +182,7 @@ internal sealed class RollMarkingReportJob : IRollMarkingReportJob
 
                 foreach (StaffMember headTeacher in headTeachersRequest.Value)
                 {
-                    Result<EmailRecipient> recipient = headTeacher.GetEmailRecipient();
+                    Result<EmailRecipient> recipient = headTeacher.GetEmailRecipient;
 
                     if (recipient.IsFailure)
                         continue;
@@ -259,7 +259,7 @@ internal sealed class RollMarkingReportJob : IRollMarkingReportJob
         recipients = [];
         foreach (var contact in absenceSettings.RollMarkingReportRecipients)
         {
-            Result<EmailRecipient> recipient = contact.Key.GetEmailRecipient();
+            Result<EmailRecipient> recipient = contact.Key.GetEmailRecipient;
 
             if (recipient.IsFailure) 
                 continue;

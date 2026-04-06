@@ -1,6 +1,7 @@
 ﻿namespace Constellation.Application.Domains.StaffMembers.Queries.GetStaffDetails;
 
 using Core.Models.Faculties.Identifiers;
+using Core.Models.Identifiers;
 using Core.Models.Offerings.Identifiers;
 using Core.Models.SchoolContacts.Enums;
 using Core.Models.SchoolContacts.Identifiers;
@@ -25,7 +26,7 @@ public sealed record StaffDetailsResponse(
 {
     public sealed record SchoolAssignmentResponse(
         SchoolAssignmentId AssignmentId,
-        string SchoolCode,
+        SchoolCode SchoolCode,
         string SchoolName,
         bool IsDeleted,
         DateOnly StartDate,

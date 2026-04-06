@@ -2,6 +2,7 @@
 
 using Enums;
 using Identifiers;
+using Models.Identifiers;
 using Primitives;
 using System;
 
@@ -19,7 +20,7 @@ public sealed class SchoolContactRole : IAuditableEntity
     internal SchoolContactRole(
         SchoolContactId contactId,
         Position role,
-        string schoolCode, 
+        SchoolCode schoolCode, 
         string schoolName,
         string note)
     {
@@ -34,7 +35,7 @@ public sealed class SchoolContactRole : IAuditableEntity
     public SchoolContactRoleId Id { get; private set; }
     public SchoolContactId SchoolContactId { get; private set; }
     public Position Role { get; private set; }
-    public string SchoolCode { get; private set; }
+    public SchoolCode SchoolCode { get; private set; }
     public string SchoolName { get; private set; }
     public string Note { get; private set; }
     public string? CreatedBy { get; set; }

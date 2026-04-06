@@ -16,7 +16,8 @@ using System.Threading.Tasks;
 internal class StudentFlagCacheService : IStudentFlagCacheService
 {
     private readonly IServiceScopeFactory _serviceFactory;
-    private List<StudentFlag> _flags = [];
+    private readonly List<StudentFlag> _flags = [];
+    private readonly Dictionary<StudentFlag, List<StudentId>> _studentsWithFlag = [];
     private DateTimeOffset _lastUpdated = DateTimeOffset.MinValue;
 
     public StudentFlagCacheService(
@@ -25,19 +26,19 @@ internal class StudentFlagCacheService : IStudentFlagCacheService
         _serviceFactory = serviceFactory;
     }
 
-    public async Task<List<string>> GetFlags()
+    public async Task<List<StudentFlag>> GetFlags()
     {
         await Update();
 
-        return _flags.Select(f => f.Name).ToList();
+        return _flags.ToList();
     }
 
-    public async Task<List<StudentId>> GetStudentsWithFlag(string flag)
+    public async Task<List<StudentId>> GetStudentsWithFlag(StudentFlag flag)
     {
         await Update();
 
-        StudentFlag flagEntry = _flags.FirstOrDefault(f => f.Name.Equals(flag, StringComparison.OrdinalIgnoreCase));
-        return flagEntry?.StudentIds ?? [];
+        bool flagEntryFound = _studentsWithFlag.TryGetValue(flag, out List<StudentId>? studentIds);
+        return flagEntryFound ? studentIds! : [];
     }
 
     public async Task Update()
@@ -53,43 +54,59 @@ internal class StudentFlagCacheService : IStudentFlagCacheService
 
     private async Task FetchFlagsFromSentral()
     {
-        List<StudentFlag> foundFlags = [];
-
-        using var scope = _serviceFactory.CreateScope();
+        using IServiceScope scope = _serviceFactory.CreateScope();
 
         ISentralGateway gateway = scope.ServiceProvider.GetRequiredService<ISentralGateway>();
         List<(string SentralId, List<string> Flags)> result = await gateway.GetStudentFlags();
 
-        List<string> flagNames = result.SelectMany(entry => entry.Flags)
+        _flags.AddRange(result
+            .SelectMany(entry => entry.Flags)
             .Distinct()
-            .ToList();
+            .Select(flag => new StudentFlag(flag))
+            .Where(flag => !string.IsNullOrWhiteSpace(flag.Name)));
 
         IStudentRepository studentRepository = scope.ServiceProvider.GetRequiredService<IStudentRepository>();
         List<Student> students = await studentRepository.GetCurrentStudents();
 
-        foreach (string flag in flagNames)
+        foreach ((string SentralId, List<string> Flags) entry in result)
         {
-            List<string> validSentralIds = result
-                .Where(entry => entry.Flags.Contains(flag))
-                .Select(entry => entry.SentralId)
-                .ToList();
+            Student? student = students
+                .FirstOrDefault(student =>
+                    student.SystemLinks
+                        .Any(link =>
+                            link.System == SystemType.Sentral &&
+                            link.Value == entry.SentralId));
 
-            foundFlags.Add(new()
+            if (student is null)
+                continue;
+
+            foreach (string studentFlag in entry.Flags)
             {
-                Name = flag,
-                StudentIds = students
-                    .Where(student => 
-                        student.SystemLinks
-                            .Where(link => 
-                                link.System == SystemType.Sentral && 
-                                validSentralIds.Contains(link.Value))
-                            .Any())
-                    .Select(student => student.Id)
-                    .ToList()
-            });
+                if (string.IsNullOrWhiteSpace(studentFlag))
+                    continue;
+
+                StudentFlag? flag = _flags.FirstOrDefault(flag => flag.Name == studentFlag);
+
+                if (flag is null)
+                {
+                    flag = new StudentFlag(studentFlag);
+
+                    _flags.Add(flag);
+                }
+
+                bool flagFound = _studentsWithFlag.TryGetValue(flag, out List<StudentId>? studentIds);
+
+                if (!flagFound)
+                {
+                    _studentsWithFlag.Add(flag, [ student.Id ]);
+                }
+                else
+                {
+                    studentIds!.Add(student.Id);
+                }
+            }
         }
 
-        _flags = foundFlags;
         _lastUpdated = DateTimeOffset.UtcNow;
     }
 }

@@ -3,6 +3,7 @@
 using Core.Models.Assets;
 using Core.Models.Assets.Enums;
 using Core.Models.Assets.Identifiers;
+using Core.Models.Identifiers;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -26,6 +27,12 @@ internal sealed class LocationConfiguration : IEntityTypeConfiguration<Location>
             .HasConversion(
                 category => category.Value,
                 value => LocationCategory.FromValue(value));
+
+        builder
+            .Property(location => location.SchoolCode)
+            .HasConversion(
+                id => id.Value,
+                value => SchoolCode.FromValue(value));
 
         builder
             .HasIndex(location => location.SchoolCode);

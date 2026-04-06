@@ -21,8 +21,6 @@
             <li class="nav-item dropdown">
                 <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-expanded="false">Partners <span class="caret"></span></a>
                 <ul class="dropdown-menu">
-                    <li><a class="dropdown-item" asp-area="Staff" asp-page="/Messaging/Contacts/Index">Contacts</a></li>
-                    <li><hr class="dropdown-divider" /></li>
                     <li><a class="dropdown-item" asp-area="Staff" asp-page="/Partner/Schools/Index">Schools</a></li>
                     <li><a class="dropdown-item" asp-area="Staff" asp-page="/Partner/Schools/Contacts/Index">School Contacts</a></li>
                     <li><hr class="dropdown-divider" /></li>
@@ -31,6 +29,20 @@
                     <li><hr class="dropdown-divider" /></li>
                     <li><a class="dropdown-item" asp-area="Staff" asp-page="/Partner/Students/Index">Students</a></li>
                     <li><a class="dropdown-item" asp-area="Staff" asp-page="/Partner/Students/Families/Index">Families</a></li>
+                </ul>
+            </li>
+            
+            <li class="nav-item dropdown">
+                <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-expanded="False">Messaging <span class="caret"></span></a>
+                <ul class="dropdown-menu">
+                    <li><a class="dropdown-item" asp-area="Staff" asp-page="/Messaging/Contacts/Index">Contacts</a></li>
+                    <li><hr class="dropdown-divider" /></li>
+                    <li><a class="dropdown-item" asp-area="Staff" asp-page="/Messaging/Drafts/Index">Drafts</a></li>
+                    @if (Model.CanAccessEmergencyConsole)
+                    {
+                        <li><a class="dropdown-item" asp-area="Staff" asp-page="/Messaging/Drafts/Templates/Index">Templates</a></li>
+                    }
+                    <li><a class="dropdown-item" asp-area="Staff" asp-page="/Messaging/History/Recent">Recent</a></li>
                 </ul>
             </li>
 

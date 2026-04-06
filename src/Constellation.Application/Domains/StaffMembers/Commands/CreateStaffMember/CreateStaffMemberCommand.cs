@@ -2,6 +2,7 @@
 
 using Abstractions.Messaging;
 using Constellation.Core.Models.Students.Enums;
+using Core.Models.Identifiers;
 
 public sealed record CreateStaffMemberCommand(
     string EmployeeId,
@@ -10,6 +11,6 @@ public sealed record CreateStaffMemberCommand(
     string LastName,
     Gender Gender,
     string EmailAddress,
-    string SchoolCode,
+    SchoolCode SchoolCode,
     bool IsShared)
     : ICommand;

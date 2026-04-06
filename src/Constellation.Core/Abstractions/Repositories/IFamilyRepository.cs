@@ -17,10 +17,12 @@ public interface IFamilyRepository
     Task<Family?> GetFamilyById(FamilyId Id, CancellationToken cancellationToken = default);
     Task<Family?> GetFamilyByEmail(EmailAddress email, CancellationToken cancellationToken = default);
     Task<List<Family>> GetFamiliesByStudentId(StudentId studentId, CancellationToken cancellationToken = default);
+    Task<Parent?> GetParentById(ParentId id, CancellationToken cancellationToken = default);
     Task<Parent?> GetParentByEmail(EmailAddress email, CancellationToken cancellationToken = default);
 
     Task<bool> DoesEmailBelongToParentOrFamily(string email, CancellationToken cancellationToken = default);
     Task<List<Family>> GetFamilyByMobileNumber(PhoneNumber phoneNumber, CancellationToken cancellationToken = default);
+    Task<Parent?> GetParentByMobileNumber(PhoneNumber phoneNumber, CancellationToken cancellationToken = default);
     Task<Dictionary<StudentId, bool>> GetStudentIdsFromFamilyWithEmail(string email, CancellationToken cancellation = default);
     Task<int> CountOfParentsWithEmailAddress(string email, CancellationToken cancellationToken = default);
     void Insert(Family family);

@@ -11,7 +11,7 @@ using Newtonsoft.Json;
 using Outbox;
 using System.Reflection;
 
-public class AppDbContext : IdentityDbContext<AppUser, AppRole, Guid>, IAppDbContext
+public class AppDbContext : IdentityDbContext<AppUser, AppRole, Guid>
 {
     public const string TeamsOperationId = "TeamsOperationId";
 

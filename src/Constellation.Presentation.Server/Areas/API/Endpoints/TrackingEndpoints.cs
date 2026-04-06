@@ -3,7 +3,6 @@
 using Application.Interfaces.Services;
 using Core.Models.Messaging.Email.Identifiers;
 using Core.Models.Messaging.Tracking;
-using Microsoft.AspNetCore.Mvc;
 
 public static class TrackingEndpoints
 {
@@ -14,6 +13,34 @@ public static class TrackingEndpoints
     {
         app.MapGet("track/open/{emailMessageId}", HandleTrackingPixel)
             .WithName("TrackingPixel");
+
+        app.MapGet("track/click/{emailMessageId}", HandleTrackingLink)
+            .WithName("TrackingLink");
+    }
+
+    private static async Task<IResult> HandleTrackingLink(
+        EmailId emailMessageId,
+        string? url,
+        ITrackingEventQueueService queue,
+        HttpContext context)
+    {
+        if (string.IsNullOrWhiteSpace(url))
+            return Results.BadRequest();
+
+        var destination = Uri.UnescapeDataString(url);
+
+        if (!Uri.TryCreate(destination, UriKind.Absolute, out var destinationUri)
+            || (destinationUri.Scheme != Uri.UriSchemeHttp
+                && destinationUri.Scheme != Uri.UriSchemeHttps))
+            return Results.BadRequest();
+
+        await queue.EnqueueAsync(new EmailClickEvent(emailMessageId, destination)
+        {
+            IpAddress = context.Connection.RemoteIpAddress?.ToString() ?? string.Empty,
+            UserAgent = context.Request.Headers.UserAgent.ToString()
+        });
+
+        return Results.Redirect(destination, permanent: false);
     }
 
     private static async Task<IResult> HandleTrackingPixel(

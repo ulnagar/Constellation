@@ -118,11 +118,11 @@ internal sealed class AbsenceResponseConfirmedDomainEvent_SendEmailToSchoolAdmin
             return;
         }
 
-        EmailDtos.AbsenceResponseEmail notificationEmail = new();
+        AbsenceResponseEmail notificationEmail = new();
 
-        notificationEmail.Recipients.Add(EmailRecipient.AbsencesMailbox.Email);
-        notificationEmail.Recipients.Add(EmailRecipient.AuroraCollege.Email);
-        notificationEmail.WholeAbsences.Add(new EmailDtos.AbsenceResponseEmail.AbsenceDto(absence, response, activityName));
+        notificationEmail.Recipients.Add(EmailRecipient.AbsencesMailbox);
+        notificationEmail.Recipients.Add(EmailRecipient.AuroraCollege);
+        notificationEmail.WholeAbsences.Add(new AbsenceResponseEmail.AbsenceDto(absence, response, activityName));
         notificationEmail.StudentName = student.Name.DisplayName;
 
         await _emailService.SendAbsenceReasonToSchoolAdmin(notificationEmail);

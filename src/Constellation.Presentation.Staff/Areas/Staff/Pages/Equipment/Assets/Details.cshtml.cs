@@ -19,6 +19,7 @@ using Constellation.Presentation.Shared.Helpers.Attributes;
 using Constellation.Presentation.Staff.Areas;
 using Core.Abstractions.Services;
 using Core.Models.Assets.Enums;
+using Core.Models.Identifiers;
 using Core.Models.StaffMembers.Identifiers;
 using Core.Models.Students.Identifiers;
 using MediatR;
@@ -173,7 +174,7 @@ public class DetailsModel : BasePageModel
 
         if (viewModel.AllocationType.Equals(AllocationType.School))
         {
-            if (string.IsNullOrWhiteSpace(viewModel.SchoolCode))
+            if (viewModel.SchoolCode == SchoolCode.Empty)
             {
                 ModalContent = ErrorDisplay.Create(AllocationErrors.SchoolEmpty);
 

@@ -65,7 +65,7 @@ public sealed class SchoolSelectorViewComponent : ViewComponent
         
         viewModel.CurrentSchool = string.IsNullOrWhiteSpace(selectedSchoolCode)
             ? schoolsRequest.Value.MinBy(school => school.SchoolCode)
-            : viewModel.ValidSchools.FirstOrDefault(entry => entry.SchoolCode == selectedSchoolCode);
+            : viewModel.ValidSchools.FirstOrDefault(entry => entry.SchoolCode.ToString() == selectedSchoolCode);
 
         if (viewModel.CurrentSchool is null)
             if (viewModel.ValidSchools.Count > 0)
@@ -77,7 +77,7 @@ public sealed class SchoolSelectorViewComponent : ViewComponent
             nameof(SchoolResponse.Name),
             viewModel.CurrentSchool?.SchoolCode);
         
-        HttpContext.Session.SetString(nameof(BasePageModel.CurrentSchoolCode), viewModel.CurrentSchool!.SchoolCode);
+        HttpContext.Session.SetString(nameof(BasePageModel.CurrentSchoolCode), viewModel.CurrentSchool!.SchoolCode.ToString());
 
         return View("SchoolSelector", viewModel);
     }

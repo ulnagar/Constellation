@@ -35,7 +35,7 @@ internal sealed class CreateContactRoleAssignmentCommandHandler
 
     public async Task<Result> Handle(CreateContactRoleAssignmentCommand request, CancellationToken cancellationToken)
     {
-        School school = await _schoolRepository.GetById(request.SchoolCode, cancellationToken);
+        School? school = await _schoolRepository.GetById(request.SchoolCode, cancellationToken);
 
         if (school is null)
         {
@@ -47,7 +47,7 @@ internal sealed class CreateContactRoleAssignmentCommandHandler
             return Result.Failure(DomainErrors.Partners.School.NotFound(request.SchoolCode));
         }
         
-        SchoolContact contact = await _contactRepository.GetById(request.ContactId, cancellationToken);
+        SchoolContact? contact = await _contactRepository.GetById(request.ContactId, cancellationToken);
 
         if (contact is null)
         {

@@ -59,7 +59,7 @@ internal sealed class GetStaffDetailsQueryHandler
 
     public async Task<Result<StaffDetailsResponse>> Handle(GetStaffDetailsQuery request, CancellationToken cancellationToken)
     {
-        StaffMember staffMember = await _staffRepository.GetById(request.StaffId, cancellationToken);
+        StaffMember? staffMember = await _staffRepository.GetById(request.StaffId, cancellationToken);
 
         if (staffMember is null)
         {
@@ -71,7 +71,7 @@ internal sealed class GetStaffDetailsQueryHandler
             return Result.Failure<StaffDetailsResponse>(StaffMemberErrors.NotFound(request.StaffId));
         }
 
-        School school = staffMember.CurrentAssignment is not null
+        School? school = staffMember.CurrentAssignment is not null
             ? await _schoolRepository.GetById(staffMember.CurrentAssignment.SchoolCode, cancellationToken)
             : null;
 
@@ -94,8 +94,11 @@ internal sealed class GetStaffDetailsQueryHandler
 
         foreach (Faculty faculty in faculties)
         {
-            FacultyMembership membership = faculty.Members
+            FacultyMembership? membership = faculty.Members
                 .FirstOrDefault(membership => membership.StaffId == staffMember.Id);
+
+            if (membership is null)
+                continue;
 
             facultyMemberships.Add(new(
                 membership.Id,
@@ -119,7 +122,7 @@ internal sealed class GetStaffDetailsQueryHandler
             if (course is null)
                 continue;
 
-            TeacherAssignment assignment = offering.Teachers.FirstOrDefault(entry => entry.StaffId == staffMember.Id);
+            TeacherAssignment? assignment = offering.Teachers.FirstOrDefault(entry => entry.StaffId == staffMember.Id);
 
             if (assignment is null)
                 continue;
@@ -135,7 +138,7 @@ internal sealed class GetStaffDetailsQueryHandler
 
             foreach (Session session in offering.Sessions.Where(session => !session.IsDeleted))
             {
-                Period period = periods.FirstOrDefault(entry => entry.Id == session.PeriodId);
+                Period? period = periods.FirstOrDefault(entry => entry.Id == session.PeriodId);
 
                 if (period is null)
                     continue;

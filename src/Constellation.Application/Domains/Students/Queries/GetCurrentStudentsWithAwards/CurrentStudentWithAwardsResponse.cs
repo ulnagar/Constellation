@@ -11,7 +11,7 @@ public sealed record CurrentStudentWithAwardsResponse(
     string FirstName,
     string LastName,
     string DisplayName,
-    string SchoolCode,
+    SchoolCode SchoolCode,
     string SchoolName,
     Grade Grade,
     List<CurrentStudentWithAwardsResponse.RegisteredAward> Awards)

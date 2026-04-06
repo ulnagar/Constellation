@@ -1318,27 +1318,27 @@ public class ExcelService : IExcelService
             // Index 15: Percentage explained
             // Index 16: Percentage unexplained
 
-            string srn = line[5].FormatField();
+            string srn = line[5].FormatField;
 
             Result<StudentReferenceNumber> studentReferenceNumber = StudentReferenceNumber.Create(srn);
 
             if (studentReferenceNumber.IsFailure)
                 continue;
 
-            StudentAttendanceData entry = data.FirstOrDefault(entry => entry.StudentReferenceNumber == studentReferenceNumber.Value);
+            StudentAttendanceData? entry = data.FirstOrDefault(entry => entry.StudentReferenceNumber == studentReferenceNumber.Value);
 
             if (entry is not null)
             {
-                entry.DayYTD = Convert.ToDecimal(line[11].FormatField(), null);
+                entry.DayYTD = Convert.ToDecimal(line[11].FormatField, null);
             }
             else
             {
                 entry = new()
                 {
                     StudentReferenceNumber = studentReferenceNumber.Value,
-                    Name = $"{line[1].FormatField()} {line[0].FormatField()}",
-                    Grade = (Grade)Convert.ToInt32(line[4].FormatField(), null),
-                    DayYTD = Convert.ToDecimal(line[11].FormatField(), null)
+                    Name = $"{line[1].FormatField} {line[0].FormatField}",
+                    Grade = (Grade)Convert.ToInt32(line[4].FormatField, null),
+                    DayYTD = Convert.ToDecimal(line[11].FormatField, null)
                 };
 
                 data.Add(entry);
@@ -1398,7 +1398,7 @@ public class ExcelService : IExcelService
                 entry = new()
                 {
                     StudentReferenceNumber = studentReferenceNumber.Value,
-                    Name = $"{row[1].ToString().FormatField()} {row[2].ToString().FormatField()}",
+                    Name = $"{row[1].ToString().FormatField} {row[2].ToString().FormatField}",
                     MinuteYTD = Convert.ToDecimal(row[10], null)
                 };
 
@@ -1446,18 +1446,18 @@ public class ExcelService : IExcelService
             // Index 15: Percentage explained
             // Index 16: Percentage unexplained
 
-            string srn = line[5].FormatField();
+            string srn = line[5].FormatField;
 
             Result<StudentReferenceNumber> studentReferenceNumber = StudentReferenceNumber.Create(srn);
 
             if (studentReferenceNumber.IsFailure)
                 continue;
 
-            StudentAttendanceData entry = data.FirstOrDefault(entry => entry.StudentReferenceNumber == studentReferenceNumber.Value);
+            StudentAttendanceData? entry = data.FirstOrDefault(entry => entry.StudentReferenceNumber == studentReferenceNumber.Value);
 
             if (entry is not null)
             {
-                string value = line[11].FormatField();
+                string value = line[11].FormatField;
 
                 if (string.IsNullOrWhiteSpace(value))
                 {
@@ -1470,7 +1470,7 @@ public class ExcelService : IExcelService
             }
             else
             {
-                string value = line[11].FormatField();
+                string value = line[11].FormatField;
 
                 decimal dayWeekValue = 0;
 
@@ -1482,7 +1482,7 @@ public class ExcelService : IExcelService
                 entry = new()
                 {
                     StudentReferenceNumber = studentReferenceNumber.Value,
-                    Name = $"{line[1].FormatField()} {line[0].FormatField()}",
+                    Name = $"{line[1].FormatField} {line[0].FormatField}",
                     DayWeek = dayWeekValue
                 };
 
@@ -1525,14 +1525,14 @@ public class ExcelService : IExcelService
             // Index 9: Un-tallied Time
             // Index 10: Percentage
 
-            string srn = row[0].ToString();
+            string? srn = row[0].ToString();
 
             Result<StudentReferenceNumber> studentReferenceNumber = StudentReferenceNumber.Create(srn);
 
             if (studentReferenceNumber.IsFailure)
                 continue;
 
-            StudentAttendanceData entry = data.FirstOrDefault(entry => entry.StudentReferenceNumber == studentReferenceNumber.Value);
+            StudentAttendanceData? entry = data.FirstOrDefault(entry => entry.StudentReferenceNumber == studentReferenceNumber.Value);
 
             if (entry is not null)
             {
@@ -1543,7 +1543,7 @@ public class ExcelService : IExcelService
                 entry = new()
                 {
                     StudentReferenceNumber = studentReferenceNumber.Value,
-                    Name = $"{row[1].ToString().FormatField()} {row[2].ToString().FormatField()}",
+                    Name = $"{row[1].ToString().FormatField} {row[2].ToString().FormatField}",
                     MinuteWeek = Convert.ToDecimal(row[10], null)
                 };
 
@@ -1631,7 +1631,7 @@ public class ExcelService : IExcelService
             // Index 17: Required Student Actions
             // Index 18: New Due Date
 
-            string incidentId = row[5].ToString().FormatField();
+            string incidentId = row[5].ToString().FormatField;
 
             if (response.Any(entry => entry.IncidentId == incidentId))
                 continue;
@@ -1664,12 +1664,12 @@ public class ExcelService : IExcelService
             response.Add(new(
                 srn,
                 dateCreated,
-                row[5].ToString().FormatField(),
-                row[11].ToString().FormatField(),
-                row[13].ToString().FormatField(),
-                matchingRow[19].ToString().FormatField(),
-                row[1].ToString().FormatField(),
-                row[2].ToString().FormatField(),
+                row[5].ToString().FormatField,
+                row[11].ToString().FormatField,
+                row[13].ToString().FormatField,
+                matchingRow[19].ToString().FormatField,
+                row[1].ToString().FormatField,
+                row[2].ToString().FormatField,
                 grade,
                 severity));
         }

@@ -2,10 +2,11 @@
 
 using Abstractions.Messaging;
 using Core.Enums;
+using Core.Models.Identifiers;
 using System.Collections.Generic;
 
 public sealed record BulkCancelRollsCommand(
-    List<string> SchoolCodes,
+    List<SchoolCode> SchoolCodes,
     List<Grade> Grades,
     string Comment)
     : ICommand;

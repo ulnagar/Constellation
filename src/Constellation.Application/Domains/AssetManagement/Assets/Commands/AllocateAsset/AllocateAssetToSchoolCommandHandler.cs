@@ -50,7 +50,7 @@ internal sealed class AllocateAssetToSchoolCommandHandler
             return Result.Failure(AssetErrors.NotFoundByAssetNumber(request.AssetNumber));
         }
 
-        School school = await _schoolRepository.GetById(request.SchoolCode, cancellationToken);
+        School? school = await _schoolRepository.GetById(request.SchoolCode, cancellationToken);
 
         if (school is null)
         {

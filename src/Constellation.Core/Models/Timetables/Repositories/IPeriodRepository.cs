@@ -19,11 +19,11 @@ public interface IPeriodRepository
     Task<List<Period>> GetForTutorialOnDay(TutorialId tutorialId, DateOnly absenceDate, PeriodWeek week, PeriodDay day, CancellationToken cancellationToken = default);
     Task<List<Period>> GetForOfferingOnDay(OfferingId offeringId, DateTime absenceDate, PeriodWeek week, PeriodDay day, CancellationToken cancellationToken = default);
     Task<List<Period>> GetForOfferingOnDay(OfferingId offeringId, DateOnly absenceDate, PeriodWeek week, PeriodDay day, CancellationToken cancellationToken = default);
-    Task<Period> GetById(PeriodId id, CancellationToken cancellationToken = default);
+    Task<Period?> GetById(PeriodId id, CancellationToken cancellationToken = default);
     Task<List<Period>> GetListFromIds(List<PeriodId> periodIds, CancellationToken cancellationToken = default);
     Task<List<Period>> GetCurrent(CancellationToken cancellationToken = default);
     Task<List<Period>> GetByWeekAndDay(PeriodWeek week, PeriodDay day, CancellationToken cancellationToken = default);
-    Task<Period> GetByPeriodCode(string code, CancellationToken cancellationToken = default);
+    Task<Period?> GetByPeriodCode(string code, CancellationToken cancellationToken = default);
     Task<List<Period>> GetByDayNumber(int dayNumber, CancellationToken cancellationToken = default);
     void Insert(Period period);
 }

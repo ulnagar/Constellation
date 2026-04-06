@@ -42,6 +42,8 @@ public class SciencePracRollConfiguration : IEntityTypeConfiguration<SciencePrac
 
         builder
             .Property(entry => entry.SchoolCode)
-            .IsRequired(false);
+            .HasConversion(
+                id => id.Value,
+                value => SchoolCode.FromValue(value));
     }
 }

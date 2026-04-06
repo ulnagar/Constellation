@@ -25,7 +25,7 @@ public sealed class GetSchoolContactDetailsQueryHandler
 
     public async Task<Result<SchoolContactDetailsResponse>> Handle(GetSchoolContactDetailsQuery request, CancellationToken cancellationToken)
     {
-        School school = await _schoolRepository.GetById(request.Code, cancellationToken);
+        School? school = await _schoolRepository.GetById(request.Code, cancellationToken);
 
         if (school is null)
         {

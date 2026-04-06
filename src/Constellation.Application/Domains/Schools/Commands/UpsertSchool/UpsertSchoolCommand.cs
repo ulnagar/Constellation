@@ -1,11 +1,12 @@
 ﻿namespace Constellation.Application.Domains.Schools.Commands.UpsertSchool;
 
 using Abstractions.Messaging;
+using Core.Models.Identifiers;
 
 public sealed class UpsertSchoolCommand
     : ICommand
 {
-    public string Code { get; set; }
+    public SchoolCode Code { get; set; }
     public string Name { get; set; }
     public string Address { get; set; }
     public string Town { get; set; }

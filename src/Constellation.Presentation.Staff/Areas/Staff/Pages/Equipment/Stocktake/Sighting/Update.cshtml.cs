@@ -21,6 +21,7 @@ using Constellation.Presentation.Shared.Helpers.Attributes;
 using Constellation.Presentation.Shared.Helpers.Logging;
 using Constellation.Presentation.Shared.Helpers.ModelBinders;
 using Core.Abstractions.Services;
+using Core.Models.Identifiers;
 using Core.Models.Stocktake.Enums;
 using Core.Models.Stocktake.Identifiers;
 using MediatR;
@@ -202,7 +203,7 @@ public class UpdateModel : BasePageModel
             .OrderBy(teacher => teacher.Name.SortOrder)
             .ToList();
 
-        Result<List<string>> schoolCodes = await _mediator.Send(new GetCurrentPartnerSchoolCodesQuery());
+        Result<List<SchoolCode>> schoolCodes = await _mediator.Send(new GetCurrentPartnerSchoolCodesQuery());
 
         if (schoolCodes.IsFailure)
         {

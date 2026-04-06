@@ -4,6 +4,7 @@ using Constellation.Core.Enums;
 using Constellation.Core.Models.Offerings.Identifiers;
 using Constellation.Core.Models.Students.Identifiers;
 using Constellation.Core.Models.Subjects.Identifiers;
+using Models.Identifiers;
 using Offerings;
 using Offerings.ValueObjects;
 using Students;
@@ -13,7 +14,6 @@ using ValueObjects;
 
 public sealed class CheckInResponse
 {
-
     private CheckInResponse() { }
 
     public CheckInResponse(
@@ -26,7 +26,7 @@ public sealed class CheckInResponse
         StudentId = student.Id;
         Student = student.Name;
         Grade = student.CurrentEnrolment?.Grade ?? Grade.SpecialProgram;
-        SchoolCode = student.CurrentEnrolment?.SchoolCode ?? string.Empty;
+        SchoolCode = student.CurrentEnrolment?.SchoolCode ?? SchoolCode.Empty;
         School = student.CurrentEnrolment?.SchoolName ?? string.Empty;
 
         OfferingId = offering.Id;
@@ -41,7 +41,7 @@ public sealed class CheckInResponse
     public StudentId StudentId { get; private set; }
     public Name Student { get; private set; }
     public Grade Grade { get; private set; }
-    public string SchoolCode { get; private set; }
+    public SchoolCode SchoolCode { get; private set; }
     public string School { get; private set; }
     
     public OfferingId OfferingId { get; private set; }

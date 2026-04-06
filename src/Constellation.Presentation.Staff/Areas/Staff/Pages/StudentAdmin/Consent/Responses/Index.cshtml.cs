@@ -13,6 +13,7 @@ using Constellation.Core.Enums;
 using Constellation.Core.Models.Offerings.Identifiers;
 using Constellation.Presentation.Shared.Helpers.Attributes;
 using Core.Abstractions.Services;
+using Core.Models.Identifiers;
 using Core.Models.Students.Identifiers;
 using Core.Shared;
 using MediatR;
@@ -185,7 +186,7 @@ public class IndexModel : BasePageModel
     {
         public List<Guid> Offerings { get; set; } = new();
         public List<Grade> Grades { get; set; } = new();
-        public List<string> Schools { get; set; } = new();
+        public List<SchoolCode> Schools { get; set; } = new();
         public List<StudentId> Students { get; set; } = new();
 
         public FilterAction Action { get; set; } = FilterAction.Filter;

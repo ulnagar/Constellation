@@ -18,4 +18,4 @@ public sealed record CoverWithDetailsResponse(
     DateOnly StartDate,
     [Display(Name = DisplayNameDefaults.DateEnd)]
     DateOnly EndDate,
-    CoverType CoverType);
+    CoverType? CoverType);

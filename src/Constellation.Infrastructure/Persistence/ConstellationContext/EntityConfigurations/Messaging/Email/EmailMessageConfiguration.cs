@@ -2,6 +2,7 @@
 
 using Core.Models.Messaging.Email;
 using Core.Models.Messaging.Email.Identifiers;
+using Core.Models.Messaging.Enums;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -33,7 +34,7 @@ internal sealed class EmailMessageConfiguration : IEntityTypeConfiguration<Email
                     .HasMaxLength(200);
 
                 owned
-                    .Property(r => r.Email)
+                    .Property(r => r.Destination)
                     .HasColumnName("From_Email")
                     .IsRequired()
                     .HasMaxLength(320);
@@ -51,7 +52,7 @@ internal sealed class EmailMessageConfiguration : IEntityTypeConfiguration<Email
                     .HasMaxLength(200);
 
                 owned
-                    .Property(r => r.Email)
+                    .Property(r => r.Destination)
                     .HasColumnName("ReplyTo_Email")
                     .HasMaxLength(320);
             });
@@ -96,7 +97,9 @@ internal sealed class EmailMessageConfiguration : IEntityTypeConfiguration<Email
             .HasColumnType("nvarchar(max)");
 
         builder.Property(e => e.Status)
-            .HasConversion<string>()
+            .HasConversion(
+                status => status.Value,
+                value => MessageStatus.FromValue(value))
             .HasMaxLength(50);
 
         builder
@@ -110,6 +113,10 @@ internal sealed class EmailMessageConfiguration : IEntityTypeConfiguration<Email
             .UsePropertyAccessMode(PropertyAccessMode.Field);
 
         builder
+            .Navigation(e => e.Recipients)
+            .AutoInclude();
+
+        builder
             .HasMany(e => e.TrackingEvents)
             .WithOne()
             .HasForeignKey(e => e.EmailId)
@@ -118,17 +125,18 @@ internal sealed class EmailMessageConfiguration : IEntityTypeConfiguration<Email
         builder.Navigation(e => e.TrackingEvents)
             .HasField("_events")
             .UsePropertyAccessMode(PropertyAccessMode.Field);
-        
-        builder
-            .HasIndex(e => e.ProviderMessageId)
-            .HasDatabaseName("IX_Messages_Email_ProviderMessageId");
+
+        builder.Navigation(e => e.Links)
+            .HasField("_links")
+            .UsePropertyAccessMode(PropertyAccessMode.Field);
 
         builder
-            .HasIndex(e => e.Status)
-            .HasDatabaseName("IX_Messages_Email_Status");
+            .HasIndex(e => e.ProviderMessageId);
 
         builder
-            .HasIndex(e => e.SentAt)
-            .HasDatabaseName("IX_Messages_Email_SentAt");
+            .HasIndex(e => e.Status);
+
+        builder
+            .HasIndex(e => e.SentAt);
     }
 }

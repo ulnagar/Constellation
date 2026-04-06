@@ -4,6 +4,7 @@ using Abstractions.Messaging;
 using Core.Models.Assets;
 using Core.Models.Assets.Errors;
 using Core.Models.Assets.Repositories;
+using Core.Models.Identifiers;
 using Core.Models.Stocktake;
 using Core.Models.Stocktake.Errors;
 using Core.Models.Stocktake.Repositories;
@@ -34,7 +35,7 @@ internal sealed class GetStocktakeSightingForAssetQueryHandler
 
     public async Task<Result<StocktakeSightingForAssetResponse>> Handle(GetStocktakeSightingForAssetQuery request, CancellationToken cancellationToken)
     {
-        StocktakeEvent @event = await _stocktakeRepository.GetById(request.EventId, cancellationToken);
+        StocktakeEvent? @event = await _stocktakeRepository.GetById(request.EventId, cancellationToken);
 
         if (@event is null)
         {
@@ -51,9 +52,9 @@ internal sealed class GetStocktakeSightingForAssetQueryHandler
             .ToList();
 
         if (sightings.Count == 0 || sightings.All(entry => entry.IsCancelled))
-            return new StocktakeSightingForAssetResponse(false, null, null);
+            return new StocktakeSightingForAssetResponse(false, SchoolCode.Empty, string.Empty);
 
-        Asset asset = await _assetRepository.GetByAssetNumber(request.AssetNumber, cancellationToken);
+        Asset? asset = await _assetRepository.GetByAssetNumber(request.AssetNumber, cancellationToken);
 
         if (asset is null)
         {
@@ -65,12 +66,12 @@ internal sealed class GetStocktakeSightingForAssetQueryHandler
             return Result.Failure<StocktakeSightingForAssetResponse>(AssetErrors.NotFoundByAssetNumber(request.AssetNumber));
         }
 
-        StocktakeSighting sighting = sightings
+        StocktakeSighting? sighting = sightings
             .OrderByDescending(entry => entry.SightedAt)
             .FirstOrDefault(entry => !entry.IsCancelled);
 
         return new StocktakeSightingForAssetResponse(true, 
-            asset.CurrentLocation?.SchoolCode ?? string.Empty,
+            asset.CurrentLocation?.SchoolCode ?? SchoolCode.Empty,
             sighting!.LocationCode);
     }
 }

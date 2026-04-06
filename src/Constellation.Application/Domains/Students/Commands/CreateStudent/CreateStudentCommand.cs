@@ -2,6 +2,7 @@
 
 using Abstractions.Messaging;
 using Core.Enums;
+using Core.Models.Identifiers;
 using Core.Models.Students.Enums;
 
 public sealed record CreateStudentCommand(
@@ -12,5 +13,5 @@ public sealed record CreateStudentCommand(
     Gender Gender,
     Grade Grade,
     string EmailAddress,
-    string SchoolCode)
+    SchoolCode SchoolCode)
     : ICommand;

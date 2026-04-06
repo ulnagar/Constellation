@@ -181,7 +181,7 @@ internal sealed class SendComplianceNotificationEmailToTeacherAndHeadTeacher
                     if (!deputy.Value.Contains(detail.Grade))
                         continue;
 
-                    Result<EmailRecipient> deputyEmail = deputy.Key.GetEmailRecipient();
+                    Result<EmailRecipient> deputyEmail = deputy.Key.GetEmailRecipient;
 
                     if (deputyEmail.IsFailure)
                     {
@@ -214,7 +214,7 @@ internal sealed class SendComplianceNotificationEmailToTeacherAndHeadTeacher
                     if (!principal.Value.Contains(detail.Grade))
                         continue;
 
-                    Result<EmailRecipient> principalEmail = principal.Key.GetEmailRecipient();
+                    Result<EmailRecipient> principalEmail = principal.Key.GetEmailRecipient;
 
                     if (principalEmail.IsFailure)
                     {

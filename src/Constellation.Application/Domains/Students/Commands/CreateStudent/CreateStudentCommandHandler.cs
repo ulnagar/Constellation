@@ -5,6 +5,7 @@ using Core.Abstractions.Clock;
 using Core.Enums;
 using Core.Errors;
 using Core.Models;
+using Core.Models.Identifiers;
 using Core.Models.Students;
 using Core.Models.Students.Errors;
 using Core.Models.Students.Repositories;
@@ -72,9 +73,9 @@ internal sealed class CreateStudentCommandHandler
                 return Result.Failure(student.Error);
             }
 
-            if (!string.IsNullOrWhiteSpace(request.SchoolCode) && request.Grade != Grade.SpecialProgram)
+            if (request.SchoolCode != SchoolCode.Empty && request.Grade != Grade.SpecialProgram)
             {
-                School school = await _schoolRepository.GetById(request.SchoolCode, cancellationToken);
+                School? school = await _schoolRepository.GetById(request.SchoolCode, cancellationToken);
 
                 if (school is null)
                 {
@@ -97,7 +98,7 @@ internal sealed class CreateStudentCommandHandler
         }
         else
         {
-            Student existing = await _studentRepository.GetBySRN(studentReferenceNumber.Value, cancellationToken);
+            Student? existing = await _studentRepository.GetBySRN(studentReferenceNumber.Value, cancellationToken);
 
             if (existing is not null)
             {
@@ -121,7 +122,7 @@ internal sealed class CreateStudentCommandHandler
                 return Result.Failure(emailAddress.Error);
             }
 
-            School school = await _schoolRepository.GetById(request.SchoolCode, cancellationToken);
+            School? school = await _schoolRepository.GetById(request.SchoolCode, cancellationToken);
 
             if (school is null)
             {

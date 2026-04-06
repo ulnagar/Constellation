@@ -5,6 +5,7 @@ using Constellation.Core.Enums;
 using Constellation.Core.Errors;
 using Errors;
 using Identifiers;
+using Models.Identifiers;
 using Primitives;
 using Shared;
 using System;
@@ -15,7 +16,7 @@ public sealed class SchoolEnrolment : IAuditableEntity
 
     private SchoolEnrolment(
         StudentId studentId,
-        string schoolCode,
+        SchoolCode schoolCode,
         string schoolName,
         Grade grade,
         int year,
@@ -34,7 +35,7 @@ public sealed class SchoolEnrolment : IAuditableEntity
 
     public SchoolEnrolmentId Id { get; private set; }
     public StudentId StudentId { get; private set; }
-    public string SchoolCode { get; private set; }
+    public SchoolCode SchoolCode { get; private set; }
     public string SchoolName { get; private set; }
     public Grade Grade { get; private set; }
     public int Year { get; private set; }
@@ -51,7 +52,7 @@ public sealed class SchoolEnrolment : IAuditableEntity
 
     internal static Result<SchoolEnrolment> Create(
         StudentId studentId,
-        string schoolCode,
+        SchoolCode schoolCode,
         string schoolName,
         Grade grade,
         int year,
@@ -62,7 +63,7 @@ public sealed class SchoolEnrolment : IAuditableEntity
         if (studentId == StudentId.Empty)
             return Result.Failure<SchoolEnrolment>(StudentErrors.InvalidId);
 
-        if (string.IsNullOrWhiteSpace(schoolCode) || string.IsNullOrWhiteSpace(schoolName))
+        if (schoolCode == SchoolCode.Empty)
             return Result.Failure<SchoolEnrolment>(DomainErrors.Partners.School.NotFound(schoolCode));
 
         startDate ??= dateTime.Today;

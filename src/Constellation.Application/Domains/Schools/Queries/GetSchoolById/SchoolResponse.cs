@@ -1,4 +1,7 @@
 ﻿namespace Constellation.Application.Domains.Schools.Queries.GetSchoolById;
+
+using Core.Models.Identifiers;
+
 public sealed record SchoolResponse(
-    string SchoolCode,
+    SchoolCode SchoolCode,
     string Name);

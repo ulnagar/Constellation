@@ -1,8 +1,8 @@
 ﻿namespace Constellation.Infrastructure.Persistence.ConstellationContext.EntityConfigurations.EmergencyConsole;
 
-using Core.Models.EmergencyConsole;
-using Core.Models.EmergencyConsole.Enums;
-using Core.Models.EmergencyConsole.Identifiers;
+using Core.Models.Messaging.EmergencyConsole;
+using Core.Models.Messaging.EmergencyConsole.Identifiers;
+using Core.Models.Messaging.Enums;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 

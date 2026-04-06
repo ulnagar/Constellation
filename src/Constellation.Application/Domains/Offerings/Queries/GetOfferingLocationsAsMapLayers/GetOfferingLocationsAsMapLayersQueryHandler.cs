@@ -9,6 +9,7 @@ using Constellation.Core.Models.Offerings.Repositories;
 using Constellation.Core.Models.Students;
 using Constellation.Core.Models.Students.Repositories;
 using Core.Models.Enrolments.Repositories;
+using Core.Models.Identifiers;
 using Core.Models.StaffMembers;
 using Core.Models.StaffMembers.Repositories;
 using Core.Shared;
@@ -49,19 +50,19 @@ internal sealed class GetOfferingLocationsAsMapLayersQueryHandler
 
     public async Task<Result<List<MapLayer>>> Handle(GetOfferingLocationsAsMapLayersQuery request, CancellationToken cancellationToken)
     {
-        List<string> studentSchoolCodes = new();
-        List<string> staffSchoolCodes = new();
+        List<SchoolCode> studentSchoolCodes = new();
+        List<SchoolCode> staffSchoolCodes = new();
 
         List<Enrolment> enrolments = await _enrolmentRepository.GetCurrentByOfferingId(request.OfferingId, cancellationToken);
 
         foreach (Enrolment enrolment in enrolments)
         {
-            Student student = await _studentRepository.GetById(enrolment.StudentId, cancellationToken);
+            Student? student = await _studentRepository.GetById(enrolment.StudentId, cancellationToken);
 
             if (student is null)
                 continue;
 
-            SchoolEnrolment schoolEnrolment = student.CurrentEnrolment;
+            SchoolEnrolment? schoolEnrolment = student.CurrentEnrolment;
 
             if (schoolEnrolment is null)
                 continue;
@@ -70,7 +71,7 @@ internal sealed class GetOfferingLocationsAsMapLayersQueryHandler
                 studentSchoolCodes.Add(schoolEnrolment.SchoolCode);
         }
 
-        Offering offering = await _offeringRepository.GetById(request.OfferingId, cancellationToken);
+        Offering? offering = await _offeringRepository.GetById(request.OfferingId, cancellationToken);
         
         if (offering is null)
         {
@@ -84,15 +85,15 @@ internal sealed class GetOfferingLocationsAsMapLayersQueryHandler
 
         foreach (TeacherAssignment assignment in offering.Teachers)
         {
-            StaffMember staffMember = await _staffRepository.GetById(assignment.StaffId, cancellationToken);
+            StaffMember? staffMember = await _staffRepository.GetById(assignment.StaffId, cancellationToken);
 
             if (staffMember is not null && staffMember.CurrentAssignment is not null)
                 staffSchoolCodes.Add(staffMember.CurrentAssignment.SchoolCode);
         }
 
-        List<string> schoolCodes = studentSchoolCodes.ToList();
+        List<SchoolCode> schoolCodes = studentSchoolCodes.ToList();
 
-        foreach (string schoolCode in staffSchoolCodes)
+        foreach (SchoolCode schoolCode in staffSchoolCodes)
         {
             if (!schoolCodes.Contains(schoolCode))
                 schoolCodes.Add(schoolCode);

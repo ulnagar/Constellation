@@ -79,7 +79,7 @@ internal sealed class LessonNotificationsJob : ILessonNotificationsJob
 
         foreach (var headTeacher in lessonSettings.Contacts)
         {
-            Result<EmailRecipient> htResult = headTeacher.Key.GetEmailRecipient();
+            Result<EmailRecipient> htResult = headTeacher.Key.GetEmailRecipient;
 
             if (htResult.IsSuccess && facultyContacts.All(contact => contact.Email != htResult.Value.Email))
                 facultyContacts.Add(htResult.Value);

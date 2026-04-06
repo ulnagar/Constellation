@@ -4,6 +4,7 @@ using Constellation.Application.Domains.Schools.Queries.GetSchoolsForContact;
 using Constellation.Application.Models.Auth;
 using Constellation.Application.Models.Identity;
 using Constellation.Application.Models.Identity.Enums;
+using Constellation.Core.Models.Identifiers;
 using Constellation.Core.Models.SchoolContacts.Identifiers;
 using Constellation.Core.Shared;
 using MediatR;
@@ -64,17 +65,18 @@ public sealed class SchoolSelectorModalViewComponent : ViewComponent
         
         viewModel.CurrentSchool = string.IsNullOrWhiteSpace(selectedSchoolCode)
             ? schoolsRequest.Value.MinBy(school => school.SchoolCode)
-            : viewModel.ValidSchools.FirstOrDefault(entry => entry.SchoolCode == selectedSchoolCode);
+            : viewModel.ValidSchools.FirstOrDefault(entry => entry.SchoolCode.ToString() == selectedSchoolCode);
 
         if (viewModel.CurrentSchool is null)
             if (viewModel.ValidSchools.Count > 0)
                 viewModel.CurrentSchool = schoolsRequest.Value.MinBy(school => school.SchoolCode);
 
         viewModel.SchoolsList = new SelectList(
-            viewModel.ValidSchools, 
+            viewModel.ValidSchools,
             nameof(SchoolResponse.SchoolCode),
-            nameof(SchoolResponse.Name),
-            viewModel.CurrentSchool?.SchoolCode);
+            nameof(SchoolResponse.Name));
+
+        viewModel.NewSchoolCode = viewModel.CurrentSchool?.SchoolCode ?? SchoolCode.Empty;
         
         return View("SchoolSelectorModal", viewModel);
     }

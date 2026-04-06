@@ -8,6 +8,5 @@ public sealed class CreateContactWithRoleCommandValidator : AbstractValidator<Cr
     {
         RuleFor(command => command.FirstName).NotEmpty();
         RuleFor(command => command.LastName).NotEmpty();
-        RuleFor(command => command.SchoolCode).NotEmpty().Length(4);
     }
 }

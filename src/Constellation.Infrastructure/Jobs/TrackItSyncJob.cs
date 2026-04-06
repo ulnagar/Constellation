@@ -83,7 +83,7 @@ internal sealed class TrackItSyncJob : ITrackItSyncJob
 
             _logger.Information("{id}: School: Name {school} - Code {code}", jobId, acosSchool.Name, acosSchool.Code);
             
-            Location? tiLocation = _tiLocations.FirstOrDefault(c => c.Note == acosSchool.Code);
+            Location? tiLocation = _tiLocations.FirstOrDefault(c => c.Note == acosSchool.Code.ToString());
             
             if (tiLocation is not null)
             {
@@ -307,7 +307,7 @@ internal sealed class TrackItSyncJob : ITrackItSyncJob
     {
         Location location = new()
         {
-            Note = school.Code,
+            Note = school.Code.ToString(),
             Name = ConvertSchoolNameToLocationName(school.Name),
             Address = school.Address,
             City = school.Town,
@@ -375,8 +375,9 @@ internal sealed class TrackItSyncJob : ITrackItSyncJob
         string? schoolCode = contact.Assignments
             .FirstOrDefault(role => 
                 !role.IsDeleted && 
-                role.Role == Position.TimetableOfficer)
-            ?.SchoolCode;
+                role.Role == Position.TimetableOfficer)?
+            .SchoolCode
+            .ToString();
 
         if (!customer.Client.Equals(contactPortalId.ToUpper(CultureInfo.InvariantCulture), StringComparison.OrdinalIgnoreCase))
             customer.Client = contactPortalId.ToUpper(CultureInfo.InvariantCulture);
@@ -435,7 +436,7 @@ internal sealed class TrackItSyncJob : ITrackItSyncJob
         Department? department = _tiDepartments.FirstOrDefault(c => c.Name == "Students");
         customer.Dept = department?.Sequence;
 
-        Location? location = _tiLocations.FirstOrDefault(c => c.Note == student.CurrentEnrolment?.SchoolCode);
+        Location? location = _tiLocations.FirstOrDefault(c => c.Note == student.CurrentEnrolment?.SchoolCode.ToString());
         customer.Location = location?.Sequence;
 
         customer.Inactive = 0;
@@ -474,7 +475,7 @@ internal sealed class TrackItSyncJob : ITrackItSyncJob
             customer.Dept = department?.Sequence;
         }
         
-        Location? location = _tiLocations.FirstOrDefault(c => c.Note == staff.CurrentAssignment?.SchoolCode);
+        Location? location = _tiLocations.FirstOrDefault(c => c.Note == staff.CurrentAssignment?.SchoolCode.ToString());
         customer.Location = location?.Sequence;
 
         customer.Inactive = 0;
@@ -504,8 +505,9 @@ internal sealed class TrackItSyncJob : ITrackItSyncJob
         string? schoolCode = contact.Assignments
             .FirstOrDefault(role =>
                 !role.IsDeleted &&
-                role.Role == Position.TimetableOfficer)
-            ?.SchoolCode;
+                role.Role == Position.TimetableOfficer)?
+            .SchoolCode
+            .ToString();
 
         if (!string.IsNullOrWhiteSpace(schoolCode))
         {
@@ -535,7 +537,7 @@ internal sealed class TrackItSyncJob : ITrackItSyncJob
         Department? department = _tiDepartments.FirstOrDefault(c => c.Name == "Students");
         customer.Dept = department?.Sequence;
 
-        Location? location = _tiLocations.FirstOrDefault(c => c.Note == student.CurrentEnrolment?.SchoolCode);
+        Location? location = _tiLocations.FirstOrDefault(c => c.Note == student.CurrentEnrolment?.SchoolCode.ToString());
         customer.Location = location?.Sequence;
 
         customer.Sequence = GetNextCustomerSequence();
@@ -567,7 +569,7 @@ internal sealed class TrackItSyncJob : ITrackItSyncJob
             customer.Dept = department?.Sequence;
         }
 
-        Location? location = _tiLocations.FirstOrDefault(c => c.Note == staff.CurrentAssignment?.SchoolCode);
+        Location? location = _tiLocations.FirstOrDefault(c => c.Note == staff.CurrentAssignment?.SchoolCode.ToString());
         customer.Location = location?.Sequence;
 
         customer.Sequence = GetNextCustomerSequence();

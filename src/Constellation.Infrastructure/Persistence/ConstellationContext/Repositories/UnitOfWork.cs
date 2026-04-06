@@ -16,6 +16,6 @@ public class UnitOfWork : IUnitOfWork
     public async Task AddIntegrationEvent(IIntegrationEvent integrationEvent) =>
         await _context.AddIntegrationEvent(integrationEvent);
 
-    public async Task CompleteAsync(CancellationToken token) => await _context.SaveChangesAsync(token);
-    public async Task CompleteAsync() => await _context.SaveChangesAsync();
+    public async Task CompleteAsync(CancellationToken token = default) => await _context.SaveChangesAsync(token);
+
 }

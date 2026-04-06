@@ -102,7 +102,7 @@ public class IndexModel : BasePageModel
 
         if (!sightingRecord.Value.HasSighting)
         {
-            if (asset.Value.LocationCode != CurrentSchoolCode)
+            if (asset.Value.LocationCode != CurrentSchoolCode.ToString())
             {
                 ModalContent = FeedbackDisplay.Create(
                     "Stocktake Sighting",
@@ -123,7 +123,7 @@ public class IndexModel : BasePageModel
             return Page();
         }
 
-        if (sightingRecord.Value.SightingSchoolCode == CurrentSchoolCode)
+        if (sightingRecord.Value.SightingSchoolCode == CurrentSchoolCode.ToString())
         {
             ModalContent = FeedbackDisplay.Create(
                 "Stocktake Sighting",

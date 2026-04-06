@@ -1,11 +1,10 @@
-﻿using Constellation.Application.DTOs;
-using System.Threading.Tasks;
+﻿namespace Constellation.Application.Interfaces.Gateways;
 
-namespace Constellation.Application.Interfaces.Gateways
+using Constellation.Application.DTOs;
+using Core.Models.Identifiers;
+
+public interface INetworkStatisticsGateway
 {
-    public interface INetworkStatisticsGateway
-    {
-        Task<NetworkStatisticsSiteDto> GetSiteDetails(string schoolCode);
-        Task GetSiteUsage(NetworkStatisticsSiteDto site, int day = 0);
-    }
+    Task<NetworkStatisticsSiteDto> GetSiteDetails(SchoolCode schoolCode);
+    Task GetSiteUsage(NetworkStatisticsSiteDto site, int day = 0);
 }

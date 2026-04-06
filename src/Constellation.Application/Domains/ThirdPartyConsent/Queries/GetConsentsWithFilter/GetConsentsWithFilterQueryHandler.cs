@@ -4,8 +4,8 @@ using Abstractions.Messaging;
 using Core.Enums;
 using Core.Models.Enrolments;
 using Core.Models.Enrolments.Repositories;
+using Core.Models.Identifiers;
 using Core.Models.Offerings.Identifiers;
-using Core.Models.Offerings.Repositories;
 using Core.Models.Students;
 using Core.Models.Students.Errors;
 using Core.Models.Students.Identifiers;
@@ -62,7 +62,7 @@ internal sealed class GetConsentsWithFilterQueryHandler
             studentIds.AddRange(students.Select(student => student.Id));
         }
 
-        foreach (string schoolCode in request.SchoolCodes)
+        foreach (SchoolCode schoolCode in request.SchoolCodes)
         {
             List<Student> students = await _studentRepository.GetCurrentStudentsFromSchool(schoolCode, cancellationToken);
 
@@ -80,7 +80,7 @@ internal sealed class GetConsentsWithFilterQueryHandler
 
         foreach (var studentId in studentIds)
         {
-            Student student = await _studentRepository.GetById(studentId, cancellationToken);
+            Student? student = await _studentRepository.GetById(studentId, cancellationToken);
 
             if (student is null)
             {
@@ -91,7 +91,7 @@ internal sealed class GetConsentsWithFilterQueryHandler
                 continue;
             }
 
-            SchoolEnrolment schoolEnrolment = student.CurrentEnrolment;
+            SchoolEnrolment? schoolEnrolment = student.CurrentEnrolment;
 
             if (schoolEnrolment is null)
             {
@@ -107,7 +107,7 @@ internal sealed class GetConsentsWithFilterQueryHandler
 
             foreach (Application application in applications)
             {
-                Consent consent = application.Consents
+                Consent? consent = application.Consents
                     .Where(consent => consent.StudentId == studentId)
                     .MaxBy(consent => consent.ProvidedAt);
 

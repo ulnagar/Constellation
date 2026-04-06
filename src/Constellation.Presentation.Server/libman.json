@@ -20,7 +20,7 @@
       "destination": "wwwroot/lib/downloadjs/"
     },
     {
-      "library": "summernote@0.8.20",
+      "library": "summernote@0.9.1",
       "destination": "wwwroot/lib/summernote/"
     },
     {
@@ -36,7 +36,7 @@
       "destination": "wwwroot/lib/bootstrap4/"
     },
     {
-      "library": "jquery@3.5.1",
+      "library": "jquery@3.6.0",
       "destination": "wwwroot/lib/jquery/"
     },
     {

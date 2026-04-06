@@ -1,25 +1,25 @@
 ﻿namespace Constellation.Application.Interfaces.Gateways.TeamsGateway.Models;
 
-using Newtonsoft.Json;
 using System;
+using System.Text.Json.Serialization;
 
 public sealed class TeamChannel
 {
-    [JsonProperty("Id")]
+    [JsonPropertyName("Id")]
     public string Id { get; internal set; } = string.Empty;
 
-    [JsonProperty("DisplayName")]
+    [JsonPropertyName("DisplayName")]
     public string DisplayName { get; internal set; } = string.Empty;
 
-    [JsonProperty("Description")]
+    [JsonPropertyName("Description")]
     public string Description { get; internal set; } = string.Empty;
 
-    [JsonProperty("MembershipType")]
+    [JsonPropertyName("MembershipType")]
     public TeamChannelMembershipType MembershipType { get; internal set; }
 
-    [JsonProperty("HostTeamId")]
+    [JsonPropertyName("HostTeamId")]
     public Guid HostTeamId { get; internal set; }
 
-    [JsonProperty("TenantId")]
+    [JsonPropertyName("TenantId")]
     public Guid TenantId { get; internal set; }
 }

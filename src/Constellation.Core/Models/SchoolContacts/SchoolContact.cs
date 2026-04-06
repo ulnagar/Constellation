@@ -5,6 +5,7 @@ using Enums;
 using Errors;
 using Events;
 using Identifiers;
+using Models.Identifiers;
 using Primitives;
 using Shared;
 using System;
@@ -112,11 +113,11 @@ public sealed class SchoolContact : AggregateRoot, IAuditableEntity
 
     public Result AddRole(
         Position role,
-        string schoolCode,
+        SchoolCode schoolCode,
         string schoolName,
         string note)
     {
-        if (string.IsNullOrWhiteSpace(schoolCode) || string.IsNullOrWhiteSpace(schoolName))
+        if (schoolCode == SchoolCode.Empty)
             return Result.Failure(SchoolContactRoleErrors.Validation.SchoolCodeEmpty);
         
         SchoolContactRole contactRole = new(
@@ -136,7 +137,7 @@ public sealed class SchoolContact : AggregateRoot, IAuditableEntity
     public Result RemoveRole(
         SchoolContactRoleId roleId)
     {
-        SchoolContactRole role = _roles.FirstOrDefault(role => role.Id == roleId);
+        SchoolContactRole? role = _roles.FirstOrDefault(role => role.Id == roleId);
 
         if (role is null)
             return Result.Failure(SchoolContactRoleErrors.NotFound(roleId));
@@ -152,7 +153,7 @@ public sealed class SchoolContact : AggregateRoot, IAuditableEntity
         SchoolContactRoleId roleId,
         string note)
     {
-        SchoolContactRole role = _roles.FirstOrDefault(role => role.Id == roleId);
+        SchoolContactRole? role = _roles.FirstOrDefault(role => role.Id == roleId);
 
         if (role is null)
             return Result.Failure(SchoolContactRoleErrors.NotFound(roleId));

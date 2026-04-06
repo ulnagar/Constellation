@@ -1,6 +1,6 @@
 ﻿namespace Constellation.Presentation.Shared.Helpers.ModelBinders;
 
-using Core.Models.EmergencyConsole.Enums;
+using Core.Models.Messaging.Enums;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.AspNetCore.Mvc.ModelBinding.Binders;
 

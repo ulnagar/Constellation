@@ -2,6 +2,7 @@
 
 using Constellation.Core.Models.Assets.Enums;
 using Constellation.Presentation.Shared.Helpers.ModelBinders;
+using Core.Models.Identifiers;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using System.ComponentModel.DataAnnotations;
@@ -12,7 +13,7 @@ public sealed class TransferAssetSelection
     public LocationCategory LocationCategory { get; set; }
 
     public string Site { get; set; } = string.Empty;
-    public string SchoolCode { get; set; } = string.Empty;
+    public SchoolCode SchoolCode { get; set; } = SchoolCode.Empty;
     public string Room { get; set; } = string.Empty;
     [DataType(DataType.Date), DisplayFormat(DataFormatString = "{0:yyyy-MM-dd}", ApplyFormatInEditMode = true)]
     public DateOnly ArrivalDate { get; set; }

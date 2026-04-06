@@ -4,6 +4,7 @@ using Constellation.Infrastructure.Persistence.ConstellationContext.Converters;
 using Core.Models.Attendance;
 using Core.Models.Attendance.Enums;
 using Core.Models.Attendance.Identifiers;
+using Core.Models.Identifiers;
 using Core.Models.Students;
 using Core.Models.Timetables.Enums;
 using Microsoft.EntityFrameworkCore;
@@ -94,7 +95,10 @@ internal sealed class AttendancePlanConfiguration : IEntityTypeConfiguration<Att
 
         builder
             .Property(plan => plan.SchoolCode)
-            .HasMaxLength(4);
+            .HasMaxLength(4)
+            .HasConversion(
+                id => id.Value,
+                value => SchoolCode.FromValue(value));
 
         builder
             .Navigation(plan => plan.Periods)

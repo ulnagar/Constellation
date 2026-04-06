@@ -2,6 +2,7 @@
 
 using Core.Enums;
 using Core.Models.Students.ValueObjects;
+using Core.Primitives;
 using Core.ValueObjects;
 
 public sealed record ContactResponse(
@@ -10,7 +11,8 @@ public sealed record ContactResponse(
     Grade StudentGrade,
     string School,
     ContactCategory Category,
+    IStronglyTypedId Id,
     string Contact,
     EmailAddress ContactEmail,
-    PhoneNumber ContactPhone,
+    PhoneNumber? ContactPhone,
     string AdditionalNotes);

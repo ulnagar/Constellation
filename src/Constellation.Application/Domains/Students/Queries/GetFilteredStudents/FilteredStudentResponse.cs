@@ -1,6 +1,7 @@
 ﻿namespace Constellation.Application.Domains.Students.Queries.GetFilteredStudents;
 
 using Core.Enums;
+using Core.Models.Identifiers;
 using Core.Models.Students.Enums;
 using Core.Models.Students.Identifiers;
 using Core.Models.Students.ValueObjects;
@@ -13,7 +14,7 @@ public sealed record FilteredStudentResponse(
     Gender Gender,
     Grade? Grade,
     string School,
-    string SchoolCode,
+    SchoolCode SchoolCode,
     int EnrolmentCount,
     bool CurrentEnrolment,
     bool IsDeleted);

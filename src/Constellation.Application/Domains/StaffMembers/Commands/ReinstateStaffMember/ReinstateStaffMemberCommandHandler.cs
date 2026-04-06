@@ -38,7 +38,7 @@ internal sealed class ReinstateStaffMemberCommandHandler
 
     public async Task<Result> Handle(ReinstateStaffMemberCommand request, CancellationToken cancellationToken)
     {
-        StaffMember staffMember = await _staffRepository.GetById(request.StaffId, cancellationToken);
+        StaffMember? staffMember = await _staffRepository.GetById(request.StaffId, cancellationToken);
 
         if (staffMember is null)
         {
@@ -53,7 +53,7 @@ internal sealed class ReinstateStaffMemberCommandHandler
         if (!staffMember.IsDeleted)
             return Result.Success();
 
-        School school = await _schoolRepository.GetById(request.SchoolCode, cancellationToken);
+        School? school = await _schoolRepository.GetById(request.SchoolCode, cancellationToken);
 
         if (school is null)
         {

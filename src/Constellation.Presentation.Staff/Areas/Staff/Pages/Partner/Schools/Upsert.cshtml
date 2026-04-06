@@ -1,7 +1,8 @@
-﻿@page "{id?}"
+﻿@page "{schoolCode?}"
+@using Constellation.Core.Models.Identifiers
 @model Constellation.Presentation.Staff.Areas.Staff.Pages.Partner.Schools.UpsertModel
 
-<h2>@(string.IsNullOrWhiteSpace(Model.Id) ? "New School" : "Edit School")</h2>
+<h2>@(Model.SchoolCode == SchoolCode.Empty ? "New School" : "Edit School")</h2>
 
 <div class="page-menu">
     <a asp-page="/Partner/Schools/Index" asp-area="Staff" class="btn btn-danger btn-pull-right">Go Back</a>
@@ -16,7 +17,7 @@
         <div class="form-group row">
             <label asp-for="SchoolCode" class="col-md-2">School Code</label>
             <div class="col-md-3">
-                <input asp-for="SchoolCode" class="form-control" readonly="@(!string.IsNullOrWhiteSpace(Model.Id))" />
+                <input asp-for="SchoolCode" class="form-control" readonly="@(Model.SchoolCode != SchoolCode.Empty)" />
                 <span asp-validation-for="SchoolCode" class="text-danger"></span>
             </div>
         </div>

@@ -80,7 +80,7 @@ internal class NotifyStaffOfRefusedConsent
                 if (!instructionalLeader.Value.Contains(transaction.Grade))
                     continue;
 
-                Result<EmailRecipient> recipient = instructionalLeader.Key.GetEmailRecipient();
+                Result<EmailRecipient> recipient = instructionalLeader.Key.GetEmailRecipient;
 
                 if (recipient.IsSuccess)
                     recipients.Add(recipient.Value);
@@ -103,7 +103,7 @@ internal class NotifyStaffOfRefusedConsent
                 if (!deputyPrincipal.Value.Contains(transaction.Grade))
                     continue;
 
-                Result<EmailRecipient> recipient = deputyPrincipal.Key.GetEmailRecipient();
+                Result<EmailRecipient> recipient = deputyPrincipal.Key.GetEmailRecipient;
 
                 if (recipient.IsSuccess)
                     recipients.Add(recipient.Value);

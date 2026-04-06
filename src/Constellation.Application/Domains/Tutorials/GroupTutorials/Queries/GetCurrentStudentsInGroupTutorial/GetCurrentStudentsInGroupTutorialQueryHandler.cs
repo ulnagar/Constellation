@@ -6,6 +6,7 @@ using Constellation.Core.Models.Students;
 using Core.Abstractions.Repositories;
 using Core.Errors;
 using Core.Models.GroupTutorials;
+using Core.Models.Identifiers;
 using Core.Models.Students.Identifiers;
 using Core.Models.Students.Repositories;
 using Core.Shared;
@@ -37,7 +38,7 @@ internal sealed class GetCurrentStudentsInGroupTutorialQueryHandler
     {
         List<StudentResponse> response = new();
 
-        GroupTutorial tutorial = await _tutorialRepository.GetById(request.TutorialId, cancellationToken);
+        GroupTutorial? tutorial = await _tutorialRepository.GetById(request.TutorialId, cancellationToken);
 
         if (tutorial is null)
         {
@@ -64,8 +65,8 @@ internal sealed class GetCurrentStudentsInGroupTutorialQueryHandler
                 student.PreferredGender,
                 student.CurrentEnrolment?.Grade,
                 student.EmailAddress,
-                student.CurrentEnrolment?.SchoolName,
-                student.CurrentEnrolment?.SchoolCode,
+                student.CurrentEnrolment?.SchoolName ?? string.Empty,
+                student.CurrentEnrolment?.SchoolCode ?? SchoolCode.Empty,
                 student.CurrentEnrolment is not null,
                 student.IsDeleted));
         }

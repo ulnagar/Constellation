@@ -39,3 +39,18 @@ function toggleLoader() {
     else
         $('.spinner-overlay').addClass('d-none');
 }
+
+// Active any Summernote text areas
+$('.summernote').summernote({
+    height: 300,
+    toolbar: [
+        // [groupName, [list of button]]
+        ['style', ['bold', 'italic', 'underline', 'clear']],
+        ['font', ['strikethrough', 'superscript', 'subscript']],
+        ['fontsize', ['fontsize']],
+        ['color', ['color']],
+        ['para', ['ul', 'ol', 'paragraph']],
+        ['insert', ['link']],
+        ['height', ['height']]
+    ]
+});

@@ -40,7 +40,7 @@ internal sealed class GetLessonRollsForSchoolQueryHandler
 
         foreach (SciencePracLesson lesson in lessons)
         {
-            SciencePracRoll roll = lesson.Rolls.FirstOrDefault(roll => roll.SchoolCode == request.SchoolCode);
+            SciencePracRoll? roll = lesson.Rolls.FirstOrDefault(roll => roll.SchoolCode == request.SchoolCode);
 
             if (roll is null)
                 continue;
@@ -48,13 +48,16 @@ internal sealed class GetLessonRollsForSchoolQueryHandler
             if (roll.Status == Core.Enums.LessonStatus.Cancelled)
                 continue;
 
-            OfferingId offeringId = lesson.Offerings.First().OfferingId;
+            OfferingId offeringId = lesson.Offerings[0].OfferingId;
 
-            Offering offering = await _offeringRepository.GetById(offeringId, cancellationToken);
+            Offering? offering = await _offeringRepository.GetById(offeringId, cancellationToken);
 
-            Course course = await _courseRepository.GetById(offering.CourseId, cancellationToken);
+            if (offering is null)
+                continue;
 
-            int totalStudents = roll.Attendance.Count();
+            Course? course = await _courseRepository.GetById(offering.CourseId, cancellationToken);
+
+            int totalStudents = roll.Attendance.Count;
             int presentStudents = roll.Attendance.Count(entry => entry.Present);
 
             ScienceLessonRollSummary summary = new()

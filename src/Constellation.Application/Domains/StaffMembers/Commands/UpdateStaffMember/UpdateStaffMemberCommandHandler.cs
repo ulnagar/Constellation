@@ -40,7 +40,7 @@ internal sealed class UpdateStaffMemberCommandHandler
     
     public async Task<Result> Handle(UpdateStaffMemberCommand request, CancellationToken cancellationToken)
     {
-        StaffMember staffMember = await _staffRepository.GetById(request.StaffId, cancellationToken);
+        StaffMember? staffMember = await _staffRepository.GetById(request.StaffId, cancellationToken);
 
         if (staffMember is null)
         {
@@ -95,7 +95,7 @@ internal sealed class UpdateStaffMemberCommandHandler
             request.Gender,
             request.IsShared);
 
-        School school = await _schoolRepository.GetById(request.SchoolCode, cancellationToken);
+        School? school = await _schoolRepository.GetById(request.SchoolCode, cancellationToken);
 
         if (school is null)
         {

@@ -12,6 +12,7 @@ using Core.Enums;
 using Core.Models.Faculties;
 using Core.Models.Faculties.Identifiers;
 using Core.Models.Faculties.ValueObjects;
+using Core.Models.Identifiers;
 using Core.Models.StaffMembers.Identifiers;
 using Core.Models.StaffMembers.Repositories;
 using Core.Models.Tutorials;
@@ -184,7 +185,7 @@ public class StaffRepository : IStaffRepository
             .ToListAsync(cancellationToken);
 
     public async Task<List<StaffMember>> GetActiveFromSchool(
-        string schoolCode, 
+        SchoolCode schoolCode, 
         CancellationToken cancellationToken = default) =>
         await _context
             .Set<StaffMember>()
@@ -196,7 +197,7 @@ public class StaffRepository : IStaffRepository
             .ToListAsync(cancellationToken);
 
     public async Task<int> GetCountCurrentStaffFromSchool(
-        string schoolCode,
+        SchoolCode schoolCode,
         CancellationToken cancellationToken = default) =>
         await _context
             .Set<StaffMember>()
@@ -234,13 +235,13 @@ public class StaffRepository : IStaffRepository
                 staff.EmailAddress == emailAddress)
             .FirstOrDefaultAsync(cancellationToken);
 
-    public async Task<StaffMember> GetFromName(
+    public async Task<StaffMember?> GetFromName(
         string name,
         CancellationToken cancellationToken = default)
     {
         string[] splitName = name.ToLowerInvariant().Trim().Split(' ');
 
-        StaffMember straightMatch = await _context
+        StaffMember? straightMatch = await _context
             .Set<StaffMember>()
             .FirstOrDefaultAsync(staff => 
                 (staff.Name.FirstName.Contains(splitName[0]) || staff.Name.PreferredName.Contains(splitName[0])) && 
@@ -256,6 +257,14 @@ public class StaffRepository : IStaffRepository
             .Set<StaffMember>()
             .SingleOrDefaultAsync(member => member.EmailAddress.Email.Contains(username), cancellationToken);
     }
+
+    public async Task<StaffMember?> GetCurrentByPhoneNumber(
+        PhoneNumber number,
+        CancellationToken cancellationToken = default) =>
+        await _context
+            .Set<StaffMember>()
+            .Where(member => member.PhoneNumber == number)
+            .FirstOrDefaultAsync(cancellationToken);
 
     public void Insert(StaffMember member) => _context.Set<StaffMember>().Add(member);
 }

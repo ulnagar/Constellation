@@ -4,11 +4,31 @@
 @using Constellation.Application.Domains.Contacts.Models
 @using Constellation.Core.Enums;
 @using Constellation.Core.Extensions
+@using Constellation.Core.Models.Messaging.Enums
+
+@inject IAuthorizationService AuthorizationService
+@{
+    AuthorizationResult execMemberTest = await AuthorizationService.AuthorizeAsync(User, AuthPermission.Partners_SchoolContacts_ShowPrincipals_Value);
+}
 
 <h2>Contacts List</h2>
 
 <div class="page-menu">
-    <button type="button" class="btn btn-warning" data-toggle="collapse" data-target="#filterDefinition" aria-expanded="false" aria-controls="filterDefinition">Show Filter</button>
+    <button type="button" class="btn btn-warning" data-bs-toggle="collapse" data-bs-target="#filterDefinition" aria-expanded="false" aria-controls="filterDefinition">Show Filter</button>
+    
+    @if (execMemberTest.Succeeded)
+    {
+        <div class="dropdown d-inline-block">
+            <button class="btn btn-warning dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">Emergency Groups</button>
+            <ul class="dropdown-menu">
+                @foreach (var group in RecipientGroup.GetOptions.OrderBy(entry => entry.Order))
+                {
+                    <li><button type="button" class="dropdown-item" onclick="loadEmergencyGroup('@group.Value')">@group.Name</button></li>
+                }
+            </ul>
+        </div>
+    }
+
     <button id="SubmitFormAsExport" class="btn btn-warning show-loader-5">Export Current Filter</button>
     <button id="SendEmail" class="btn btn-warning">Send Email</button>
 </div>
@@ -37,7 +57,7 @@
 
 	                </div>
 	                <div class="col-md-6">
-		                <label asp-for="Filter.Courses">Courses</label>
+		                <label asp-for="Filter.CourseIds">Courses</label>
 		                <div id="SelectedCoursesList"> </div>
 
 	                </div>
@@ -56,14 +76,14 @@
                 </div>
             </div>
             <div class="col-md-2">
-                <button id="ShowGradeSelectList" type="button" class="btn btn-primary btn-block">Add Grades</button>
-                <button id="ShowSchoolSelectList" type="button" class="btn btn-primary btn-block">Add Schools</button>
-                <button id="ShowClassSelectList" type="button" class="btn btn-primary btn-block">Add Classes</button>
-                <button id="ShowCourseSelectList" type="button" class="btn btn-primary btn-block">Add Courses</button>
-                <button id="ShowCategorySelectList" type="button" class="btn btn-primary btn-block">Add Categories</button>
-				<button id="ShowFlagSelectList" type="button" class="btn btn-primary btn-block">Add Student Flags</button>
+                <button id="ShowGradeSelectList" type="button" class="btn btn-primary w-100 mt-1">Add Grades</button>
+                <button id="ShowSchoolSelectList" type="button" class="btn btn-primary w-100 mt-1">Add Schools</button>
+                <button id="ShowClassSelectList" type="button" class="btn btn-primary w-100 mt-1">Add Classes</button>
+                <button id="ShowCourseSelectList" type="button" class="btn btn-primary w-100 mt-1">Add Courses</button>
+                <button id="ShowCategorySelectList" type="button" class="btn btn-primary w-100 mt-1">Add Categories</button>
+                <button id="ShowFlagSelectList" type="button" class="btn btn-primary w-100 mt-1">Add Student Flags</button>
 
-                <button id="SubmitFormAsFilter" type="button" class="btn btn-success btn-block mt-3">Filter</button>
+                <button id="SubmitFormAsFilter" type="button" class="btn btn-success w-100 mt-3">Filter</button>
             </div>
         </div>
     </form>
@@ -71,143 +91,175 @@
 
 <hr />
 
-<table class="table table-striped table-hover custom-data-table">
-    <thead>
-        <tr>
-            <th>Student Name</th>
-            <th></th>
-            <th></th>
-            <th>Contact Name</th>
-            <th>Contact Email</th>
-            <th>Contact Phone</th>
-        </tr>
-    </thead>
-    <tbody>
-        @if (Model.Contacts.Any())
-        {
-            foreach (var contact in Model.Contacts)
+<div id="contacts-table-container">
+    <table class="table table-striped table-hover custom-data-table">
+        <thead>
+            <tr>
+                <th>Student Name</th>
+                <th></th>
+                <th></th>
+                <th>Contact Name</th>
+                <th>Contact Email</th>
+                <th>Contact Phone</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (Model.Contacts.Any())
             {
-                <tr>
-                    <td>@contact.Student.DisplayName (@contact.StudentGrade.AsName())</td>
-                    <td>
-                        @{
-                            if (contact.Category.Value.Contains("PartnerSchool"))
+                foreach (var contact in Model.Contacts.OrderBy(entry => entry.Student.SortOrder))
+                {
+                    <tr>
+                        <td>
+                            @{
+                                if (contact.StudentGrade == Grade.SpecialProgram)
+                                {
+                                    <span>@contact.Student.DisplayName</span>
+                                }
+                                else
+                                {
+                                    <span>@contact.Student.DisplayName (@contact.StudentGrade.AsName())</span>
+                                }
+                            }
+                        </td>
+                        <td>
+                            @{
+                                if (contact.Category.Value.Contains("PartnerSchool"))
+                                {
+                                    <i class="fal fa-school" title="Partner School"></i>
+                                }
+
+                                if (contact.Category.Value.Contains("NonResidential"))
+                                {
+                                    <i class="fal fa-house-damage" title="Non-Residential Family"></i>
+                                }
+
+                                if (contact.Category.Value.Contains(".Residential"))
+                                {
+                                    <i class="fal fa-house" title="Residential Family"></i>
+                                }
+
+                                if (contact.Category.Value.Contains("Student"))
+                                {
+                                    <i class="fal fa-child" title="Student"></i>
+                                }
+
+                                if (contact.Category.Value.Contains("Aurora."))
+                                {
+                                    <i class="fal fa-chalkboard-teacher" title="Aurora College"></i>
+                                }
+                            }
+                        </td>
+                        <td>
+                            @{
+                                if (contact.Category.Value.Contains(".Family"))
+                                {
+                                    //<i class="fal fa-house-leave" title="Family Contact"></i>
+                                    @:Family
+                                }
+
+                                if (contact.Category.Value.Contains(".Mother"))
+                                {
+                                    //<i class="fal fa-female" title="Mother"></i>
+                                    @:Mother
+                                }
+
+                                if (contact.Category.Value.Contains(".Father"))
+                                {
+                                    //<i class="fal fa-male" title="Father"></i>
+                                    @:Father
+                                }
+
+                                if (contact.Category.Value.Contains(".Parent"))
+                                {
+                                    //<i class="fal fa-restroom" title="Parent"></i>
+                                    @:Parent
+                                }
+
+                                if (contact.Category.Value.Contains(".School"))
+                                {
+                                    //<i class="fal fa-chalkboard-teacher" title="School"></i>
+                                    @:School
+                                }
+
+                                if (contact.Category.Value.Contains(".Principal"))
+                                {
+                                    //<i class="fal fa-restroom" title="Principal"></i>
+                                    @:Principal
+                                }
+
+                                if (contact.Category.Value.Contains(".AuroraCollegeCoordinator"))
+                                {
+                                    //<i class="fal fa-restroom" title="ACC"></i>
+                                    @:ACC
+                                }
+
+                                if (contact.Category.Value.Contains(".SciencePracticalTeacher"))
+                                {
+                                    //<i class="fal fa-restroom" title="SPT"></i>
+                                    @:SPT
+                                }
+
+                                if (contact.Category.Value.Contains(".OtherStaff"))
+                                {
+                                    //<i class="fal fa-restroom" title="Other Staff"></i>
+                                    @:Other Staff
+                                }
+
+                                if (contact.Category.Value.Contains(".Teacher"))
+                                {
+                                    @:Teacher
+                                }
+
+                                if (contact.Category.Value.Contains(".HeadTeacher"))
+                                {
+                                    @:Head Teacher
+                                }
+                            }
+                        </td>
+                        <td>
+                            @contact.Contact
+                            @if (!string.IsNullOrWhiteSpace(contact.AdditionalNotes))
                             {
-                                <i class="fal fa-school" title="Partner School"></i>
+                                <br />
+                                <span class="font-italic text-muted">@contact.AdditionalNotes</span>
+                            }
+                        </td>
+                        <td>@contact.ContactEmail.Email</td>
+                        <td>
+                            @if (execMemberTest.Succeeded)
+                            {
+                                @contact.ContactPhone?.ToString()
+                            }
+                        </td>
+                        <td>
+                            @if (execMemberTest.Succeeded)
+                            {
+                                @if (contact.Category.Value.Contains("Aurora."))
+                                {
+                                    <button class="btn btn-sm btn-info btn-show-hover staff-phone" data-id="@contact.Id">Update Phone</button>
+                                }
+
+                                @if (contact.Category.Value.Contains("PartnerSchool"))
+                                {
+                                    <button class="btn btn-sm btn-info btn-show-hover contact-phone" data-id="@contact.Id">Update Phone</button>
+                                }
                             }
 
-                            if (contact.Category.Value.Contains("NonResidential"))
-                            {
-                                <i class="fal fa-house-damage" title="Non-Residential Family"></i>
-                            }
-
-                            if (contact.Category.Value.Contains(".Residential"))
-                            {
-                                <i class="fal fa-house" title="Residential Family"></i>
-                            }
-
-                            if (contact.Category.Value.Contains("Student"))
-                            {
-                                <i class="fal fa-child" title="Student"></i>
-                            }
-
-                            if (contact.Category.Value.Contains("Aurora."))
-                            {
-                                <i class="fal fa-chalkboard-teacher" title="Aurora College"></i>
-                            }
-                        }
-                    </td>
-                    <td>
-                        @{
-                            if (contact.Category.Value.Contains(".Family"))
-                            {
-                                //<i class="fal fa-house-leave" title="Family Contact"></i>
-                                @:Family
-                            }
-
-                            if (contact.Category.Value.Contains(".Mother"))
-                            {
-                                //<i class="fal fa-female" title="Mother"></i>
-                                @:Mother
-                            }
-
-                            if (contact.Category.Value.Contains(".Father"))
-                            {
-                                //<i class="fal fa-male" title="Father"></i>
-                                @:Father
-                            }
-
-                            if (contact.Category.Value.Contains(".Parent"))
-                            {
-                                //<i class="fal fa-restroom" title="Parent"></i>
-                                @:Parent
-                            }
-
-                            if (contact.Category.Value.Contains(".School"))
-                            {
-                                //<i class="fal fa-chalkboard-teacher" title="School"></i>
-                                @:School
-                            }
-
-                            if (contact.Category.Value.Contains(".Principal"))
-                            {
-                                //<i class="fal fa-restroom" title="Principal"></i>
-                                @:Principal
-                            }
-
-                            if (contact.Category.Value.Contains(".AuroraCollegeCoordinator"))
-                            {
-                                //<i class="fal fa-restroom" title="ACC"></i>
-                                @:ACC
-                            }
-
-                            if (contact.Category.Value.Contains(".SciencePracticalTeacher"))
-                            {
-                                //<i class="fal fa-restroom" title="SPT"></i>
-                                @:SPT
-                            }
-
-                            if (contact.Category.Value.Contains(".OtherStaff"))
-                            {
-                                //<i class="fal fa-restroom" title="Other Staff"></i>
-                                @:Other Staff
-                            }
-
-                            if (contact.Category.Value.Contains(".Teacher"))
-                            {
-                                @:Teacher
-                            }
-
-                            if (contact.Category.Value.Contains(".HeadTeacher"))
-                            {
-                                @:Head Teacher
-                            }
-                        }
-                    </td>
-                    <td>
-                        @contact.Contact
-                        @if (!string.IsNullOrWhiteSpace(contact.AdditionalNotes))
-                        {
-                            <br/>
-                            <span class="font-italic text-muted">@contact.AdditionalNotes</span>
-                        }
-                    </td>
-                    <td>@contact.ContactEmail.Email</td>
-                    <td>@contact.ContactPhone?.ToString()</td>
-                </tr>
+                            <a asp-page="/Messaging/History/Details" asp-area="Staff" asp-route-type="@contact.Id.GetType().Name" asp-route-id="@contact.Id" class="btn btn-sm btn-success btn-show-hover">View Comms</a>
+                        </td>
+                    </tr>
+                }
             }
-        }
-    </tbody>
-</table>
+        </tbody>
+    </table>
+</div>
 
 <div class="modal" id="GradeListModal" tabindex="-1">
     <div class="modal-dialog modal-dialog-scrollable">
         <div class="modal-content">
             <div class="modal-header">
                 <h4 class="modal-title">Select Grades for Filter</h4>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
             </div>
             <div class="modal-body">
                 <div class="container-fluid">
@@ -250,7 +302,7 @@
                 </div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
             </div>
         </div>
     </div>
@@ -261,9 +313,6 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h4 class="modal-title">Select Schools for Filter</h4>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
             </div>
             <div class="modal-body">
                 <div class="container-fluid">
@@ -282,7 +331,7 @@
                 </div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
             </div>
         </div>
     </div>
@@ -293,9 +342,6 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h4 class="modal-title">Select Classes for Filter</h4>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
             </div>
             <div class="modal-body">
                 <div class="container-fluid">
@@ -320,7 +366,7 @@
                 </div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
             </div>
         </div>
     </div>
@@ -331,9 +377,6 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h4 class="modal-title">Select Courses for Filter</h4>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
             </div>
             <div class="modal-body">
                 <div class="container-fluid">
@@ -358,7 +401,7 @@
                 </div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
             </div>
         </div>
     </div>
@@ -369,9 +412,6 @@
 		<div class="modal-content">
 			<div class="modal-header">
 				<h4 class="modal-title">Select Categories for Filter</h4>
-				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
-					<span aria-hidden="true">&times;</span>
-				</button>
 			</div>
 			<div class="modal-body">
 				<div class="container-fluid">
@@ -435,7 +475,7 @@
 				</div>
 			</div>
 			<div class="modal-footer">
-				<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+				<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
 			</div>
 		</div>
 	</div>
@@ -446,9 +486,6 @@
 		<div class="modal-content">
 			<div class="modal-header">
 				<h4 class="modal-title">Select Student Flags for Filter</h4>
-				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
-					<span aria-hidden="true">&times;</span>
-				</button>
 			</div>
 			<div class="modal-body">
 				<div class="container-fluid">
@@ -459,18 +496,15 @@
 
 					<div class="row">
 						<h5 class="col-md-12">Available Flags:</h5>
-                        <div class="col">
-							@foreach (var flag in Model.Flags.OrderBy(entry => entry))
-							{
-								<button id="flagSelect-@flag" class="btn btn-outline-info select-button" onClick="toggleFlag('@flag')">@flag</button>
-							}
+                        <div class="col" id="FlagButtonsList">
+                            <span class="text-muted fst-italic">Loading flags...</span>
                         </div>
 					</div>
 					
 				</div>
 			</div>
 			<div class="modal-footer">
-				<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+				<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
 			</div>
 		</div>
 	</div>
@@ -483,34 +517,90 @@
     }
 </div>
 
+<div class="hidden">
+    <form id="emergency-groups" method="post" asp-page-handler="EmergencyGroup">
+        <input type="hidden" name="group" id="group-input" />
+    </form>
+</div>
 
 @section scripts {
     <script>
-        $('#ShowGradeSelectList').on('click', function () {
-            $('#GradeListModal').modal('show');
+        // ─── Modal openers ────────────────────────────────────────────────────────
+        const modalTriggers = {
+            'ShowGradeSelectList':    'GradeListModal',
+            'ShowSchoolSelectList':   'SchoolListModal',
+            'ShowClassSelectList':    'ClassListModal',
+            'ShowCourseSelectList':   'CourseListModal',
+            'ShowCategorySelectList': 'CategoryListModal'
+        };
+
+        Object.entries(modalTriggers).forEach(([btnId, modalId]) => {
+            $(`#${btnId}`).on('click', () => $(`#${modalId}`).modal('show'));
         });
 
-        $('#ShowCategorySelectList').on('click', function () {
-            $('#CategoryListModal').modal('show');
-        });
+        // ─── Emergency Group dropdown ─────────────────────────────────────────────
+        function loadEmergencyGroup(value) {
+            document.getElementById('group-input').value = value;
+            document.getElementById('emergency-groups').submit();
+        }
 
-        $('#ShowClassSelectList').on('click', function () {
-            $('#ClassListModal').modal('show');
-        });
-        
-        $('#ShowCourseSelectList').on('click', function () {
-            $('#CourseListModal').modal('show');
-        });
+        // ─── Flag modal — lazy load on first open ─────────────────────────────────
+        // Pre-selected flags emitted from the server so they can be restored on
+        // page load without waiting for the modal to open.
+        const preSelectedFlags = new Set([
+            @Html.Raw(string.Join(",", Model.Filter.Flags.Select(f => $"'{f.Name}'")))
+        ]);
 
-        $('#ShowSchoolSelectList').on('click', function () {
-            $('#SchoolListModal').modal('show');
-        });
+        let flagsLoaded = false;
 
-        $('#ShowFlagSelectList').on('click', function () {
+        $('#ShowFlagSelectList').on('click', async function () {
             $('#FlagListModal').modal('show');
-		});
 
-        $('#SubmitFormAsFilter').on('click', function() {
+            if (flagsLoaded) return;
+
+            try {
+                const response = await fetch('?handler=FlagList');
+                const flags = await response.json();
+                const $container = $('#FlagButtonsList').empty();
+
+                flags.forEach(flag => {
+                    const flagName = flag.replace(/ /g, "_");
+                    const isSelected = preSelectedFlags.has(flag);
+
+                    const button = $('<button>');
+                    button.attr('id', `flagSelect-${flag}`);
+                    button.attr('type', 'button');
+                    button.addClass(isSelected ? 'btn btn-info select-button' : 'btn btn-outline-info select-button');
+                    button.text(flag);
+                    button.on('click', () => toggleFlag(flag));
+                    button.appendTo($container);
+
+                    // $('<button>')
+                    //     .attr('id', `flagSelect-${flag.replace(/ /g, "_")}`)
+                    //     .attr('type', 'button')
+                    //     .addClass(isSelected ? 'btn btn-info select-button' : 'btn btn-outline-info select-button')
+                    //     .text(flag)
+                    //     .on('click', () => toggleFlag(flag))
+                    //     .appendTo($container);
+
+                    // Populate the modal selected list for pre-selected flags
+                    if (isSelected) {
+                        $('<button>')
+                            .attr('id', `md-flagSelect-${flag}`)
+                            .addClass('btn btn-info select-button')
+                            .text(flag)
+                            .appendTo('#ModalSelectedFlagsList');
+                    }
+                });
+
+                flagsLoaded = true;
+            } catch {
+                $('#FlagButtonsList').html('<span class="text-danger">Failed to load flags. Please try again.</span>');
+            }
+        });
+
+        // ─── Filter form submission ───────────────────────────────────────────────
+        $('#SubmitFormAsFilter').on('click', function () {
             showLoader();
             $('#filterAction').val(0);
             $('#filterForm').submit();
@@ -522,290 +612,211 @@
             $('#filterForm').submit();
         });
 
-        var $schoolOption = $("#custom-combo").select2({ theme: 'bootstrap' });
+        // ─── School select2 ───────────────────────────────────────────────────────
+        const $schoolOption = $('#custom-combo').select2({ 
+                theme: 'bootstrap-5',
+                dropdownParent: $('#SchoolListModal')
+            });
 
-        $schoolOption.on('select2:select', function(e) {
-            var code = e.params.data.id;
-            toggleSchool(code);
+        $schoolOption.on('select2:select select2:unselect', function (e) {
+            toggleSchool(e.params.data.id);
         });
+        
+        // ─── Generic filter toggle ────────────────────────────────────────────────
+        // Uses document.getElementById to safely handle values containing CSS
+        // special characters (e.g. dots in category/flag names).
+        function toggleItem(prefix, value, pageSelector, modalSelector, inputName) {
+            const id = `${prefix}-${value}`;
+            const $btn = $(document.getElementById(id));
+            const isSelected = $btn.hasClass('btn-info');
 
-        $schoolOption.on('select2:unselect', function(e) {
-            var code = e.params.data.id;
-            toggleSchool(code);
-        });
+            $btn.toggleClass('btn-info', !isSelected)
+                .toggleClass('btn-outline-info', isSelected);
 
-        function toggleGrade(grade) {
-            var selectDiv = $('#gradeSelect-' + grade);
-            if (selectDiv.hasClass('btn-info')) {
-                // Selected, need to deselect
-                selectDiv.removeClass('btn-info');
-                selectDiv.addClass('btn-outline-info')
-
-                $('#pd-gradeSelect-' + grade).remove();
-                $('#md-gradeSelect-' + grade).remove();
-                $('#i-gradeSelect-' + grade).remove();
-            }
-            else {
-                // Deselected, need to select
-                selectDiv.addClass('btn-info');
-                selectDiv.removeClass('btn-outline-info')
-
-                var pageDisplayDiv = $('#gradeSelect-' + grade).clone().prop('id', 'pd-gradeSelect-' + grade);
-                pageDisplayDiv.appendTo('#SelectedGradesList');
-                var modalDisplayDiv = $('#gradeSelect-' + grade).clone().prop('id', 'md-gradeSelect-' + grade);
-                modalDisplayDiv.appendTo('#ModalSelectedGradesList');
-
-                var input = $('<input>').attr('id', 'i-gradeSelect-' + grade)
-                    .attr('name', 'Filter.Grades')
-                    .attr('type', "hidden");
-                input.val(grade);
-                var classInputDiv = $('#SelectedGradesList');
-                classInputDiv.append(input);
+            if (isSelected) {
+                [`pd-${id}`, `md-${id}`, `i-${id}`].forEach(elemId => document.getElementById(elemId)?.remove());
+            } else {
+                $btn.clone().prop('id', `pd-${id}`).appendTo(pageSelector);
+                $btn.clone().prop('id', `md-${id}`).appendTo(modalSelector);
+                $('<input>').attr({ id: `i-${id}`, name: inputName, type: 'hidden' })
+                    .val(value)
+                    .appendTo(pageSelector);
             }
         }
 
-        function toggleSchool(code) {
-            var selectDiv = $('#schoolSelect-' + code);
-            if (selectDiv.hasClass('btn-info')) {
-                // Selected, need to deselect
-                selectDiv.removeClass('btn-info');
-                selectDiv.addClass('btn-outline-info')
+        function toggleGrade(grade)     { toggleItem('gradeSelect',    grade,    '#SelectedGradesList',     '#ModalSelectedGradesList',     'Filter.Grades'); }
+        function toggleSchool(code)     { toggleItem('schoolSelect',   code,     '#SelectedSchoolsList',    '#ModalSelectedSchoolsList',    'Filter.SchoolCodes'); }
+        function toggleClass(id)        { toggleItem('offeringSelect', id,       '#SelectedClassesList',    '#ModalSelectedClassesList',    'Filter.OfferingIds'); }
+        function toggleCourse(courseId) { toggleItem('courseSelect',   courseId, '#SelectedCoursesList',    '#ModalSelectedCoursesList',    'Filter.CourseIds'); }
+        function toggleFlag(value)      { toggleItem('flagSelect',     value,    '#SelectedFlagsList',      '#ModalSelectedFlagsList',      'Filter.Flags'); }
+        function toggleCategory(value)  { toggleItem('categorySelect', value,    '#SelectedCategoriesList', '#ModalSelectedCategoriesList', 'Filter.Categories'); }
 
-                $('#pd-schoolSelect-' + code).remove();
-                $('#md-schoolSelect-' + code).remove();
-                $('#i-schoolSelect-' + code).remove();
-            }
-            else {
-                // Deselected, need to select
-                selectDiv.addClass('btn-info');
-                selectDiv.removeClass('btn-outline-info')
-
-                var pageDisplayDiv = $('#schoolSelect-' + code).clone().prop('id', 'pd-schoolSelect-' + code);
-                pageDisplayDiv.appendTo('#SelectedSchoolsList');
-                var modalDisplayDiv = $('#schoolSelect-' + code).clone().prop('id', 'md-schoolSelect-' + code);
-                modalDisplayDiv.appendTo('#ModalSelectedSchoolsList');
-
-                var input = $('<input>').attr('id', 'i-schoolSelect-' + code)
-                    .attr('name', 'Filter.Schools')
-                    .attr('type', "hidden");
-                input.val(code);
-                var classInputDiv = $('#SelectedSchoolsList');
-                classInputDiv.append(input);
-            }
-        }
-
-        function toggleClass(offeringId) {
-            var selectDiv = $('#offeringSelect-' + offeringId);
-            if (selectDiv.hasClass('btn-info')) {
-                // Selected, need to deselect
-                selectDiv.removeClass('btn-info');
-                selectDiv.addClass('btn-outline-info')
-
-                $('#pd-offeringSelect-' + offeringId).remove();
-                $('#md-offeringSelect-' + offeringId).remove();
-                $('#i-offeringSelect-' + offeringId).remove();
-            }
-            else {
-                // Deselected, need to select
-                selectDiv.addClass('btn-info');
-                selectDiv.removeClass('btn-outline-info')
-
-                var pageDisplayDiv = $('#offeringSelect-' + offeringId).clone().prop('id', 'pd-offeringSelect-' + offeringId);
-                pageDisplayDiv.appendTo('#SelectedClassesList');
-                var modalDisplayDiv = $('#offeringSelect-' + offeringId).clone().prop('id', 'md-offeringSelect-' + offeringId);
-                modalDisplayDiv.appendTo('#ModalSelectedClassesList');
-
-                var input = $('<input>').attr('id', 'i-offeringSelect-' + offeringId)
-                    .attr('name', 'Filter.Offerings')
-                    .attr('type', "hidden");
-                input.val(offeringId);
-                var classInputDiv = $('#SelectedClassesList');
-                classInputDiv.append(input);
-            }
-        }
-
-        function toggleCourse(courseId) {
-            var selectDiv = $('#courseSelect-' + courseId);
-            if (selectDiv.hasClass('btn-info')) {
-                // Selected, need to deselect
-                selectDiv.removeClass('btn-info');
-                selectDiv.addClass('btn-outline-info')
-
-                $('#pd-courseSelect-' + courseId).remove();
-                $('#md-courseSelect-' + courseId).remove();
-                $('#i-courseSelect-' + courseId).remove();
-            }
-            else {
-                // Deselected, need to select
-                selectDiv.addClass('btn-info');
-                selectDiv.removeClass('btn-outline-info')
-
-                var pageDisplayDiv = $('#courseSelect-' + courseId).clone().prop('id', 'pd-courseSelect-' + courseId);
-                pageDisplayDiv.appendTo('#SelectedCoursesList');
-                var modalDisplayDiv = $('#courseSelect-' + courseId).clone().prop('id', 'md-courseSelect-' + courseId);
-                modalDisplayDiv.appendTo('#ModalSelectedCourseList');
-
-                var input = $('<input>').attr('id', 'i-courseSelect-' + courseId)
-                    .attr('name', 'Filter.Courses')
-                    .attr('type', "hidden");
-                input.val(courseId);
-                var classInputDiv = $('#SelectedCoursesList');
-                classInputDiv.append(input);
-            }
-        }
-
-        function toggleFlag(value) {
-            var selectDiv = $('button[id="flagSelect-' + value + '"]');
-            if (selectDiv.hasClass('btn-info')) {
-                // Selected, need to deselect
-                selectDiv.removeClass('btn-info');
-                selectDiv.addClass('btn-outline-info')
-
-                $('button[id="pd-flagSelect-' + value + '"]').remove();
-                $('button[id="md-flagSelect-' + value + '"]').remove();
-                $('input[id="i-flagSelect-' + value + '"]').remove();
-            }
-            else {
-                // Deselected, need to select
-                selectDiv.addClass('btn-info');
-                selectDiv.removeClass('btn-outline-info');
-
-                var pageDisplayDiv = $('button[id="flagSelect-' + value + '"]').clone().prop('id', 'pd-flagSelect-' + value);
-                pageDisplayDiv.appendTo('#SelectedFlagsList');
-                var modalDisplayDiv = $('button[id="flagSelect-' + value + '"]').clone().prop('id', 'md-flagSelect-' + value);
-                modalDisplayDiv.appendTo('#ModalSelectedFlagsList');
-
-                var input = $('<input>').attr('id', 'i-flagSelect-' + value)
-                    .attr('name', 'Filter.Flags')
-                    .attr('type', "hidden");
-                input.val(value);
-                var classInputDiv = $('#SelectedFlagsList');
-                classInputDiv.append(input);
-            }
-        }
-
-        function toggleCategory(value) {
-            var selectDiv = $('button[id="categorySelect-' + value + '"]');
-            if (selectDiv.hasClass('btn-info')) {
-                // Selected, need to deselect
-                selectDiv.removeClass('btn-info');
-                selectDiv.addClass('btn-outline-info')
-
-                $('button[id="pd-categorySelect-' + value + '"]').remove();
-                $('button[id="md-categorySelect-' + value + '"]').remove();
-                $('input[id="i-categorySelect-' + value + '"]').remove();
-            }
-            else {
-                // Deselected, need to select
-                selectDiv.addClass('btn-info');
-                selectDiv.removeClass('btn-outline-info');
-
-                var pageDisplayDiv = $('button[id="categorySelect-' + value + '"]').clone().prop('id', 'pd-categorySelect-' + value);
-                pageDisplayDiv.appendTo('#SelectedCategoriesList');
-                var modalDisplayDiv = $('button[id="categorySelect-' + value + '"]').clone().prop('id', 'md-categorySelect-' + value);
-                modalDisplayDiv.appendTo('#ModalSelectedCategoriesList');
-
-                var input = $('<input>').attr('id', 'i-categorySelect-' + value)
-                    .attr('name', 'Filter.Categories')
-                    .attr('type', "hidden");
-                input.val(value);
-                var classInputDiv = $('#SelectedCategoriesList');
-                classInputDiv.append(input);
-            }
-        }
-
+        // ─── Restore filter state on page load ───────────────────────────────────
         $(document).ready(function () {
             @foreach (var grade in Model.Filter.Grades)
             {
                 @:toggleGrade('@grade');
             }
 
-            @foreach (var category in Model.Filter.Categories)
+            @foreach (var category in Model.Filter.Categories) 
             {
-                @:toggleCategory('@category');
+                @:toggleCategory('@category.Value'); 
             }
 
-            @foreach (var offering in Model.Filter.Offerings)
+            @foreach (var offering in Model.Filter.OfferingIds)
             {
-                @:toggleClass('@offering');
+                @:toggleClass('@offering.Value'); 
             }
 
-            @foreach (var course in Model.Filter.Courses)
-            {
-                @:toggleCourse('@course');
+            @foreach (var course in Model.Filter.CourseIds)    
+            { 
+                @:toggleCourse('@course.Value'); 
             }
 
-            @foreach (var school in Model.Filter.Schools)
+            @foreach (var school in Model.Filter.SchoolCodes) 
             {
-                @:toggleSchool(@school);
+                @:toggleSchool('@school'); 
             }
 
-            @foreach (var flag in Model.Filter.Flags)
-            {
-                @:toggleFlag('@flag');
-            }
+            // Flags: the modal buttons don't exist yet, so we directly create the
+            // page-side display badge and hidden input for each pre-selected flag.
+            // The modal selected list and button states are handled when the modal loads.
+            preSelectedFlags.forEach(flag => {
+                $('<button>')
+                    .attr('id', `pd-flagSelect-${flag}`)
+                    .addClass('btn btn-info select-button')
+                    .text(flag)
+                    .on('click', () => toggleFlag(flag))
+                    .appendTo('#SelectedFlagsList');
+
+                $('<input>')
+                    .attr({ id: `i-flagSelect-${flag}`, name: 'Filter.Flags', type: 'hidden' })
+                    .val(flag)
+                    .appendTo('#SelectedFlagsList');
+            });
         });
 
-        var table = $('.custom-data-table')
-            .DataTable({
-                "order": [],
-                "rowGroup": {
-                    "dataSrc": 0
+        // ─── DataTable ────────────────────────────────────────────────────────────
+        const table = $('.custom-data-table').DataTable({
+            order: [],
+            rowGroup: { dataSrc: 0 },
+            columnDefs: [{ visible: false, targets: 0 }]
+        });
+
+        // ─── Send Email ───────────────────────────────────────────────────────────
+        $('#SendEmail').on('click', async function () {
+            toggleLoader();
+            const recipients = getRecipientsFromTable();
+
+            if (recipients.length === 0) {
+                alert('No recipients found.');
+                return;
+            }
+
+            const response = await fetch('?handler=AddRecipients', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
                 },
-                "columnDefs": [
-                    { "visible": false, "targets": 0 }
-                ]
+                body: JSON.stringify({ recipients })
             });
 
-        $('#SendEmail').on('click', function() {
-            var email = '';
-
-            table.column(4, { search: 'applied' }).data().each(function (value, index) {
-                email += value.replace(/<.*?>/ig, '') + ';';
-            });
-
-            var arr = email.split(';');
-            arr = arr.filter((item, index) => arr.indexOf(item) === index);
-            email = arr.join(";");
-
-            if (email.length > 2048)
-            {
-                console.log("This string is too long!");
-
-                var dummy = document.createElement("textarea");
-                document.body.appendChild(dummy);
-                dummy.textContent = email;
-                dummy.select();
-                document.execCommand("copy");
-                document.body.removeChild(dummy);
-
-                var dummyModal = $(makeModal('<p>The email addresses of all contacts in the table displayed below have been copied to your clipboard.</p><p>Please paste (with Ctrl+V) into your email client <strong>BCC field</strong> now.</p>'));
-                dummyModal.modal('show');
+            if (response.redirected) {
+                window.location.href = response.url;
+                return;
             }
-            else
-            {
-                window.location = 'mailto:?bcc=' + email;
-            }
+
+            $(makeModal('<p>The details of all contacts in the table displayed below have been added to your draft message.</p><p>Please use the Messaging module to send your message.</p>'))
+                .modal('show');
+            toggleLoader();
         });
+
+        function getRecipientsFromTable() {
+            const recipients = [];
+
+            // rows({ search: 'applied' }) respects the current DataTable filter/search state
+            table.rows({ search: 'applied' }).every(function () {
+                const row = this.node();
+                recipients.push({
+                    name:         $('td:eq(2)', row).text().trim().split('\n')[0].trim().replace(/\s*\(.*$/, ''),
+                    emailAddress: { value: $('td:eq(3)', row).text().trim() },
+                    phoneNumber:  { value: $('td:eq(4)', row).text().trim() }
+                });
+            });
+
+            return recipients;
+        }
 
         function makeModal(message) {
             return `
-                    <div class="modal fade" id="dummyModal" tabindex="-1">
-                        <div class="modal-dialog">
-                            <div class="modal-content">
-                                <div class="modal-header">
-                                    <h5 class="modal-title">Alert!</h5>
-                                </div>
-                                <div class="modal-body">
-                                    ${message}
-                                </div>
-                                <div class="modal-footer">
-                                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button
-                                </div>
+                <div class="modal fade" id="dummyModal" tabindex="-1">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title">Alert!</h5>
+                            </div>
+                            <div class="modal-body">${message}</div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                             </div>
                         </div>
-                    </div>`;
+                    </div>
+                </div>`;
         }
 
+        // ─── Phone number update ──────────────────────────────────────────────────
+        let activePhoneHandler = '';
+        let clickedRow = null;
+
+        function openPhoneModal($btn, handler, paramName) {
+            clickedRow = $btn.closest('tr');
+            $.ajax({
+                url: `?handler=${handler}`,
+                type: 'POST',
+                data: {
+                    [paramName]: $btn.data('id'),
+                    __RequestVerificationToken: $('input:hidden[name="__RequestVerificationToken"]').val()
+                }
+            }).done(function (data) {
+                $('#page-modal .modal-content').html(data);
+                $('#page-modal').modal('show');
+            });
+        }
+
+        $('#contacts-table-container').on('click', '.staff-phone', function () {
+            activePhoneHandler = 'StaffPhoneUpdate';
+            openPhoneModal($(this), 'AjaxStaffPhoneUpdate', 'staffId');
+        });
+
+        $('#contacts-table-container').on('click', '.contact-phone', function () {
+            activePhoneHandler = 'ContactPhoneUpdate';
+            openPhoneModal($(this), 'AjaxContactPhoneUpdate', 'contactId');
+        });
+
+        // Intercept modal form submit — works for both staff and contact phone forms
+        // without needing to modify either partial view.
+        $('#page-modal').on('submit', 'form', function (e) {
+            e.preventDefault();
+            toggleLoader();
+
+            $.ajax({
+                url: '?handler=' + activePhoneHandler,
+                type: 'POST',
+                data: $(this).serialize()
+            }).done(function (result) {
+                if (result.success) {
+                    $('#page-modal').modal('hide');
+                    table.cell(clickedRow, 5).data(result.phoneNumber).draw(false);
+                    clickedRow = null;
+                } else {
+                    $('#page-modal .error-message').text(result.error).show();
+                }
+                toggleLoader();
+            }).fail(function () {
+                $('#page-modal .error-message').text('An unexpected error occurred.').show();
+                toggleLoader();
+            });
+        });
     </script>
 }

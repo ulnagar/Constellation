@@ -2,9 +2,10 @@
 
 using Application.Domains.Schools.Enums;
 using Constellation.Application.Interfaces.Repositories;
-using Constellation.Core.Models;
 using Core.Abstractions.Clock;
 using Core.Enums;
+using Core.Models;
+using Core.Models.Identifiers;
 using Core.Models.StaffMembers;
 using Core.Models.Students;
 using Microsoft.EntityFrameworkCore;
@@ -25,7 +26,7 @@ public class SchoolRepository : ISchoolRepository
     public async Task<List<School>> GetAllActive(
         CancellationToken cancellationToken = default)
     {
-        List<string> studentSchoolCodes = await _context
+        List<SchoolCode> studentSchoolCodes = await _context
             .Set<Student>()
             .Where(student => !student.IsDeleted)
             .SelectMany(student => student.SchoolEnrolments)
@@ -37,7 +38,7 @@ public class SchoolRepository : ISchoolRepository
             .Distinct()
             .ToListAsync(cancellationToken);
 
-        List<string> staffSchoolCodes = await _context
+        List<SchoolCode> staffSchoolCodes = await _context
             .Set<StaffMember>()
             .Where(member => !member.IsDeleted)
             .SelectMany(member => member.SchoolAssignments)
@@ -60,7 +61,7 @@ public class SchoolRepository : ISchoolRepository
     public async Task<List<School>> GetAllInactive(
         CancellationToken cancellationToken = default)
     {
-        List<string> studentSchoolCodes = await _context
+        List<SchoolCode> studentSchoolCodes = await _context
             .Set<Student>()
             .Where(student => !student.IsDeleted)
             .SelectMany(student => student.SchoolEnrolments)
@@ -71,7 +72,7 @@ public class SchoolRepository : ISchoolRepository
             .Select(enrolment => enrolment.SchoolCode)
             .ToListAsync(cancellationToken);
 
-        List<string> staffSchoolCodes = await _context
+        List<SchoolCode> staffSchoolCodes = await _context
             .Set<StaffMember>()
             .Where(member => !member.IsDeleted)
             .SelectMany(member => member.SchoolAssignments)
@@ -92,7 +93,7 @@ public class SchoolRepository : ISchoolRepository
     }
 
     public async Task<List<School>> GetListFromIds(
-        List<string> schoolCodes, 
+        List<SchoolCode> schoolCodes, 
         CancellationToken cancellationToken = default) =>
         await _context
             .Set<School>()
@@ -100,7 +101,7 @@ public class SchoolRepository : ISchoolRepository
             .ToListAsync(cancellationToken);
 
     public async Task<SchoolType> GetSchoolType(
-        string schoolCode,
+        SchoolCode schoolCode,
         CancellationToken cancellationToken = default)
     {
         List<Student> students = await _context
@@ -115,10 +116,10 @@ public class SchoolRepository : ISchoolRepository
                         (enrolment.EndDate == null || enrolment.EndDate >= _dateTime.Today)))
             .ToListAsync(cancellationToken);
         
-        if (students.All(student => student.CurrentEnrolment.Grade >= Grade.Y07))
+        if (students.All(student => student.CurrentEnrolment?.Grade >= Grade.Y07))
             return SchoolType.Secondary;
 
-        if (students.All(student => student.CurrentEnrolment.Grade <= Grade.Y06))
+        if (students.All(student => student.CurrentEnrolment?.Grade <= Grade.Y06))
             return SchoolType.Primary;
 
         return SchoolType.Central;
@@ -128,11 +129,11 @@ public class SchoolRepository : ISchoolRepository
         _context.Set<School>().Add(school);
 
     public async Task<School?> GetById(
-        string id,
+        SchoolCode schoolCode,
         CancellationToken cancellationToken = default) =>
         await _context
             .Set<School>()
-            .FirstOrDefaultAsync(school => school.Code == id, cancellationToken);
+            .FirstOrDefaultAsync(school => school.Code == schoolCode, cancellationToken);
 
     public async Task<List<School>> GetAll(
         CancellationToken cancellationToken = default) =>
@@ -143,7 +144,7 @@ public class SchoolRepository : ISchoolRepository
     public async Task<List<School>> GetWithCurrentStudents(
         CancellationToken cancellationToken = default)
     {
-        List<string> schoolCodes = await _context
+        List<SchoolCode> schoolCodes = await _context
             .Set<Student>()
             .Where(student => !student.IsDeleted)
             .SelectMany(student => student.SchoolEnrolments)
@@ -161,16 +162,16 @@ public class SchoolRepository : ISchoolRepository
     }
         
     public async Task<bool> IsPartnerSchoolWithStudents(
-        string code,
+        SchoolCode schoolCode,
         CancellationToken cancellationToken = default) =>
         await _context
             .Set<Student>()
             .Where(student => !student.IsDeleted)
             .SelectMany(student => student.SchoolEnrolments)
-            .Where(enrolment =>
+            .AnyAsync(enrolment =>
                 !enrolment.IsDeleted &&
                 enrolment.StartDate <= _dateTime.Today &&
-                (enrolment.EndDate == null || enrolment.EndDate >= _dateTime.Today))
-            .Select(enrolment => enrolment.SchoolCode)
-            .AnyAsync(schoolCode => schoolCode == code, cancellationToken);
+                (enrolment.EndDate == null || enrolment.EndDate >= _dateTime.Today) &&
+                enrolment.SchoolCode == schoolCode,
+                cancellationToken);
 }

@@ -1,6 +1,4 @@
 ﻿#nullable enable
-using Constellation;
-
 namespace Constellation.Application.Domains.Students.Commands.ImportStudentsFromFile;
 
 using Abstractions.Messaging;
@@ -11,6 +9,7 @@ using Constellation.Core.Models.Students.ValueObjects;
 using Core.Abstractions.Clock;
 using Core.Errors;
 using Core.Models;
+using Core.Models.Identifiers;
 using Core.Models.Students.Enums;
 using Core.Models.Students.Errors;
 using Core.Shared;
@@ -121,23 +120,8 @@ internal sealed class ImportStudentsFromFileCommandHandler
                     continue;
                 }
                 
-                if (!string.IsNullOrWhiteSpace(entry.School) && grade != Grade.SpecialProgram)
+                if (school is not null && grade != Grade.SpecialProgram)
                 {
-                    if (school is null)
-                    {
-                        _logger
-                            .ForContext(nameof(ImportStudentDto), entry, true)
-                            .ForContext(nameof(Error), DomainErrors.Partners.School.NotFound(entry.School), true)
-                            .Warning("Failed to create new student");
-
-                        response.Add(new(
-                            entry.RowNumber,
-                            false,
-                            DomainErrors.Partners.School.NotFound(entry.School)));
-
-                        continue;
-                    }
-
                     _logger
                         .ForContext(nameof(ImportStudentDto), entry, true)
                         .ForContext(nameof(Student), student.Value, true)
@@ -211,23 +195,8 @@ internal sealed class ImportStudentsFromFileCommandHandler
                     continue;
                 }
 
-                if (!string.IsNullOrWhiteSpace(entry.School) && grade != Grade.SpecialProgram)
+                if (school is not null && grade != Grade.SpecialProgram)
                 {
-                    if (school is null)
-                    {
-                        _logger
-                            .ForContext(nameof(ImportStudentDto), entry, true)
-                            .ForContext(nameof(Error), DomainErrors.Partners.School.NotFound(entry.School), true)
-                            .Warning("Failed to create new student");
-
-                        response.Add(new(
-                            entry.RowNumber,
-                            false,
-                            DomainErrors.Partners.School.NotFound(entry.School)));
-
-                        continue;
-                    }
-
                     _logger
                         .ForContext(nameof(ImportStudentDto), entry, true)
                         .ForContext(nameof(Student), student.Value, true)
@@ -366,12 +335,11 @@ internal sealed class ImportStudentsFromFileCommandHandler
 
     private static School? LookupSchool(string potentialSchool, List<School> schools)
     {
-        School? school = schools.FirstOrDefault(entry => entry.Code == potentialSchool);
+        Result<SchoolCode> schoolCode = SchoolCode.TryFromValue(potentialSchool);
 
-        if (school is not null)
-            return school;
-
-        school = schools.FirstOrDefault(entry => entry.Name == potentialSchool);
+        School? school = schoolCode.IsSuccess
+            ? schools.FirstOrDefault(entry => entry.Code == schoolCode.Value)
+            : schools.FirstOrDefault(entry => entry.Name == potentialSchool);
 
         return school;
     }

@@ -5,6 +5,7 @@ using Core.Abstractions.Clock;
 using Core.Abstractions.Repositories;
 using Core.Abstractions.Services;
 using Core.Enums;
+using Core.Models.Identifiers;
 using Core.Models.Offerings;
 using Core.Models.Offerings.Identifiers;
 using Core.Models.Offerings.Repositories;
@@ -58,11 +59,11 @@ internal sealed class BulkCancelRollsCommandHandler
             offeringIds.AddRange(offerings.Select(entry => entry.Id));
         }
 
-        foreach (string code in request.SchoolCodes)
+        foreach (SchoolCode code in request.SchoolCodes)
         {
             List<SciencePracLesson> lessons = await _lessonRepository.GetAllForSchool(code, cancellationToken);
 
-            if (offeringIds.Any())
+            if (offeringIds.Count > 0)
             {
                 lessons = lessons
                     .Where(entry => 
@@ -73,7 +74,7 @@ internal sealed class BulkCancelRollsCommandHandler
 
             foreach (SciencePracLesson lesson in lessons)
             {
-                SciencePracRoll roll = lesson.Rolls.FirstOrDefault(roll => roll.SchoolCode == code);
+                SciencePracRoll? roll = lesson.Rolls.FirstOrDefault(roll => roll.SchoolCode == code);
 
                 if (roll is null || roll.Status != LessonStatus.Active)
                     continue;

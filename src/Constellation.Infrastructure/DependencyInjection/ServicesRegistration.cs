@@ -60,7 +60,6 @@ public static class ServicesRegistration
 
             });
 
-        services.AddScoped<IAppDbContext, AppDbContext>();
         services.AddScoped<AppDbContext>(sp =>
             sp.GetRequiredService<IDbContextFactory<AppDbContext>>().CreateDbContext());
         services.AddScoped<IUnitOfWork, UnitOfWork>();
@@ -90,6 +89,7 @@ public static class ServicesRegistration
         services.AddScoped<IMandatoryTrainingScanJob, MandatoryTrainingScanJob>();
         services.AddScoped<ICanvasAccessAuditJob, CanvasAccessAuditJob>();
         services.AddScoped<IProcessOutboxMessagesJob, ProcessOutboxMessagesJob>();
+        services.AddScoped<IProcessQueuedMessagesJob, ProcessQueuedMessagesJob>();
         services.AddScoped<IProcessScheduledReportsJob, ProcessScheduledReportsJob>();
         services.AddScoped<IProcessTrackingEventsJob, ProcessTrackingEventsJob>();
         services.AddScoped<IRollMarkingReportJob, RollMarkingReportJob>();
@@ -139,7 +139,7 @@ public static class ServicesRegistration
             selector.FromAssemblies(
                 Constellation.Application.AssemblyReference.Assembly,
                 Constellation.Infrastructure.AssemblyReference.Assembly)
-            .AddClasses(classes => classes.InNamespaceOf<ActiveDirectoryActionsService>(), false)
+            .AddClasses(classes => classes.InNamespaceOf<AppSettingsService>(), false)
             .UsingRegistrationStrategy(RegistrationStrategy.Skip)
             .AsMatchingInterface()
             .WithScopedLifetime());

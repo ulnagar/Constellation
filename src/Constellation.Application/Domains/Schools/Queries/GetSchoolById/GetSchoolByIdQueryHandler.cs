@@ -25,7 +25,7 @@ internal sealed class GetSchoolByIdQueryHandler
 
     public async Task<Result<SchoolResponse>> Handle(GetSchoolByIdQuery request, CancellationToken cancellationToken)
     {
-        School school = await _schoolRepository.GetById(request.SchoolCode, cancellationToken);
+        School? school = await _schoolRepository.GetById(request.SchoolCode, cancellationToken);
 
         if (school is null)
         {

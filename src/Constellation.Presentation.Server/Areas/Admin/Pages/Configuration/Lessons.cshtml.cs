@@ -6,7 +6,6 @@ using Application.Models.Auth;
 using BaseModels;
 using Constellation.Application.Common.PresentationModels;
 using Constellation.Application.Domains.AppSettings.Queries.BuildStaffDictionary;
-using Constellation.Application.Domains.EmergencyConsole.Queries.GetContactDetails;
 using Constellation.Application.Domains.StaffMembers.Models;
 using Constellation.Application.Domains.StaffMembers.Queries.GetStaffForSelectionList;
 using Constellation.Core.Enums;

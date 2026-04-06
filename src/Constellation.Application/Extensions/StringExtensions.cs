@@ -4,85 +4,56 @@ using Helpers;
 
 public static class StringExtensions
 {
-    public static string FormatField(this string content)
+    extension(string content)
     {
-        return content.RemoveQuotes().RemoveWhitespace();
-    }
+        public string FormatField => content.RemoveQuotes.RemoveWhitespace;
 
-    public static string FormatEmail(this string content)
-    {
-        return content.RemoveQuotes().RemoveWhitespace().ToLower();
-    }
+        public string FormatEmail => content.RemoveQuotes.RemoveWhitespace;
 
-    public static (string, string) ExtractLine(this string offeringName)
-    {
-        if (string.IsNullOrWhiteSpace(offeringName))
-            return ("Unknown", "Unknown");
-
-        if (offeringName.Length != 7)
-            return ("Unknown", "Unknown");
-
-        string line = offeringName.Substring(offeringName.Length - 2, 1);
-
-        return line switch
+        public (string, string) ExtractLine()
         {
-            "G" => ("Secondary", "G"),
-            "N" => ("Secondary", "N"),
-            
-            "V" => ("Alternate", "V"),
-            "Y" => ("Alternate", "Y"),
+            if (string.IsNullOrWhiteSpace(content))
+                return ("Unknown", "Unknown");
 
-            "B" => ("Primary", "B"),
-            "P" => ("Primary", "P"),
-            "R" => ("Primary", "R"),
+            if (content.Length != 7)
+                return ("Unknown", "Unknown");
 
-            "1" => ("Senior", "1"),
-            "2" => ("Senior", "2"),
-            "3" => ("Senior", "3"),
-            "4" => ("Senior", "4"),
-            "5" => ("Senior", "5"),
-            "6" => ("Senior", "6"),
-            _ => ("Unknown", "Unknown")
-        };
-    }
+            string line = content.Substring(content.Length - 2, 1);
 
-    private static string RemoveQuotes(this string content)
-    {
-        return content.TrimStart('"').TrimEnd('"');
-    }
+            return line switch
+            {
+                "G" => ("Secondary", "G"),
+                "N" => ("Secondary", "N"),
 
-    private static string RemoveWhitespace(this string content)
-    {
-        return content.TrimStart(' ').TrimEnd(' ');
-    }
+                "V" => ("Alternate", "V"),
+                "Y" => ("Alternate", "Y"),
 
-    /// <summary>
-    ///  Extension Method to Remove HTML Tags from a given String.
-    /// </summary>
-    /// <param name="source">Sourch HTML String</param>
-    /// <returns>Plain Text</returns>
-    public static string RemoveHtml(this string source)
-    {
-        return HtmlHelper.RemoveHtmlTags(source);
-    }
+                "B" => ("Primary", "B"),
+                "P" => ("Primary", "P"),
+                "R" => ("Primary", "R"),
 
-    /// <summary>
-    /// Extension Method to Return a copy of this string converted to HTML markup.
-    /// </summary>
-    public static string ToHtml(this string source)
-    {
-        return ToHtml(source, false);
-    }
+                "1" => ("Senior", "1"),
+                "2" => ("Senior", "2"),
+                "3" => ("Senior", "3"),
+                "4" => ("Senior", "4"),
+                "5" => ("Senior", "5"),
+                "6" => ("Senior", "6"),
+                _ => ("Unknown", "Unknown")
+            };
+        }
 
-    /// <summary>
-    /// Extension Method to Return a copy of this string converted to HTML markup.
-    /// </summary>
-    /// <param name="source">Non-HTML Text Source String</param>
-    /// <param name="nofollow">If true, links are given "nofollow"
-    /// attribute</param>
-    public static string ToHtml(this string source, bool nofollow)
-    {
-        // Return HTML Version
-        return HtmlHelper.ConvertToHtml(source, nofollow);
+        public string ToHtml()
+        {
+            return ToHtml(content, false);
+        }
+
+        public string ToHtml(bool noFollow)
+        {
+            return HtmlHelper.ConvertToHtml(content, noFollow);
+        }
+
+        private string RemoveQuotes => content.TrimStart('"').TrimEnd('"');
+        
+        private string RemoveWhitespace => content.TrimStart(' ').TrimEnd(' ');
     }
 }

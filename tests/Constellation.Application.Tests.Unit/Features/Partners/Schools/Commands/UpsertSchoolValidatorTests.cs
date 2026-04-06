@@ -1,10 +1,13 @@
 ﻿namespace Constellation.Application.Tests.Unit.Features.Partners.Schools.Commands;
 
+using Core.Models.Identifiers;
 using Domains.Schools.Commands.UpsertSchool;
 
 public class UpsertSchoolCommandValidatorTests
 {
     private readonly UpsertSchoolCommandValidator _sut;
+
+    private readonly SchoolCode _schoolCode = SchoolCode.FromValue("1111");
 
     public UpsertSchoolCommandValidatorTests()
     {
@@ -17,7 +20,7 @@ public class UpsertSchoolCommandValidatorTests
         // Arrange
         var model = new UpsertSchoolCommand
         {
-            Code = "1111",
+            Code = _schoolCode,
             EmailAddress = "someschool@det.nsw.edu.au",
             PhoneNumber = "012345"
         };
@@ -37,7 +40,7 @@ public class UpsertSchoolCommandValidatorTests
         // Arrange
         var model = new UpsertSchoolCommand
         {
-            Code = "1111",
+            Code = _schoolCode,
             EmailAddress = "someschool@det.nsw.edu.au",
             PhoneNumber = "0123456789"
         };
@@ -57,7 +60,7 @@ public class UpsertSchoolCommandValidatorTests
         // Arrange
         var model = new UpsertSchoolCommand
         {
-            Code = "1111",
+            Code = _schoolCode,
             EmailAddress = "someschool@det.nsw.edu.au",
             PhoneNumber = "0212345678"
         };
@@ -75,7 +78,7 @@ public class UpsertSchoolCommandValidatorTests
         // Arrange
         var model = new UpsertSchoolCommand
         {
-            Code = "",
+            Code = SchoolCode.Empty,
             EmailAddress = "someschool@det.nsw.edu.au",
             PhoneNumber = "0212345678"
         };
@@ -95,7 +98,7 @@ public class UpsertSchoolCommandValidatorTests
         // Arrange
         var model = new UpsertSchoolCommand
         {
-            Code = "1111",
+            Code = _schoolCode,
             EmailAddress = "someschooldet.nsw.edu.au",
             PhoneNumber = "0212345678"
         };

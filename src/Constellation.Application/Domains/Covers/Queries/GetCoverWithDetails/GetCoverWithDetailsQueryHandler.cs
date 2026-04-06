@@ -5,8 +5,11 @@ using Constellation.Core.Models.Covers;
 using Constellation.Core.Models.Covers.Enums;
 using Constellation.Core.Models.Covers.Repositories;
 using Core.Abstractions.Repositories;
+using Core.Models;
+using Core.Models.Casuals;
 using Core.Models.Covers.Errors;
 using Core.Models.Identifiers;
+using Core.Models.Offerings;
 using Core.Models.Offerings.Repositories;
 using Core.Models.StaffMembers;
 using Core.Models.StaffMembers.Identifiers;
@@ -42,39 +45,39 @@ internal sealed class GetCoverWithDetailsQueryHandler
 
     public async Task<Result<CoverWithDetailsResponse>> Handle(GetCoverWithDetailsQuery request, CancellationToken cancellationToken)
     {
-        var cover = await _coverRepository.GetById(request.Id, cancellationToken);
+        Cover? cover = await _coverRepository.GetById(request.Id, cancellationToken);
 
         if (cover is null)
         {
             return Result.Failure<CoverWithDetailsResponse>(CoverErrors.NotFound(request.Id));
         }
 
-        var offering = await _offeringRepository
+        Offering? offering = await _offeringRepository
                 .GetById(cover.OfferingId, cancellationToken);
 
-        var offeringName = offering is null ? "" : offering.Name;
+        string offeringName = offering?.Name ?? "";
 
         string teacherName = "";
         string teacherSchool = "";
 
         if (cover.TeacherType == CoverTeacherType.Casual)
         {
-            var teacher = await _casualRepository.GetById(CasualId.FromValue(Guid.Parse(cover.TeacherId)), cancellationToken);
+            Casual? teacher = await _casualRepository.GetById(CasualId.FromValue(Guid.Parse(cover.TeacherId)), cancellationToken);
 
             if (teacher is not null)
             {
                 teacherName = teacher.Name.DisplayName;
 
-                var school = await _schoolRepository.GetById(teacher.SchoolCode, cancellationToken);
+                School? school = await _schoolRepository.GetById(teacher.SchoolCode, cancellationToken);
 
-                teacherSchool = school?.Name;
+                teacherSchool = school?.Name ?? string.Empty;
             }
         }
         else
         {
             StaffId staffId = StaffId.FromValue(Guid.Parse(cover.TeacherId));
 
-            StaffMember teacher = staffId == StaffId.Empty
+            StaffMember? teacher = staffId == StaffId.Empty
                 ? null
                 : await _staffRepository.GetById(staffId, cancellationToken);
 
@@ -84,11 +87,11 @@ internal sealed class GetCoverWithDetailsQueryHandler
 
                 teacherSchool = (teacher.CurrentAssignment is null)
                     ? string.Empty
-                    : (await _schoolRepository.GetById(teacher.CurrentAssignment.SchoolCode, cancellationToken))?.Name;
+                    : (await _schoolRepository.GetById(teacher.CurrentAssignment.SchoolCode, cancellationToken))?.Name ?? string.Empty;
             }
         }
 
-        CoverType coverType = cover switch
+        CoverType? coverType = cover switch
         {
             ClassCover => CoverType.ClassCover,
             AccessCover => CoverType.AccessCover,

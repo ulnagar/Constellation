@@ -11,6 +11,7 @@ using Constellation.Core.Models.SchoolContacts.Identifiers;
 using Constellation.Core.Shared;
 using Constellation.Presentation.Shared.Helpers.Attributes;
 using Core.Abstractions.Services;
+using Core.Models.Identifiers;
 using Core.Models.SchoolContacts.Enums;
 using Core.ValueObjects;
 using MediatR;
@@ -70,7 +71,7 @@ public class UpsertModel : BasePageModel
     public PhoneNumber? PhoneNumber { get; set; } = PhoneNumber.Empty;
 
     [BindProperty]
-    public string SchoolCode { get; set; }
+    public SchoolCode SchoolCode { get; set; }
 
     [BindProperty]
     public Position Role { get; set; }
@@ -111,7 +112,7 @@ public class UpsertModel : BasePageModel
 
     public async Task<IActionResult> OnPostCreate()
     {
-        if (string.IsNullOrWhiteSpace(SchoolCode))
+        if (SchoolCode == SchoolCode.Empty)
             ModelState.AddModelError("SchoolCode", "You must select a school");
 
         if (!ModelState.IsValid)

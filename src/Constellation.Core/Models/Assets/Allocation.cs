@@ -86,7 +86,7 @@ public class Allocation : IAuditableEntity
         Allocation allocation = new(
             assetId,
             AllocationType.School,
-            school.Code,
+            school.Code.ToString(),
             school.Name);
 
         allocation.SetAllocationDate(allocatedOn);

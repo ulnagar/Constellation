@@ -1,6 +1,7 @@
 ﻿namespace Constellation.Presentation.Schools.Areas.Schools.Pages.Shared.Components.SchoolSelectorModal;
 
 using Constellation.Application.Domains.Schools.Queries.GetSchoolsForContact;
+using Core.Models.Identifiers;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using System.Collections.Generic;
 
@@ -12,5 +13,5 @@ public sealed class SchoolSelectorModalViewModel
 
 
     public SelectList SchoolsList { get; set; }
-    public string NewSchoolCode { get; set; }
+    public SchoolCode NewSchoolCode { get; set; }
 }

@@ -80,17 +80,17 @@ internal sealed class ExportContactListCommandHandler
 
         List<Student> students = await _studentRepository
             .GetFilteredStudents(
-                request.OfferingCodes,
-                request.CourseIds,
-                request.Grades,
-                request.SchoolCodes,
+                request.Filter.OfferingIds,
+                request.Filter.CourseIds,
+                request.Filter.Grades,
+                request.Filter.SchoolCodes,
                 cancellationToken);
 
-        if (request.Flags.Any())
+        if (request.Filter.Flags.Count > 0)
         {
             List<StudentId> studentIds = [];
 
-            foreach (string flag in request.Flags)
+            foreach (StudentFlag flag in request.Filter.Flags)
             {
                 List<StudentId> idsWithFlag = await _flagCache.GetStudentsWithFlag(flag);
                 studentIds.AddRange(idsWithFlag);
@@ -130,6 +130,7 @@ internal sealed class ExportContactListCommandHandler
                 enrolment.Grade,
                 enrolment.SchoolName,
                 ContactCategory.Student,
+                student.Id,
                 student.Name.DisplayName,
                 student.EmailAddress,
                 PhoneNumber.Empty,
@@ -152,6 +153,7 @@ internal sealed class ExportContactListCommandHandler
                     enrolment.Grade,
                     enrolment.SchoolName,
                     ContactCategory.PartnerSchoolSchool,
+                    school.Code,
                     enrolment.SchoolName,
                     schoolEmail.Value,
                     schoolPhone.IsSuccess ? schoolPhone.Value : PhoneNumber.Empty,
@@ -185,6 +187,7 @@ internal sealed class ExportContactListCommandHandler
                         enrolment.Grade,
                         enrolment.SchoolName,
                         category,
+                        contact.Id,
                         contact.Name.DisplayName,
                         contact.EmailAddress,
                         contact.PhoneNumber,
@@ -211,6 +214,7 @@ internal sealed class ExportContactListCommandHandler
                         enrolment.Grade,
                         enrolment.SchoolName,
                         ContactCategory.ResidentialFamily,
+                        family.Id,
                         family.FamilyTitle,
                         familyEmail.Value,
                         PhoneNumber.Empty,
@@ -231,6 +235,7 @@ internal sealed class ExportContactListCommandHandler
                             enrolment.Grade,
                             enrolment.SchoolName,
                             category,
+                            parent.Id,
                             parent.Name.DisplayName,
                             parent.EmailAddress,
                             parent.MobileNumber,
@@ -245,6 +250,7 @@ internal sealed class ExportContactListCommandHandler
                         enrolment.Grade,
                         enrolment.SchoolName,
                         ContactCategory.NonResidentialFamily,
+                        family.Id,
                         family.FamilyTitle,
                         familyEmail.Value,
                         PhoneNumber.Empty,
@@ -258,6 +264,7 @@ internal sealed class ExportContactListCommandHandler
                             enrolment.Grade,
                             enrolment.SchoolName,
                             ContactCategory.NonResidentialParent,
+                            parent.Id,
                             parent.Name.DisplayName,
                             parent.EmailAddress,
                             parent.MobileNumber,
@@ -291,6 +298,7 @@ internal sealed class ExportContactListCommandHandler
                         enrolment.Grade,
                         enrolment.SchoolName,
                         ContactCategory.AuroraTeacher,
+                        teacher.Id,
                         teacherName,
                         teacher.EmailAddress,
                         PhoneNumber.Empty,
@@ -332,6 +340,7 @@ internal sealed class ExportContactListCommandHandler
                         enrolment.Grade,
                         enrolment.SchoolName,
                         ContactCategory.AuroraHeadTeacher,
+                        headTeacher.Id,
                         teacherName,
                         headTeacher.EmailAddress,
                         PhoneNumber.Empty,
@@ -340,11 +349,11 @@ internal sealed class ExportContactListCommandHandler
             }
         }
 
-        if (request.ContactCateogries.Count > 0)
+        if (request.Filter.Categories.Count > 0)
         {
             result = result
                 .Where(entry =>
-                    request.ContactCateogries.Contains(entry.Category))
+                    request.Filter.Categories.Contains(entry.Category))
                 .ToList();
         }
 

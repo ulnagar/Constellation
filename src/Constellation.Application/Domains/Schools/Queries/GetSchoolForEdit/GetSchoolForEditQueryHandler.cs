@@ -25,7 +25,7 @@ internal sealed class GetSchoolForEditQueryHandler
 
     public async Task<Result<SchoolEditResponse>> Handle(GetSchoolForEditQuery request, CancellationToken cancellationToken)
     {
-        School school = await _schoolRepository.GetById(request.SchoolCode, cancellationToken);
+        School? school = await _schoolRepository.GetById(request.SchoolCode, cancellationToken);
 
         if (school is null)
         {

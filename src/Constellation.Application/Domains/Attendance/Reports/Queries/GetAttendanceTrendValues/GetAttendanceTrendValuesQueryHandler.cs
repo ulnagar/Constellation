@@ -43,12 +43,12 @@ internal sealed class GetAttendanceTrendValuesQueryHandler
 
         foreach (IGrouping<StudentId, AttendanceValue> studentEntries in groupedValues)
         {
-            Student student = students.FirstOrDefault(entry => entry.Id == studentEntries.Key);
+            Student? student = students.FirstOrDefault(entry => entry.Id == studentEntries.Key);
 
             if (student is null)
                 continue;
 
-            SchoolEnrolment enrolment = student.CurrentEnrolment;
+            SchoolEnrolment? enrolment = student.CurrentEnrolment;
 
             if (enrolment is null) 
                 continue;

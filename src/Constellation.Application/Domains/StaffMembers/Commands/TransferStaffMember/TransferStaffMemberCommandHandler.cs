@@ -38,7 +38,7 @@ internal sealed class TransferStaffMemberCommandHandler : ICommandHandler<Transf
 
     public async Task<Result> Handle(TransferStaffMemberCommand request, CancellationToken cancellationToken)
     {
-        StaffMember staffMember = await _staffRepository.GetById(request.StaffId, cancellationToken);
+        StaffMember? staffMember = await _staffRepository.GetById(request.StaffId, cancellationToken);
 
         if (staffMember is null)
         {
@@ -50,7 +50,7 @@ internal sealed class TransferStaffMemberCommandHandler : ICommandHandler<Transf
             return Result.Failure(StaffMemberErrors.NotFound(request.StaffId));
         }
 
-        School school = await _schoolRepository.GetById(request.SchoolCode, cancellationToken);
+        School? school = await _schoolRepository.GetById(request.SchoolCode, cancellationToken);
 
         if (school is null)
         {

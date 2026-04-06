@@ -68,17 +68,17 @@ internal sealed class GetAbsencesForExportQueryHandler
 
         foreach (Absence absence in absences)
         {
-            Student student = await _studentRepository.GetById(absence.StudentId, cancellationToken);
+            Student? student = await _studentRepository.GetById(absence.StudentId, cancellationToken);
 
             if (student is null)
                 continue;
 
-            SchoolEnrolment enrolment = student.CurrentEnrolment;
+            SchoolEnrolment? enrolment = student.CurrentEnrolment;
 
             if (enrolment is null)
                 continue;
 
-            if (!string.IsNullOrWhiteSpace(request.Filter.SchoolCode) && enrolment.SchoolCode != request.Filter.SchoolCode)
+            if (enrolment.SchoolCode != request.Filter.SchoolCode)
                 continue;
 
             if (request.Filter.Grade.HasValue && enrolment.Grade != (Grade)request.Filter.Grade)
@@ -90,7 +90,7 @@ internal sealed class GetAbsencesForExportQueryHandler
             {
                 OfferingId offeringId = OfferingId.FromValue(absence.SourceId);
 
-                Offering offering = await _offeringRepository.GetById(offeringId, cancellationToken);
+                Offering? offering = await _offeringRepository.GetById(offeringId, cancellationToken);
 
                 if (offering is null)
                 {
@@ -106,7 +106,7 @@ internal sealed class GetAbsencesForExportQueryHandler
             {
                 TutorialId tutorialId = TutorialId.FromValue(absence.SourceId);
 
-                Tutorial tutorial = await _tutorialRepository.GetById(tutorialId, cancellationToken);
+                Tutorial? tutorial = await _tutorialRepository.GetById(tutorialId, cancellationToken);
 
                 if (tutorial is null)
                 {

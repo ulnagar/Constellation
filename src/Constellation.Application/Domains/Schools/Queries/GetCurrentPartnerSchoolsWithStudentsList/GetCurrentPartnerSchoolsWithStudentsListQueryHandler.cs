@@ -25,6 +25,6 @@ internal sealed class GetCurrentPartnerSchoolsWithStudentsListQueryHandler
     {
         List<School> schools = await _schoolRepository.GetWithCurrentStudents(cancellationToken);
 
-        return schools.OrderBy(school => school.Name).Select(school => new SchoolSelectionListResponse(school.Code, school.Name)).ToList();
+        return schools.OrderBy(school => school.Name).Select(school => new SchoolSelectionListResponse(school.Code.ToString(), school.Name)).ToList();
     }
 }

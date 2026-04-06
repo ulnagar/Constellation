@@ -19,3 +19,8 @@ public sealed record SmsDeliveryReceiptEvent(
     string? Status,
     DateTimeOffset DateTime)
     : TrackingEvent;
+
+public sealed record EmailClickEvent(
+    EmailId EmailId,
+    string DestinationUrl)
+    : TrackingEvent;

@@ -1,5 +1,6 @@
 ﻿namespace Constellation.Application.Domains.Schools.Queries.GetSchoolDetails;
 
+using Core.Models.Identifiers;
 using Core.Models.Offerings.Identifiers;
 using Core.Models.SchoolContacts.Enums;
 using Core.Models.SchoolContacts.Identifiers;
@@ -10,7 +11,7 @@ using Students.Queries.GetCurrentStudentsWithCurrentOfferings;
 using System.Collections.Generic;
 
 public sealed record SchoolDetailsResponse(
-    string SchoolCode,
+    SchoolCode SchoolCode,
     string Name,
     string Address,
     string Town,

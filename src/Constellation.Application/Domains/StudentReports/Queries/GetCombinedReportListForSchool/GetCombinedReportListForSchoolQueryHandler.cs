@@ -34,10 +34,9 @@ internal sealed class GetCombinedReportListForSchoolQueryHandler
     {
         List<SchoolReportResponse> results = new();
 
-        List<Student> students =
-            await _studentRepository.GetCurrentStudentsFromSchool(request.SchoolCode, cancellationToken);
+        List<Student> students = await _studentRepository.GetCurrentStudentsFromSchool(request.SchoolCode, cancellationToken);
 
-        if (students is null || students.Count == 0)
+        if (students.Count == 0)
             return results;
 
         foreach (Student student in students)
@@ -47,8 +46,8 @@ internal sealed class GetCombinedReportListForSchoolQueryHandler
             if (enrolment is null)
                 continue;
 
-            var academicReports = await _reportRepository.GetAcademicReportsForStudent(student.Id, cancellationToken);
-            var externalReports = await _reportRepository.GetExternalReportsForStudent(student.Id, cancellationToken);
+            List<AcademicReport> academicReports = await _reportRepository.GetAcademicReportsForStudent(student.Id, cancellationToken);
+            List<ExternalReport> externalReports = await _reportRepository.GetExternalReportsForStudent(student.Id, cancellationToken);
 
             foreach (AcademicReport report in academicReports)
             {

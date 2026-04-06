@@ -1,6 +1,7 @@
 ﻿namespace Constellation.Infrastructure.Persistence.ConstellationContext.EntityConfigurations;
 
 using Constellation.Core.Models;
+using Core.Models.Identifiers;
 using Core.Models.StaffMembers;
 using Core.Models.Students;
 using Microsoft.EntityFrameworkCore;
@@ -16,6 +17,11 @@ public class SchoolConfiguration : IEntityTypeConfiguration<School>
 
         builder.Property(s => s.Code)
             .HasMaxLength(4);
+
+        builder.Property(s => s.Code)
+            .HasConversion(
+                id => id.Value,
+                value => SchoolCode.FromValue(value));
 
         builder.Property(s => s.PhoneNumber)
             .HasMaxLength(10);

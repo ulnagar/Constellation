@@ -5,6 +5,7 @@ using Application.Domains.Schools.Commands.UpsertSchool;
 using Application.Domains.Schools.Queries.GetSchoolForEdit;
 using Application.Models.Auth;
 using Core.Abstractions.Services;
+using Core.Models.Identifiers;
 using Core.Shared;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
@@ -39,10 +40,7 @@ public class UpsertModel : BasePageModel
     [ViewData] public string PageTitle { get; set; } = "New School";
 
     [BindProperty(SupportsGet = true)]
-    public string? Id { get; set; } = null;
-
-    [BindProperty] 
-    public string SchoolCode { get; set; } = string.Empty;
+    public SchoolCode SchoolCode { get; set; } = SchoolCode.Empty;
 
     [BindProperty]
     public string Name { get; set; } = string.Empty;
@@ -82,13 +80,13 @@ public class UpsertModel : BasePageModel
 
     public async Task OnGet()
     {
-        if (Id is null)
+        if (SchoolCode == SchoolCode.Empty)
             return;
 
         _logger
-            .Information("Requested to retrieve School with id {Id} for edit by user {User}", Id, _currentUserService.UserName);
+            .Information("Requested to retrieve School with id {Id} for edit by user {User}", SchoolCode, _currentUserService.UserName);
 
-        Result<SchoolEditResponse> school = await _mediator.Send(new GetSchoolForEditQuery(Id));
+        Result<SchoolEditResponse> school = await _mediator.Send(new GetSchoolForEditQuery(SchoolCode));
 
         if (school.IsFailure)
         {
@@ -98,7 +96,7 @@ public class UpsertModel : BasePageModel
 
             _logger
                 .ForContext(nameof(Error), school.Error, true)
-                .Information("Failed to retrieve School with id {Id} for edit by user {User}", Id, _currentUserService.UserName);
+                .Information("Failed to retrieve School with id {Id} for edit by user {User}", SchoolCode, _currentUserService.UserName);
             
             return;
         }

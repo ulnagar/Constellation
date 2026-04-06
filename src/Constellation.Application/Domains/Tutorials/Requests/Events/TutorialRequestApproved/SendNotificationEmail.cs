@@ -82,7 +82,7 @@ internal sealed class SendNotificationEmail
                 if (!scheduler.Value.Contains(tutorialRequest.Grade))
                     continue;
 
-                Result<EmailRecipient> schedulerEmail = scheduler.Key.GetEmailRecipient();
+                Result<EmailRecipient> schedulerEmail = scheduler.Key.GetEmailRecipient;
 
                 if (schedulerEmail.IsFailure)
                 {

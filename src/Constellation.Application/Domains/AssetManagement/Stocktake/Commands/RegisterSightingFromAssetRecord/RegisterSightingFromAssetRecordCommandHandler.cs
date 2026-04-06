@@ -45,7 +45,7 @@ internal sealed class RegisterSightingFromAssetRecordCommandHandler
     }
     public async Task<Result> Handle(RegisterSightingFromAssetRecordCommand request, CancellationToken cancellationToken)
     {
-        Asset asset = await _assetRepository.GetById(request.AssetId, cancellationToken);
+        Asset? asset = await _assetRepository.GetById(request.AssetId, cancellationToken);
 
         if (asset is null)
         {
@@ -57,7 +57,7 @@ internal sealed class RegisterSightingFromAssetRecordCommandHandler
             return Result.Failure(AssetErrors.NotFoundById(request.AssetId));
         }
 
-        StocktakeEvent @event = await _stocktakeRepository.GetById(request.EventId, cancellationToken);
+        StocktakeEvent? @event = await _stocktakeRepository.GetById(request.EventId, cancellationToken);
 
         if (@event is null)
         {
@@ -75,7 +75,7 @@ internal sealed class RegisterSightingFromAssetRecordCommandHandler
             asset.ModelDescription,
             asset.CurrentLocation?.Category.AsStocktakeLocationCategory() ?? LocationCategory.Other,
             asset.CurrentLocation?.Site ?? string.Empty,
-            asset.CurrentLocation?.SchoolCode ?? string.Empty,
+            asset.CurrentLocation?.SchoolCode.ToString() ?? string.Empty,
             asset.CurrentAllocation?.AllocationType.AsStocktakeUserType() ?? UserType.Other,
             asset.CurrentAllocation?.ResponsibleOfficer ?? string.Empty,
             asset.CurrentAllocation?.UserId ?? string.Empty,

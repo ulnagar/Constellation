@@ -12,6 +12,7 @@ using Enums;
 using Errors;
 using Extensions;
 using Identifiers;
+using Models.Identifiers;
 using Shared;
 using StaffMembers;
 using StaffMembers.Identifiers;
@@ -34,7 +35,7 @@ public sealed class AttendanceCaseDetail : CaseDetail
     public StudentId StudentId { get; private set; } = StudentId.Empty;
     public string Name { get; private set; } = string.Empty;
     public Grade Grade { get; private set; }
-    public string SchoolCode { get; private set; } = string.Empty;
+    public SchoolCode SchoolCode { get; private set; } = SchoolCode.Empty;
     public string SchoolName { get; private set; } = string.Empty;
     public AttendanceValueId AttendanceValueId { get; private set; } = AttendanceValueId.Empty;
     public string PeriodLabel { get; private set; } = string.Empty;
@@ -103,7 +104,7 @@ public sealed class ComplianceCaseDetail : CaseDetail
     public StudentId StudentId { get; private set; } = StudentId.Empty;
     public string Name { get; private set; } = string.Empty;
     public Grade Grade { get; private set; }
-    public string SchoolCode { get; private set; } = string.Empty;
+    public SchoolCode SchoolCode { get; private set; } = SchoolCode.Empty;
     public string SchoolName { get; private set; } = string.Empty;
     public string IncidentId { get; private set; } = string.Empty;
     public string IncidentType { get; private set; } = string.Empty;
