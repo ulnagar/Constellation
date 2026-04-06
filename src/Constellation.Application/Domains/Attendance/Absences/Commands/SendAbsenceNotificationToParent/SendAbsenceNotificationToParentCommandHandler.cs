@@ -191,7 +191,7 @@ internal sealed class SendAbsenceNotificationToParentCommandHandler
                             if (smsRecipient.IsSuccess)
                             {
                                 Result<List<OutgoingSmsConfirmation>> sentMessages = await _smsService.SendAbsenceNotification(
-                                    group.ToList(),
+                                    group.First().Date,
                                     student,
                                     [smsRecipient.Value],
                                     cancellationToken);

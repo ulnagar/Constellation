@@ -1,9 +1,7 @@
 ﻿namespace Constellation.Infrastructure.ExternalServices.SMS;
 
-using Application.Domains.Attendance.Absences.Commands.ConvertAbsenceToAbsenceEntry;
 using Application.Domains.Messaging.Sms.Dtos;
 using Application.Interfaces.Gateways;
-using Azure.Messaging;
 using Constellation.Application.Interfaces.Services;
 using Core.Errors;
 using Core.Models.Messaging.Enums;
@@ -15,6 +13,7 @@ using Core.ValueObjects;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.Options;
+using System.Globalization;
 
 public sealed class Service : ISMSService
 {
@@ -83,24 +82,20 @@ public sealed class Service : ISMSService
     }
 
     public async Task<Result<List<OutgoingSmsConfirmation>>> SendAbsenceNotification(
-        List<AbsenceEntry> absences,
+        DateOnly absenceDate,
         Student student,
         List<SmsRecipient> recipients,
         CancellationToken cancellationToken = default)
     {
-        string classListString = string.Empty;
-        foreach (string offering in absences.Select(absence => absence.OfferingName).OrderBy(c => c))
-            classListString += $"{offering}\r\n";
+        const string link = $"http://edu.nsw.link/aurora";
 
-        string link = $"http://edu.nsw.link/aurora";
-
-        string messageText = $"{student.Name.PreferredName} was absent from the following classes on {absences.First().Date.ToShortDateString()}\r\n{classListString}To explain these absences, please click here {link}";
+        string messageText = $"{student.Name.PreferredName} was absent from classes on {absenceDate.ToShortDateString()}. To explain these absences, please login at {link} or reply using the code {absenceDate.ToString("ddMM", DateTimeFormatInfo.InvariantInfo)}";
 
         List<string> destinations = recipients.Select(recipient => recipient.Number).ToList();
 
         OutgoingSms messageContent = new()
         {
-            origin = _configuration.OutgoingNumber,
+            origin = SmsRecipient.Aurora.Number,
             destinations = destinations,
             message = messageText
         };
