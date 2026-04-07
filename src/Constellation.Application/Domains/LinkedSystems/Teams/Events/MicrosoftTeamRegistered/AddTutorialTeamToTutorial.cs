@@ -5,7 +5,7 @@ using Constellation.Core.Models.LinkedSystems;
 using Core.Abstractions.Clock;
 using Core.Abstractions.Repositories;
 using Core.DomainEvents;
-using Core.Models;
+using Core.Helpers;
 using Core.Models.LinkedSystems.Errors;
 using Core.Models.Tutorials;
 using Core.Models.Tutorials.Errors;
@@ -67,12 +67,11 @@ public sealed class AddTutorialTeamToTutorial : IDomainEventHandler<MicrosoftTea
             return;
         }
 
-        string pattern = @"\d{2}T[a-zA-Z]{2}X\d";
         string tutName = string.Empty;
 
         foreach (string part in descriptionParts)
         {
-            Match match = Regex.Match(part, pattern);
+            Match match = RegularExpressions.TutorialName().Match(part);
 
             if (match.Success)
                 tutName = match.Value;

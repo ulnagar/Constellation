@@ -1,6 +1,7 @@
 ﻿namespace Constellation.Application.Domains.MeritAwards.Awards.Queries.GetAwardDetailsFromSentral;
 
 using Abstractions.Messaging;
+using Core.Helpers;
 using Core.Shared;
 using Extensions;
 using HtmlAgilityPack;
@@ -9,7 +10,6 @@ using Serilog;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -18,7 +18,6 @@ internal sealed class GetAwardDetailsFromSentralQueryHandler
 {
     private readonly ISentralGateway _gateway;
     private readonly ILogger _logger;
-    private readonly Regex _parser = new(",(?=(?:[^\"]*\"[^\"]*\")*(?![^\"]*\"))");
     
     public GetAwardDetailsFromSentralQueryHandler(
         ISentralGateway gateway,
@@ -32,7 +31,7 @@ internal sealed class GetAwardDetailsFromSentralQueryHandler
     {
         List<AwardDetailResponse> response = new();
 
-        HtmlDocument document = await _gateway.GetAwardsReport(cancellationToken);
+        HtmlDocument? document = await _gateway.GetAwardsReport(cancellationToken);
 
         if (document is null)
         {
@@ -53,10 +52,9 @@ internal sealed class GetAwardDetailsFromSentralQueryHandler
         list.RemoveAt(0);
         list.RemoveAt(list.Count - 1);
 
-        for (int i = 0; i < list.Count; i++)
+        foreach (string entry in list)
         {
-            string entry = list[i];
-            string[] split = _parser.Split(entry);
+            string[] split = RegularExpressions.CommaSeparatedValueRow().Split(entry);
 
             // Index 0 = Award Category
             // Index 1 = Award Type

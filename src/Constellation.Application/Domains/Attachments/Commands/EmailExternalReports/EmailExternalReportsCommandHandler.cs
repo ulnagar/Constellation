@@ -193,15 +193,13 @@ internal sealed class EmailExternalReportsCommandHandler
 
                 RenderedEmail rendered = await _razorService.RenderEmail("/Views/Emails/PlainEmail.cshtml", body);
 
-                EmailMessage message = new()
-                {
-                    From = EmailRecipient.AuroraCollege,
-                    SendingModule = string.Empty,
-                    Subject = subject,
-                    BodyText = rendered.PlainText,
-                    BodyHtml = rendered.Html,
-                    CreatedAt = DateTimeOffset.UtcNow
-                };
+                EmailMessage message = new(
+                    "External Reports",
+                    EmailRecipient.AuroraCollege,
+                    null,
+                    subject,
+                    rendered.PlainText,
+                    rendered.Html);
 
                 message.AddRecipient(recipient, EmailRecipientType.To);
 

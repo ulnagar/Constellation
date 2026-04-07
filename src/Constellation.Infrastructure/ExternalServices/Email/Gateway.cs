@@ -2,6 +2,7 @@
 
 using Application.Interfaces.Services;
 using Constellation.Application.Interfaces.Gateways;
+using Core.Helpers;
 using Core.Models.Messaging.Email;
 using Core.Models.Messaging.Email.Enums;
 using Core.Models.Messaging.Email.Identifiers;
@@ -13,6 +14,7 @@ using Microsoft.Extensions.Options;
 using MimeKit;
 using MimeKit.Text;
 using System.Net.Mail;
+using System.Text.RegularExpressions;
 using SmtpClient = MailKit.Net.Smtp.SmtpClient;
 
 public class Gateway : IEmailGateway
@@ -67,7 +69,14 @@ public class Gateway : IEmailGateway
         Result<string> result = await PushToServer(message.Id, mime, cancellationToken);
 
         if (result.IsSuccess)
-            message.MarkSent(result.Value);
+        {
+            Match messageId = RegularExpressions.EmailServerMessageId().Match(result.Value);
+
+            if (messageId.Success)
+                message.MarkSent("DoE", messageId.Groups[1].Value);
+            else
+                message.MarkSent();
+        }
         else
             message.MarkFailed(result.Error.Message);
 
@@ -173,6 +182,8 @@ public class Gateway : IEmailGateway
 
         using SmtpClient client = new();
 
+        string response;
+
         try
         {
             client.ServerCertificateValidationCallback = (s, c, h, e) => true;
@@ -189,7 +200,7 @@ public class Gateway : IEmailGateway
                     _configuration.Password,
                     cancellationToken);
 
-            string response = await client.SendAsync(message, cancellationToken);
+            response = await client.SendAsync(message, cancellationToken);
 
             _logger
                 .Information("{id}: Email send response: {response}", messageId, response);
@@ -207,6 +218,6 @@ public class Gateway : IEmailGateway
             await client.DisconnectAsync(false, cancellationToken);
         }
 
-        return string.Empty;
+        return response;
     }
 }

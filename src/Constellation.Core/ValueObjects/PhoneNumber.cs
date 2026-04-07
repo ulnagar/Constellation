@@ -1,6 +1,7 @@
 ﻿namespace Constellation.Core.ValueObjects;
 
 using Errors;
+using Helpers;
 using Newtonsoft.Json;
 using Primitives;
 using Shared;
@@ -10,8 +11,6 @@ using System.Text.RegularExpressions;
 public sealed class PhoneNumber : ValueObject
 {
     public static readonly PhoneNumber Empty = new(string.Empty);
-
-    private const string _regExFormat = @"^(?:\+?(61))? ?(?:\((?=.*\)))?(0?[2-57-8])\)? ?(\d\d(?:[- ](?=\d{3})|(?!\d\d[- ]?\d[- ]))\d\d[- ]?\d[- ]?\d{3})$";
 
     [JsonConstructor]
     private PhoneNumber(string number)
@@ -38,7 +37,7 @@ public sealed class PhoneNumber : ValueObject
             return Result.Failure<PhoneNumber>(DomainErrors.ValueObjects.PhoneNumber.NumberInvalid);
         }
 
-        if (!Regex.IsMatch(trimmedNumber, _regExFormat))
+        if (!RegularExpressions.PhoneNumber().IsMatch(trimmedNumber))
         {
             return Result.Failure<PhoneNumber>(DomainErrors.ValueObjects.PhoneNumber.NumberInvalid);
         }

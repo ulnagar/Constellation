@@ -1,6 +1,7 @@
 ﻿namespace Constellation.Core.Models.Students.ValueObjects;
 
 using Errors;
+using Helpers;
 using Primitives;
 using Shared;
 using System.Collections.Generic;
@@ -8,8 +9,6 @@ using System.Text.RegularExpressions;
 
 public sealed class StudentReferenceNumber : ValueObject
 {
-    private const string _srnRegex = @"^\d{9}$";
-
     public static readonly StudentReferenceNumber Empty = new(string.Empty);
 
     public string Number { get; }
@@ -26,7 +25,7 @@ public sealed class StudentReferenceNumber : ValueObject
         if (string.IsNullOrWhiteSpace(srn))
             return Result.Failure<StudentReferenceNumber>(StudentReferenceNumberErrors.EmptyValue);
 
-        if (!Regex.IsMatch(srn, _srnRegex))
+        if (!RegularExpressions.StudentReferenceNumber().IsMatch(srn))
             return Result.Failure<StudentReferenceNumber>(StudentReferenceNumberErrors.InvalidValue(srn));
 
         return new StudentReferenceNumber(srn);

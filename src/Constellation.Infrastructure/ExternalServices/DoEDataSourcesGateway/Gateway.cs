@@ -2,6 +2,7 @@
 
 using Constellation.Application.DTOs;
 using Constellation.Application.Interfaces.Gateways;
+using Core.Helpers;
 using Microsoft.Extensions.Options;
 using System.Globalization;
 using System.Net;
@@ -101,11 +102,10 @@ internal class Gateway : IDoEDataSourcesGateway
         TextInfo textInfo = new CultureInfo("en-AU", false).TextInfo;
 
         List<DataCollectionsSchoolResponse> list = new List<DataCollectionsSchoolResponse>();
-        Regex CSVParser = new Regex(",(?=(?:[^\"]*\"[^\"]*\")*(?![^\"]*\"))");
-
+        
         foreach (string entry in entries)
         {
-            string[] splitString = CSVParser.Split(entry);
+            string[] splitString = RegularExpressions.CommaSeparatedValueRow().Split(entry);
             if (splitString[0].Length > 4 || splitString.Length == 1)
                 continue;
 

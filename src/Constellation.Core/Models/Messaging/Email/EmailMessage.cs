@@ -15,48 +15,73 @@ public sealed class EmailMessage : IHasCreatedAt
     private readonly List<EmailTrackingEvent> _events = [];
     private readonly List<EmailLink> _links = [];
 
-    public EmailId Id { get; init; } = new();
-    public required string SendingModule { get; set; }
+    private EmailMessage() { }
 
-    public DateTimeOffset CreatedAt { get; set; }
-    public DateTimeOffset? SentAt { get; set; }
-    public DateTimeOffset? StatusUpdatedAt { get; set; }
+    public EmailMessage(
+        string sendingModule,
+        MessageSender from,
+        MessageSender? replyTo,
+        string subject,
+        string bodyText,
+        string bodyHtml)
+    {
+        Id = new();
+
+        SendingModule = sendingModule;
+        CreatedAt = DateTimeOffset.UtcNow;
+
+        From = from;
+        ReplyTo = replyTo;
+
+        Subject = subject;
+        BodyText = bodyText;
+        BodyHtml = bodyHtml;
+
+        Status = MessageStatus.Pending;
+    }
+
+    public EmailId Id { get; init; }
+    public string SendingModule { get; private set; }
+
+    public DateTimeOffset CreatedAt { get; private set; }
+    public DateTimeOffset? SentAt { get; private set; }
+    public DateTimeOffset? StatusUpdatedAt { get; private set; }
 
     // Sender — single value, owned directly on the message
-    public required MessageSender From { get; set; }
-    public MessageSender? ReplyTo { get; set; }
+    public MessageSender From { get; private set; }
+    public MessageSender? ReplyTo { get; private set; }
 
     // Content
-    public required string Subject { get; set; }
-    public required string BodyText { get; set; }
-    public required string BodyHtml { get; set; }
+    public string Subject { get; private set; }
+    public string BodyText { get; private set; }
+    public string BodyHtml { get; private set; }
 
     // Status & Delivery
-    public MessageStatus Status { get; set; } = MessageStatus.Pending;
-    public string? Provider { get; set; }
-    public string? ProviderMessageId { get; set; }
-    public string? ErrorMessage { get; set; }
+    public MessageStatus Status { get; private set; }
+    public string? Provider { get; private set; } = string.Empty;
+    public string? ProviderMessageId { get; private set; } = string.Empty;
+    public string? ErrorMessage { get; private set; }
 
     // Open tracking (denormalised for quick reads)
-    public int OpenCount { get; set; } = 0;
-    public DateTimeOffset? FirstOpenedAt { get; set; }
-    public DateTimeOffset? LastOpenedAt { get; set; }
-    public int ClickCount { get; set; } = 0;
-    public DateTimeOffset? FirstClickedAt { get; set; }
-    public DateTimeOffset? LastClickedAt { get; set; }
+    public int OpenCount { get; private set; }
+    public DateTimeOffset? FirstOpenedAt { get; private set; }
+    public DateTimeOffset? LastOpenedAt { get; private set; }
+    public int ClickCount { get; private set; } 
+    public DateTimeOffset? FirstClickedAt { get; private set; }
+    public DateTimeOffset? LastClickedAt { get; private set; }
 
 
     // Metadata
-    public string? TemplateId { get; set; }
-    public string? Tags { get; set; }
-    public string? Metadata { get; set; }
+    public string? TemplateId { get; private set; } = string.Empty;
+    public string? Tags { get; private set; } = string.Empty;
+    public string? Metadata { get; private set; } = string.Empty;
 
     // Navigation
     public IReadOnlyList<EmailMessageRecipient> Recipients => _recipients.AsReadOnly();
     public IReadOnlyList<EmailTrackingEvent> TrackingEvents => _events.AsReadOnly();
     public IReadOnlyList<EmailLink> Links => _links.AsReadOnly();
 
-    public Result MarkSent(string? providerMessageId = null)
+    public Result MarkSent(string? provider = null, string? providerMessageId = null)
     {
         if (Status != MessageStatus.Pending)
             return Result.Failure(EmailMessagingErrors.InvalidStatusTransition(Status, MessageStatus.Sent));
@@ -64,7 +89,8 @@ public sealed class EmailMessage : IHasCreatedAt
         Status = MessageStatus.Sent;
         SentAt = DateTimeOffset.UtcNow;
         StatusUpdatedAt = DateTimeOffset.UtcNow;
-        ProviderMessageId = providerMessageId;
+        Provider = provider ?? string.Empty;
+        ProviderMessageId = providerMessageId ?? string.Empty;
 
         return Result.Success();
     }
@@ -145,17 +171,15 @@ public sealed class EmailMessage : IHasCreatedAt
         return Result.Success();
     }
 
-    public Result RegisterLink(string destinationUrl)
+    public void RegisterLink(string destinationUrl)
     {
         if (_links.Any(l => l.DestinationUrl.Equals(destinationUrl, StringComparison.OrdinalIgnoreCase)))
-            return Result.Success(); // Already registered — not an error, just a duplicate link in the template
+            return; // Already registered — not an error, just a duplicate link in the template
 
         _links.Add(new EmailLink
         {
             DestinationUrl = destinationUrl,
             EmailId = Id
         });
-
-        return Result.Success();
     }
 }

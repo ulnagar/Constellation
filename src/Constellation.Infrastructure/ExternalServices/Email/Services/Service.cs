@@ -62,15 +62,13 @@ public sealed partial class Service : IEmailService
     {
         RenderedEmail rendered = await _razorService.RenderEmail("/Views/Emails/PlainEmail.cshtml", body);
 
-        EmailMessage message = new()
-        {
-            From = from,
-            SendingModule = string.Empty,
-            Subject = subject,
-            BodyText = rendered.PlainText,
-            BodyHtml = rendered.Html,
-            CreatedAt = DateTimeOffset.UtcNow
-        };
+        EmailMessage message = new(
+            "System",
+            from,
+            null,
+            subject,
+            rendered.PlainText,
+            rendered.Html);
 
         foreach (string entry in recipients)
         {
@@ -113,15 +111,13 @@ public sealed partial class Service : IEmailService
     {
         RenderedEmail rendered = await _razorService.RenderEmail("/Views/Emails/PlainEmail.cshtml", body);
 
-        EmailMessage message = new()
-        {
-            From = from,
-            SendingModule = string.Empty,
-            Subject = subject,
-            BodyText = rendered.PlainText,
-            BodyHtml = rendered.Html,
-            CreatedAt = DateTimeOffset.UtcNow
-        };
+        EmailMessage message = new(
+            "System",
+            from,
+            null,
+            subject,
+            rendered.PlainText,
+            rendered.Html);
 
         foreach (EmailRecipient entry in recipients)
             message.AddRecipient(entry, EmailRecipientType.To);
@@ -150,15 +146,13 @@ public sealed partial class Service : IEmailService
     {
         RenderedEmail rendered = await _razorService.RenderEmail(viewModel.ViewLocation, viewModel);
 
-        EmailMessage message = new()
-        {
-            From = from,
-            SendingModule = sendingModule,
-            Subject = subject,
-            BodyText = rendered.PlainText,
-            BodyHtml = rendered.Html,
-            CreatedAt = DateTimeOffset.UtcNow
-        };
+        EmailMessage message = new(
+            sendingModule,
+            from,
+            null,
+            subject,
+            rendered.PlainText,
+            rendered.Html);
 
         foreach (string entry in recipients)
         {
@@ -207,15 +201,13 @@ public sealed partial class Service : IEmailService
     {
         RenderedEmail rendered = await _razorService.RenderEmail(viewModel.ViewLocation, viewModel);
 
-        EmailMessage message = new()
-        {
-            From = from,
-            SendingModule = sendingModule,
-            Subject = subject,
-            BodyText = rendered.PlainText,
-            BodyHtml = rendered.Html,
-            CreatedAt = DateTimeOffset.UtcNow
-        };
+        EmailMessage message = new(
+            sendingModule,
+            from,
+            null,
+            subject,
+            rendered.PlainText,
+            rendered.Html);
 
         foreach (EmailRecipient entry in recipients)
             message.AddRecipient(entry, EmailRecipientType.To);

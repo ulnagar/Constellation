@@ -3,13 +3,12 @@
 using Constellation.Core.Errors;
 using Constellation.Core.Primitives;
 using Constellation.Core.Shared;
+using Helpers;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 
 public sealed class EmailAddress : ValueObject
 {
-    private const string _emailRegex = @"^([\w-\.]+)@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.)|(([\w-]+\.)+))([a-zA-Z]{2,6}|[0-9]{1,3})(\]?)$";
-
     public static readonly EmailAddress None = new("");
 
     private EmailAddress() { }
@@ -23,7 +22,7 @@ public sealed class EmailAddress : ValueObject
         if (string.IsNullOrWhiteSpace(email))
             return Result.Failure<EmailAddress>(DomainErrors.ValueObjects.EmailAddress.EmailEmpty);
 
-        if (!Regex.IsMatch(email, _emailRegex))
+        if (!RegularExpressions.EmailAddress().IsMatch(email))
             return Result.Failure<EmailAddress>(DomainErrors.ValueObjects.EmailAddress.EmailInvalid);
 
         return new EmailAddress(email);
