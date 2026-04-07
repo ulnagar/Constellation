@@ -15,6 +15,7 @@ using Constellation.Infrastructure.Extensions;
 using Constellation.Infrastructure.ExternalServices.Sentral.Models;
 using Core.Abstractions.Clock;
 using Core.Errors;
+using Core.Helpers;
 using Core.Models.AppSettings.Enums;
 using Core.Models.Families;
 using Core.Models.Students.Enums;
@@ -1803,7 +1804,7 @@ public class Gateway : ISentralGateway
 
             foreach (string entry in list)
             {
-                string[] splitString = Regex.Split(entry, "[,]{1}(?=(?:[^\"]*\"[^\"]*\")*(?![^\"]*\"))");
+                string[] splitString = RegularExpressions.CommaSeparatedValueRowWithQuotedContent().Split(entry);
 
                 if (splitString[0] == "\"Date\"" || splitString.Length != 7)
                     continue;

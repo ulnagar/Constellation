@@ -1,6 +1,7 @@
 ﻿namespace Constellation.Core.Models.StaffMembers.ValueObjects;
 
 using Errors;
+using Helpers;
 using Primitives;
 using Shared;
 using System;
@@ -12,8 +13,6 @@ using System.Text.RegularExpressions;
 [TypeConverter(typeof(EmployeeIdConverter))]
 public sealed class EmployeeId : ValueObject
 {
-    private const string _srnRegex = @"^\d{6,9}$";
-
     public static readonly EmployeeId Empty = new(string.Empty);
 
     public string Number { get; }
@@ -30,7 +29,7 @@ public sealed class EmployeeId : ValueObject
         if (string.IsNullOrWhiteSpace(value))
             return Result.Failure<EmployeeId>(EmployeeIdErrors.EmptyValue);
 
-        if (!Regex.IsMatch(value, _srnRegex))
+        if (!RegularExpressions.EmployeeId().IsMatch(value))
             return Result.Failure<EmployeeId>(EmployeeIdErrors.InvalidValue(value));
 
         return new EmployeeId(value);

@@ -26,15 +26,13 @@ public sealed partial class Service : IEmailService
 
         RenderedEmail rendered = await _razorService.RenderEmail("/Views/Emails/Auth/MagicLinkLoginEmail.cshtml", viewModel);
 
-        EmailMessage message = new()
-        {
-            From = EmailRecipient.NoReply,
-            SendingModule = string.Empty,
-            Subject = viewModel.Title,
-            BodyText = rendered.PlainText,
-            BodyHtml = rendered.Html,
-            CreatedAt = DateTimeOffset.UtcNow
-        };
+        EmailMessage message = new(
+            "Authentication",
+            EmailRecipient.NoReply,
+            null,
+            viewModel.Title,
+            rendered.PlainText,
+            rendered.Html);
 
         foreach (EmailRecipient entry in notification.Recipients)
             message.AddRecipient(entry, EmailRecipientType.To);

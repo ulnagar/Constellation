@@ -29,6 +29,7 @@ using Constellation.Core.Models.Attendance.Checkin;
 using Core.Abstractions.Clock;
 using Core.Enums;
 using Core.Extensions;
+using Core.Helpers;
 using Core.Models.StaffMembers.Identifiers;
 using Core.Models.Students;
 using Core.Models.Students.Identifiers;
@@ -53,7 +54,6 @@ using System.Threading;
 public class ExcelService : IExcelService
 {
     private readonly IDateTimeProvider _dateTime;
-    private static readonly Regex _csvParser = new(",(?=(?:[^\"]*\"[^\"]*\")*(?![^\"]*\"))");
     private static readonly List<string[]> _ptoHeadings = new()
     {
         new[]
@@ -1298,7 +1298,7 @@ public class ExcelService : IExcelService
 
         foreach (string row in ytdDayData)
         {
-            string[] line = _csvParser.Split(row);
+            string[] line = RegularExpressions.CommaSeparatedValueRow().Split(row);
 
             // Index 0: Surname
             // Index 1: Preferred name
@@ -1426,7 +1426,7 @@ public class ExcelService : IExcelService
 
         foreach (string row in fnDayData)
         {
-            string[] line = _csvParser.Split(row);
+            string[] line = RegularExpressions.CommaSeparatedValueRow().Split(row);
 
             // Index 0: Surname
             // Index 1: Preferred name

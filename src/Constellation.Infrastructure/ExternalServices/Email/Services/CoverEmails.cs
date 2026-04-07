@@ -77,15 +77,13 @@ public sealed partial class Service : IEmailService
 
             string icsData = _calendarService.CreateInvite(uid, coveringTeacher.Name, coveringTeacher.Email, summary, location, rendered.PlainText, appointmentStart, appointmentEnd, 0);
 
-            EmailMessage message = new()
-            {
-                From = EmailRecipient.AuroraCollege,
-                SendingModule = "Covers",
-                Subject = viewModel.Title,
-                BodyText = rendered.PlainText,
-                BodyHtml = rendered.Html,
-                CreatedAt = DateTimeOffset.UtcNow
-            };
+            EmailMessage message = new(
+                "Covers",
+                EmailRecipient.AuroraCollege,
+                null,
+                viewModel.Title,
+                rendered.PlainText,
+                rendered.Html);
 
             foreach (EmailRecipient entry in primaryRecipients)
                 message.AddRecipient(entry, EmailRecipientType.To);
@@ -174,15 +172,13 @@ public sealed partial class Service : IEmailService
 
             string icsData = _calendarService.CreateInvite(uid, coveringTeacher.Name, coveringTeacher.Email, summary, location, rendered.PlainText, appointmentStart, appointmentEnd, 0);
 
-            EmailMessage message = new()
-            {
-                From = EmailRecipient.AuroraCollege,
-                SendingModule = "Covers",
-                Subject = viewModel.Title,
-                BodyText = rendered.PlainText,
-                BodyHtml = rendered.Html,
-                CreatedAt = DateTimeOffset.UtcNow
-            };
+            EmailMessage message = new(
+                "Covers",
+                EmailRecipient.AuroraCollege,
+                null,
+                viewModel.Title,
+                rendered.PlainText,
+                rendered.Html);
 
             foreach (EmailRecipient entry in primaryRecipients)
                 message.AddRecipient(entry, EmailRecipientType.To);
@@ -266,15 +262,13 @@ public sealed partial class Service : IEmailService
             DateTime appointmentEnd = cover.EndDate.ToDateTime(endTime);
             string icsData = _calendarService.CancelInvite(uid, coveringTeacher.Name, coveringTeacher.Email, summary, location, rendered.PlainText, appointmentStart, appointmentEnd, 0);
 
-            EmailMessage message = new()
-            {
-                From = EmailRecipient.AuroraCollege,
-                SendingModule = "Covers",
-                Subject = viewModel.Title,
-                BodyText = rendered.PlainText,
-                BodyHtml = rendered.Html,
-                CreatedAt = DateTimeOffset.UtcNow
-            };
+            EmailMessage message = new(
+                "Covers",
+                EmailRecipient.AuroraCollege,
+                null,
+                viewModel.Title,
+                rendered.PlainText,
+                rendered.Html);
 
             foreach (EmailRecipient entry in primaryRecipients)
                 message.AddRecipient(entry, EmailRecipientType.To);
