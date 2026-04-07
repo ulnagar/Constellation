@@ -356,8 +356,12 @@
 
         async function saveDraft() {
             const subject = $('#Subject').val();
-            // const body    = $('#Body').val();
-            const body = $('.summernote').summernote('code')
+            const type = $('input[name="Type"]:checked').val()
+            var body = $('.summernote').summernote('code')
+
+            if (type === 'SMS') {
+                body = $("<p>" + body + "</p>").text();
+            } 
 
             try {
                 const response = await fetch('?handler=AjaxAutoSave', {
