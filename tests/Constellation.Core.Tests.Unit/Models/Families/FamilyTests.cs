@@ -350,7 +350,7 @@ public class FamilyTests
         // Assert
         result.IsSuccess.Should().BeTrue();
         result.Value.Should().BeOfType<Parent>();
-        result.Value.MobileNumber.Should().Be(string.Empty);
+        result.Value.MobileNumber.Should().Be(PhoneNumber.Empty);
     }
 
     [Fact]
@@ -533,7 +533,7 @@ public class FamilyTests
         // Assert
         result.IsSuccess.Should().BeTrue();
         result.Value.Should().BeOfType<Parent>();
-        result.Value.MobileNumber.Should().Be(string.Empty);
+        result.Value.MobileNumber.Should().Be(PhoneNumber.Empty);
     }
 
     [Fact]

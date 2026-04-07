@@ -183,7 +183,7 @@ public class EmailToNonResidentialParentsTests
             x => x.GetFamiliesByStudentId(
                 It.IsAny<StudentId>(),
                 It.IsAny<CancellationToken>()))
-            .ReturnsAsync(() => null)
+            .ReturnsAsync(() => [])
             .Verifiable();
 
         var handler = new AcademicReportCreatedDomainEvent_EmailToNonResidentialParents(

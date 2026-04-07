@@ -6,6 +6,7 @@ using Constellation.Core.Models.Offerings.ValueObjects;
 using Core.Models.Offerings.Errors;
 using Core.Models.Offerings.Identifiers;
 using Core.Models.StaffMembers.Identifiers;
+using Core.Models.Timetables.Identifiers;
 
 public class OfferingTests
 {
@@ -466,6 +467,7 @@ public class OfferingTests
     [Fact]
     public void AddSession_ShouldReturnFailure_WhenEntryAlreadyExists()
     {
+        var periodId = new PeriodId();
         var name = OfferingName.FromValue("07SCI1");
 
         var sut = new Offering(
@@ -475,11 +477,11 @@ public class OfferingTests
             DateOnly.FromDateTime(DateTime.Today)
         );
 
-        sut.AddSession(new());
+        sut.AddSession(periodId);
         sut.ClearDomainEvents();
 
         // Act
-        var result = sut.AddSession(new());
+        var result = sut.AddSession(periodId);
 
         // Assert
         result.IsFailure.Should().BeTrue();
@@ -489,6 +491,7 @@ public class OfferingTests
     [Fact]
     public void AddSession_ShouldCreateEntry_WhenEntryDoesNotAlreadyExist()
     {
+        var periodId = new PeriodId();
         var name = OfferingName.FromValue("07SCI1");
 
         var sut = new Offering(
@@ -499,12 +502,12 @@ public class OfferingTests
         );
 
         // Act
-        var result = sut.AddSession(new());
+        var result = sut.AddSession(periodId);
 
         // Assert
         result.IsSuccess.Should().BeTrue();
         sut.Sessions.Should().HaveCount(1);
-        sut.Sessions.First().PeriodId.Should().Be(1);
+        sut.Sessions.First().PeriodId.Should().Be(periodId);
     }
 
     [Fact]
