@@ -86,7 +86,7 @@ public sealed class GroupTutorial : AggregateRoot, IAuditableEntity
 
         if (_teachers.Any(enrol => enrol.StaffId == teacher.Id && !enrol.IsDeleted))
         {
-            TutorialTeacher existingEntry = _teachers.FirstOrDefault(enrol => enrol.StaffId == teacher.Id && !enrol.IsDeleted);
+            TutorialTeacher? existingEntry = _teachers.FirstOrDefault(enrol => enrol.StaffId == teacher.Id && !enrol.IsDeleted);
 
             return existingEntry;
         }

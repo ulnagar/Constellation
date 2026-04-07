@@ -170,7 +170,7 @@ public sealed class Family : AggregateRoot, IAuditableEntity
         existingParent.Update(
             title,
             parentName.Value,
-            (parentMobile.IsSuccess ? parentMobile.Value : null),
+            parentMobile.IsSuccess ? parentMobile.Value : PhoneNumber.Empty,
             parentEmail.Value,
             sentralLink);
 

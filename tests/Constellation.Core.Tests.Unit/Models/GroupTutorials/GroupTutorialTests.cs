@@ -16,11 +16,11 @@ using ValueObjects;
 
 public class GroupTutorialTests
 {
-    private IDateTimeProvider _dateTimeProvider = new DateTimeProvider();
+    private static IDateTimeProvider _dateTimeProvider = new DateTimeProvider();
 
-    private School School => new School() { Code = SchoolCode.FromValue("1234"), Name = "Imaginarium Public School" };
+    private static School School => new School() { Code = SchoolCode.FromValue("1234"), Name = "Imaginarium Public School" };
 
-    private Student Student => Student.Create(
+    private readonly Student Student = Student.Create(
             StudentReferenceNumber.FromValue("123456789"),
             Name.Create("John", "Johnny", "Doe").Value,
             EmailAddress.Create("john.doe3@education.nsw.gov.au").Value,
@@ -30,7 +30,7 @@ public class GroupTutorialTests
             _dateTimeProvider)
         .Value;
 
-    private StaffMember Teacher => StaffMember.Create(
+    private readonly StaffMember Teacher = StaffMember.Create(
             EmployeeId.FromValue("1234567"),
             Name.Create("John", string.Empty, "Tester").Value,
             EmailAddress.Create("john.tester@det.nsw.edu.au").Value,
@@ -129,11 +129,13 @@ public class GroupTutorialTests
 
     [Theory]
     [InlineData(null)]
-    [InlineData("2022-12-01")]
-    public void AddTeacher_ShouldRaiseDomainEvent_WhenTeacherSucessfullyAdded(string effectiveToDate)
+    [InlineData("A future date")]
+    public void AddTeacher_ShouldRaiseDomainEvent_WhenTeacherSuccessfullyAdded(string effectiveToDate)
     {
         // Arrange
-        DateOnly? effectiveTo = string.IsNullOrWhiteSpace(effectiveToDate) ? null : DateOnly.Parse(effectiveToDate);
+        DateOnly? effectiveTo = string.IsNullOrWhiteSpace(effectiveToDate) 
+            ? null 
+            : DateOnly.FromDateTime(DateTime.Today.AddDays(3));
 
         var sut = GroupTutorial.Create(
             new GroupTutorialId(),
@@ -432,11 +434,13 @@ public class GroupTutorialTests
 
     [Theory]
     [InlineData(null)]
-    [InlineData("2022-12-01")]
-    public void EnrolStudent_ShouldRaiseDomainEvent_WhenStudentSucessfullyEnrolled(string effectiveToDate)
+    [InlineData("A future date")]
+    public void EnrolStudent_ShouldRaiseDomainEvent_WhenStudentSuccessfullyEnrolled(string effectiveToDate)
     {
         // Arrange
-        DateOnly? effectiveTo = string.IsNullOrWhiteSpace(effectiveToDate) ? null : DateOnly.Parse(effectiveToDate);
+        DateOnly? effectiveTo = string.IsNullOrWhiteSpace(effectiveToDate)
+            ? null
+            : DateOnly.FromDateTime(DateTime.Today.AddDays(3));
 
         var sut = GroupTutorial.Create(
             new GroupTutorialId(),
