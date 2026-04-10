@@ -82,6 +82,9 @@ internal sealed class SendEmailActionConfiguration : IEntityTypeConfiguration<Se
                     config
                         .Property(sender => sender.Email)
                         .HasColumnName("SenderEmail");
+
+                    config
+                        .Ignore(sender => sender.Value);
                 });
 
         builder
@@ -108,8 +111,10 @@ internal sealed class SendEmailActionConfiguration : IEntityTypeConfiguration<Se
 
                     config
                         .Property(recipient => recipient.Name)
-
                         .HasColumnName(nameof(EmailRecipient.Name));
+
+                    config
+                        .Ignore(recipient => recipient.Value);
                 });
     }
 }

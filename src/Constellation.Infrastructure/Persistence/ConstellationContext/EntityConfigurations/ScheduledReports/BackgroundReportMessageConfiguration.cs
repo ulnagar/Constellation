@@ -34,6 +34,10 @@ internal sealed class ScheduledReportConfiguration : IEntityTypeConfiguration<Sc
             .HasColumnName(nameof(EmailRecipient.Name));
 
         builder
+            .ComplexProperty(report => report.ForwardTo)
+            .Ignore(recipient => recipient.Value);
+
+        builder
             .Property(report => report.LastResult)
             .HasConversion<ResultConverter>();
 
