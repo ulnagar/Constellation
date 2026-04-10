@@ -2,9 +2,9 @@
 
 using Abstractions.Messaging;
 using Core.Models.Faculties;
+using Core.Models.Faculties.Enums;
 using Core.Models.Faculties.Errors;
 using Core.Models.Faculties.Repositories;
-using Core.Models.Faculties.ValueObjects;
 using Core.Models.StaffMembers;
 using Core.Models.StaffMembers.Identifiers;
 using Core.Models.StaffMembers.Repositories;

@@ -4,6 +4,7 @@ using Abstractions.Messaging;
 using Constellation.Core.Models.Awards.Identifiers;
 using Constellation.Core.Models.Offerings.Identifiers;
 using Constellation.Core.Models.Subjects.Identifiers;
+using Core.Models.Awards.Enums;
 using Core.Models.Students.Identifiers;
 using Core.ValueObjects;
 

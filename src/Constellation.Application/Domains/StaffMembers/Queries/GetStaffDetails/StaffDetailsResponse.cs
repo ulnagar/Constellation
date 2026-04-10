@@ -1,5 +1,6 @@
 ﻿namespace Constellation.Application.Domains.StaffMembers.Queries.GetStaffDetails;
 
+using Core.Models.Faculties.Enums;
 using Core.Models.Faculties.Identifiers;
 using Core.Models.Identifiers;
 using Core.Models.Offerings.Identifiers;
@@ -8,6 +9,7 @@ using Core.Models.SchoolContacts.Identifiers;
 using Core.Models.StaffMembers.Identifiers;
 using Core.Models.StaffMembers.ValueObjects;
 using Core.ValueObjects;
+using Courses.Models;
 using System;
 using System.Collections.Generic;
 
@@ -36,7 +38,7 @@ public sealed record StaffDetailsResponse(
         FacultyMembershipId MembershipId,
         FacultyId FacultyId,
         string Name,
-        string Role);
+        FacultyMembershipRole Role);
 
     public sealed record OfferingResponse(
         OfferingId OfferingId,

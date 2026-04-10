@@ -4,7 +4,6 @@ using Errors;
 using Primitives;
 using Shared;
 using System;
-using System.Collections.Generic;
 
 public sealed class Name : ValueObject, IComparable, IEquatable<Name>
 {
@@ -64,16 +63,9 @@ public sealed class Name : ValueObject, IComparable, IEquatable<Name>
     public string DisplayName => string.IsNullOrWhiteSpace(PreferredName) ? $"{FirstName} {LastName}" : $"{PreferredName} {LastName}";
     public string SortOrder => string.IsNullOrWhiteSpace(PreferredName) ? $"{LastName}, {FirstName}" : $"{LastName}, {PreferredName}";
 
-    public override IEnumerable<object> GetAtomicValues()
-    {
-        yield return FirstName;
-        yield return PreferredName;
-        yield return LastName;
-    }
-
     public override string ToString() => DisplayName;
 
-    public int CompareTo(object obj)
+    public int CompareTo(object? obj)
     {
         if (obj is Name other)
         {
@@ -83,10 +75,10 @@ public sealed class Name : ValueObject, IComparable, IEquatable<Name>
         return -1;
     }
 
-    public static implicit operator string(Name name) =>
+    public static implicit operator string(Name? name) =>
         name is null ? string.Empty : name.ToString();
 
-    public bool Equals(Name other)
+    public bool Equals(Name? other)
     {
         if (other is null)
             return false;
@@ -100,7 +92,14 @@ public sealed class Name : ValueObject, IComparable, IEquatable<Name>
                LastName == other.LastName;
     }
 
-    public override bool Equals(object obj) => 
+    public override IEnumerable<object> GetAtomicValues()
+    {
+        yield return FirstName;
+        yield return PreferredName;
+        yield return LastName;
+    }
+
+    public override bool Equals(object? obj) => 
         ReferenceEquals(this, obj) || obj is Name other && Equals(other);
 
     public override int GetHashCode() => 

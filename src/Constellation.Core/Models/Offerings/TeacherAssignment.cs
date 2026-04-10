@@ -1,5 +1,6 @@
 ﻿namespace Constellation.Core.Models.Offerings;
 
+using Enums;
 using Identifiers;
 using Primitives;
 using StaffMembers.Identifiers;

@@ -3,10 +3,10 @@
 using Abstractions.Messaging;
 using Core.Models.Attachments;
 using Core.Models.Attachments.DTOs;
+using Core.Models.Attachments.Enums;
 using Core.Models.Attachments.Errors;
 using Core.Models.Attachments.Repository;
 using Core.Models.Attachments.Services;
-using Core.Models.Attachments.ValueObjects;
 using Core.Models.Reports;
 using Core.Models.Reports.Errors;
 using Core.Models.Reports.Repositories;

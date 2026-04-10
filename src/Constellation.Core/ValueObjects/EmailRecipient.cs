@@ -4,9 +4,12 @@ using Errors;
 using Primitives;
 using Shared;
 using System.Collections.Generic;
+using System.Reflection;
 
-public sealed class EmailRecipient : ValueObject
+public sealed class EmailRecipient : ValueObject<EmailRecipient, string>, IValueObject<EmailRecipient, string>
 {
+    private static readonly Dictionary<string, EmailRecipient> _enumerations = CreateEnumerations();
+
     public static readonly EmailRecipient AuroraCollege = new("Aurora College", "auroracoll-h.school@det.nsw.edu.au");
     public static readonly EmailRecipient AbsencesMailbox = new("Aurora College - Absences", "AuroraCollege.Absences@det.nsw.edu.au");
     public static readonly EmailRecipient SupportQueue = new("Aurora College", "support@aurora.nsw.edu.au");
@@ -40,8 +43,23 @@ public sealed class EmailRecipient : ValueObject
     public string Name { get; private set; }
     public string Email { get; private set; }
 
-    public override IEnumerable<object> GetAtomicValues()
+    public static EmailRecipient FromValue(string value) =>
+        _enumerations.GetValueOrDefault(value);
+
+    private static Dictionary<string, EmailRecipient> CreateEnumerations()
     {
-        yield return Email;
+        Type enumerationType = typeof(EmailRecipient);
+
+        IEnumerable<EmailRecipient> fieldsForType = enumerationType
+            .GetProperties(
+                BindingFlags.Public |
+                BindingFlags.Static |
+                BindingFlags.FlattenHierarchy)
+            .Where(fieldInfo =>
+                enumerationType.IsAssignableFrom(fieldInfo.PropertyType))
+            .Select(fieldInfo =>
+                (EmailRecipient)fieldInfo.GetValue(default)!);
+
+        return fieldsForType.ToDictionary(x => x.Email);
     }
 }

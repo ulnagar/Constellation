@@ -4,7 +4,7 @@ using Constellation.Core.Primitives;
 using System;
 
 public readonly record struct QueuedMessageId(Guid Value)
-    : IStronglyTypedId
+    : IStronglyTypedId<QueuedMessageId, Guid>
 {
     public static QueuedMessageId Empty => new(Guid.Empty);
 

@@ -23,9 +23,9 @@ internal sealed class AssetNumberConverter : ValueConverter<AssetNumber, string?
         if (value is null)
             return AssetNumber.Empty;
                 
-        AssetNumber? assetNumber = AssetNumber.FromValue(value);
+        AssetNumber assetNumber = AssetNumber.FromValue(value);
 
-        return assetNumber ?? AssetNumber.Empty;
+        return assetNumber;
     }
 
     public override bool ConvertsNulls => true;

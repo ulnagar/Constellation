@@ -4,7 +4,7 @@ using Primitives;
 using System;
 
 public readonly record struct TutorialId(Guid Value)
-    :IStronglyTypedId
+    :IStronglyTypedId<TutorialId, Guid>
 {
     public static readonly TutorialId Empty = new(Guid.Empty);
 

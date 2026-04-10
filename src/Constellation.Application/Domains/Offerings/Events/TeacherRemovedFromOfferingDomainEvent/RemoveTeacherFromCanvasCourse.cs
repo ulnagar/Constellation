@@ -47,7 +47,7 @@ internal sealed class RemoveTeacherFromCanvasCourse
 
     public async Task Handle(TeacherRemovedFromOfferingDomainEvent notification, CancellationToken cancellationToken)
     {
-        Offering offering = await _offeringRepository.GetById(notification.OfferingId, cancellationToken);
+        Offering? offering = await _offeringRepository.GetById(notification.OfferingId, cancellationToken);
 
         if (offering is null)
         {
@@ -59,7 +59,7 @@ internal sealed class RemoveTeacherFromCanvasCourse
             return;
         }
 
-        TeacherAssignment assignment = offering.Teachers.FirstOrDefault(assignment => assignment.Id == notification.AssignmentId);
+        TeacherAssignment? assignment = offering.Teachers.FirstOrDefault(assignment => assignment.Id == notification.AssignmentId);
 
         if (assignment is null)
         {
@@ -71,7 +71,7 @@ internal sealed class RemoveTeacherFromCanvasCourse
             return;
         }
 
-        StaffMember staffMember = await _staffRepository.GetById(assignment.StaffId, cancellationToken);
+        StaffMember? staffMember = await _staffRepository.GetById(assignment.StaffId, cancellationToken);
 
         if (staffMember is null)
         {
@@ -90,7 +90,7 @@ internal sealed class RemoveTeacherFromCanvasCourse
         foreach (CanvasCourseResource resource in resources)
         {
             ModifyEnrolmentCanvasOperation operation = new(
-                staffMember.EmployeeId.Number,
+                staffMember.EmployeeId.Value,
                 resource.CourseId,
                 resource.SectionId,
                 CanvasAction.Remove,

@@ -3,7 +3,7 @@
 using Primitives;
 
 public readonly record struct TrackingQueueEntryId(Guid Value)
-    : IStronglyTypedId
+    : IStronglyTypedId<TrackingQueueEntryId, Guid>
 {
     public static TrackingQueueEntryId Empty => new(Guid.Empty);
 

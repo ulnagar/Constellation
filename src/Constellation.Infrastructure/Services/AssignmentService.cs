@@ -6,8 +6,8 @@ using Core.Models.Assignments;
 using Core.Models.Assignments.Errors;
 using Core.Models.Assignments.Services;
 using Core.Models.Attachments.DTOs;
+using Core.Models.Attachments.Enums;
 using Core.Models.Attachments.Services;
-using Core.Models.Attachments.ValueObjects;
 using Core.Models.Canvas.Models;
 using Core.Models.Students;
 using Core.Models.Students.Errors;
@@ -77,7 +77,7 @@ internal class AssignmentService : IAssignmentService
             if (result.IsSuccess)
                 continue;
 
-            result = await _canvasGateway.UploadAssignmentSubmission(courseId, assignment.CanvasId, student.StudentReferenceNumber.Number, fileRequest.Value, cancellationToken);
+            result = await _canvasGateway.UploadAssignmentSubmission(courseId, assignment.CanvasId, student.StudentReferenceNumber.Value, fileRequest.Value, cancellationToken);
         }
 
         if (result.IsFailure)

@@ -1,15 +1,12 @@
-﻿#nullable enable
-namespace Constellation.Core.ValueObjects;
+﻿namespace Constellation.Core.Models.Awards.Enums;
 
-using Enums;
-using Primitives;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
+using Common;
+using Core.Enums;
 
-public sealed class AwardType : ValueObject
+public sealed class AwardType : StringEnumeration<AwardType>
 {
+    public static readonly AwardType Empty = new(string.Empty);
+
     public static readonly AwardType FirstInSubject = new("First in Course");
     public static readonly AwardType FirstInSubjectMathematics = new("First in Course - Mathematics", [Grade.Y05, Grade.Y06]);
     public static readonly AwardType FirstInSubjectScienceTechnology = new("First in Course - Science & Technology", [Grade.Y05, Grade.Y06]);
@@ -23,62 +20,36 @@ public sealed class AwardType : ValueObject
     public static readonly AwardType GalaxyMedal = new("Galaxy Medal");
     public static readonly AwardType UniversalAchiever = new("Universal Achiever");
 
-    public static AwardType? FromValue(string value)
+    public static new AwardType FromValue(string value)
     {
         if (string.IsNullOrWhiteSpace(value))
-            return null;
+            return Empty;
 
-        IEnumerable<AwardType> defined = CreateEnumerations()
-            .Where(entry => entry.Key == value)
-            .Select(entry => entry.Value)
+        IEnumerable<AwardType> defined = GetEnumerable
+            .Where(entry => entry.Value == value)
             .ToList();
 
         if (!defined.Any() || defined.Count() > 1)
-            return null;
+            return Empty;
 
         return defined.First();
     }
 
     private AwardType(string value)
+        : base(value, value)
     {
         Value = value;
         Grades = new();
     }
 
     private AwardType(string value, List<Grade> grades)
+        : base(value, value)
     {
         Value = value;
         Grades = grades;
     }
 
-    public string Value { get; }
     public List<Grade> Grades { get; }
-
-    public override IEnumerable<object> GetAtomicValues()
-    {
-        yield return Value;
-    }
-
-    public override string ToString() => Value;
-
-    public static readonly IEnumerable<AwardType> Options = CreateEnumerations()
-        .Select(entry => entry.Value)
-        .AsEnumerable();
-
-    private static Dictionary<string, AwardType> CreateEnumerations()
-    {
-        Type enumerationType = typeof(AwardType);
-
-        IEnumerable<AwardType> fieldsForType = enumerationType
-            .GetFields(
-                BindingFlags.Public |
-                BindingFlags.Static |
-                BindingFlags.FlattenHierarchy)
-            .Where(fieldInfo =>
-                enumerationType.IsAssignableFrom(fieldInfo.FieldType))
-            .Select(fieldInfo =>
-                (AwardType)fieldInfo.GetValue(default)!);
-
-        return fieldsForType.ToDictionary(x => x.Value);
-    }
+    
+    public static IEnumerable<AwardType> GetOptions => GetEnumerable;
 }

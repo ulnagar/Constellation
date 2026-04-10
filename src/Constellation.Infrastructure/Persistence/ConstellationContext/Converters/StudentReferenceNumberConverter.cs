@@ -16,10 +16,10 @@ internal sealed class StudentReferenceNumberConverter : ValueConverter<StudentRe
     private static string? StudentReferenceNumberToString(StudentReferenceNumber? number) =>
         number is null ? null
             : number == StudentReferenceNumber.Empty ? null 
-            : number.Number;
+            : number.Value;
 
     private static StudentReferenceNumber StringToStudentReferenceNumber(string? value) =>
-        value == null ? StudentReferenceNumber.Empty : StudentReferenceNumber.FromValue(value);
+        StudentReferenceNumber.FromValue(value);
 
     public override bool ConvertsNulls => true;
 }

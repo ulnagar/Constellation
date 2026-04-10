@@ -1,40 +1,28 @@
 ﻿namespace Constellation.Core.Models.Offerings.ValueObjects;
 
-using Errors;
 using Primitives;
-using Shared;
 using System;
-using System.Collections.Generic;
 
-public sealed class OfferingName : ValueObject, IComparable
+public sealed class OfferingName : ValueObject<OfferingName, string>, IValueObject<OfferingName, string>, IComparable
 {
-    public static OfferingName None => new("");
+    public static OfferingName Empty => new(string.Empty);
 
     private OfferingName(string value)
     {
         Value = value;
     }
 
-    public static Result<OfferingName> FromValue(string value) 
+    public static OfferingName FromValue(string value) 
     {
         if (string.IsNullOrEmpty(value))
-        {
-            return Result.Failure<OfferingName>(OfferingNameErrors.ValueEmpty);
-        }
+            return Empty;
 
         return new OfferingName(value);
     }
 
-    public string Value { get; }
-
-    public override IEnumerable<object> GetAtomicValues()
-    {
-        yield return Value;
-    }
-
     public override string ToString() => Value;
 
-    public int CompareTo(object obj)
+    public int CompareTo(object? obj)
     {
         if (obj is OfferingName other)
         {
@@ -44,6 +32,6 @@ public sealed class OfferingName : ValueObject, IComparable
         return -1;
     }
 
-    public static implicit operator string(OfferingName offeringName) =>
+    public static implicit operator string(OfferingName? offeringName) =>
         offeringName is null ? string.Empty : offeringName.ToString();
 }

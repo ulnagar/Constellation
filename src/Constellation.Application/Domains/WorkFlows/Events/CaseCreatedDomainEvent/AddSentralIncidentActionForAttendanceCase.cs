@@ -5,6 +5,7 @@ using Core.Abstractions.Services;
 using Core.Models.Enrolments;
 using Core.Models.Enrolments.Repositories;
 using Core.Models.Offerings;
+using Core.Models.Offerings.Enums;
 using Core.Models.Offerings.Errors;
 using Core.Models.Offerings.Repositories;
 using Core.Models.Offerings.ValueObjects;

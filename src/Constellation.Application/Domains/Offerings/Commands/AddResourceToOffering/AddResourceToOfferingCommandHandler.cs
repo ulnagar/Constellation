@@ -6,6 +6,7 @@ using Constellation.Core.Models.Offerings;
 using Constellation.Core.Models.Offerings.Errors;
 using Constellation.Core.Models.Offerings.Repositories;
 using Constellation.Core.Shared;
+using Core.Models.Offerings.Enums;
 using Core.Models.Offerings.ValueObjects;
 using Serilog;
 using System.Threading;

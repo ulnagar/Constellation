@@ -3,7 +3,7 @@
 using Primitives;
 
 public readonly record struct SmsId(Guid Value)
-    : IStronglyTypedId
+    : IStronglyTypedId<SmsId, Guid>
 {
     public static SmsId Empty => new(Guid.Empty);
 

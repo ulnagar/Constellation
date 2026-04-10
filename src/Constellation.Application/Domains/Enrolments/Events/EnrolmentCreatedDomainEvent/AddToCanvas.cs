@@ -6,13 +6,13 @@ using Constellation.Core.Models.Enrolments.Events;
 using Constellation.Core.Models.Offerings;
 using Constellation.Core.Models.Offerings.Errors;
 using Constellation.Core.Models.Offerings.Repositories;
-using Constellation.Core.Models.Offerings.ValueObjects;
 using Constellation.Core.Models.Operations;
 using Constellation.Core.Models.Students;
 using Constellation.Core.Models.Students.Repositories;
 using Core.Models.Enrolments;
 using Core.Models.Enrolments.Errors;
 using Core.Models.Enrolments.Repositories;
+using Core.Models.Offerings.Enums;
 using Core.Models.Operations.Enums;
 using Core.Models.Students.Errors;
 using Core.Models.Students.ValueObjects;
@@ -57,7 +57,7 @@ internal sealed class AddToCanvas
 
     public async Task Handle(EnrolmentCreatedDomainEvent notification, CancellationToken cancellationToken)
     {
-        Enrolment enrolment = await _enrolmentRepository.GetById(notification.EnrolmentId, cancellationToken);
+        Enrolment? enrolment = await _enrolmentRepository.GetById(notification.EnrolmentId, cancellationToken);
 
         if (enrolment is null)
         {
@@ -69,7 +69,7 @@ internal sealed class AddToCanvas
             return;
         }
 
-        Student student = await _studentRepository.GetById(enrolment.StudentId, cancellationToken);
+        Student? student = await _studentRepository.GetById(enrolment.StudentId, cancellationToken);
 
         if (student is null)
         {
@@ -92,12 +92,10 @@ internal sealed class AddToCanvas
             return;
         }
 
-        if (enrolment is not OfferingEnrolment)
+        if (enrolment is not OfferingEnrolment offeringEnrolment)
             return;
 
-        OfferingEnrolment offeringEnrolment = enrolment as OfferingEnrolment;
-
-        Offering offering = await _offeringRepository.GetById(offeringEnrolment.OfferingId, cancellationToken);
+        Offering? offering = await _offeringRepository.GetById(offeringEnrolment.OfferingId, cancellationToken);
 
         if (offering is null)
         {
@@ -114,13 +112,13 @@ internal sealed class AddToCanvas
 
         List<CanvasCourseResource> resources = offering.Resources
             .Where(resource => resource.Type == ResourceType.CanvasCourse)
-            .Select(resource => resource as CanvasCourseResource)
+            .Select(resource => (resource as CanvasCourseResource)!)
             .ToList();
 
         foreach (CanvasCourseResource resource in resources)
         {
             ModifyEnrolmentCanvasOperation operation = new(
-                student.StudentReferenceNumber.Number,
+                student.StudentReferenceNumber.Value,
                 resource.CourseId,
                 resource.SectionId,
                 CanvasAction.Add,

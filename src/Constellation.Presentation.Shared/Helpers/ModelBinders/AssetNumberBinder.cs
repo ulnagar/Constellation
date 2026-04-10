@@ -15,7 +15,7 @@ public sealed class AssetNumberBinder : IModelBinder
 
         if (valueProviderResult == ValueProviderResult.None) return Task.CompletedTask;
 
-        AssetNumber? assetNumber = TryParse(valueProviderResult.FirstValue);
+        AssetNumber assetNumber = TryParse(valueProviderResult.FirstValue);
         StoreResult(bindingContext, modelName, assetNumber);
 
         return Task.CompletedTask;
@@ -29,7 +29,7 @@ public sealed class AssetNumberBinder : IModelBinder
             bindingContext.ModelState.TryAddModelError(modelName, "Invalid Asset Number");
     }
 
-    private static AssetNumber? TryParse(string? rawValue) =>
+    private static AssetNumber TryParse(string? rawValue) =>
         AssetNumber.FromValue(rawValue);
 }
 

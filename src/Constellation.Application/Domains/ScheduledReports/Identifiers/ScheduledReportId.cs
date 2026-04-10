@@ -5,7 +5,7 @@ using Core.Primitives;
 using System;
 
 public readonly record struct ScheduledReportId(Guid Value)
-    : IStronglyTypedId
+    : IStronglyTypedId<ScheduledReportId, Guid>
 {
     public static ScheduledReportId Empty => new(Guid.Empty);
 

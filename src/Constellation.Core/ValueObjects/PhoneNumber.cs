@@ -5,17 +5,16 @@ using Helpers;
 using Newtonsoft.Json;
 using Primitives;
 using Shared;
-using System.Collections.Generic;
 using System.Text.RegularExpressions;
 
-public sealed class PhoneNumber : ValueObject
+public sealed class PhoneNumber : ValueObject<PhoneNumber, string>, IValueObject<PhoneNumber, string>
 {
     public static readonly PhoneNumber Empty = new(string.Empty);
 
     [JsonConstructor]
-    private PhoneNumber(string number)
+    private PhoneNumber(string value)
     {
-        Number = number;
+        Value = value;
     }
 
     public static Result<PhoneNumber> Create(string number)
@@ -57,7 +56,7 @@ public sealed class PhoneNumber : ValueObject
         if (this == Empty)
             return string.Empty;
 
-        string prefix = Number[..2];
+        string prefix = Value[..2];
 
         switch (prefix)
         {
@@ -77,33 +76,25 @@ public sealed class PhoneNumber : ValueObject
     public string ToString(Format format) =>
         format switch
         {
-            Format.Mobile => $"{Number[..4]} {Number[4..7]} {Number[7..10]}",
-            Format.LandLine => $"({Number[..2]}) {Number[2..6]} {Number[6..10]}",
-            Format.International => $"61{Number[1..]}",
-            Format.None => Number,
-            _ => Number
+            Format.Mobile => $"{Value[..4]} {Value[4..7]} {Value[7..10]}",
+            Format.LandLine => $"({Value[..2]}) {Value[2..6]} {Value[6..10]}",
+            Format.International => $"61{Value[1..]}",
+            _ => Value
         };
     
-    private string Number { get; }
-
     public bool IsMobile()
     {
         if (this == Empty)
             return false;
 
-        if (string.IsNullOrWhiteSpace(Number))
+        if (string.IsNullOrWhiteSpace(Value))
             return false;
 
-        return Number[..2] switch
+        return Value[..2] switch
         {
             "04" => true,
             _ => false
         };
-    }
-
-    public override IEnumerable<object> GetAtomicValues()
-    {
-        yield return Number;
     }
 
     public enum Format

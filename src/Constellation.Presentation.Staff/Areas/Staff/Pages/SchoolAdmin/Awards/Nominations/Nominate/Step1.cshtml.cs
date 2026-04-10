@@ -8,6 +8,7 @@ using Constellation.Core.Shared;
 using Constellation.Core.ValueObjects;
 using Constellation.Presentation.Shared.Helpers.Attributes;
 using Core.Abstractions.Services;
+using Core.Models.Awards.Enums;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
@@ -50,7 +51,7 @@ public class Step1Model : BasePageModel
     {
         _logger.Information("Requested to create new Award Nomination by user {User}", _currentUserService.UserName);
 
-        AwardTypes = new SelectList(AwardType.Options, "Value", "Value");
+        AwardTypes = new SelectList(AwardType.GetOptions, "Value", "Value");
 
         Result<NominationPeriodDetailResponse> periodRequest = await _mediator.Send(new GetNominationPeriodRequest(PeriodId));
 

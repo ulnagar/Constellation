@@ -1,8 +1,8 @@
 ﻿namespace Constellation.Core.Models.Attachments.Errors;
 
+using Enums;
 using Shared;
 using System;
-using ValueObjects;
 
 public static class AttachmentErrors
 {

@@ -10,6 +10,7 @@ using Constellation.Core.Models.Offerings.Repositories;
 using Constellation.Core.Models.Offerings.ValueObjects;
 using Constellation.Core.Models.Operations;
 using Constellation.Core.Shared;
+using Core.Models.Offerings.Enums;
 using Core.Models.Offerings.Identifiers;
 using Core.Models.Operations.Enums;
 using Core.Models.Students;
@@ -62,9 +63,7 @@ internal sealed class RemoveStudentsFromCanvasCourseResource
             return;
         }
 
-        CanvasCourseResource? resource = notification.Resource as CanvasCourseResource;
-
-        if (resource is null)
+        if (notification.Resource is not CanvasCourseResource resource)
         {
             _logger
                 .ForContext(nameof(ResourceRemovedFromOfferingDomainEvent), notification, true)
@@ -79,7 +78,7 @@ internal sealed class RemoveStudentsFromCanvasCourseResource
         foreach (Student student in students)
         {
             ModifyEnrolmentCanvasOperation operation = new(
-                student.StudentReferenceNumber.Number,
+                student.StudentReferenceNumber.Value,
                 resource.CourseId,
                 resource.SectionId,
                 CanvasAction.Remove,

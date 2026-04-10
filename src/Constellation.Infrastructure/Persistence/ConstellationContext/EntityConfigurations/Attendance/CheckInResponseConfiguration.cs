@@ -65,7 +65,7 @@ internal sealed class CheckInResponseConfiguration : IEntityTypeConfiguration<Ch
             .Property(response => response.Offering)
             .HasConversion(
                 name => name.Value,
-                value => OfferingName.FromValue(value).Value);
+                value => OfferingName.FromValue(value));
 
         builder
             .Property(response => response.SchoolCode)

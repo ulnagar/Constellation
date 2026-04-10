@@ -75,12 +75,12 @@ internal sealed class CreateInterviewsImportQueryHandler
             {
                 foreach (OfferingEnrolment enrolment in validEnrolments.OfType<OfferingEnrolment>())
                 {
-                    Offering offering = offerings.FirstOrDefault(offering => offering.Id == enrolment.OfferingId);
+                    Offering? offering = offerings.FirstOrDefault(offering => offering.Id == enrolment.OfferingId);
 
                     if (offering is null)
                         continue;
 
-                    Course course = courses.FirstOrDefault(course => course.Id == offering.CourseId);
+                    Course? course = courses.FirstOrDefault(course => course.Id == offering.CourseId);
 
                     if (course is null)
                         continue;
@@ -91,13 +91,13 @@ internal sealed class CreateInterviewsImportQueryHandler
                     {
                         InterviewExportDto dto = new()
                         {
-                            StudentId = student.StudentReferenceNumber.Number,
+                            StudentId = student.StudentReferenceNumber.Value,
                             StudentFirstName = student.Name.FirstName,
                             StudentLastName = student.Name.LastName,
                             ClassCode = offering.Name,
                             ClassGrade = course.Grade.AsNumber(),
                             ClassName = course.Name,
-                            TeacherCode = teacher.EmployeeId.Number,
+                            TeacherCode = teacher.EmployeeId.Value,
                             TeacherTitle = "",
                             TeacherFirstName = teacher.Name.FirstName,
                             TeacherLastName = teacher.Name.LastName,

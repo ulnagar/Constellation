@@ -110,7 +110,7 @@ public class UpsertModel : BasePageModel
             return;
         }
 
-        StudentReferenceNumber = student.Value.StudentReferenceNumber.Number;
+        StudentReferenceNumber = student.Value.StudentReferenceNumber.Value;
         FirstName = student.Value.Name.FirstName;
         PreferredName = student.Value.Name.PreferredName;
         LastName = student.Value.Name.LastName;

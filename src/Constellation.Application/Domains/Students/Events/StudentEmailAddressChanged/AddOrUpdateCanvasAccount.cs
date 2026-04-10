@@ -37,7 +37,7 @@ internal sealed class AddOrUpdateCanvasAccount
     {
         _logger.Information("Attempting to update student ({studentId}) to new email address in Canvas", notification.StudentId);
 
-        Student student = await _studentRepository.GetById(notification.StudentId, cancellationToken);
+        Student? student = await _studentRepository.GetById(notification.StudentId, cancellationToken);
 
         if (student == null)
         {
@@ -58,10 +58,10 @@ internal sealed class AddOrUpdateCanvasAccount
         {
             // No account exists, create a new account
             CreateUserCanvasOperation operation = new(
-                student.StudentReferenceNumber.Number,
+                student.StudentReferenceNumber,
                 student.Name.FirstName,
                 student.Name.LastName,
-                newAddress.Value.Email.Substring(0, newAddress.Value.Email.IndexOf('@')),
+                newAddress.Value.Email.Substring(0, newAddress.Value.Email.IndexOf('@', StringComparison.OrdinalIgnoreCase)),
                 newAddress.Value.Email);
 
             _operationsRepository.Insert(operation);
@@ -72,8 +72,8 @@ internal sealed class AddOrUpdateCanvasAccount
         else
         {
             UpdateUserEmailCanvasOperation operation = new(
-                student.StudentReferenceNumber.Number,
-                newAddress.Value.Email.Substring(0, newAddress.Value.Email.IndexOf('@')));
+                student.StudentReferenceNumber,
+                newAddress.Value.Email.Substring(0, newAddress.Value.Email.IndexOf('@', StringComparison.OrdinalIgnoreCase)));
 
             _operationsRepository.Insert(operation);
             await _unitOfWork.CompleteAsync(cancellationToken);

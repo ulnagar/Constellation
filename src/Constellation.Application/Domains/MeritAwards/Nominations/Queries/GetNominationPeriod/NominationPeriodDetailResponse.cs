@@ -3,6 +3,7 @@
 using Constellation.Core.Enums;
 using Constellation.Core.Models.Awards.Identifiers;
 using Constellation.Core.ValueObjects;
+using Core.Models.Awards.Enums;
 using System;
 using System.Collections.Generic;
 

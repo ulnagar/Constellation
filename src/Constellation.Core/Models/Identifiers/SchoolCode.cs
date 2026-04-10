@@ -5,7 +5,7 @@ using Primitives;
 using Shared;
 
 public readonly record struct SchoolCode(string Value)
-    : IStronglyTypedId
+    : IStronglyTypedId<SchoolCode, string>
 {
     public static SchoolCode Empty => new("0000");
 

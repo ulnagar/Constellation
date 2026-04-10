@@ -65,7 +65,7 @@
                                     TimeSpan dayEnd = periods.Last().EndTime;
 
                                     List<StaffIntegratedTimetableResponse> classPeriods = periods
-                                        .Where(period => period.OfferingName != OfferingName.None)
+                                        .Where(period => period.OfferingName != OfferingName.Empty)
                                         .OrderBy(period => period.StartTime)
                                         .ToList();
 
@@ -87,7 +87,7 @@
                                             dayStart,
                                             dayEnd,
                                             (int)dayEnd.Subtract(dayStart).TotalMinutes,
-                                            OfferingName.None));
+                                            OfferingName.Empty));
                                     }
                                     else
                                     {
@@ -110,7 +110,7 @@
                                                     dayStart,
                                                     classPeriods.First().StartTime,
                                                     (int)classPeriods.First().StartTime.Subtract(dayStart).TotalMinutes,
-                                                    OfferingName.None));
+                                                    OfferingName.Empty));
                                             }
 
                                             // If this is the last class of the day, create an OOB record for the rest of the day
@@ -131,7 +131,7 @@
                                                     classPeriods[i].EndTime,
                                                     dayEnd,
                                                     (int)dayEnd.Subtract(classPeriods[i].EndTime).TotalMinutes,
-                                                    OfferingName.None));
+                                                    OfferingName.Empty));
                                             }
                                             else if (classPeriods.Any(period => period.PeriodId != classPeriods[i].PeriodId && period.StartTime == classPeriods[i].EndTime))
                                             {
@@ -157,7 +157,7 @@
                                                     classPeriods[i].EndTime,
                                                     next.StartTime,
                                                     (int)next.StartTime.Subtract(classPeriods[i].EndTime).TotalMinutes,
-                                                    OfferingName.None));
+                                                    OfferingName.Empty));
                                             }
                                         }
                                     }
@@ -167,7 +167,7 @@
                                 {
                                     var style = "";
 
-                                    if (period.OfferingName == OfferingName.None)
+                                    if (period.OfferingName == OfferingName.Empty)
                                     {
                                         style += " Inactive";
                                     }
@@ -184,7 +184,7 @@
                                     <div class="Student-Timetable-Day-Period integrated @style" style="height: @(period.Duration * 1.75)px;">
 
                                         <div class="class-eventDetails" title="@period.OfferingName &#013; @period.PeriodCode - @period.PeriodName &#013; @period.StartTime.As12HourTime() - @period.EndTime.As12HourTime()">
-                                            @if (period.OfferingName != OfferingName.None)
+                                            @if (period.OfferingName != OfferingName.Empty)
                                             {
                                                 @period.OfferingName
                                                 <br/>
@@ -253,7 +253,7 @@
                                         {
                                             var style = "";
 
-                                            if (period.OfferingName == OfferingName.None)
+                                            if (period.OfferingName == OfferingName.Empty)
                                             {
                                                 style += " Inactive";
                                             }
@@ -268,7 +268,7 @@
                                             }
 
                                             <div class="Student-Timetable-Day-Period @style">
-                                                @if (period.OfferingName != OfferingName.None)
+                                                @if (period.OfferingName != OfferingName.Empty)
                                                 {
                                                     <div class="class-eventDetails">
                                                         @period.OfferingName

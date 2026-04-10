@@ -2,11 +2,10 @@
 
 using Primitives;
 using System;
-using System.Collections.Generic;
 
-public sealed class TutorialName : ValueObject, IComparable
+public sealed class TutorialName : ValueObject<TutorialName, string>, IValueObject<TutorialName, string>, IComparable
 {
-    public static TutorialName None => new("");
+    public static TutorialName Empty => new(string.Empty);
 
     private TutorialName(string value)
     {
@@ -14,18 +13,11 @@ public sealed class TutorialName : ValueObject, IComparable
     }
 
     public static TutorialName FromValue(string value) 
-        => new TutorialName(value);
-
-    public string Value { get; }
-
-    public override IEnumerable<object> GetAtomicValues()
-    {
-        yield return Value;
-    }
+        => new(value);
 
     public override string ToString() => Value;
 
-    public int CompareTo(object obj)
+    public int CompareTo(object? obj)
     {
         if (obj is TutorialName other)
         {
@@ -35,9 +27,6 @@ public sealed class TutorialName : ValueObject, IComparable
         return -1;
     }
 
-    public static implicit operator string(TutorialName offeringName) =>
+    public static implicit operator string(TutorialName? offeringName) =>
         offeringName is null ? string.Empty : offeringName.ToString();
-
-    //public static explicit operator string(TutorialName offeringName) =>
-    //    offeringName is null ? string.Empty : offeringName.ToString();
 }

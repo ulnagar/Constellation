@@ -5,7 +5,7 @@ using System;
 using System.Text.RegularExpressions;
 
 public readonly record struct CasualId(Guid Value)
-    : IStronglyTypedId
+    : IStronglyTypedId<CasualId, Guid>
 {
     public static CasualId Empty => new(Guid.Empty);
 

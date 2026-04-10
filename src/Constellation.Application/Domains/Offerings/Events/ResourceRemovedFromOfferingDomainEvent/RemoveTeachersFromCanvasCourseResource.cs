@@ -7,9 +7,9 @@ using Constellation.Core.Models.Offerings;
 using Constellation.Core.Models.Offerings.Errors;
 using Constellation.Core.Models.Offerings.Events;
 using Constellation.Core.Models.Offerings.Repositories;
-using Constellation.Core.Models.Offerings.ValueObjects;
 using Constellation.Core.Models.Operations;
 using Constellation.Core.Shared;
+using Core.Models.Offerings.Enums;
 using Core.Models.Operations.Enums;
 using Core.Models.StaffMembers;
 using Core.Models.StaffMembers.Identifiers;
@@ -51,7 +51,7 @@ internal sealed class RemoveTeachersFromCanvasCourseResource
         if (notification.Resource.Type != ResourceType.CanvasCourse)
             return;
 
-        Offering offering = await _offeringRepository.GetById(notification.OfferingId, cancellationToken);
+        Offering? offering = await _offeringRepository.GetById(notification.OfferingId, cancellationToken);
 
         if (offering is null)
         {
@@ -63,7 +63,7 @@ internal sealed class RemoveTeachersFromCanvasCourseResource
             return;
         }
 
-        CanvasCourseResource resource = notification.Resource as CanvasCourseResource;
+        CanvasCourseResource? resource = notification.Resource as CanvasCourseResource;
 
         List<StaffId> staffIds = offering.Teachers
             .Where(assignment => !assignment.IsDeleted)
@@ -75,7 +75,7 @@ internal sealed class RemoveTeachersFromCanvasCourseResource
         foreach (StaffMember staffMember in staffMembers)
         {
             ModifyEnrolmentCanvasOperation operation = new(
-                staffMember.EmployeeId.Number,
+                staffMember.EmployeeId.Value,
                 resource!.CourseId, 
                 resource.SectionId,
                 CanvasAction.Remove,

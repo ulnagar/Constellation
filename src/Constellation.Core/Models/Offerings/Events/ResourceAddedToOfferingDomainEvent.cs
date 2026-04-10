@@ -2,6 +2,7 @@
 
 using Constellation.Core.Models.Identifiers;
 using DomainEvents;
+using Enums;
 using Identifiers;
 using ValueObjects;
 

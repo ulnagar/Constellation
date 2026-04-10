@@ -64,7 +64,7 @@ internal sealed class CalculateDifferences : IIntegrationEventHandler<EdvalStude
                 continue;
             }
 
-            Student student = existingStudents.FirstOrDefault(student => student.StudentReferenceNumber == srn.Value);
+            Student? student = existingStudents.FirstOrDefault(student => student.StudentReferenceNumber == srn.Value);
 
             if (student is null)
             {
@@ -130,7 +130,7 @@ internal sealed class CalculateDifferences : IIntegrationEventHandler<EdvalStude
                 .Where(ignore => ignore.System == EdvalDifferenceSystem.ConstellationDifference)
                 .Any(ignore => ignore.Identifier == student.Id.ToString());
 
-            if (edvalStudents.All(edvalStudent => edvalStudent.StudentId != student.StudentReferenceNumber.Number))
+            if (edvalStudents.All(edvalStudent => edvalStudent.StudentId != student.StudentReferenceNumber.Value))
             {
                 _edvalRepository.Insert(new Difference(
                     EdvalDifferenceType.EdvalStudent,

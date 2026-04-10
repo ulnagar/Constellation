@@ -2439,7 +2439,7 @@ public class ExcelService : IExcelService
 
         foreach (ExportRecord record in records.OrderBy(entry => entry.Grade).ThenBy(entry => entry.Name.SortOrder))
         {
-            worksheet.Cells[row, 1].Value = record.StudentReferenceNumber.Number;
+            worksheet.Cells[row, 1].Value = record.StudentReferenceNumber;
             worksheet.Cells[row, 2].Value = record.Name.PreferredName;
             worksheet.Cells[row, 3].Value = record.Name.LastName;
             worksheet.Cells[row, 4].Value = record.Grade.AsName();

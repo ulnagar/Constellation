@@ -7,7 +7,6 @@ using Constellation.Core.Models.Offerings;
 using Constellation.Core.Models.Offerings.Errors;
 using Constellation.Core.Models.Offerings.Events;
 using Constellation.Core.Models.Offerings.Repositories;
-using Constellation.Core.Models.Offerings.ValueObjects;
 using Constellation.Core.Models.Operations;
 using Constellation.Core.Shared;
 using Core.Models.Operations.Enums;
@@ -48,7 +47,7 @@ internal sealed class AddTeacherToCanvasCourse
 
     public async Task Handle(TeacherAddedToOfferingDomainEvent notification, CancellationToken cancellationToken)
     {
-        Offering offering = await _offeringRepository.GetById(notification.OfferingId, cancellationToken);
+        Offering? offering = await _offeringRepository.GetById(notification.OfferingId, cancellationToken);
 
         if (offering is null)
         {
@@ -60,7 +59,7 @@ internal sealed class AddTeacherToCanvasCourse
             return;
         }
 
-        TeacherAssignment assignment = offering.Teachers.FirstOrDefault(assignment => assignment.Id == notification.AssignmentId);
+        TeacherAssignment? assignment = offering.Teachers.FirstOrDefault(assignment => assignment.Id == notification.AssignmentId);
 
         if (assignment is null)
         {
@@ -72,7 +71,7 @@ internal sealed class AddTeacherToCanvasCourse
             return;
         }
 
-        StaffMember staffMember = await _staffRepository.GetById(assignment.StaffId, cancellationToken);
+        StaffMember? staffMember = await _staffRepository.GetById(assignment.StaffId, cancellationToken);
 
         if (staffMember is null)
         {
@@ -91,7 +90,7 @@ internal sealed class AddTeacherToCanvasCourse
         foreach (CanvasCourseResource resource in resources)
         {
             ModifyEnrolmentCanvasOperation operation = new(
-                staffMember.EmployeeId.Number,
+                staffMember.EmployeeId.Value,
                 resource.CourseId,
                 resource.SectionId,
                 CanvasAction.Add,

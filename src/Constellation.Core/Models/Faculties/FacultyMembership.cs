@@ -1,8 +1,8 @@
 ﻿namespace Constellation.Core.Models.Faculties;
 
 using Constellation.Core.Models.Faculties.Identifiers;
-using Constellation.Core.Models.Faculties.ValueObjects;
 using Constellation.Core.Primitives;
+using Enums;
 using StaffMembers.Identifiers;
 using System;
 

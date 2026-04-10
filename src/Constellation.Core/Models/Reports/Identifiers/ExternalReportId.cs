@@ -4,7 +4,7 @@ using System;
 namespace Constellation.Core.Models.Reports.Identifiers;
 
 public readonly record struct ExternalReportId(Guid Value)
-    : IStronglyTypedId
+    : IStronglyTypedId<ExternalReportId, Guid>
 {
     public static ExternalReportId FromValue(Guid value) =>
         new(value);

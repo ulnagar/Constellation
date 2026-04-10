@@ -13,6 +13,7 @@ using Constellation.Core.Models.Operations;
 using Constellation.Core.Models.Operations.Enums;
 using Constellation.Core.Shared;
 using Core.Models.LinkedSystems;
+using Core.Models.Offerings.Enums;
 using Core.Models.Operations.Repositories;
 using Core.Models.StaffMembers;
 using Core.Models.StaffMembers.Identifiers;

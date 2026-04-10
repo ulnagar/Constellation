@@ -28,7 +28,7 @@ internal sealed class StaffMemberConfiguration : IEntityTypeConfiguration<StaffM
             .Property(member => member.EmployeeId)
             .IsRequired(false)
             .HasConversion(
-                id => id.Number,
+                id => id.Value,
                 value => EmployeeId.FromValue(value));
 
         builder

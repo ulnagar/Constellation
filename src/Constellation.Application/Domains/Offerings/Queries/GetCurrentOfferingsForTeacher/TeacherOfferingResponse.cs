@@ -2,6 +2,7 @@
 
 using Constellation.Core.Models.Offerings.Identifiers;
 using Constellation.Core.Models.Offerings.ValueObjects;
+using Core.Models.Offerings.Enums;
 
 public sealed record TeacherOfferingResponse(
     OfferingId OfferingId,

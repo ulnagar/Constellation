@@ -1,6 +1,7 @@
 ﻿namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Shared.Components.AddTeacherToOffering;
 
 using Constellation.Core.Models.Offerings.Identifiers;
+using Core.Models.Offerings.Enums;
 using Core.Models.Offerings.ValueObjects;
 using Core.Models.StaffMembers.Identifiers;
 using Microsoft.AspNetCore.Mvc;

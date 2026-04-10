@@ -61,7 +61,7 @@ internal sealed class CreateOfferingCommandHandler
             return Result.Failure<OfferingId>(OfferingErrors.Validation.EndDateInPast);
         }
 
-        Course course = await _courseRepository.GetById(request.CourseId, cancellationToken);
+        Course? course = await _courseRepository.GetById(request.CourseId, cancellationToken);
 
         if (course is null)
         {
@@ -73,20 +73,20 @@ internal sealed class CreateOfferingCommandHandler
             return Result.Failure<OfferingId>(CourseErrors.NotFound(request.CourseId));
         }
 
-        Result<OfferingName> name = OfferingName.FromValue(request.Name);
+        OfferingName name = OfferingName.FromValue(request.Name);
 
-        if (name is null)
+        if (name == OfferingName.Empty)
         {
             _logger
                 .ForContext(nameof(CreateOfferingCommand), request, true)
-                .ForContext(nameof(Error), name.Error, true)
+                .ForContext(nameof(Error), OfferingNameErrors.ValueEmpty, true)
                 .Warning("Failed to create Offering");
 
-            return Result.Failure<OfferingId>(name.Error);
+            return Result.Failure<OfferingId>(OfferingNameErrors.ValueEmpty);
         }
 
-        Offering offering = new Offering(
-            name.Value, 
+        Offering offering = new(
+            name, 
             course.Id, 
             request.StartDate, 
             request.EndDate);

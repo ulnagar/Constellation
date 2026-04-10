@@ -9,6 +9,7 @@ using Core.Models.Assignments.Repositories;
 using Core.Models.Assignments.Services;
 using Core.Models.Canvas.Models;
 using Core.Models.Offerings;
+using Core.Models.Offerings.Enums;
 using Core.Models.Offerings.Errors;
 using Core.Models.Offerings.Repositories;
 using Core.Models.Offerings.ValueObjects;

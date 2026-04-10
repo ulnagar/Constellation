@@ -5,6 +5,7 @@ using Constellation.Core.Models.Offerings.Identifiers;
 using Constellation.Core.Models.Offerings.ValueObjects;
 using Converters;
 using Core.Models.Canvas.Models;
+using Core.Models.Offerings.Enums;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 

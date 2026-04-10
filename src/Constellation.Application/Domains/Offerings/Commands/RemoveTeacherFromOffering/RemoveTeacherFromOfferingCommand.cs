@@ -3,6 +3,7 @@
 using Constellation.Application.Abstractions.Messaging;
 using Constellation.Core.Models.Offerings.Identifiers;
 using Constellation.Core.Models.Offerings.ValueObjects;
+using Core.Models.Offerings.Enums;
 using Core.Models.StaffMembers.Identifiers;
 
 public sealed record RemoveTeacherFromOfferingCommand(

@@ -1,8 +1,8 @@
 ﻿namespace Constellation.Infrastructure.Persistence.ConstellationContext.EntityConfigurations.Attachments;
 
 using Core.Models.Attachments;
+using Core.Models.Attachments.Enums;
 using Core.Models.Attachments.Identifiers;
-using Core.Models.Attachments.ValueObjects;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 

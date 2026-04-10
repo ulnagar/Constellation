@@ -23,6 +23,7 @@ using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Serilog;
+using System.Globalization;
 using System.Text;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
@@ -157,7 +158,6 @@ builder.Services.AddMvc(options =>
     options.ModelBinderProviders.Insert(0, new ContactPositionBinderProvider());
     options.ModelBinderProviders.Insert(0, new AssetNumberBinderProvider());
     options.ModelBinderProviders.Insert(0, new RecipientGroupBinderProvider());
-    options.ModelBinderProviders.Insert(0, new AlertRecipientBinderProvider());
     options.ModelBinderProviders.Insert(0, new AuthPermissionBinderProvider());
     options.ModelBinderProviders.Insert(0, new MessageRecipientListBinderProvider());
 });
@@ -242,9 +242,9 @@ app.Map("/debug/services", hostBuilder => hostBuilder.Run(async context =>
     foreach (ServiceDescriptor svc in builder.Services)
     {
         sb.Append("<tr>");
-        sb.Append($"<td>{svc.ServiceType.FullName}</td>");
-        sb.Append($"<td>{svc.Lifetime}</td>");
-        sb.Append($"<td>{svc.ImplementationType?.FullName}</td>");
+        sb.Append(CultureInfo.InvariantCulture, $"<td>{svc.ServiceType.FullName}</td>");
+        sb.Append(CultureInfo.InvariantCulture, $"<td>{svc.Lifetime}</td>");
+        sb.Append(CultureInfo.InvariantCulture, $"<td>{svc.ImplementationType?.FullName}</td>");
         sb.Append("</tr>");
     }
     sb.Append("</tbody></table>");
@@ -259,4 +259,4 @@ app.UseEndpoints(endpoints =>
         new DashboardOptions() { DashboardTitle = "Hangfire Dashboard", AppPath = "/" });
 });
 
-app.Run();
+await app.RunAsync();

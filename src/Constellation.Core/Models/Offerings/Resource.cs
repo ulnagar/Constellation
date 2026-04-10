@@ -4,6 +4,7 @@ using Canvas.Models;
 using Identifiers;
 using ValueObjects;
 using Constellation.Core.Models.Subjects.Identifiers;
+using Enums;
 using System;
 
 public abstract class Resource

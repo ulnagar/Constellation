@@ -12,6 +12,7 @@ using Core.Models.Enrolments.Repositories;
 using Core.Models.Faculties;
 using Core.Models.Faculties.Errors;
 using Core.Models.Faculties.Repositories;
+using Core.Models.Offerings.Enums;
 using Core.Models.StaffMembers;
 using Core.Models.StaffMembers.Identifiers;
 using Core.Models.StaffMembers.Repositories;

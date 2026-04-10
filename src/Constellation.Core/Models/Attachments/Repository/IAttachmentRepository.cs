@@ -1,8 +1,8 @@
 ﻿#nullable enable
 namespace Constellation.Core.Models.Attachments.Repository;
 
-using ValueObjects;
 using Attachments;
+using Enums;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;

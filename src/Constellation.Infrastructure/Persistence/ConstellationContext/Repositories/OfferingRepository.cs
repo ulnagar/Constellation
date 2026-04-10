@@ -9,6 +9,7 @@ using Constellation.Core.Models.Offerings.Repositories;
 using Constellation.Core.Models.Subjects;
 using Constellation.Core.Models.Subjects.Identifiers;
 using Core.Abstractions.Clock;
+using Core.Models.Offerings.Enums;
 using Core.Models.Offerings.ValueObjects;
 using Core.Models.StaffMembers.Identifiers;
 using Core.Models.Students.Identifiers;
@@ -19,7 +20,7 @@ using Core.Models.Timetables.ValueObjects;
 using Microsoft.EntityFrameworkCore;
 using System.Threading;
 
-public class OfferingRepository : IOfferingRepository
+internal sealed class OfferingRepository : IOfferingRepository
 {
     private readonly AppDbContext _context;
     private readonly IDateTimeProvider _dateTime;

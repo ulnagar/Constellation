@@ -5,23 +5,19 @@ using Helpers;
 using Primitives;
 using Shared;
 using System;
-using System.Collections.Generic;
 using System.ComponentModel;
 using System.Globalization;
-using System.Text.RegularExpressions;
 
 [TypeConverter(typeof(EmployeeIdConverter))]
-public sealed class EmployeeId : ValueObject
+public sealed class EmployeeId : ValueObject<EmployeeId, string>, IValueObject<EmployeeId, string>
 {
     public static readonly EmployeeId Empty = new(string.Empty);
 
-    public string Number { get; }
-
     private EmployeeId() { }
 
-    private EmployeeId(string number)
+    private EmployeeId(string value)
     {
-        Number = number;
+        Value = value;
     }
 
     public static Result<EmployeeId> Create(string value)
@@ -35,12 +31,7 @@ public sealed class EmployeeId : ValueObject
         return new EmployeeId(value);
     }
 
-    public override IEnumerable<object> GetAtomicValues()
-    {
-        yield return Number;
-    }
-
-    public override string ToString() => Number;
+    public override string ToString() => Value;
 
     /// <summary>
     /// Do not use. For EF Core only.

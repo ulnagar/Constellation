@@ -53,7 +53,7 @@ internal sealed class CreateTeam
 
     public async Task Handle(TutorialRequestScheduledDomainEvent notification, CancellationToken cancellationToken)
     {
-        Request tutorialRequest = await _tutorialRepository.GetRequestById(notification.RequestId, cancellationToken);
+        Request? tutorialRequest = await _tutorialRepository.GetRequestById(notification.RequestId, cancellationToken);
 
         if (tutorialRequest is null)
         {
@@ -75,7 +75,7 @@ internal sealed class CreateTeam
             return;
         }
 
-        Student student = await _studentRepository.GetById(tutorialRequest.StudentId, cancellationToken);
+        Student? student = await _studentRepository.GetById(tutorialRequest.StudentId, cancellationToken);
 
         if (student is null)
         {
@@ -87,20 +87,20 @@ internal sealed class CreateTeam
             return;
         }
 
-        Team? existingTeam = await _teamRepository.GetByDescriptionTag(_dateTime.CurrentYear, student.StudentReferenceNumber.Number, cancellationToken);
+        Team? existingTeam = await _teamRepository.GetByDescriptionTag(_dateTime.CurrentYear, student.StudentReferenceNumber, cancellationToken);
 
         if (existingTeam is null)
         {
             // Schedule creation of Team for tutorial
             CreateTeamTeamOperation operation = new(
                 MicrosoftTeamsHelper.FormatTeamName(tutorialRequest.Plan.Name),
-                $"8912;TUT;Support;{_dateTime.CurrentYearAsString};{tutorialRequest.Grade.AsName()};{tutorialRequest.Plan.Name};{student.StudentReferenceNumber.Number}");
+                $"8912;TUT;Support;{_dateTime.CurrentYearAsString};{tutorialRequest.Grade.AsName()};{tutorialRequest.Plan.Name};{student.StudentReferenceNumber}");
 
             _teamOperationRepository.Insert(operation);
         }
         else
         {
-            Tutorial tutorial = await _tutorialRepository.GetById(tutorialRequest.Plan.TutorialId, cancellationToken);
+            Tutorial? tutorial = await _tutorialRepository.GetById(tutorialRequest.Plan.TutorialId, cancellationToken);
 
             if (tutorial is null)
             {

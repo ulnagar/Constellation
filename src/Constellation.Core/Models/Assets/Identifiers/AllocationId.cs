@@ -4,7 +4,7 @@ using Constellation.Core.Primitives;
 using System;
 
 public readonly record struct AllocationId(Guid Value)
-    : IStronglyTypedId
+    : IStronglyTypedId<AllocationId, Guid>
 {
     public static readonly AllocationId Empty = new(Guid.Empty);
 

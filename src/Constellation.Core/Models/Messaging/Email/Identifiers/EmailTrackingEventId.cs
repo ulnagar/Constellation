@@ -3,7 +3,7 @@
 using Primitives;
 
 public readonly record struct EmailTrackingEventId(Guid Value)
-    : IStronglyTypedId
+    : IStronglyTypedId<EmailTrackingEventId, Guid>
 {
     public static EmailTrackingEventId Empty => new(Guid.Empty);
 

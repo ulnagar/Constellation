@@ -43,13 +43,13 @@ internal sealed class GetStudentsWithAbsenceSettingsQueryHandler
                     configuration.ScanEndDate));
             }
 
-            SchoolEnrolment enrolment = student.CurrentEnrolment;
+            SchoolEnrolment? enrolment = student.CurrentEnrolment;
 
             if (enrolment is null)
                 continue;
 
             StudentAbsenceSettingsResponse entry = new(
-                student.StudentReferenceNumber.Number,
+                student.StudentReferenceNumber,
                 student.Name.DisplayName,
                 student.PreferredGender.Value,
                 enrolment.Grade,

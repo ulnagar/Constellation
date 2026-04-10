@@ -16,6 +16,7 @@ using Constellation.Core.Models.Students.Repositories;
 using Constellation.Core.Models.Tutorials;
 using Core.Models.Enrolments;
 using Core.Models.LinkedSystems;
+using Core.Models.Offerings.Enums;
 using Core.Models.Offerings.ValueObjects;
 using Core.Models.Operations;
 using Core.Models.Operations.Enums;

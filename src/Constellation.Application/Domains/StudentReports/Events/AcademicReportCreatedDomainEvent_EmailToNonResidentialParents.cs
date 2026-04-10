@@ -3,8 +3,8 @@
 using Abstractions.Messaging;
 using Core.Abstractions.Repositories;
 using Core.Models.Attachments.DTOs;
+using Core.Models.Attachments.Enums;
 using Core.Models.Attachments.Services;
-using Core.Models.Attachments.ValueObjects;
 using Core.Models.Families;
 using Core.Models.Reports;
 using Core.Models.Reports.Events;

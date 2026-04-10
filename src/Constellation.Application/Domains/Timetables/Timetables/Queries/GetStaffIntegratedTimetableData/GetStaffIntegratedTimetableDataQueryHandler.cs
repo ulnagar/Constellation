@@ -72,7 +72,7 @@ internal sealed class GetStaffIntegratedTimetableDataQueryHandler
                     period.StartTime,
                     period.EndTime,
                     period.Duration,
-                    OfferingName.None));
+                    OfferingName.Empty));
 
                 continue;
             }

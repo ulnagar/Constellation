@@ -6,6 +6,7 @@ using Core.Models;
 using Core.Models.Attendance;
 using Core.Models.Attendance.Repositories;
 using Core.Models.Offerings;
+using Core.Models.Offerings.Enums;
 using Core.Models.Offerings.Errors;
 using Core.Models.Offerings.Repositories;
 using Core.Models.Offerings.ValueObjects;

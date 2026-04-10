@@ -4,7 +4,7 @@ using Primitives;
 using System;
 
 public readonly record struct StudentId(Guid Value)
-    : IStronglyTypedId
+    : IStronglyTypedId<StudentId, Guid>
 {
     public static StudentId Empty => new(Guid.Empty);
 

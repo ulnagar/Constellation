@@ -120,7 +120,7 @@ public class UpsertModel : BasePageModel
             return;
         }
 
-        EmployeeId = staffMember.Value.EmployeeId?.Number ?? string.Empty;
+        EmployeeId = staffMember.Value.EmployeeId.Value;
         FirstName = staffMember.Value.Name.FirstName;
         PreferredName = staffMember.Value.Name.PreferredName;
         LastName = staffMember.Value.Name.LastName;

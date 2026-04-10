@@ -4,7 +4,7 @@ using Primitives;
 using System;
 
 public readonly record struct TeamsResourceId(Guid Value)
-    : IStronglyTypedId
+    : IStronglyTypedId<TeamsResourceId, Guid>
 {
     public static readonly TeamsResourceId Empty = new(Guid.Empty);
 

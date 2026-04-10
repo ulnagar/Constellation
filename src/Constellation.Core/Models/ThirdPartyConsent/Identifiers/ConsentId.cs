@@ -4,7 +4,7 @@ using Constellation.Core.Primitives;
 using System;
 
 public record struct ConsentId(Guid Value)
-    : IStronglyTypedId
+    : IStronglyTypedId<ConsentId, Guid>
 {
     public static ConsentId Empty => new(Guid.Empty);
 

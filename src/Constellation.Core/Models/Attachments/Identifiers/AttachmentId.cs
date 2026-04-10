@@ -4,7 +4,7 @@ using Constellation.Core.Primitives;
 using System;
 
 public readonly record struct AttachmentId(Guid Value)
-    : IStronglyTypedId
+    : IStronglyTypedId<AttachmentId, Guid>
 {
     public static AttachmentId FromValue(Guid value) =>
         new(value);

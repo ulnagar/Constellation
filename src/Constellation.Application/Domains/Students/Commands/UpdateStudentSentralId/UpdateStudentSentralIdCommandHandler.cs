@@ -4,12 +4,12 @@ using Abstractions.Messaging;
 using Constellation.Core.Enums;
 using Constellation.Core.Models.Students.Repositories;
 using Core.Models.Students;
-using Core.Models.Students.Enums;
 using Core.Models.Students.Errors;
 using Core.Shared;
 using Interfaces.Gateways;
 using Interfaces.Repositories;
 using Serilog;
+using System.Globalization;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -35,7 +35,7 @@ internal sealed class UpdateStudentSentralIdCommandHandler
 
     public async Task<Result> Handle(UpdateStudentSentralIdCommand request, CancellationToken cancellationToken)
     {
-        Student student = await _studentRepository.GetById(request.StudentId, cancellationToken);
+        Student? student = await _studentRepository.GetById(request.StudentId, cancellationToken);
 
         if (student is null)
         {
@@ -47,7 +47,7 @@ internal sealed class UpdateStudentSentralIdCommandHandler
             return Result.Failure(StudentErrors.NotFound(request.StudentId));
         }
 
-        SchoolEnrolment enrolment = student.CurrentEnrolment;
+        SchoolEnrolment? enrolment = student.CurrentEnrolment;
 
         if (enrolment is null)
         {
@@ -59,7 +59,7 @@ internal sealed class UpdateStudentSentralIdCommandHandler
             return Result.Failure(SchoolEnrolmentErrors.NotFound);
         }
 
-        string id = await _gateway.GetSentralStudentIdFromSRN(student.StudentReferenceNumber.Number, ((int)enrolment.Grade).ToString());
+        string id = await _gateway.GetSentralStudentIdFromSRN(student.StudentReferenceNumber, ((int)enrolment.Grade).ToString(CultureInfo.InvariantCulture));
 
         if (string.IsNullOrWhiteSpace(id))
         {

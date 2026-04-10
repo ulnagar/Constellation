@@ -4,7 +4,7 @@ using Constellation.Core.Primitives;
 using System;
 
 public readonly record struct DomainEventId(Guid Value)
-    : IStronglyTypedId
+    : IStronglyTypedId<DomainEventId, Guid>
 {
     public static DomainEventId FromValue(Guid value) =>
         new(value);

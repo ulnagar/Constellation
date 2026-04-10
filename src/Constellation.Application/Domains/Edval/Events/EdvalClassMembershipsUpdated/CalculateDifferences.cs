@@ -78,7 +78,7 @@ internal sealed class CalculateDifferences : IIntegrationEventHandler<EdvalClass
                 continue;
             }
 
-            Student student = existingStudents.FirstOrDefault(student => student.StudentReferenceNumber == srn.Value);
+            Student? student = existingStudents.FirstOrDefault(student => student.StudentReferenceNumber == srn.Value);
 
             if (student is null)
             {
@@ -97,8 +97,8 @@ internal sealed class CalculateDifferences : IIntegrationEventHandler<EdvalClass
                 continue;
             }
 
-            Offering offering = existingOfferings.FirstOrDefault(offering => offering.Name.Value == membership.OfferingName);
-            Tutorial tutorial = existingTutorials.FirstOrDefault(tutorial => tutorial.Name.Value == membership.OfferingName);
+            Offering? offering = existingOfferings.FirstOrDefault(offering => offering.Name.Value == membership.OfferingName);
+            Tutorial? tutorial = existingTutorials.FirstOrDefault(tutorial => tutorial.Name.Value == membership.OfferingName);
 
             if (offering is null && tutorial is null)
             {
@@ -139,7 +139,7 @@ internal sealed class CalculateDifferences : IIntegrationEventHandler<EdvalClass
                 .Where(ignore => ignore.System == EdvalDifferenceSystem.ConstellationDifference)
                 .Any(ignore => ignore.Identifier == enrolment.Id.ToString());
 
-            Student student = existingStudents.FirstOrDefault(student => student.Id == enrolment.StudentId);
+            Student? student = existingStudents.FirstOrDefault(student => student.Id == enrolment.StudentId);
 
             if (student is null)
             {
@@ -152,7 +152,7 @@ internal sealed class CalculateDifferences : IIntegrationEventHandler<EdvalClass
 
             if (enrolment is OfferingEnrolment offeringEnrolment)
             {
-                Offering offering = existingOfferings.FirstOrDefault(offering => offering.Id == offeringEnrolment.OfferingId);
+                Offering? offering = existingOfferings.FirstOrDefault(offering => offering.Id == offeringEnrolment.OfferingId);
 
                 if (offering is null)
                 {
@@ -163,7 +163,7 @@ internal sealed class CalculateDifferences : IIntegrationEventHandler<EdvalClass
                     continue;
                 }
 
-                if (edvalClassMemberships.All(entry => entry.StudentId != student.StudentReferenceNumber.Number && entry.OfferingName != offering.Name.Value))
+                if (edvalClassMemberships.All(entry => entry.StudentId != student.StudentReferenceNumber.Value && entry.OfferingName != offering.Name.Value))
                 {
                     // Additional class enrolment in Constellation
                     _edvalRepository.Insert(new Difference(
@@ -179,7 +179,7 @@ internal sealed class CalculateDifferences : IIntegrationEventHandler<EdvalClass
 
             if (enrolment is TutorialEnrolment tutorialEnrolment)
             {
-                Tutorial tutorial = existingTutorials.FirstOrDefault(tutorial => tutorial.Id == tutorialEnrolment.TutorialId);
+                Tutorial? tutorial = existingTutorials.FirstOrDefault(tutorial => tutorial.Id == tutorialEnrolment.TutorialId);
 
                 if (tutorial is null)
                 {
@@ -190,7 +190,7 @@ internal sealed class CalculateDifferences : IIntegrationEventHandler<EdvalClass
                     continue;
                 }
 
-                if (edvalClassMemberships.All(entry => entry.StudentId != student.StudentReferenceNumber.Number && entry.OfferingName != tutorial.Name.Value))
+                if (edvalClassMemberships.All(entry => entry.StudentId != student.StudentReferenceNumber.Value && entry.OfferingName != tutorial.Name.Value))
                 {
                     // Additional class enrolment in Constellation
                     _edvalRepository.Insert(new Difference(

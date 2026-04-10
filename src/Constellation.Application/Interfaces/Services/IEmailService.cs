@@ -86,7 +86,6 @@ public interface IEmailService
     Task SendUpdatedCoverEmail(Cover cover, Offering offering, EmailRecipient coveringTeacher, List<EmailRecipient> primaryRecipients, List<EmailRecipient> secondaryRecipients, DateOnly originalStartDate, TimeOnly startTime, TimeOnly endTime, string teamLink, List<Attachment> attachments, CancellationToken cancellationToken = default);
 
     // Messaging Emails
-    Task<Result> SendEmergencyConsoleEmail(AlertRecipient recipient, string message, CancellationToken cancellationToken = default);
     Task<Result> SendQueuedMessage(MessageSender sender, EmailRecipient receiver, string subject, string messageBody, CancellationToken cancellationToken = default);
     Task<Result> SendQueuedMessageLog(EmailRecipient receiver, QueuedMessage message, CancellationToken cancellationToken = default);
 

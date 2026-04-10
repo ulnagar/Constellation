@@ -4,31 +4,28 @@ using Errors;
 using Primitives;
 using Shared;
 using System;
-using System.Collections.Generic;
 
-public sealed class AssetNumber : ValueObject, IComparable
+public sealed class AssetNumber : ValueObject<AssetNumber, string>, IValueObject<AssetNumber, string>, IComparable
 {
     public static readonly AssetNumber Empty = new(string.Empty);
-
-    private string Number { get; }
-
+    
     // Required for Newtonsoft.Json deserialization
     private AssetNumber() { }
 
-    private AssetNumber(string number) => Number = number;
+    private AssetNumber(string value) => Value = value;
 
-    public static AssetNumber? FromValue(string number)
+    public static AssetNumber FromValue(string number)
     {
         if (string.IsNullOrWhiteSpace(number))
-            return null;
+            return Empty;
 
         number = number.TrimStart(' ', 'A', 'C', '0');
 
         if (number.Length > 8)
-            return null;
+            return Empty;
 
         if (!int.TryParse(number, out _))
-            return null;
+            return Empty;
 
         AssetNumber assetNumber = new($"AC{number.PadLeft(8, '0')}");
 
@@ -53,28 +50,22 @@ public sealed class AssetNumber : ValueObject, IComparable
         return assetNumber;
     }
 
-    public override string ToString() => Number;
+    public override string ToString() => Value;
 
     public static implicit operator string(AssetNumber number) => number.ToString();
-
-    public override IEnumerable<object> GetAtomicValues()
-    {
-        yield return Number;
-    }
 
     public int CompareTo(object? obj)
     {
         if (obj is AssetNumber other)
-            return string.Compare(Number, other.Number, StringComparison.Ordinal);
+            return string.Compare(Value, other.Value, StringComparison.Ordinal);
 
         return -1;
     }
 
-    private bool Equals(AssetNumber other) => base.Equals(other) && Number == other.Number;
     public override bool Equals(object? obj) => ReferenceEquals(this, obj) || obj is AssetNumber other && Equals(other);
-    public override int GetHashCode() => HashCode.Combine(base.GetHashCode(), Number);
-    public static bool operator ==(AssetNumber left, AssetNumber right) => EqualOperator(left, right);
-    public static bool operator !=(AssetNumber left, AssetNumber right) => NotEqualOperator(left, right);
+    public override int GetHashCode() => HashCode.Combine(base.GetHashCode(), Value);
+    public static bool operator ==(AssetNumber left, AssetNumber right) => Equals(left, right);
+    public static bool operator !=(AssetNumber left, AssetNumber right) => !Equals(left, right);
 
     public static bool operator <(AssetNumber? left, AssetNumber? right) => 
         left is null ? right is not null : left.CompareTo(right) < 0;

@@ -2,9 +2,9 @@
 
 using Application.Domains.Faculties.Queries.GetFacultiesAsDictionary;
 using Constellation.Core.Models.Faculties.Identifiers;
-using Constellation.Core.Models.Faculties.ValueObjects;
 using Constellation.Core.Models.StaffMembers.Repositories;
 using Constellation.Core.Shared;
+using Core.Models.Faculties.Enums;
 using Core.Models.StaffMembers;
 using Core.Models.StaffMembers.Identifiers;
 using MediatR;
@@ -44,7 +44,7 @@ public class TeacherAddFacultyViewComponent : ViewComponent
 
         viewModel.StaffId = staffId;
         viewModel.StaffName = staffMember.Name.DisplayName;
-        viewModel.FacultyRoles = new SelectList(FacultyMembershipRole.Enumerations(), "");
+        viewModel.FacultyRoles = new SelectList(FacultyMembershipRole.GetOptions, "");
 
         return View(viewModel);
     }

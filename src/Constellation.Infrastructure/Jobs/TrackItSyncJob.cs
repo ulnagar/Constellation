@@ -188,7 +188,7 @@ internal sealed class TrackItSyncJob : ITrackItSyncJob
             _logger.Information("{id}: Student: Name {student} - Email {emailAddress}", jobId, acosStudent.Name.DisplayName, acosStudent.EmailAddress);
             
             string customerEmailId = ConvertEmailToEmailId(acosStudent.EmailAddress);
-            Customer? tiCustomer = tiCustomers.FirstOrDefault(c => c.Client == acosStudent.StudentReferenceNumber.Number || c.Emailid == customerEmailId);
+            Customer? tiCustomer = tiCustomers.FirstOrDefault(c => c.Client == acosStudent.StudentReferenceNumber || c.Emailid == customerEmailId);
             
             if (tiCustomer is not null)
             {
@@ -357,7 +357,7 @@ internal sealed class TrackItSyncJob : ITrackItSyncJob
         $"SMTP:{{{email.ToLower(CultureInfo.InvariantCulture)}}}{email.ToLower(CultureInfo.InvariantCulture)}";
 
     private static string ConvertEmailToPortalId(string email) =>
-        email[..(email.IndexOf('@') - 1)].ToLower(CultureInfo.InvariantCulture);
+        email[..(email.IndexOf('@', StringComparison.OrdinalIgnoreCase) - 1)].ToLower(CultureInfo.InvariantCulture);
 
     private void CheckExistingCustomerDetail(Customer customer, SchoolContact contact)
     {
@@ -367,7 +367,7 @@ internal sealed class TrackItSyncJob : ITrackItSyncJob
         if (checkDepartment?.Name.Contains("Faculty", StringComparison.OrdinalIgnoreCase) ?? false)
             return;
 
-        string? contactPortalId = ConvertEmailToPortalId(contact.EmailAddress.Email);
+        string contactPortalId = ConvertEmailToPortalId(contact.EmailAddress.Email);
 
         if (string.IsNullOrWhiteSpace(contactPortalId))
             return;
@@ -414,8 +414,8 @@ internal sealed class TrackItSyncJob : ITrackItSyncJob
 
     private void CheckExistingCustomerDetail(Customer customer, Student student)
     {
-        if (!customer.Client.Equals(student.StudentReferenceNumber.Number.ToUpper(CultureInfo.InvariantCulture), StringComparison.OrdinalIgnoreCase))
-            customer.Client = student.StudentReferenceNumber.Number.ToUpper(CultureInfo.InvariantCulture);
+        if (!customer.Client.Equals(student.StudentReferenceNumber, StringComparison.OrdinalIgnoreCase))
+            customer.Client = student.StudentReferenceNumber;
 
         customer.Emailid = ConvertEmailToEmailId(student.EmailAddress);
 
@@ -485,11 +485,11 @@ internal sealed class TrackItSyncJob : ITrackItSyncJob
 
     private Customer CreateCustomerFromContact(SchoolContact contact)
     {
-        string? contactPortalId = ConvertEmailToPortalId(contact.EmailAddress.Email);
+        string contactPortalId = ConvertEmailToPortalId(contact.EmailAddress.Email);
         
         Customer customer = new()
         {
-            Client = contactPortalId?.ToUpper(CultureInfo.InvariantCulture),
+            Client = contactPortalId.ToUpper(CultureInfo.InvariantCulture),
             Emailid = ConvertEmailToEmailId(contact.EmailAddress),
             Group = 2,
             Inactive = 0,
@@ -524,7 +524,7 @@ internal sealed class TrackItSyncJob : ITrackItSyncJob
     {
         Customer customer = new()
         {
-            Client = student.StudentReferenceNumber.Number.ToUpper(CultureInfo.InvariantCulture),
+            Client = student.StudentReferenceNumber,
             Emailid = ConvertEmailToEmailId(student.EmailAddress),
             Group = 2,
             Inactive = 0,

@@ -1,5 +1,6 @@
 ﻿namespace Constellation.Core.Models.Offerings.Errors;
 
+using Enums;
 using Identifiers;
 using Shared;
 using System;

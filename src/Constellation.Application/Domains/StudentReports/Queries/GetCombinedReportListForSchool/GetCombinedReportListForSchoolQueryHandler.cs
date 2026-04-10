@@ -52,7 +52,7 @@ internal sealed class GetCombinedReportListForSchoolQueryHandler
             foreach (AcademicReport report in academicReports)
             {
                 results.Add(new SchoolAcademicReportResponse(
-                    student.StudentReferenceNumber.Number,
+                    student.StudentReferenceNumber,
                     student.Name.FirstName,
                     student.Name.LastName,
                     student.Name.DisplayName,
@@ -66,7 +66,7 @@ internal sealed class GetCombinedReportListForSchoolQueryHandler
             foreach (ExternalReport report in externalReports)
             {
                 results.Add(new SchoolExternalReportResponse(
-                    student.StudentReferenceNumber.Number,
+                    student.StudentReferenceNumber,
                     student.Name.FirstName,
                     student.Name.LastName,
                     student.Name.DisplayName,

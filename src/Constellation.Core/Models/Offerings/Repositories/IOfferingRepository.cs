@@ -3,7 +3,7 @@ namespace Constellation.Core.Models.Offerings.Repositories;
 using Canvas.Models;
 using Constellation.Core.Models.Students.Identifiers;
 using Constellation.Core.Models.Subjects.Identifiers;
-using Enums;
+using Core.Enums;
 using Identifiers;
 using Offerings;
 using StaffMembers.Identifiers;

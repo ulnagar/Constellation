@@ -36,7 +36,7 @@ internal sealed class CreateCanvasAccount
     {
         _logger.Information("Attempting to add student ({studentId}) to Canvas", notification.StudentId);
 
-        Student student = await _studentRepository.GetById(notification.StudentId, cancellationToken);
+        Student? student = await _studentRepository.GetById(notification.StudentId, cancellationToken);
 
         if (student == null)
         {
@@ -57,10 +57,10 @@ internal sealed class CreateCanvasAccount
         }
 
         CreateUserCanvasOperation operation = new(
-            student.StudentReferenceNumber.Number,
+            student.StudentReferenceNumber,
             student.Name.PreferredName,
             student.Name.LastName,
-            student.EmailAddress.Email.Substring(0, student.EmailAddress.Email.IndexOf('@')),
+            student.EmailAddress.Email.Substring(0, student.EmailAddress.Email.IndexOf('@', StringComparison.OrdinalIgnoreCase)),
             student.EmailAddress.Email);
 
         _operationsRepository.Insert(operation);

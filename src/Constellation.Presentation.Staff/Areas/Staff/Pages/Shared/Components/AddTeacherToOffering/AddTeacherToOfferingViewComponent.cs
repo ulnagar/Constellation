@@ -6,6 +6,7 @@ using Constellation.Application.Domains.Offerings.Queries.GetOfferingDetails;
 using Constellation.Core.Models.Offerings.Identifiers;
 using Constellation.Core.Models.Offerings.ValueObjects;
 using Constellation.Core.Shared;
+using Core.Models.Offerings.Enums;
 using Core.Models.StaffMembers.Identifiers;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
@@ -34,7 +35,7 @@ public class AddTeacherToOfferingViewComponent : ViewComponent
 
         Dictionary<string, string> resourceList = new();
 
-        foreach (AssignmentType entry in AssignmentType.Enumerations())
+        foreach (AssignmentType entry in AssignmentType.GetOptions)
         {
             resourceList.Add(entry.Value, entry.Value);
         }

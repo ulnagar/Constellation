@@ -8,6 +8,7 @@ using Core.Models.Enrolments.Repositories;
 using Core.Models.Faculties;
 using Core.Models.Faculties.Repositories;
 using Core.Models.Offerings;
+using Core.Models.Offerings.Enums;
 using Core.Models.Offerings.Repositories;
 using Core.Models.Offerings.ValueObjects;
 using Core.Models.SchoolContacts;

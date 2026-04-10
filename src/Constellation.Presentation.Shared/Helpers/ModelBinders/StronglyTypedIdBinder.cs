@@ -1,61 +1,65 @@
-﻿#nullable enable
-namespace Constellation.Presentation.Shared.Helpers.ModelBinders;
+﻿namespace Constellation.Presentation.Shared.Helpers.ModelBinders;
 
 using Core.Primitives;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
-using Microsoft.AspNetCore.Mvc.ModelBinding.Binders;
 using System.ComponentModel;
 
-public sealed class StronglyTypedIdBinder : IModelBinder
+public class StronglyTypedIdModelBinder<TSelf, TValue> : IModelBinder
+    where TSelf : IStronglyTypedId<TSelf, TValue>
 {
     public Task BindModelAsync(ModelBindingContext bindingContext)
     {
-        string modelName = bindingContext.ModelName;
-        Type modelType = bindingContext.ModelType;
+        ValueProviderResult valueProviderResult = bindingContext.ValueProvider
+            .GetValue(bindingContext.ModelName);
 
-        ValueProviderResult valueProviderResult = bindingContext.ValueProvider.GetValue(modelName);
+        if (valueProviderResult == ValueProviderResult.None)
+            return Task.CompletedTask;
 
-        if (valueProviderResult == ValueProviderResult.None) return Task.CompletedTask;
+        string? rawValue = valueProviderResult.FirstValue;
 
-        object? id = TryParse(modelType, valueProviderResult.FirstValue);
-        StoreResult(bindingContext, modelName, id);
+        if (string.IsNullOrEmpty(rawValue))
+            return Task.CompletedTask;
+
+        try
+        {
+            // Use TypeConverter so Guid, string, int etc. all work without
+            // special-casing — ConvertFromInvariantString handles culture safely.
+            TypeConverter converter = TypeDescriptor.GetConverter(typeof(TValue));
+            TValue typedValue = (TValue)converter.ConvertFromInvariantString(rawValue)!;
+
+            bindingContext.Result = ModelBindingResult.Success(TSelf.FromValue(typedValue));
+        }
+        catch (Exception ex)
+        {
+            bindingContext.ModelState.TryAddModelError(bindingContext.ModelName, ex.Message);
+        }
 
         return Task.CompletedTask;
     }
-
-    private void StoreResult(ModelBindingContext bindingContext, string modelName, object? id)
-    {
-        if (id is not null)
-            bindingContext.Result = ModelBindingResult.Success(id);
-        else
-            bindingContext.ModelState.TryAddModelError(modelName, "Invalid ID");
-    }
-
-    private object? TryParse(Type idType, string? rawValue) =>
-        FromString(idType, rawValue) is object parsedValue
-            ? Activator.CreateInstance(idType, parsedValue)
-            : null;
-
-    private object? FromString(Type idType, string? rawValue) =>
-        rawValue is string && !string.IsNullOrWhiteSpace(rawValue) && GetContainedType(idType) is Type containedType
-            ? TypeDescriptor.GetConverter(containedType).ConvertFromString(rawValue)
-            : null;
-
-    private Type? GetContainedType(Type idType) =>
-        idType.GetProperty("Value")?.PropertyType;
 }
 
-public sealed class StronglyTypedIdBinderProvider : IModelBinderProvider
+public class StronglyTypedIdBinderProvider : IModelBinderProvider
 {
-    public IModelBinder GetBinder(ModelBinderProviderContext context)
+    public IModelBinder? GetBinder(ModelBinderProviderContext context)
     {
-        ArgumentNullException.ThrowIfNull(context);
+        Type modelType = context.Metadata.ModelType;
 
-        Type[] interfaceTypes = context.Metadata.ModelType.FindInterfaces((type, criteria) => type.ToString() == criteria.ToString(), typeof(IStronglyTypedId));
+        // Walk the interface list looking for IStronglyTypedId<TSelf, TValue>
+        Type? matchingInterface = modelType
+            .GetInterfaces()
+            .FirstOrDefault(i =>
+                i.IsGenericType &&
+                i.GetGenericTypeDefinition() == typeof(IStronglyTypedId<,>));
 
-        if (interfaceTypes.Contains(typeof(IStronglyTypedId)))
-            return new BinderTypeModelBinder(typeof(StronglyTypedIdBinder));
+        if (matchingInterface is null)
+            return null;
 
-        return null;
+        // [0] = TSelf (the concrete type), [1] = TValue (Guid, string, etc.)
+        Type[] typeArgs = matchingInterface.GetGenericArguments();
+
+        Type binderType = typeof(StronglyTypedIdModelBinder<,>)
+            .MakeGenericType(typeArgs);
+
+        return (IModelBinder)Activator.CreateInstance(binderType)!;
     }
 }

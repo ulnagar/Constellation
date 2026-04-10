@@ -10,6 +10,7 @@ using Constellation.Core.Models.Offerings;
 using Constellation.Core.Models.Offerings.Repositories;
 using Constellation.Core.Models.Subjects;
 using Core.Errors;
+using Core.Models.Awards.Enums;
 using Core.Models.Awards.Errors;
 using Core.Models.Offerings.Identifiers;
 using Core.Models.Students;

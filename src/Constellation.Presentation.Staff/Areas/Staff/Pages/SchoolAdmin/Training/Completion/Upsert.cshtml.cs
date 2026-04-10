@@ -15,7 +15,7 @@ using Constellation.Core.Models.Training.Identifiers;
 using Constellation.Core.Shared;
 using Core.Abstractions.Services;
 using Core.Errors;
-using Core.Models.Attachments.ValueObjects;
+using Core.Models.Attachments.Enums;
 using Core.Models.StaffMembers.Identifiers;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;

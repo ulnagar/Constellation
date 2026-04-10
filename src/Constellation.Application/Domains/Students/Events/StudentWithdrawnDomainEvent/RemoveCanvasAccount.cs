@@ -37,7 +37,7 @@ internal sealed class RemoveCanvasAccount
     {
         _logger.Information("Attempting to remove student ({studentId}) from Canvas", notification.StudentId);
 
-        Student student = await _studentRepository.GetById(notification.StudentId, cancellationToken);
+        Student? student = await _studentRepository.GetById(notification.StudentId, cancellationToken);
 
         if (student == null)
         {
@@ -49,7 +49,7 @@ internal sealed class RemoveCanvasAccount
             return;
         }
        
-        DeleteUserCanvasOperation operation = new(student.StudentReferenceNumber.Number);
+        DeleteUserCanvasOperation operation = new(student.StudentReferenceNumber);
 
         _operationsRepository.Insert(operation);
         await _unitOfWork.CompleteAsync(cancellationToken);

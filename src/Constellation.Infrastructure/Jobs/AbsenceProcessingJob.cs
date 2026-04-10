@@ -147,7 +147,7 @@ internal sealed class AbsenceProcessingJob : IAbsenceProcessingJob
             // This student doesn't have an identified sentral id!
             string detectedId = await _sentralGateway
                 .GetSentralStudentIdFromSRN(
-                    student.StudentReferenceNumber.Number, 
+                    student.StudentReferenceNumber, 
                     ((int)student.CurrentEnrolment?.Grade).ToString(NumberFormatInfo.InvariantInfo));
 
             if (string.IsNullOrWhiteSpace(detectedId))

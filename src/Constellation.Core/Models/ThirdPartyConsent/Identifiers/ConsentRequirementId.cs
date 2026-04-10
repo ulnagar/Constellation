@@ -4,7 +4,7 @@ using System;
 namespace Constellation.Core.Models.ThirdPartyConsent.Identifiers;
 
 public record struct ConsentRequirementId(Guid Value)
-    : IStronglyTypedId
+    : IStronglyTypedId<ConsentRequirementId, Guid>
 {
     public static ConsentRequirementId Empty => new(Guid.Empty);
 

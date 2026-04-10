@@ -27,7 +27,7 @@ public class OfferingConfiguration : IEntityTypeConfiguration<Offering>
             .Property(offering => offering.Name)
             .HasConversion(
                 name => name.Value,
-                value => OfferingName.FromValue(value).Value);
+                value => OfferingName.FromValue(value));
 
         builder
             .HasOne<Course>()

@@ -1,10 +1,10 @@
 ﻿namespace Constellation.Core.Models.Attachments;
 
+using Enums;
 using Errors;
 using Identifiers;
 using Shared;
 using System;
-using ValueObjects;
 
 public sealed class Attachment
 {

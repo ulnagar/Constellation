@@ -3,6 +3,7 @@ namespace Constellation.Core.Models.Offerings;
 
 using Canvas.Models;
 using Constellation.Core.Models.Subjects.Identifiers;
+using Enums;
 using Errors;
 using Events;
 using Identifiers;

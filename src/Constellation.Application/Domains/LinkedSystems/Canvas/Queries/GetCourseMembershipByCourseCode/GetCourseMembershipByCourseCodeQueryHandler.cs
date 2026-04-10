@@ -6,9 +6,9 @@ using Core.Enums;
 using Core.Errors;
 using Core.Models.Canvas.Models;
 using Core.Models.Offerings;
+using Core.Models.Offerings.Enums;
 using Core.Models.Offerings.Errors;
 using Core.Models.Offerings.Repositories;
-using Core.Models.Offerings.ValueObjects;
 using Core.Models.StaffMembers;
 using Core.Models.StaffMembers.Repositories;
 using Core.Models.Students;
@@ -71,7 +71,7 @@ internal sealed class GetCourseMembershipByCourseCodeQueryHandler
 
                 response.Add(new(
                     request.CourseCode, 
-                    student.StudentReferenceNumber.Number, 
+                    student.StudentReferenceNumber.Value, 
                     resource.SectionId, 
                     CanvasPermissionLevel.Student));
             }

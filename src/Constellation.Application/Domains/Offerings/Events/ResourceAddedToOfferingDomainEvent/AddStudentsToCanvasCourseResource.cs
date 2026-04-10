@@ -12,6 +12,7 @@ using Constellation.Core.Models.Offerings.ValueObjects;
 using Constellation.Core.Models.Operations;
 using Constellation.Core.Shared;
 using Core.Models.Enrolments.Repositories;
+using Core.Models.Offerings.Enums;
 using Core.Models.Operations.Enums;
 using Core.Models.Students;
 using Core.Models.Students.Repositories;
@@ -53,7 +54,7 @@ internal sealed class AddStudentsToCanvasCourseResource
         if (notification.ResourceType != ResourceType.CanvasCourse)
             return;
 
-        Offering offering = await _offeringRepository.GetById(notification.OfferingId, cancellationToken);
+        Offering? offering = await _offeringRepository.GetById(notification.OfferingId, cancellationToken);
 
         if (offering is null)
         {
@@ -65,9 +66,7 @@ internal sealed class AddStudentsToCanvasCourseResource
             return;
         }
 
-        CanvasCourseResource resource = offering.Resources.FirstOrDefault(resource => resource.Id == notification.ResourceId) as CanvasCourseResource;
-        
-        if (resource is null)
+        if (offering.Resources.FirstOrDefault(resource => resource.Id == notification.ResourceId) is not CanvasCourseResource resource)
         {
             _logger
                 .ForContext(nameof(ResourceAddedToOfferingDomainEvent), notification, true)
@@ -82,7 +81,7 @@ internal sealed class AddStudentsToCanvasCourseResource
         foreach (Student student in students)
         {
             ModifyEnrolmentCanvasOperation operation = new(
-                student.StudentReferenceNumber.Number,
+                student.StudentReferenceNumber.Value,
                 resource.CourseId,
                 resource.SectionId,
                 CanvasAction.Add,

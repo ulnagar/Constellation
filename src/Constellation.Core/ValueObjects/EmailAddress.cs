@@ -1,17 +1,16 @@
 ﻿namespace Constellation.Core.ValueObjects;
 
-using Constellation.Core.Errors;
-using Constellation.Core.Primitives;
-using Constellation.Core.Shared;
+using Errors;
 using Helpers;
-using System.Collections.Generic;
-using System.Text.RegularExpressions;
+using Primitives;
+using Shared;
 
-public sealed class EmailAddress : ValueObject
+public sealed class EmailAddress : ValueObject<EmailAddress, string>, IValueObject<EmailAddress, string>
 {
     public static readonly EmailAddress None = new("");
 
     private EmailAddress() { }
+
     private EmailAddress(string email)
     {
         Email = email;
@@ -29,12 +28,7 @@ public sealed class EmailAddress : ValueObject
     }
 
     public string Email { get; }
-
-    public override IEnumerable<object> GetAtomicValues()
-    {
-        yield return Email;
-    }
-
+    
     public static implicit operator string(EmailAddress address) =>
         address.ToString();
 

@@ -3,14 +3,13 @@
 using Constellation.Application.Abstractions.Messaging;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Core.Abstractions.Clock;
-using Constellation.Core.Models;
 using Constellation.Core.Models.Offerings;
 using Constellation.Core.Models.Offerings.Errors;
 using Constellation.Core.Models.Offerings.Events;
 using Constellation.Core.Models.Offerings.Repositories;
-using Constellation.Core.Models.Offerings.ValueObjects;
 using Constellation.Core.Models.Operations;
 using Constellation.Core.Shared;
+using Core.Models.Offerings.Enums;
 using Core.Models.Operations.Enums;
 using Core.Models.StaffMembers;
 using Core.Models.StaffMembers.Identifiers;
@@ -52,7 +51,7 @@ internal sealed class AddTeachersToCanvasCourseResource
         if (notification.ResourceType != ResourceType.CanvasCourse)
             return;
 
-        Offering offering = await _offeringRepository.GetById(notification.OfferingId, cancellationToken);
+        Offering? offering = await _offeringRepository.GetById(notification.OfferingId, cancellationToken);
 
         if (offering is null)
         {
@@ -64,7 +63,7 @@ internal sealed class AddTeachersToCanvasCourseResource
             return;
         }
 
-        CanvasCourseResource resource = offering.Resources.FirstOrDefault(resource => resource.Id == notification.ResourceId) as CanvasCourseResource;
+        CanvasCourseResource? resource = offering.Resources.FirstOrDefault(resource => resource.Id == notification.ResourceId) as CanvasCourseResource;
 
         if (resource is null)
         {
@@ -83,7 +82,7 @@ internal sealed class AddTeachersToCanvasCourseResource
         foreach (StaffMember staffMember in staffMembers)
         {
             ModifyEnrolmentCanvasOperation operation = new(
-                staffMember.EmployeeId.Number,
+                staffMember.EmployeeId.Value,
                 resource.CourseId,
                 resource.SectionId,
                 CanvasAction.Add,

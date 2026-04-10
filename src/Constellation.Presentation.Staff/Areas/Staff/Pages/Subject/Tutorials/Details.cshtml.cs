@@ -70,7 +70,7 @@ public class DetailsModel : BasePageModel
                 response.Error,
                 _linkGenerator.GetPathByPage("/Subject/Tutorials/Index", values: new{ area = "Staff" }));
 
-            Tutorial = new(TutorialId.Empty, TutorialName.None, _dateTime.Today, _dateTime.Today, false, [], [], [], 0);
+            Tutorial = new(TutorialId.Empty, TutorialName.Empty, _dateTime.Today, _dateTime.Today, false, [], [], [], 0);
 
             return;
         }

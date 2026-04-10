@@ -13,7 +13,7 @@ using Constellation.Presentation.Shared.Helpers.Attributes;
 using Constellation.Presentation.Staff.Areas;
 using Core.Abstractions.Services;
 using Core.Models.Attachments.DTOs;
-using Core.Models.Attachments.ValueObjects;
+using Core.Models.Attachments.Enums;
 using Hangfire;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;

@@ -4,7 +4,7 @@ using Constellation.Core.Primitives;
 using System;
 
 public readonly record struct CaseDetailId(Guid Value)
-    : IStronglyTypedId
+    : IStronglyTypedId<CaseDetailId, Guid>
 {
     public static CaseDetailId Empty => new(Guid.Empty);
 

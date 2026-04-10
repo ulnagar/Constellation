@@ -3,11 +3,11 @@
 using Abstractions.Messaging;
 using Core.Models;
 using Core.Models.Attachments.DTOs;
+using Core.Models.Attachments.Enums;
 using Core.Models.Attachments.Services;
-using Core.Models.Attachments.ValueObjects;
 using Core.Models.Faculties;
+using Core.Models.Faculties.Enums;
 using Core.Models.Faculties.Repositories;
-using Core.Models.Faculties.ValueObjects;
 using Core.Models.SchoolContacts;
 using Core.Models.SchoolContacts.Repositories;
 using Core.Models.StaffMembers;

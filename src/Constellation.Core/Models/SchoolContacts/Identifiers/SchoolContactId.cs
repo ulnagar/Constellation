@@ -4,7 +4,7 @@ using Constellation.Core.Primitives;
 using System;
 
 public readonly record struct SchoolContactId(Guid Value)
-    : IStronglyTypedId
+    : IStronglyTypedId<SchoolContactId, Guid>
 {
     public static SchoolContactId Empty => new(Guid.Empty);
 

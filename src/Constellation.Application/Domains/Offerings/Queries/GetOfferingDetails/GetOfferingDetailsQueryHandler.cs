@@ -220,21 +220,21 @@ internal sealed class GetOfferingDetailsQueryHandler
         decimal fteTotal = students.Count() * course.FullTimeEquivalentValue;
         int duration = sessions.Sum(session => session.Duration);
         
-        Result<OfferingName> offeringName = OfferingName.FromValue(offering.Name);
+        OfferingName offeringName = OfferingName.FromValue(offering.Name);
 
-        if (offeringName.IsFailure)
+        if (offeringName == OfferingName.Empty)
         {
             _logger
                 .ForContext(nameof(GetOfferingDetailsQuery), request, true)
-                .ForContext(nameof(Error), offeringName.Error, true)
+                .ForContext(nameof(Error), OfferingNameErrors.ValueEmpty, true)
                 .Warning("Failed to retrieve Offering");
 
-            return Result.Failure<OfferingDetailsResponse>(offeringName.Error);
+            return Result.Failure<OfferingDetailsResponse>(OfferingNameErrors.ValueEmpty);
         }
 
         OfferingDetailsResponse response = new(
             offering.Id,
-            offeringName.Value,
+            offeringName,
             offering.CourseId,
             course.Name,
             course.Grade,

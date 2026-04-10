@@ -6,6 +6,7 @@ using Core.Abstractions.Clock;
 using Core.Abstractions.Services;
 using Core.Models.Covers;
 using Core.Models.Offerings;
+using Core.Models.Offerings.Enums;
 using Core.Models.Offerings.Repositories;
 using Core.Models.Offerings.ValueObjects;
 using Core.Models.Timetables;

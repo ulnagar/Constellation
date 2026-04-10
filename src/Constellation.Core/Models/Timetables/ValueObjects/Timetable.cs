@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 
-public class Timetable : ValueObject, IComparable<Timetable>
+public class Timetable : ValueObject<Timetable, string>, IValueObject<Timetable, string>
 {
     private static readonly Dictionary<string, Timetable> _enumerations = CreateEnumerations();
 
@@ -49,13 +49,6 @@ public class Timetable : ValueObject, IComparable<Timetable>
     public static IEnumerable<Timetable> GetEnumerable = _enumerations
         .Select(entry => entry.Value)
         .AsEnumerable();
-
-    public override IEnumerable<object> GetAtomicValues()
-    {
-        yield return Code;
-        yield return Name;
-        yield return Prefix;
-    }
 
     public override string ToString() => DisplayName;
 

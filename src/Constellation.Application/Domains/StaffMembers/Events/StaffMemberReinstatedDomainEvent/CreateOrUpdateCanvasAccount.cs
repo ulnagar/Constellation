@@ -36,7 +36,7 @@ internal sealed class CreateOrUpdateCanvasAccount
     {
         _logger.Information("Attempting to add staff member ({StaffId}) to Canvas", notification.StaffId);
 
-        StaffMember staffMember = await _staffRepository.GetById(notification.StaffId, cancellationToken);
+        StaffMember? staffMember = await _staffRepository.GetById(notification.StaffId, cancellationToken);
 
         if (staffMember is null)
         {
@@ -57,7 +57,7 @@ internal sealed class CreateOrUpdateCanvasAccount
         }
 
         CreateUserCanvasOperation operation = new(
-            staffMember.EmployeeId.Number,
+            staffMember.EmployeeId.Value,
             staffMember.Name.FirstName,
             staffMember.Name.LastName,
             staffMember.EmailAddress.Email.Substring(0, staffMember.EmailAddress.Email.IndexOf('@')),

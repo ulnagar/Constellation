@@ -14,8 +14,8 @@ using Constellation.Application.Domains.Students.Queries.GetLifecycleDetailsForS
 using Constellation.Presentation.Shared.Helpers.Attributes;
 using Core.Abstractions.Services;
 using Core.Errors;
+using Core.Models.Faculties.Enums;
 using Core.Models.Faculties.Identifiers;
-using Core.Models.Faculties.ValueObjects;
 using Core.Models.StaffMembers.Identifiers;
 using Core.Shared;
 using MediatR;

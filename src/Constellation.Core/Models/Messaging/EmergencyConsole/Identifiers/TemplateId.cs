@@ -3,7 +3,7 @@
 using Primitives;
 
 public readonly record struct TemplateId(Guid Value)
-    : IStronglyTypedId
+    : IStronglyTypedId<TemplateId, Guid>
 {
     public static readonly TemplateId Empty = new(Guid.Empty);
 

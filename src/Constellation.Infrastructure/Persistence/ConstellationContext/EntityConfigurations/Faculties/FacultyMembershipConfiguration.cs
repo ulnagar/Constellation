@@ -1,8 +1,8 @@
 ﻿namespace Constellation.Infrastructure.Persistence.ConstellationContext.EntityConfigurations.Faculties;
 
 using Core.Models.Faculties;
+using Core.Models.Faculties.Enums;
 using Core.Models.Faculties.Identifiers;
-using Core.Models.Faculties.ValueObjects;
 using Core.Models.StaffMembers;
 using Core.Models.StaffMembers.Identifiers;
 using Microsoft.EntityFrameworkCore;

@@ -85,16 +85,16 @@ internal sealed class ImportProvisionsFromFileCommandHandler
             if (srnResult.IsFailure)
                 return Result.Failure(new("ImportError", $"Error importing at row {row} due to invalid SRN"));
 
-            Result<OfferingName> offeringNameResult = OfferingName.FromValue(stringOffering);
+            OfferingName offeringName = OfferingName.FromValue(stringOffering);
 
-            if (offeringNameResult.IsFailure)
+            if (offeringName == OfferingName.Empty)
                 return Result.Failure(new("ImportError", $"Error importing at row {row} due to invalid Offering Name"));
 
             importData.Add(new()
             {
                 StudentReferenceNumber = srnResult.Value,
                 ExamName = examName,
-                OfferingName = offeringNameResult.Value,
+                OfferingName = offeringName,
                 Adjustments = adjustments
             });
         }
@@ -103,7 +103,7 @@ internal sealed class ImportProvisionsFromFileCommandHandler
 
         foreach (IGrouping<StudentReferenceNumber, AssessmentProvision> studentReferenceNumber in groupedByStudent)
         {
-            Student student = _cachedStudents.FirstOrDefault(student => student.StudentReferenceNumber == studentReferenceNumber.Key);
+            Student? student = _cachedStudents.FirstOrDefault(student => student.StudentReferenceNumber == studentReferenceNumber.Key);
 
             if (student is null)
             {
@@ -119,7 +119,7 @@ internal sealed class ImportProvisionsFromFileCommandHandler
 
             foreach (AssessmentProvision provision in studentReferenceNumber)
             {
-                Offering offering = _cachedOfferings.FirstOrDefault(offering => offering.Name == provision.OfferingName);
+                Offering? offering = _cachedOfferings.FirstOrDefault(offering => offering.Name == provision.OfferingName);
 
                 if (offering is null)
                 {
@@ -131,7 +131,7 @@ internal sealed class ImportProvisionsFromFileCommandHandler
                     _cachedOfferings.Add(offering);
                 }
 
-                Course course = _cachedCourses.FirstOrDefault(course => course.Id == offering.CourseId);
+                Course? course = _cachedCourses.FirstOrDefault(course => course.Id == offering.CourseId);
 
                 if (course is null)
                 {
@@ -163,10 +163,10 @@ internal sealed class ImportProvisionsFromFileCommandHandler
 
     internal sealed class AssessmentProvision
     {
-        public StudentReferenceNumber StudentReferenceNumber { get; set; }
-        public OfferingName OfferingName { get; set; }
-        public string ExamName { get; set; }
-        public List<string> Adjustments { get; set; }
+        public required StudentReferenceNumber StudentReferenceNumber { get; set; }
+        public required OfferingName OfferingName { get; set; }
+        public required string ExamName { get; set; }
+        public List<string> Adjustments { get; set; } = [];
     }
 }
 

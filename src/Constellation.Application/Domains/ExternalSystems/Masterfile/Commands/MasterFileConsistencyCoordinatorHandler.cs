@@ -13,6 +13,7 @@ using Interfaces.Services;
 using Models;
 using Serilog;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Threading;
@@ -54,7 +55,7 @@ internal sealed class MasterFileConsistencyCoordinatorHandler
 
         foreach (MasterFileSchool fileSchool in masterFileSchools)
         {
-            DataCollectionsSchoolResponse collectionSchool = dataCollectionsSchools.FirstOrDefault(school => school.SchoolCode == fileSchool.SiteCode);
+            DataCollectionsSchoolResponse? collectionSchool = dataCollectionsSchools.FirstOrDefault(school => school.SchoolCode == fileSchool.SiteCode);
 
             if (collectionSchool is null)
             {
@@ -63,23 +64,23 @@ internal sealed class MasterFileConsistencyCoordinatorHandler
                 continue;
             }
 
-            if (fileSchool.PrincipalName.ToLower() != collectionSchool.PrincipalName.ToLower())
+            if (!fileSchool.PrincipalName.Equals(collectionSchool.PrincipalName, StringComparison.OrdinalIgnoreCase))
             {
-                _logger.Information("Detected difference in Principal Name for {school}! MasterFile: \"{fileName}\" Data Collections: \"{collectionsName}\"", fileSchool.Name, fileSchool.PrincipalName.ToLower(), collectionSchool.PrincipalName.ToLower());
+                _logger.Information("Detected difference in Principal Name for {school}! MasterFile: \"{fileName}\" Data Collections: \"{collectionsName}\"", fileSchool.Name, fileSchool.PrincipalName.ToLower(CultureInfo.InvariantCulture), collectionSchool.PrincipalName.ToLower(CultureInfo.InvariantCulture));
 
                 updateItems.Add(new UpdateItem(
                     "MasterFile Schools",
                     fileSchool.Index,
                     fileSchool.Name,
                     "Principal Name",
-                    fileSchool.PrincipalName.ToLower(),
-                    collectionSchool.PrincipalName.ToLower(),
+                    fileSchool.PrincipalName.ToLower(CultureInfo.InvariantCulture),
+                    collectionSchool.PrincipalName.ToLower(CultureInfo.InvariantCulture),
                     "MasterFile value (current) does not match DataCollections value (new)"));
             }
 
-            if (fileSchool.PrincipalEmail.ToLower() != collectionSchool.PrincipalEmail.ToLower())
+            if (!fileSchool.PrincipalEmail.Equals(collectionSchool.PrincipalEmail, StringComparison.OrdinalIgnoreCase))
             {
-                _logger.Information("Detected difference in Principal Email for {school}! MasterFile: \"{fileEmail}\" Data Collections: \"{collectionsEmail}\"", fileSchool.Name, fileSchool.PrincipalEmail.ToLower(), collectionSchool.PrincipalEmail.ToLower());
+                _logger.Information("Detected difference in Principal Email for {school}! MasterFile: \"{fileEmail}\" Data Collections: \"{collectionsEmail}\"", fileSchool.Name, fileSchool.PrincipalEmail.ToLower(CultureInfo.InvariantCulture), collectionSchool.PrincipalEmail.ToLower(CultureInfo.InvariantCulture));
 
                 Result<EmailAddress> collectionEmailRequest = EmailAddress.Create(collectionSchool.PrincipalEmail);
 
@@ -90,7 +91,7 @@ internal sealed class MasterFileConsistencyCoordinatorHandler
                         0,
                         string.Empty,
                         "Principal Email",
-                        collectionSchool.PrincipalEmail.ToLower(),
+                        collectionSchool.PrincipalEmail.ToLower(CultureInfo.InvariantCulture),
                         string.Empty,
                         "DataCollections Email is invalid"));
                 }
@@ -101,8 +102,8 @@ internal sealed class MasterFileConsistencyCoordinatorHandler
                     fileSchool.Index,
                     fileSchool.Name,
                     "Principal Email",
-                    fileSchool.PrincipalEmail.ToLower(),
-                    collectionEmailRequest.Value.Email.ToLower(),
+                    fileSchool.PrincipalEmail.ToLower(CultureInfo.InvariantCulture),
+                    collectionEmailRequest.Value.Email.ToLower(CultureInfo.InvariantCulture),
                     "MasterFile value (current) does not match DataCollections value (new)"));
                 }
             }
@@ -116,7 +117,7 @@ internal sealed class MasterFileConsistencyCoordinatorHandler
                     fileSchool.Index,
                     fileSchool.Name,
                     "Principal Email",
-                    fileSchool.PrincipalEmail.ToLower(),
+                    fileSchool.PrincipalEmail.ToLower(CultureInfo.InvariantCulture),
                     string.Empty,
                     "MasterFile Email is invalid"));
             }
@@ -128,7 +129,7 @@ internal sealed class MasterFileConsistencyCoordinatorHandler
 
         foreach (MasterFileStudent fileStudent in masterFileStudents)
         {
-            Student dbStudent = dbStudents.FirstOrDefault(student => student.StudentReferenceNumber.Number == fileStudent.SRN);
+            Student? dbStudent = dbStudents.FirstOrDefault(student => student.StudentReferenceNumber.Value == fileStudent.SRN);
 
             if (dbStudent is null)
             {
@@ -143,7 +144,7 @@ internal sealed class MasterFileConsistencyCoordinatorHandler
             List<Family> families = await _familyRepository.GetFamiliesByStudentId(dbStudent.Id, cancellationToken);
 
             // Get the residential family
-            Family residentialFamily = families
+            Family? residentialFamily = families
                 .FirstOrDefault(family =>
                     family.Students.Any(student =>
                         student.StudentId == dbStudent.Id &&
@@ -164,12 +165,12 @@ internal sealed class MasterFileConsistencyCoordinatorHandler
                         fileStudent.Index,
                         dbStudent.Name.DisplayName,
                         "Parent 1 Email",
-                        fileStudent.Parent1Email.ToLower(),
+                        fileStudent.Parent1Email.ToLower(CultureInfo.InvariantCulture),
                         string.Empty,
                         "MasterFile Email is invalid"));
                 }
 
-                Parent matchedParent = parents.FirstOrDefault(parent => parent.EmailAddress.ToString().ToLower() == fileStudent.Parent1Email.ToLower());
+                Parent? matchedParent = parents.FirstOrDefault(parent => parent.EmailAddress.ToString().Equals(fileStudent.Parent1Email, StringComparison.OrdinalIgnoreCase));
 
                 if (matchedParent is null)
                 {
@@ -178,7 +179,7 @@ internal sealed class MasterFileConsistencyCoordinatorHandler
                         fileStudent.Index,
                         dbStudent.Name.DisplayName,
                         "Parent 1 Email",
-                        fileStudent.Parent1Email.ToLower(),
+                        fileStudent.Parent1Email.ToLower(CultureInfo.InvariantCulture),
                         string.Empty,
                         "MasterFile value does not exist in Constellation"));
                 }
@@ -199,12 +200,12 @@ internal sealed class MasterFileConsistencyCoordinatorHandler
                         fileStudent.Index,
                         dbStudent.Name.DisplayName,
                         "Parent 2 Email",
-                        fileStudent.Parent1Email.ToLower(),
+                        fileStudent.Parent1Email.ToLower(CultureInfo.InvariantCulture),
                         string.Empty,
                         "MasterFile Email is invalid"));
                 }
 
-                Parent matchedParent = parents.FirstOrDefault(parent => parent.EmailAddress.ToString().ToLower() == fileStudent.Parent2Email.ToLower());
+                Parent? matchedParent = parents.FirstOrDefault(parent => parent.EmailAddress.ToString().Equals(fileStudent.Parent2Email, StringComparison.OrdinalIgnoreCase));
 
                 if (matchedParent is null)
                 {
@@ -213,7 +214,7 @@ internal sealed class MasterFileConsistencyCoordinatorHandler
                         fileStudent.Index,
                         dbStudent.Name.DisplayName,
                         "Parent 2 Email",
-                        fileStudent.Parent2Email.ToLower(),
+                        fileStudent.Parent2Email.ToLower(CultureInfo.InvariantCulture),
                         string.Empty,
                         "MasterFile value does not exist in Constellation"));
                 }
@@ -233,7 +234,7 @@ internal sealed class MasterFileConsistencyCoordinatorHandler
                         dbStudent.Name.DisplayName,
                         "Parent Email",
                         string.Empty,
-                        parent.EmailAddress.ToString().ToLower(),
+                        parent.EmailAddress.ToString().ToLower(CultureInfo.InvariantCulture),
                         "Constellation value does not exist in MasterFile"));
                 }
                 else
@@ -244,7 +245,7 @@ internal sealed class MasterFileConsistencyCoordinatorHandler
                         dbStudent.Name.DisplayName,
                         "Other Parent Email",
                         string.Empty,
-                        parent.EmailAddress.ToString().ToLower(),
+                        parent.EmailAddress.ToString().ToLower(CultureInfo.InvariantCulture),
                         "Constellation value does not exist in MasterFile"));
                 }
             }

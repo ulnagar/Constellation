@@ -23,6 +23,7 @@ using Constellation.Presentation.Shared.Helpers.Attributes;
 using Constellation.Presentation.Staff.Areas;
 using Core.Abstractions.Services;
 using Core.Models.Canvas.Models;
+using Core.Models.Offerings.Enums;
 using Core.Models.Offerings.Errors;
 using Core.Models.StaffMembers.Identifiers;
 using Core.Models.Students.Identifiers;

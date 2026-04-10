@@ -2,7 +2,7 @@
 
 using Abstractions.Messaging;
 using Core.Models.Attachments.DTOs;
-using Core.Models.Attachments.ValueObjects;
+using Core.Models.Attachments.Enums;
 
 public sealed record GetAttachmentFileQuery(
         AttachmentType Type,

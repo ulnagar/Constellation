@@ -13,6 +13,7 @@ using Constellation.Core.Models.Subjects.Repositories;
 using Constellation.Core.Models.Tutorials;
 using Constellation.Core.Models.Tutorials.Repositories;
 using Constellation.Core.Shared;
+using Core.Models.Offerings.Enums;
 using Core.Models.StaffMembers.Identifiers;
 using Serilog;
 using System.Collections.Generic;

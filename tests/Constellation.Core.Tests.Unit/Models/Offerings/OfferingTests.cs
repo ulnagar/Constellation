@@ -3,6 +3,7 @@
 using Constellation.Core.Models.Offerings;
 using Constellation.Core.Models.Offerings.Events;
 using Constellation.Core.Models.Offerings.ValueObjects;
+using Core.Models.Offerings.Enums;
 using Core.Models.Offerings.Errors;
 using Core.Models.Offerings.Identifiers;
 using Core.Models.StaffMembers.Identifiers;
@@ -17,7 +18,7 @@ public class OfferingTests
         var name = OfferingName.FromValue("07SCI1");
 
         var sut = new Offering(
-            name.Value,
+            name,
             new(),
             DateOnly.FromDateTime(DateTime.Today.AddDays(-1)),
             DateOnly.FromDateTime(DateTime.Today.AddDays(1))
@@ -37,7 +38,7 @@ public class OfferingTests
         var name = OfferingName.FromValue("07SCI1");
 
         var sut = new Offering(
-            name.Value,
+            name,
             new(),
             DateOnly.FromDateTime(DateTime.Today.AddDays(-1)),
             DateOnly.FromDateTime(DateTime.Today.AddDays(1))
@@ -61,7 +62,7 @@ public class OfferingTests
         var name = OfferingName.FromValue("07SCI1");
 
         var sut = new Offering(
-            name.Value,
+            name,
             new(),
             DateOnly.FromDateTime(DateTime.Today.AddDays(-1)),
             DateOnly.FromDateTime(DateTime.Today.AddDays(1))
@@ -83,7 +84,7 @@ public class OfferingTests
         var name = OfferingName.FromValue("07SCI1");
 
         var sut = new Offering(
-            name.Value,
+            name,
             new(),
             DateOnly.FromDateTime(DateTime.Today),
             DateOnly.FromDateTime(DateTime.Today.AddDays(1))
@@ -105,7 +106,7 @@ public class OfferingTests
         var name = OfferingName.FromValue("07SCI1");
 
         var sut = new Offering(
-            name.Value,
+            name,
             new(),
             DateOnly.FromDateTime(DateTime.Today.AddDays(-1)),
             DateOnly.FromDateTime(DateTime.Today)
@@ -127,7 +128,7 @@ public class OfferingTests
         var name = OfferingName.FromValue("07SCI1");
 
         var sut = new Offering(
-            name.Value,
+            name,
             new(),
             DateOnly.FromDateTime(DateTime.Today),
             DateOnly.FromDateTime(DateTime.Today)
@@ -148,7 +149,7 @@ public class OfferingTests
         var name = OfferingName.FromValue("07SCI1");
 
         var sut = new Offering(
-            name.Value,
+            name,
             new(),
             DateOnly.FromDateTime(DateTime.Today),
             DateOnly.FromDateTime(DateTime.Today)
@@ -167,7 +168,7 @@ public class OfferingTests
         var name = OfferingName.FromValue("07SCI1");
 
         var sut = new Offering(
-            name.Value,
+            name,
             new(),
             DateOnly.FromDateTime(DateTime.Today),
             DateOnly.FromDateTime(DateTime.Today)
@@ -190,7 +191,7 @@ public class OfferingTests
         var name = OfferingName.FromValue("07SCI1");
 
         var sut = new Offering(
-            name.Value,
+            name,
             new(),
             DateOnly.FromDateTime(DateTime.Today),
             DateOnly.FromDateTime(DateTime.Today)
@@ -215,7 +216,7 @@ public class OfferingTests
         var name = OfferingName.FromValue("07SCI1");
 
         var sut = new Offering(
-            name.Value,
+            name,
             new(),
             DateOnly.FromDateTime(DateTime.Today),
             DateOnly.FromDateTime(DateTime.Today)
@@ -240,7 +241,7 @@ public class OfferingTests
         var name = OfferingName.FromValue("07SCI1");
 
         var sut = new Offering(
-            name.Value,
+            name,
             new(),
             DateOnly.FromDateTime(DateTime.Today),
             DateOnly.FromDateTime(DateTime.Today)
@@ -264,7 +265,7 @@ public class OfferingTests
         var name = OfferingName.FromValue("07SCI1");
 
         var sut = new Offering(
-            name.Value,
+            name,
             new(),
             DateOnly.FromDateTime(DateTime.Today),
             DateOnly.FromDateTime(DateTime.Today)
@@ -290,7 +291,7 @@ public class OfferingTests
         var name = OfferingName.FromValue("07SCI1");
 
         var sut = new Offering(
-            name.Value,
+            name,
             new(),
             DateOnly.FromDateTime(DateTime.Today),
             DateOnly.FromDateTime(DateTime.Today)
@@ -317,7 +318,7 @@ public class OfferingTests
         var name = OfferingName.FromValue("07SCI1");
 
         var sut = new Offering(
-            name.Value,
+            name,
             new(),
             DateOnly.FromDateTime(DateTime.Today),
             DateOnly.FromDateTime(DateTime.Today)
@@ -342,7 +343,7 @@ public class OfferingTests
         var name = OfferingName.FromValue("07SCI1");
 
         var sut = new Offering(
-            name.Value,
+            name,
             new(),
             DateOnly.FromDateTime(DateTime.Today),
             DateOnly.FromDateTime(DateTime.Today)
@@ -369,7 +370,7 @@ public class OfferingTests
         var name = OfferingName.FromValue("07SCI1");
 
         var sut = new Offering(
-            name.Value,
+            name,
             new(),
             DateOnly.FromDateTime(DateTime.Today),
             DateOnly.FromDateTime(DateTime.Today)
@@ -397,7 +398,7 @@ public class OfferingTests
         var name = OfferingName.FromValue("07SCI1");
 
         var sut = new Offering(
-            name.Value,
+            name,
             new(),
             DateOnly.FromDateTime(DateTime.Today),
             DateOnly.FromDateTime(DateTime.Today)
@@ -423,7 +424,7 @@ public class OfferingTests
         var name = OfferingName.FromValue("07SCI1");
 
         var sut = new Offering(
-            name.Value,
+            name,
             new(),
             DateOnly.FromDateTime(DateTime.Today),
             DateOnly.FromDateTime(DateTime.Today)
@@ -451,7 +452,7 @@ public class OfferingTests
         var name = OfferingName.FromValue("07SCI1");
 
         var sut = new Offering(
-            name.Value,
+            name,
             new(),
             DateOnly.FromDateTime(DateTime.Today),
             DateOnly.FromDateTime(DateTime.Today)
@@ -471,7 +472,7 @@ public class OfferingTests
         var name = OfferingName.FromValue("07SCI1");
 
         var sut = new Offering(
-            name.Value,
+            name,
             new(),
             DateOnly.FromDateTime(DateTime.Today),
             DateOnly.FromDateTime(DateTime.Today)
@@ -495,7 +496,7 @@ public class OfferingTests
         var name = OfferingName.FromValue("07SCI1");
 
         var sut = new Offering(
-            name.Value,
+            name,
             new(),
             DateOnly.FromDateTime(DateTime.Today),
             DateOnly.FromDateTime(DateTime.Today)
@@ -516,7 +517,7 @@ public class OfferingTests
         var name = OfferingName.FromValue("07SCI1");
 
         var sut = new Offering(
-            name.Value,
+            name,
             new(),
             DateOnly.FromDateTime(DateTime.Today),
             DateOnly.FromDateTime(DateTime.Today)
@@ -539,7 +540,7 @@ public class OfferingTests
         var name = OfferingName.FromValue("07SCI1");
 
         var sut = new Offering(
-            name.Value,
+            name,
             new(),
             DateOnly.FromDateTime(DateTime.Today),
             DateOnly.FromDateTime(DateTime.Today)
@@ -559,7 +560,7 @@ public class OfferingTests
         var name = OfferingName.FromValue("07SCI1");
 
         var sut = new Offering(
-            name.Value,
+            name,
             new(),
             DateOnly.FromDateTime(DateTime.Today),
             DateOnly.FromDateTime(DateTime.Today)
@@ -582,7 +583,7 @@ public class OfferingTests
         var name = OfferingName.FromValue("07SCI1");
 
         var sut = new Offering(
-            name.Value,
+            name,
             new(),
             DateOnly.FromDateTime(DateTime.Today),
             DateOnly.FromDateTime(DateTime.Today)
@@ -617,7 +618,7 @@ public class OfferingTests
         var name = OfferingName.FromValue("07SCI1");
 
         var sut = new Offering(
-            name.Value,
+            name,
             new(),
             DateOnly.FromDateTime(DateTime.Today),
             DateOnly.FromDateTime(DateTime.Today)
@@ -641,7 +642,7 @@ public class OfferingTests
         var name = OfferingName.FromValue("07SCI1");
 
         var sut = new Offering(
-            name.Value,
+            name,
             new(),
             DateOnly.FromDateTime(DateTime.Today),
             DateOnly.FromDateTime(DateTime.Today)
@@ -669,7 +670,7 @@ public class OfferingTests
         var name = OfferingName.FromValue("07SCI1");
 
         var sut = new Offering(
-            name.Value,
+            name,
             new(),
             DateOnly.FromDateTime(DateTime.Today),
             DateOnly.FromDateTime(DateTime.Today)
@@ -698,7 +699,7 @@ public class OfferingTests
         var name = OfferingName.FromValue("07SCI1");
 
         var sut = new Offering(
-            name.Value,
+            name,
             new(),
             DateOnly.FromDateTime(DateTime.Today),
             DateOnly.FromDateTime(DateTime.Today)
@@ -728,7 +729,7 @@ public class OfferingTests
         var name = OfferingName.FromValue("07SCI1");
 
         var sut = new Offering(
-            name.Value,
+            name,
             new(),
             DateOnly.FromDateTime(DateTime.Today),
             DateOnly.FromDateTime(DateTime.Today)
@@ -760,7 +761,7 @@ public class OfferingTests
         var name = OfferingName.FromValue("07SCI1");
 
         var sut = new Offering(
-            name.Value,
+            name,
             new(),
             DateOnly.FromDateTime(DateTime.Today),
             DateOnly.FromDateTime(DateTime.Today)

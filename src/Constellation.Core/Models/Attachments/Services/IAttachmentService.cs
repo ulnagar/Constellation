@@ -1,10 +1,10 @@
 ﻿namespace Constellation.Core.Models.Attachments.Services;
 
 using DTOs;
+using Enums;
 using Shared;
 using System.Threading;
 using System.Threading.Tasks;
-using ValueObjects;
 
 public interface IAttachmentService
 {

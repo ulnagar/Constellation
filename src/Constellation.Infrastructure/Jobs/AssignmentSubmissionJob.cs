@@ -11,6 +11,7 @@ using Constellation.Core.Models.Subjects.Errors;
 using Constellation.Core.Shared;
 using Core.Models.Assignments.Services;
 using Core.Models.Canvas.Models;
+using Core.Models.Offerings.Enums;
 using Core.Models.Offerings.ValueObjects;
 using System;
 using System.Threading.Tasks;

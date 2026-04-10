@@ -9,8 +9,8 @@ using Constellation.Core.Shared;
 using Constellation.Presentation.Shared.Helpers.Attributes;
 using Constellation.Presentation.Staff.Areas;
 using Core.Abstractions.Services;
+using Core.Models.Faculties.Enums;
 using Core.Models.Faculties.Identifiers;
-using Core.Models.Faculties.ValueObjects;
 using Core.Models.StaffMembers.Identifiers;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
@@ -64,7 +64,7 @@ public class AddMemberModel : BasePageModel
 
     public Dictionary<StaffId, string> StaffList { get; set; } = new();
 
-    public SelectList FacultyRoles { get; set; } = new(FacultyMembershipRole.Enumerations(), "");
+    public SelectList FacultyRoles { get; set; } = new(FacultyMembershipRole.GetOptions, "");
 
     public async Task OnGet()
     {

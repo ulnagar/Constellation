@@ -4,6 +4,7 @@ using Constellation.Core.Models.Awards;
 using Constellation.Core.Models.Awards.Identifiers;
 using Constellation.Core.Models.Students;
 using Constellation.Core.ValueObjects;
+using Core.Models.Awards.Enums;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 

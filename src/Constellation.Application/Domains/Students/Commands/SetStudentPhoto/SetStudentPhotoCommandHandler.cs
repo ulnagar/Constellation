@@ -3,13 +3,13 @@
 using Abstractions.Messaging;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Core.Models.Attachments.Repository;
-using Constellation.Core.Models.Attachments.ValueObjects;
 using Constellation.Core.Models.Students;
 using Constellation.Core.Models.Students.Repositories;
 using Core.Abstractions.Clock;
 using Core.Abstractions.Services;
 using Core.Errors;
 using Core.Models.Attachments;
+using Core.Models.Attachments.Enums;
 using Core.Models.Attachments.Services;
 using Core.Models.Students.Errors;
 using Core.Shared;

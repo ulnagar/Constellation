@@ -1,7 +1,6 @@
 ﻿namespace Constellation.Application.Domains.Enrolments.Events.EnrolmentDeletedDomainEvent;
 
 using Constellation.Application.Abstractions.Messaging;
-using Constellation.Application.Interfaces.Repositories;
 using Constellation.Core.Abstractions.Clock;
 using Constellation.Core.Models.Enrolments.Errors;
 using Constellation.Core.Models.Enrolments.Events;
@@ -9,15 +8,16 @@ using Constellation.Core.Models.Enrolments.Repositories;
 using Constellation.Core.Models.Offerings;
 using Constellation.Core.Models.Offerings.Errors;
 using Constellation.Core.Models.Offerings.Repositories;
-using Constellation.Core.Models.Offerings.ValueObjects;
 using Constellation.Core.Models.Operations;
 using Constellation.Core.Models.Students;
 using Constellation.Core.Models.Students.Repositories;
-using Constellation.Core.Shared;
 using Core.Models.Canvas.Models;
 using Core.Models.Enrolments;
+using Core.Models.Offerings.Enums;
 using Core.Models.Operations.Enums;
 using Core.Models.Students.Errors;
+using Core.Shared;
+using Interfaces.Repositories;
 using Serilog;
 using System.Collections.Generic;
 using System.Linq;
@@ -55,7 +55,7 @@ internal class RemoveFromCanvas
 
     public async Task Handle(EnrolmentDeletedDomainEvent notification, CancellationToken cancellationToken)
     {
-        Enrolment enrolment = await _enrolmentRepository.GetById(notification.EnrolmentId, cancellationToken);
+        Enrolment? enrolment = await _enrolmentRepository.GetById(notification.EnrolmentId, cancellationToken);
 
         if (enrolment is null)
         {
@@ -67,7 +67,7 @@ internal class RemoveFromCanvas
             return;
         }
 
-        Student student = await _studentRepository.GetById(enrolment.StudentId, cancellationToken);
+        Student? student = await _studentRepository.GetById(enrolment.StudentId, cancellationToken);
 
         if (student is null)
         {
@@ -79,12 +79,10 @@ internal class RemoveFromCanvas
             return;
         }
 
-        if (enrolment is not OfferingEnrolment)
+        if (enrolment is not OfferingEnrolment offeringEnrolment)
             return;
 
-        OfferingEnrolment offeringEnrolment = enrolment as OfferingEnrolment;
-
-        Offering offering = await _offeringRepository.GetById(offeringEnrolment.OfferingId, cancellationToken);
+        Offering? offering = await _offeringRepository.GetById(offeringEnrolment.OfferingId, cancellationToken);
 
         if (offering is null)
         {
@@ -98,12 +96,12 @@ internal class RemoveFromCanvas
 
         List<CanvasCourseResource> resources = offering.Resources
             .Where(resource => resource.Type == ResourceType.CanvasCourse)
-            .Select(resource => resource as CanvasCourseResource)
+            .Select(resource => (resource as CanvasCourseResource)!)
             .ToList();
 
-        List<Offering> offerings = await _offeringRepository.GetByStudentId(enrolment.StudentId, cancellationToken);
+        List<Offering> offerings = await _offeringRepository.GetByStudentId(offeringEnrolment.StudentId, cancellationToken);
         List<CanvasCourseCode?> activeCourseIds = offerings
-            .SelectMany(offering => offering.Resources)
+            .SelectMany(courseOffering => courseOffering.Resources)
             .Where(resource => resource.Type == ResourceType.CanvasCourse)
             .Select(resource => resource as CanvasCourseResource)
             .Select(resource => resource?.CourseId)
@@ -118,7 +116,7 @@ internal class RemoveFromCanvas
                 continue;
 
             ModifyEnrolmentCanvasOperation operation = new(
-                student.StudentReferenceNumber.Number,
+                student.StudentReferenceNumber.Value,
                 resource.CourseId,
                 resource.SectionId,
                 CanvasAction.Remove,

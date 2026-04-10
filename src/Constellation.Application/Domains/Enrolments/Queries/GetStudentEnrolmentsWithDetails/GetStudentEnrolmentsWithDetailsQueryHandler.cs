@@ -7,6 +7,7 @@ using Constellation.Core.Shared;
 using Core.Models.Enrolments;
 using Core.Models.Enrolments.Repositories;
 using Core.Models.Offerings;
+using Core.Models.Offerings.Enums;
 using Core.Models.Offerings.ValueObjects;
 using Core.Models.StaffMembers;
 using Core.Models.StaffMembers.Identifiers;

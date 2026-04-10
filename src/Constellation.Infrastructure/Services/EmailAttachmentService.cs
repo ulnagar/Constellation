@@ -9,6 +9,7 @@ using Constellation.Core.Models.Offerings.ValueObjects;
 using Constellation.Core.Models.Students;
 using Constellation.Core.Shared;
 using Constellation.Infrastructure.Templates.Views.Documents.Covers;
+using Core.Models.Offerings.Enums;
 using Core.Models.ThirdPartyConsent;
 using Core.Models.Timetables;
 using Core.Models.Timetables.Enums;

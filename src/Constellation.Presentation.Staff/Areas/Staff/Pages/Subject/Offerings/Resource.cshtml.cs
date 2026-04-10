@@ -5,17 +5,17 @@ using Application.Domains.Courses.Queries.GetCourseSummary;
 using Application.Domains.LinkedSystems.Teams.Models;
 using Application.Domains.LinkedSystems.Teams.Queries.GetAllTeams;
 using Application.Domains.LinkedSystems.Teams.Queries.GetTeamByName;
+using Areas;
 using Constellation.Application.Domains.Courses.Models;
 using Constellation.Application.Domains.Offerings.Commands.AddResourceToOffering;
 using Constellation.Application.Domains.Offerings.Queries.GetOfferingDetails;
 using Constellation.Application.Models.Auth;
 using Constellation.Core.Models.Offerings.Identifiers;
-using Constellation.Core.Models.Offerings.ValueObjects;
 using Constellation.Core.Shared;
 using Constellation.Presentation.Shared.Helpers.Attributes;
-using Constellation.Presentation.Staff.Areas;
 using Core.Abstractions.Services;
 using Core.Extensions;
+using Core.Models.Offerings.Enums;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
@@ -79,10 +79,10 @@ public class ResourceModel : BasePageModel
     {
         if (CurrentStep == Phase.StartEntry)
         {
-            if (Type == ResourceType.MicrosoftTeam.Value)
+            if (Type == ResourceType.MicrosoftTeam)
                 CurrentStep = Phase.MicrosoftTeamsSelection;
 
-            if (Type == ResourceType.CanvasCourse.Value)
+            if (Type == ResourceType.CanvasCourse)
                 CurrentStep = Phase.CanvasCourseSelection;
 
             PreviousSteps.Add(Phase.StartEntry);

@@ -1,5 +1,6 @@
 ﻿namespace Constellation.Core.Models.Faculties;
 
+using Enums;
 using Errors;
 using Events;
 using Identifiers;
@@ -9,7 +10,6 @@ using StaffMembers.Identifiers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using ValueObjects;
 
 public sealed class Faculty : AggregateRoot, IAuditableEntity
 {

@@ -2,8 +2,8 @@
 
 using Abstractions.Messaging;
 using Core.Models.Attachments.DTOs;
+using Core.Models.Attachments.Enums;
 using Core.Models.Attachments.Services;
-using Core.Models.Attachments.ValueObjects;
 using Core.Shared;
 using Serilog;
 using System;

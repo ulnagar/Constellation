@@ -2,7 +2,7 @@
 
 using Constellation.Core.Models.Attachments.Repository;
 using Core.Models.Attachments;
-using Core.Models.Attachments.ValueObjects;
+using Core.Models.Attachments.Enums;
 using Microsoft.EntityFrameworkCore;
 
 internal class AttachmentRepository : IAttachmentRepository

@@ -17,6 +17,7 @@ using Core.Models.Identifiers;
 using Core.Models.Messaging.EmergencyConsole.Services;
 using Core.Models.Messaging.Enums;
 using Core.Models.Offerings;
+using Core.Models.Offerings.Enums;
 using Core.Models.Offerings.Repositories;
 using Core.Models.Offerings.ValueObjects;
 using Core.Models.SchoolContacts;

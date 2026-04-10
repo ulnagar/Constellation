@@ -10,6 +10,7 @@ using Constellation.Application.Interfaces.Jobs;
 using Constellation.Application.Interfaces.Services;
 using Core.Errors;
 using Core.Models.Offerings;
+using Core.Models.Offerings.Enums;
 using Core.Models.Offerings.Repositories;
 using Core.Models.Offerings.ValueObjects;
 using Core.Models.StaffMembers;

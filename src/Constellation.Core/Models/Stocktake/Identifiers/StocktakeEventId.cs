@@ -4,7 +4,7 @@ using Constellation.Core.Primitives;
 using System;
 
 public readonly record struct StocktakeEventId(Guid Value)
-    : IStronglyTypedId
+    : IStronglyTypedId<StocktakeEventId, Guid>
 {
     public static readonly StocktakeEventId Empty = new(Guid.Empty);
 

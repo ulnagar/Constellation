@@ -1,7 +1,6 @@
 ﻿namespace Constellation.Application.Domains.Messaging.History.Queries.GetCommunicationsHistoryForContact;
 
 using Abstractions.Messaging;
-using Constellation.Application.Domains.Messaging.History.Models;
 using Core.Abstractions.Repositories;
 using Core.Models;
 using Core.Models.Families;
@@ -24,6 +23,7 @@ using Core.Models.Students.Repositories;
 using Core.Shared;
 using Core.ValueObjects;
 using Interfaces.Repositories;
+using Models;
 
 internal sealed class GetCommunicationsHistoryForContactQueryHandler
     : IQueryHandler<GetCommunicationsHistoryForContactQuery, List<CommunicationRecordResponse>>

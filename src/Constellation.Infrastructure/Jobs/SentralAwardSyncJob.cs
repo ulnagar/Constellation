@@ -95,7 +95,7 @@ internal sealed class SentralAwardSyncJob : ISentralAwardSyncJob
             List<AwardDetailResponse> reportAwards = details
                 .Value
                 .Where(entry => 
-                    entry.StudentReferenceNumber == student.StudentReferenceNumber.Number)
+                    entry.StudentReferenceNumber == student.StudentReferenceNumber)
                 .ToList();
 
             List<StudentAward> existingAwards = await _awardRepository.GetByStudentId(student.Id, cancellationToken);

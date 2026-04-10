@@ -6,6 +6,7 @@ using Constellation.Core.Models.Offerings.Identifiers;
 using Constellation.Core.Models.Offerings.ValueObjects;
 using Constellation.Core.Models.Subjects.Identifiers;
 using Constellation.Core.ValueObjects;
+using Core.Models.Offerings.Enums;
 using Core.Models.StaffMembers.Identifiers;
 using Core.Models.StaffMembers.ValueObjects;
 using Core.Models.Students.Enums;

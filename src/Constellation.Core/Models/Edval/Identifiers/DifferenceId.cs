@@ -3,7 +3,8 @@
 using Primitives;
 using System;
 
-public readonly record struct DifferenceId(Guid Value) : IStronglyTypedId
+public readonly record struct DifferenceId(Guid Value) 
+    : IStronglyTypedId<DifferenceId, Guid>
 {
     public static DifferenceId FromValue(Guid value) =>
         new(value);

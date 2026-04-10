@@ -4,7 +4,7 @@ using Constellation.Core.Primitives;
 using System;
 
 public readonly record struct TrackingEventId(Guid Value)
-    : IStronglyTypedId
+    : IStronglyTypedId<TrackingEventId, Guid>
 {
     public static TrackingEventId Empty => new(Guid.Empty);
 
