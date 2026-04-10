@@ -18,6 +18,7 @@ public abstract class ValueObject<TSelf, TValue> : IEquatable<TSelf>
     public bool Equals(TSelf? other)
     {
         if (other is null) return false;
+        if (other.Value is null) return false;
         if (ReferenceEquals(this, other)) return true;
         return Value.Equals(other.Value);
     }
