@@ -7,6 +7,7 @@ public sealed class AttachmentType : StringEnumeration<AttachmentType>
     public static readonly AttachmentType Empty = new(string.Empty);
 
     public static readonly AttachmentType Unset = new("Unset");
+    public static readonly AttachmentType AssessmentDownload = new("Assessment Download");
     public static readonly AttachmentType CanvasAssignmentSubmission = new("Canvas Assignment Submission");
     public static readonly AttachmentType StudentReport = new("Student Report");
     public static readonly AttachmentType ExternalReport = new("External Report");

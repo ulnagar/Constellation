@@ -1,12 +1,10 @@
-﻿using Constellation.Core.Models.Students.Identifiers;
+﻿namespace Constellation.Core.Models.Assignments;
 
-namespace Constellation.Core.Models.Assignments;
-
-using DomainEvents;
-using Constellation.Core.Errors;
-using Identifiers;
 using Constellation.Core.Models.Identifiers;
+using Constellation.Core.Models.Students.Identifiers;
 using Constellation.Core.Models.Subjects.Identifiers;
+using DomainEvents;
+using Identifiers;
 using Primitives;
 using Shared;
 using System;
