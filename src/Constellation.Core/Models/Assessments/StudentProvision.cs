@@ -9,6 +9,11 @@ using ValueObjects;
 
 public sealed class StudentProvision : IAuditableEntity
 {
+    /// <summary>
+    /// Required for EF Core
+    /// </summary>
+    private StudentProvision() { }
+
     public StudentProvision(
         Provision provision,
         Student student,

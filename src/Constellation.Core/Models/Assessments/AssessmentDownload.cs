@@ -7,6 +7,11 @@ public sealed class AssessmentDownload
 {
     private readonly List<AssessmentDownloadEvent> _downloadEvents = [];
 
+    /// <summary>
+    /// Required for EF Core
+    /// </summary>
+    private AssessmentDownload() { }
+
     public AssessmentDownload(
         AssessmentId assessmentId,
         string name,

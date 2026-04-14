@@ -7,6 +7,11 @@ using Shared;
 
 public sealed class AssessmentSubmission
 {
+    /// <summary>
+    /// Required for EF Core
+    /// </summary>
+    private AssessmentSubmission() { }
+
     public AssessmentSubmission(
         AssessmentStudentId assessmentStudentId,
         AppUser user)

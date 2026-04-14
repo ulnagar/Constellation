@@ -5,6 +5,11 @@ using ValueObjects;
 
 public sealed class Provision
 {
+    /// <summary>
+    /// Required for EF Core
+    /// </summary>
+    private Provision() { }
+
     public Provision(
         ProvisionCode code,
         string description)

@@ -13,6 +13,11 @@ public sealed class AssessmentStudent
     private readonly List<AssessmentProvision> _provisions = [];
     private readonly List<AssessmentSubmission> _submissions = [];
 
+    /// <summary>
+    /// Required for EF Core
+    /// </summary>
+    private AssessmentStudent() { }
+
     internal AssessmentStudent(
         AssessmentId assessmentId,
         Student student)

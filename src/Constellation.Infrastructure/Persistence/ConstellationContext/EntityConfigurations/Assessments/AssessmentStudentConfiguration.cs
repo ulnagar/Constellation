@@ -1,6 +1,8 @@
 ﻿namespace Constellation.Infrastructure.Persistence.ConstellationContext.EntityConfigurations.Assessments;
 
+using Converters;
 using Core.Models.Assessments;
+using Core.Models.Identifiers;
 using Core.Models.Students;
 using Core.ValueObjects;
 using Microsoft.EntityFrameworkCore;
@@ -14,6 +16,10 @@ internal sealed class AssessmentStudentConfiguration : IEntityTypeConfiguration<
 
         builder
             .HasKey(student => student.Id);
+
+        builder
+            .Property(student => student.SchoolCode)
+            .HasConversion<StronglyTypedIdValueConverter<SchoolCode, string>>();
 
         builder
             .HasOne<Student>()

@@ -17,6 +17,11 @@ public sealed class Assessment : AggregateRoot
     private readonly List<AssessmentDownload> _downloads = [];
     private readonly List<AssessmentStudent> _students = [];
 
+    /// <summary>
+    /// Required for EF Core
+    /// </summary>
+    private Assessment() { }
+
     private Assessment(
         string name,
         Course course,

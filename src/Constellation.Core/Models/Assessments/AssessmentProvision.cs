@@ -5,6 +5,11 @@ using ValueObjects;
 
 public sealed class AssessmentProvision
 {
+    /// <summary>
+    /// Required for EF Core
+    /// </summary>
+    private AssessmentProvision() { }
+
     internal AssessmentProvision(
         Provision provision)
     {

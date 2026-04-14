@@ -7,6 +7,11 @@ using Shared;
 
 public sealed class AssessmentDownloadEvent
 {
+    /// <summary>
+    /// Required for EF Core
+    /// </summary>
+    private AssessmentDownloadEvent() { }
+
     internal AssessmentDownloadEvent(
         AssessmentDownloadId downloadId,
         AppUser user)
