@@ -14,14 +14,14 @@ public sealed partial class Service : IEmailService
 
     public async Task SendMagicLinkLoginEmail(MagicLinkEmail notification)
     {
-        MagicLinkLoginEmailViewModel viewModel = new()
+        MagicLinkLoginEmailViewModel viewModel = new(
+            notification.Name,
+            notification.Link)
         {
             Preheader = "This is an automated message. Please do not reply.",
             SenderName = "",
             SenderTitle = "",
-            Title = "[Aurora College] Portal Login Link",
-            ToName = notification.Name,
-            Link = notification.Link
+            Title = "[Aurora College] Portal Login Link"
         };
 
         RenderedEmail rendered = await _razorService.RenderEmail("/Views/Emails/Auth/MagicLinkLoginEmail.cshtml", viewModel);
@@ -37,6 +37,6 @@ public sealed partial class Service : IEmailService
         foreach (EmailRecipient entry in notification.Recipients)
             message.AddRecipient(entry, EmailRecipientType.To);
 
-        await _emailSender.Send(message);
+        await _emailSender.Send(message, includeTracking: false);
     }
 }

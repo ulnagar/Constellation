@@ -7,7 +7,6 @@ using Constellation.Core.Models.WorkFlow.Identifiers;
 using Constellation.Infrastructure.Templates.Views.Emails.WorkFlow;
 using Core.Extensions;
 using Core.ValueObjects;
-using MimeKit;
 using System.Collections.Generic;
 using System.Net.Mail;
 using System.Threading.Tasks;

@@ -1,5 +1,6 @@
 ﻿namespace Constellation.Infrastructure.Services;
 
+using Application.Domains.Messaging.Tracking.Models;
 using Application.Interfaces.Services;
 using Core.Models.Messaging.Email.Identifiers;
 using HtmlAgilityPack;

@@ -7,6 +7,15 @@ public sealed class MagicLinkLoginEmailViewModel : EmailLayoutBaseViewModel
     private const string _viewLocation = "/Views/Emails/Auth/MagicLinkLoginEmail.cshtml";
     public override string ViewLocation => _viewLocation;
 
-    public required string ToName { get; set; }
-    public required string Link { get; set; }
+    public MagicLinkLoginEmailViewModel(
+        string name,
+        string link)
+    {
+        ToName = name;
+        Link = link;
+        //Link = Uri.EscapeDataString(link);
+    }
+
+    public string ToName { get; private set; }
+    public string Link { get; private set; }
 }
