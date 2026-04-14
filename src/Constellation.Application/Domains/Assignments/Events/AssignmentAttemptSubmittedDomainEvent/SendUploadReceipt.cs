@@ -53,7 +53,7 @@ internal sealed class SendUploadReceipt
 
     public async Task Handle(AssignmentAttemptSubmittedDomainEvent notification, CancellationToken cancellationToken)
     {
-        CanvasAssignment assignment = await _assignmentRepository.GetById(notification.AssignmentId, cancellationToken);
+        CanvasAssignment? assignment = await _assignmentRepository.GetById(notification.AssignmentId, cancellationToken);
 
         if (assignment is null)
         {
@@ -64,7 +64,7 @@ internal sealed class SendUploadReceipt
             return;
         }
 
-        CanvasAssignmentSubmission submission = assignment.Submissions.FirstOrDefault(entry => entry.Id == notification.SubmissionId);
+        CanvasAssignmentSubmission? submission = assignment.Submissions.FirstOrDefault(entry => entry.Id == notification.SubmissionId);
 
         if (submission is null)
         {
@@ -76,7 +76,7 @@ internal sealed class SendUploadReceipt
             return;
         }
 
-        Course course = await _courseRepository.GetById(assignment.CourseId, cancellationToken);
+        Course? course = await _courseRepository.GetById(assignment.CourseId, cancellationToken);
 
         if (course is null)
         {
@@ -88,7 +88,7 @@ internal sealed class SendUploadReceipt
             return;
         }
 
-        Student student = await _studentRepository.GetById(submission.StudentId, cancellationToken);
+        Student? student = await _studentRepository.GetById(submission.StudentId, cancellationToken);
 
         if (student is null)
         {
@@ -112,7 +112,7 @@ internal sealed class SendUploadReceipt
             return;
         }
 
-        SchoolContact contact = await _contactRepository.GetByNameAndSchool(submission.SubmittedBy, enrolment.SchoolCode, cancellationToken);
+        SchoolContact? contact = await _contactRepository.GetByNameAndSchool(submission.SubmittedBy, enrolment.SchoolCode, cancellationToken);
 
         if (contact is null)
         {

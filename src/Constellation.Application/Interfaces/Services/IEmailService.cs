@@ -9,6 +9,7 @@ using Constellation.Core.Models.Covers;
 using Constellation.Core.Models.Offerings;
 using Constellation.Core.Models.Students;
 using Constellation.Core.Models.WorkFlow.Identifiers;
+using Core.Models.Assessments;
 using Core.Models.Assignments;
 using Core.Models.Messaging.Drafts;
 using Core.Models.Messaging.Email;
@@ -57,6 +58,7 @@ public interface IEmailService
     Task SendIncomingSmsAlert(SmsMessage message, CancellationToken cancellationToken = default);
 
     // Assessment Provisions Emails
+    Task<Result> SendAssessmentSubmissionReceipt(Assessment assessment, AssessmentStudent student, AssessmentSubmission submission, CancellationToken cancellationToken = default);
     Task<Result> SendAssessmentProvisionEmailToSchools(List<EmailRecipient> recipients, List<EmailRecipient> ccRecipients, Name contact, List<StudentProvisions> students, CancellationToken cancellationToken = default);
     Task<Result> SendAssessmentProvisionEmailToFamilies(List<EmailRecipient> recipients, List<EmailRecipient> ccRecipients, StudentProvisions provisions, CancellationToken cancellationToken = default);
 
