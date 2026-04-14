@@ -4,6 +4,7 @@ using Constellation.Application.Models.Identity;
 using Constellation.Infrastructure.HangfireServer.Services;
 using Constellation.Infrastructure.Persistence.ConstellationContext;
 using Core.Abstractions.Services;
+using Core.Models.Auth;
 using Hangfire;
 using Hangfire.SqlServer;
 

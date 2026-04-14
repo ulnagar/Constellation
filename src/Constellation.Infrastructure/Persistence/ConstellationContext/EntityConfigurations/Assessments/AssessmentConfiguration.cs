@@ -1,0 +1,52 @@
+﻿namespace Constellation.Infrastructure.Persistence.ConstellationContext.EntityConfigurations.Assessments;
+
+using Core.Models.Assessments;
+using Core.Models.Subjects;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
+
+internal sealed class AssessmentConfiguration : IEntityTypeConfiguration<Assessment>
+{
+    public void Configure(EntityTypeBuilder<Assessment> builder)
+    {
+        builder.ToTable("Assessments", "Assessments");
+
+        builder
+            .HasKey(assessment => assessment.Id);
+
+        builder
+            .HasOne<Course>()
+            .WithMany()
+            .HasForeignKey(assessment => assessment.CourseId)
+            .IsRequired()
+            .OnDelete(DeleteBehavior.Restrict);
+
+        builder
+            .Property(assessment => assessment.Grade)
+            .HasConversion<string>();
+
+        builder
+            .HasMany(assessment => assessment.Downloads)
+            .WithOne()
+            .HasForeignKey(download => download.AssessmentId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        builder
+            .Navigation(assessment => assessment.Downloads)
+            .HasField("_downloads")
+            .UsePropertyAccessMode(PropertyAccessMode.Field)
+            .AutoInclude();
+
+        builder
+            .HasMany(assessment => assessment.Students)
+            .WithOne()
+            .HasForeignKey(student => student.AssessmentId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        builder
+            .Navigation(assessment => assessment.Students)
+            .HasField("_students")
+            .UsePropertyAccessMode(PropertyAccessMode.Field)
+            .AutoInclude();
+    }
+}

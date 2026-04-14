@@ -9,6 +9,7 @@ using Constellation.Application.Models.Auth;
 using Constellation.Application.Models.Identity;
 using Constellation.Infrastructure.Identity.Authorization;
 using Constellation.Presentation.Server.BaseModels;
+using Core.Models.Auth;
 using Core.Shared;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;

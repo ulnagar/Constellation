@@ -13,6 +13,7 @@ using Constellation.Presentation.Shared.Helpers.Attributes;
 using Constellation.Presentation.Shared.Helpers.Logging;
 using Core.Abstractions.Services;
 using Core.Errors;
+using Core.Models.Auth;
 using Core.Models.Students.Identifiers;
 using MediatR;
 using Microsoft.AspNetCore.Identity;

@@ -1,5 +1,6 @@
 ﻿namespace Constellation.Application.Domains.Auth.Queries.GetRoleDetails;
 
+using Core.Models.Auth;
 using Core.ValueObjects;
 using Models.Auth;
 using Models.Identity;

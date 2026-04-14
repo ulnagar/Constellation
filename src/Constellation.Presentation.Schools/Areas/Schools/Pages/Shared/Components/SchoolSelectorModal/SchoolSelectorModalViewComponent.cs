@@ -7,6 +7,8 @@ using Constellation.Application.Models.Identity.Enums;
 using Constellation.Core.Models.Identifiers;
 using Constellation.Core.Models.SchoolContacts.Identifiers;
 using Constellation.Core.Shared;
+using Core.Models.Auth;
+using Core.Models.Auth.Enums;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;

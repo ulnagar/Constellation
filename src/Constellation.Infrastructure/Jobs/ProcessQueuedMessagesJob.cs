@@ -3,6 +3,7 @@
 using Application.Interfaces.Jobs;
 using Application.Interfaces.Services;
 using Application.Models.Identity;
+using Core.Models.Auth;
 using Core.Models.Messaging.Drafts;
 using Core.Models.Messaging.Enums;
 using Core.Shared;

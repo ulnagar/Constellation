@@ -3,6 +3,8 @@
 using Abstractions.Messaging;
 using Core.Abstractions.Repositories;
 using Core.Errors;
+using Core.Models.Auth;
+using Core.Models.Auth.Enums;
 using Core.Models.Families;
 using Core.Models.SchoolContacts;
 using Core.Models.SchoolContacts.Repositories;
@@ -13,8 +15,6 @@ using Core.Models.Students.Repositories;
 using Core.Shared;
 using Core.ValueObjects;
 using Microsoft.AspNetCore.Identity;
-using Models.Identity;
-using Models.Identity.Enums;
 using System.Threading;
 using System.Threading.Tasks;
 

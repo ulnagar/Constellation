@@ -4,6 +4,8 @@ using Abstractions.Messaging;
 using Application.Models.Auth;
 using Application.Models.Identity;
 using Application.Models.Identity.Enums;
+using Core.Models.Auth;
+using Core.Models.Auth.Enums;
 using Core.Models.SchoolContacts;
 using Core.Models.SchoolContacts.Errors;
 using Core.Models.SchoolContacts.Events;

@@ -2,6 +2,8 @@
 
 using Application.Models.Identity;
 using Application.Models.Identity.Enums;
+using Core.Models.Auth;
+using Core.Models.Auth.Enums;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 

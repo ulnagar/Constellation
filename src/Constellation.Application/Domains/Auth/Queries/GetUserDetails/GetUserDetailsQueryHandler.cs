@@ -1,6 +1,7 @@
 ﻿namespace Constellation.Application.Domains.Auth.Queries.GetUserDetails;
 
 using Abstractions.Messaging;
+using Core.Models.Auth;
 using Core.Shared;
 using Models.Auth;
 using Models.Identity;

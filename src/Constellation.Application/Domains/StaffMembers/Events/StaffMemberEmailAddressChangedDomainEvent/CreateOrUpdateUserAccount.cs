@@ -10,6 +10,8 @@ using Constellation.Core.Models.StaffMembers.Errors;
 using Constellation.Core.Models.StaffMembers.Events;
 using Constellation.Core.Models.StaffMembers.Repositories;
 using Constellation.Core.Shared;
+using Core.Models.Auth;
+using Core.Models.Auth.Enums;
 using Microsoft.AspNetCore.Identity;
 using Serilog;
 using System.Threading;

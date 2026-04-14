@@ -3,6 +3,7 @@
 using Abstractions.Messaging;
 using Constellation.Application.Models.Identity.Repositories;
 using Core.Abstractions.Services;
+using Core.Models.Auth;
 using Core.Shared;
 using Models.Auth;
 using Models.Identity;

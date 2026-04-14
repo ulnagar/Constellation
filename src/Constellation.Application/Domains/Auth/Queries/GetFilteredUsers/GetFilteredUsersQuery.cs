@@ -1,7 +1,7 @@
 ﻿namespace Constellation.Application.Domains.Auth.Queries.GetFilteredUsers;
 
 using Abstractions.Messaging;
-using Models.Identity;
+using Core.Models.Auth;
 using System.Collections.Generic;
 
 public sealed record GetFilteredUsersQuery(

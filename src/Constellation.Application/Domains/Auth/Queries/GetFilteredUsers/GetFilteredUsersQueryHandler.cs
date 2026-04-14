@@ -1,9 +1,8 @@
 ﻿namespace Constellation.Application.Domains.Auth.Queries.GetFilteredUsers;
 
 using Abstractions.Messaging;
+using Core.Models.Auth;
 using Core.Shared;
-using Microsoft.AspNetCore.Identity;
-using Models.Identity;
 using Models.Identity.Repositories;
 using System.Collections.Generic;
 using System.Threading.Tasks;

@@ -7,6 +7,7 @@ using Constellation.Core.Models.SchoolContacts.Enums;
 using Constellation.Core.Models.SchoolContacts.Errors;
 using Constellation.Core.Models.SchoolContacts.Repositories;
 using Constellation.Core.Shared;
+using Core.Models.Auth;
 using Core.Models.SchoolContacts.Events;
 using Microsoft.AspNetCore.Identity;
 using Serilog;

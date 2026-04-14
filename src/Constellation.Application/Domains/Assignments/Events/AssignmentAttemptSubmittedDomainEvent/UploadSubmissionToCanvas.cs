@@ -12,7 +12,6 @@ using Core.Models.Offerings;
 using Core.Models.Offerings.Enums;
 using Core.Models.Offerings.Errors;
 using Core.Models.Offerings.Repositories;
-using Core.Models.Offerings.ValueObjects;
 using Core.Models.Subjects.Errors;
 using Core.Shared;
 using Interfaces.Repositories;

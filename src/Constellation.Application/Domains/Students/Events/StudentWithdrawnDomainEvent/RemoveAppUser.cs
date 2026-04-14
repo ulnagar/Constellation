@@ -5,6 +5,8 @@ using Application.Models.Identity.Enums;
 using Application.Models.Identity.Repositories;
 using Constellation.Application.Models.Identity;
 using Constellation.Core.Errors;
+using Core.Models.Auth;
+using Core.Models.Auth.Enums;
 using Core.Models.Students;
 using Core.Models.Students.Errors;
 using Core.Models.Students.Events;

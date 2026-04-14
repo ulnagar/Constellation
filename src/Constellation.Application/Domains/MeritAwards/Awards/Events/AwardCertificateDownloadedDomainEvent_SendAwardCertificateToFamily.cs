@@ -5,7 +5,6 @@ using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.Models.Awards.Events;
 using Constellation.Core.Models.Students.Repositories;
 using Core.Abstractions.Clock;
-using Core.Models;
 using Core.Models.Attachments.DTOs;
 using Core.Models.Attachments.Enums;
 using Core.Models.Attachments.Services;
@@ -19,9 +18,7 @@ using Core.ValueObjects;
 using Interfaces.Services;
 using Serilog;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Net.Mail;
 using System.Threading;
 using System.Threading.Tasks;
 

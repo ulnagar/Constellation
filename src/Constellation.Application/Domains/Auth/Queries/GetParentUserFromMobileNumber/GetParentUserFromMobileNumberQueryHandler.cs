@@ -3,12 +3,12 @@
 using Abstractions.Messaging;
 using Core.Abstractions.Repositories;
 using Core.Errors;
+using Core.Models.Auth;
 using Core.Models.Families;
 using Core.Models.Families.Errors;
 using Core.Shared;
 using Core.ValueObjects;
 using Microsoft.AspNetCore.Identity;
-using Models.Identity;
 using Serilog;
 using System.Collections.Generic;
 using System.Linq;

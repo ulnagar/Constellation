@@ -7,6 +7,7 @@ using Constellation.Application.Interfaces.Services;
 using Constellation.Application.Models.Identity;
 using Constellation.Core.Shared;
 using Constellation.Core.ValueObjects;
+using Core.Models.Auth;
 using MediatR;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
@@ -188,7 +189,7 @@ public class LoginModel : PageModel
 
         _logger.Information(" - Found user {user} for email {email}", user.Id, Input.Email);
 
-        user.AddLogin(DateTime.UtcNow, Constellation.Application.Models.Identity.Enums.LoginStatus.Started);
+        user.AddLogin(DateTime.UtcNow, Core.Models.Auth.Enums.LoginStatus.Started);
 
         await _userManager.UpdateAsync(user);
 
@@ -326,7 +327,7 @@ public class LoginModel : PageModel
 
                 Status = LoginStatus.WaitingPasswordInput;
 
-                user.AddLogin(DateTime.UtcNow, Constellation.Application.Models.Identity.Enums.LoginStatus.Failed);
+                user.AddLogin(DateTime.UtcNow, Core.Models.Auth.Enums.LoginStatus.Failed);
 
                 await _userManager.UpdateAsync(user);
 
@@ -337,7 +338,7 @@ public class LoginModel : PageModel
 
             await _signInManager.SignInAsync(user, false);
 
-            user.AddLogin(DateTime.UtcNow, Constellation.Application.Models.Identity.Enums.LoginStatus.Success);
+            user.AddLogin(DateTime.UtcNow, Core.Models.Auth.Enums.LoginStatus.Success);
             await _userManager.UpdateAsync(user);
 
             return LocalRedirect("/Index");
@@ -347,7 +348,7 @@ public class LoginModel : PageModel
 
         Status = LoginStatus.InvalidUsername;
 
-        user.AddLogin(DateTime.UtcNow, Constellation.Application.Models.Identity.Enums.LoginStatus.Failed);
+        user.AddLogin(DateTime.UtcNow, Core.Models.Auth.Enums.LoginStatus.Failed);
 
         await _userManager.UpdateAsync(user);
 
@@ -377,7 +378,7 @@ public class LoginModel : PageModel
 
             Status = LoginStatus.TokenInvalid;
 
-            user.AddLogin(DateTime.UtcNow, Constellation.Application.Models.Identity.Enums.LoginStatus.Failed);
+            user.AddLogin(DateTime.UtcNow, Core.Models.Auth.Enums.LoginStatus.Failed);
 
             await _userManager.UpdateAsync(user);
 
@@ -389,7 +390,7 @@ public class LoginModel : PageModel
 
         _logger.Information(" - Login succeeded for {user}", user.Email);
         
-        user.AddLogin(DateTime.UtcNow, Constellation.Application.Models.Identity.Enums.LoginStatus.Success);
+        user.AddLogin(DateTime.UtcNow, Core.Models.Auth.Enums.LoginStatus.Success);
 
         await _userManager.UpdateAsync(user);
 
@@ -451,7 +452,7 @@ public class LoginModel : PageModel
 
                 Status = LoginStatus.TokenInvalid;
                 
-                parent.Value.AddLogin(DateTime.UtcNow, Constellation.Application.Models.Identity.Enums.LoginStatus.Failed);
+                parent.Value.AddLogin(DateTime.UtcNow, Core.Models.Auth.Enums.LoginStatus.Failed);
                 await _userManager.UpdateAsync(parent.Value);
 
                 return Page();
@@ -462,7 +463,7 @@ public class LoginModel : PageModel
 
             _logger.Information(" - Login succeeded for {user}", parent.Value.Email);
 
-            parent.Value.AddLogin(DateTime.UtcNow, Constellation.Application.Models.Identity.Enums.LoginStatus.Success);
+            parent.Value.AddLogin(DateTime.UtcNow, Core.Models.Auth.Enums.LoginStatus.Success);
             await _userManager.UpdateAsync(parent.Value);
 
             // Redirect to home page
@@ -473,7 +474,7 @@ public class LoginModel : PageModel
 
         Status = LoginStatus.InvalidUsername;
 
-        parent.Value.AddLogin(DateTime.UtcNow, Constellation.Application.Models.Identity.Enums.LoginStatus.Failed);
+        parent.Value.AddLogin(DateTime.UtcNow, Core.Models.Auth.Enums.LoginStatus.Failed);
         await _userManager.UpdateAsync(parent.Value);
 
         return Page();

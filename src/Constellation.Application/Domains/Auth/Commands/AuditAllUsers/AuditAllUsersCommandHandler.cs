@@ -2,6 +2,8 @@
 
 using Abstractions.Messaging;
 using Core.Abstractions.Repositories;
+using Core.Models.Auth;
+using Core.Models.Auth.Enums;
 using Core.Models.Families;
 using Core.Models.Identifiers;
 using Core.Models.SchoolContacts;
@@ -18,11 +20,9 @@ using Core.ValueObjects;
 using Interfaces.Repositories;
 using Microsoft.AspNetCore.Identity;
 using Models.Identity;
-using Models.Identity.Enums;
 using Models.Identity.Repositories;
 using Serilog;
 using System.Collections.Generic;
-using System.Data;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;

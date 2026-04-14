@@ -1,8 +1,8 @@
 ﻿namespace Constellation.Application.Domains.Auth.Queries.GetParentUserFromMobileNumber;
 
 using Abstractions.Messaging;
+using Core.Models.Auth;
 using Core.ValueObjects;
-using Models.Identity;
 
 public sealed record GetParentUserFromMobileNumberQuery(
     PhoneNumber PhoneNumber)

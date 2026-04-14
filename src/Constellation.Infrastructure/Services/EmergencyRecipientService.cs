@@ -10,6 +10,8 @@ using Constellation.Core.Models.Students.Identifiers;
 using Core.Abstractions.Clock;
 using Core.Abstractions.Repositories;
 using Core.Enums;
+using Core.Models.Auth;
+using Core.Models.Auth.Enums;
 using Core.Models.Enrolments;
 using Core.Models.Enrolments.Repositories;
 using Core.Models.Families;

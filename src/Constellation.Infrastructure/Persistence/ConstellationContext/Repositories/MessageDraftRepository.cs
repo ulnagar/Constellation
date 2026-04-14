@@ -2,6 +2,7 @@
 
 using Application.Models.Identity;
 using Constellation.Core.Models.Messaging.Drafts.Errors;
+using Core.Models.Auth;
 using Core.Models.Messaging.Drafts;
 using Core.Models.Messaging.Drafts.Enums;
 using Core.Models.Messaging.Drafts.Identifiers;

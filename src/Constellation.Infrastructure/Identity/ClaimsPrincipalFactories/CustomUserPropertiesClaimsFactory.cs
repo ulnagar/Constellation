@@ -3,6 +3,8 @@
 using Application.Models.Identity.Enums;
 using Constellation.Application.Models.Auth;
 using Constellation.Application.Models.Identity;
+using Core.Models.Auth;
+using Core.Models.Auth.Enums;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
 using System.Security.Claims;

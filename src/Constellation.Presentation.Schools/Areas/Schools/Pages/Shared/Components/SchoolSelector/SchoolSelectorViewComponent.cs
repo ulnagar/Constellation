@@ -5,6 +5,8 @@ using Application.Models.Auth;
 using Application.Models.Identity;
 using Areas;
 using Constellation.Application.Models.Identity.Enums;
+using Core.Models.Auth;
+using Core.Models.Auth.Enums;
 using Core.Models.SchoolContacts.Identifiers;
 using Core.Shared;
 using MediatR;

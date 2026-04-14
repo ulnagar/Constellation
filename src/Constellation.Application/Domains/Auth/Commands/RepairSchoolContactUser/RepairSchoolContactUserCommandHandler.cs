@@ -1,14 +1,14 @@
 ﻿namespace Constellation.Application.Domains.Auth.Commands.RepairSchoolContactUser;
 
 using Abstractions.Messaging;
-using Constellation.Application.Models.Identity.Enums;
+using Core.Models.Auth;
+using Core.Models.Auth.Enums;
 using Core.Models.SchoolContacts;
 using Core.Models.SchoolContacts.Errors;
 using Core.Models.SchoolContacts.Repositories;
 using Core.Shared;
 using Interfaces.Repositories;
 using Microsoft.AspNetCore.Identity;
-using Models.Identity;
 using Serilog;
 using System.Collections.Generic;
 using System.Linq;

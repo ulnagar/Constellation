@@ -2,6 +2,7 @@
 
 using Application.Models.Identity.Repositories;
 using Constellation.Application.Models.Identity;
+using Core.Models.Auth;
 using Microsoft.AspNetCore.Mvc;
 
 public class UserAddRoleViewComponent : ViewComponent

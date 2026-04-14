@@ -5,6 +5,8 @@ using Application.Models.Identity.Enums;
 using Application.Models.Identity.Repositories;
 using Constellation.Application.Domains.Auth.Queries.GetFilteredUsers;
 using Constellation.Application.Models.Identity;
+using Core.Models.Auth;
+using Core.Models.Auth.Enums;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;

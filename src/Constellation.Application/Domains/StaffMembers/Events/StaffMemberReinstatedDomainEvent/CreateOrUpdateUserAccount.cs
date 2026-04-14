@@ -3,6 +3,8 @@
 using Abstractions.Messaging;
 using Constellation.Application.Models.Identity;
 using Constellation.Application.Models.Identity.Enums;
+using Core.Models.Auth;
+using Core.Models.Auth.Enums;
 using Core.Models.StaffMembers;
 using Core.Models.StaffMembers.Errors;
 using Core.Models.StaffMembers.Events;

@@ -2,6 +2,7 @@
 
 using Abstractions.Messaging;
 using Core.Errors;
+using Core.Models.Auth;
 using Core.Shared;
 using Microsoft.AspNetCore.Identity;
 using Models.Identity;

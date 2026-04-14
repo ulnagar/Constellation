@@ -8,6 +8,8 @@ using Constellation.Core.Models.Students;
 using Constellation.Core.Models.Students.Errors;
 using Constellation.Core.Models.Students.Events;
 using Constellation.Core.Models.Students.Repositories;
+using Core.Models.Auth;
+using Core.Models.Auth.Enums;
 using Core.Shared;
 using Core.ValueObjects;
 using Microsoft.AspNetCore.Identity;

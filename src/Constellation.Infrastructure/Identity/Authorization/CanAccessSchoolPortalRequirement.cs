@@ -3,6 +3,7 @@
 using Application.Models.Identity;
 using Constellation.Core.Models.SchoolContacts;
 using Constellation.Core.Shared;
+using Core.Models.Auth;
 using Core.Models.SchoolContacts.Repositories;
 using Core.ValueObjects;
 using Microsoft.AspNetCore.Authorization;

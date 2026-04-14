@@ -1,10 +1,10 @@
-﻿namespace Constellation.Application.Models.Identity;
+﻿namespace Constellation.Core.Models.Auth;
 
-using Core.Models.Identifiers;
-using Core.Models.SchoolContacts.Identifiers;
-using Core.Models.StaffMembers.Identifiers;
-using Core.Models.Students.Identifiers;
-using Core.Primitives;
+using Constellation.Core.Models.Identifiers;
+using Constellation.Core.Models.SchoolContacts.Identifiers;
+using Constellation.Core.Models.StaffMembers.Identifiers;
+using Constellation.Core.Models.Students.Identifiers;
+using Constellation.Core.Primitives;
 using Enums;
 
 public sealed class AppUserLink : IAuditableEntity

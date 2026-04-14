@@ -9,6 +9,8 @@ using Constellation.Core.Errors;
 using Constellation.Core.Models.Families;
 using Constellation.Core.Models.Families.Errors;
 using Constellation.Core.Models.Families.Events;
+using Core.Models.Auth;
+using Core.Models.Auth.Enums;
 using Core.Shared;
 using Microsoft.AspNetCore.Identity;
 using Serilog;

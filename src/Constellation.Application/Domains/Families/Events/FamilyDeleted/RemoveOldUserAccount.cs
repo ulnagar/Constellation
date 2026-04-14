@@ -6,6 +6,8 @@ using Application.Models.Identity.Enums;
 using Application.Models.Identity.Repositories;
 using Core.Abstractions.Repositories;
 using Core.Errors;
+using Core.Models.Auth;
+using Core.Models.Auth.Enums;
 using Core.Models.Families;
 using Core.Models.Families.Errors;
 using Core.Models.Families.Events;

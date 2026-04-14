@@ -6,6 +6,8 @@ using Constellation.Application.Common.PresentationModels;
 using Constellation.Application.Models.Auth;
 using Constellation.Application.Models.Identity;
 using Constellation.Core.Shared;
+using Core.Models.Auth;
+using Core.Models.Auth.Enums;
 using Core.Models.Identifiers;
 using Core.Models.SchoolContacts.Identifiers;
 using MediatR;

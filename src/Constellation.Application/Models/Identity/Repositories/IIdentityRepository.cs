@@ -1,6 +1,7 @@
 ﻿namespace Constellation.Application.Models.Identity.Repositories;
 
 using Auth;
+using Core.Models.Auth;
 using Domains.Auth.Queries.GetFilteredUsers;
 using Microsoft.AspNetCore.Identity;
 using System.Security.Claims;

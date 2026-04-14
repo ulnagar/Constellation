@@ -1,10 +1,10 @@
 ﻿namespace Constellation.Application.Domains.Auth.Commands.UpdateUser;
 
 using Abstractions.Messaging;
+using Core.Models.Auth;
 using Core.Shared;
 using Core.ValueObjects;
 using Interfaces.Repositories;
-using Models.Identity;
 using Models.Identity.Errors;
 using Models.Identity.Repositories;
 using Serilog;

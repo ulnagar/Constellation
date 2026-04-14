@@ -1,4 +1,4 @@
-﻿namespace Constellation.Application.Models.Identity;
+﻿namespace Constellation.Core.Models.Auth;
 
 using Enums;
 

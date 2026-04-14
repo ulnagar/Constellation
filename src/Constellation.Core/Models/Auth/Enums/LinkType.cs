@@ -1,6 +1,6 @@
-﻿namespace Constellation.Application.Models.Identity.Enums;
+﻿namespace Constellation.Core.Models.Auth.Enums;
 
-using Core.Common;
+using Constellation.Core.Common;
 
 public sealed class LinkType : StringEnumeration<LinkType>
 {

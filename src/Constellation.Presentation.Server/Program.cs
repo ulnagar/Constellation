@@ -1,6 +1,7 @@
 using Constellation.Application.Models.Auth;
 using Constellation.Application.Models.Identity;
 using Constellation.Core.Abstractions.Services;
+using Constellation.Core.Models.Auth;
 using Constellation.Infrastructure.DependencyInjection;
 using Constellation.Infrastructure.Identity.Authorization;
 using Constellation.Infrastructure.Identity.ClaimsPrincipalFactories;

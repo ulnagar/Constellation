@@ -1,8 +1,8 @@
 ﻿namespace Constellation.Application.Domains.Auth.Commands.RepairSchoolContactUser;
 
 using Abstractions.Messaging;
+using Core.Models.Auth;
 using Core.Models.SchoolContacts.Identifiers;
-using Models.Identity;
 
 public sealed record RepairSchoolContactUserCommand(
     SchoolContactId ContactId)

@@ -2,6 +2,7 @@
 
 using Constellation.Application.Models.Identity;
 using Constellation.Presentation.Server.BaseModels;
+using Core.Models.Auth;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;

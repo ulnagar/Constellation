@@ -7,6 +7,8 @@ using Constellation.Application.Models.Identity.Repositories;
 using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.Models.Families;
 using Constellation.Core.Models.Families.Events;
+using Core.Models.Auth;
+using Core.Models.Auth.Enums;
 using Core.Models.Families.Errors;
 using Core.Shared;
 using Microsoft.AspNetCore.Identity;

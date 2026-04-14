@@ -1,9 +1,9 @@
 ﻿namespace Constellation.Infrastructure.Persistence.ConstellationContext;
 
-using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Models;
 using Constellation.Application.Models.Identity;
-using Constellation.Core.Models;
+using Converters;
+using Core.Models.Auth;
 using Core.Primitives;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
@@ -20,6 +20,11 @@ public class AppDbContext : IdentityDbContext<AppUser, AppRole, Guid>
     { }
 
     public DbSet<JobActivation> JobActivations { get; set; }
+
+    protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
+    {
+        configurationBuilder.Conventions.Add(_ => new StronglyTypedIdConvention());
+    }
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
