@@ -10,5 +10,5 @@ using System.Threading.Tasks;
 
 public interface IEmailGateway
 {
-    Task<Result<string>> Send(EmailMessage message, List<Attachment>?  attachments = null, string? calendarInfo = null, MessagePriority priority = MessagePriority.Normal, CancellationToken cancellationToken = default);
+    Task<Result<string>> Send(EmailMessage message, List<Attachment>?  attachments = null, string? calendarInfo = null, MessagePriority priority = MessagePriority.Normal, bool includeTracking = true, CancellationToken cancellationToken = default);
 }

@@ -17,7 +17,7 @@
     @foreach (var pair in Model.ClassWithLink)
     {
         <li>@pair.Key - 
-            <a href="@pair.Value" target="_blank" class="button"><span style="display:block;padding:10px 20px;line-height:120%;"><span style="font-size: 14px; line-height: 16.8px;">Open Team</span></span></a>
+            <a href="@Html.Raw(pair.Value)" target="_blank" class="button"><span style="display:block;padding:10px 20px;line-height:120%;"><span style="font-size: 14px; line-height: 16.8px;">Open Team</span></span></a>
         </li>
     }
 </ul>

@@ -1,5 +1,6 @@
 ﻿namespace Constellation.Infrastructure.ExternalServices.Email;
 
+using Application.Domains.Messaging.Tracking.Models;
 using Application.Interfaces.Services;
 using Constellation.Application.Interfaces.Gateways;
 using Core.Helpers;
@@ -8,7 +9,6 @@ using Core.Models.Messaging.Email.Enums;
 using Core.Models.Messaging.Email.Identifiers;
 using Core.Shared;
 using Extensions;
-using Infrastructure.Services;
 using MailKit.Security;
 using Microsoft.Extensions.Options;
 using MimeKit;
@@ -48,12 +48,13 @@ public class Gateway : IEmailGateway
         List<Attachment>? attachments = null,
         string? calendarInfo = null,
         MessagePriority priority = MessagePriority.Normal,
+        bool includeTracking = true,
         CancellationToken cancellationToken = default)
     {
         _logger
             .Information("Sending email {id}", message.Id);
 
-        using MimeMessage mime = BuildMimeMessage(message, attachments ?? [], calendarInfo, priority);
+        using MimeMessage mime = BuildMimeMessage(message, attachments ?? [], calendarInfo, priority, includeTracking);
 
         if (_logOnly)
         {
@@ -87,7 +88,8 @@ public class Gateway : IEmailGateway
         EmailMessage message,
         List<Attachment> attachments,
         string? calendarInfo,
-        MessagePriority priority)
+        MessagePriority priority,
+        bool includeTracking = true)
     {
         MimeMessage mime = new();
 
@@ -117,15 +119,27 @@ public class Gateway : IEmailGateway
         mime.Subject = message.Subject;
         mime.Priority = priority;
 
-        InjectionResult injection = _trackingInjector.InjectTracking(message.BodyHtml, message.Id);
+        TextPart textPartBody;
 
-        foreach (var link in injection.DiscoveredLinks)
-            message.RegisterLink(link);
-
-        TextPart textPartBody = new(TextFormat.Html)
+        if (includeTracking)
         {
-            Text = injection.Html
-        };
+            InjectionResult injection = _trackingInjector.InjectTracking(message.BodyHtml, message.Id);
+
+            foreach (var link in injection.DiscoveredLinks)
+                message.RegisterLink(link);
+
+            textPartBody = new(TextFormat.Html)
+            {
+                Text = injection.Html
+            };
+        }
+        else
+        {
+            textPartBody = new(TextFormat.Html)
+            {
+                Text = message.BodyHtml
+            };
+        }
 
         if (attachments.Count > 0 || !string.IsNullOrWhiteSpace(calendarInfo))
         {

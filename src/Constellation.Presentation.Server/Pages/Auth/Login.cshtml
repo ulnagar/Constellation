@@ -1,4 +1,4 @@
-﻿@page 
+﻿@page
 @using Microsoft.AspNetCore.Mvc.ModelBinding
 @model LoginModel
 
@@ -110,6 +110,12 @@
                             <div class="form-value">
                                 <button type="submit">Log in</button>
                             </div>
+                            @if (Model.SSOEnabled)
+                            {
+                                <div class="form-value bottom">
+                                    <a class="ssoButton" asp-page-handler="SingleSignOn">Log in with DoE</a>
+                                </div>
+                            }
                         </div>
                     </form>
 
@@ -157,6 +163,12 @@
                             <div class="form-value">
                                 <button type="submit">Log in</button>
                             </div>
+                            @if (Model.SSOEnabled)
+                            {
+                                <div class="form-value bottom">
+                                    <a class="ssoButton" asp-page-handler="SingleSignOn">Log in with DoE</a>
+                                </div>
+                            }
                         </div>
                     </form>
 

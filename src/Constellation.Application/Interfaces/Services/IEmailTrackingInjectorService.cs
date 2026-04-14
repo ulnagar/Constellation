@@ -2,6 +2,7 @@
 
 using Constellation.Infrastructure.Services;
 using Core.Models.Messaging.Email.Identifiers;
+using Domains.Messaging.Tracking.Models;
 
 public interface IEmailTrackingInjectorService
 {
