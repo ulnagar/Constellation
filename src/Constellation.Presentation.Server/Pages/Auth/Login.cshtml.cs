@@ -94,11 +94,8 @@ public class LoginModel : PageModel
 
     public LoginStatus Status { get; set; } = LoginStatus.WaitingUserInput;
 
-    public async Task OnGet()
+    private async Task PreparePage()
     {
-        // Clear the existing external cookie to ensure a clean login process
-        await HttpContext.SignOutAsync();
-        
         AuthenticationConfiguration? configuration = await _appSettings.Authentication();
 
         if (configuration is not null)
@@ -106,9 +103,17 @@ public class LoginModel : PageModel
             LoginEnabled = configuration.LoginEnabled;
             SSOEnabled = configuration.SSOEnabled;
         }
-        
+
         if (!LoginEnabled && Manual)
             LoginEnabled = true;
+    }
+
+    public async Task OnGet()
+    {
+        // Clear the existing external cookie to ensure a clean login process
+        await HttpContext.SignOutAsync();
+
+        await PreparePage();
         
         Status = LoginStatus.WaitingUserInput;
     }
@@ -122,6 +127,8 @@ public class LoginModel : PageModel
 
     public async Task<IActionResult> OnPostAsync()
     {
+        await PreparePage();
+
         if (!ModelState.IsValid)
             return Page();
 
@@ -263,11 +270,7 @@ public class LoginModel : PageModel
                 break;
             case not null when Input.Email.Contains("@det.nsw.edu.au", StringComparison.InvariantCultureIgnoreCase):
             case not null when Input.Email.Contains("@education.nsw.gov.au", StringComparison.InvariantCultureIgnoreCase):
-                if (SSOEnabled)
-                    loginType = LoginType.SSO;
-                else
-                    loginType = LoginType.Domain;
-                
+                loginType = SSOEnabled ? LoginType.SSO : LoginType.Domain;
                 break;
             case not null when Input.Email.All(Char.IsDigit):
                 loginType = LoginType.Sms;
@@ -282,6 +285,8 @@ public class LoginModel : PageModel
 
     public async Task<IActionResult> OnPostPasswordLogin()
     {
+        await PreparePage();
+
         if (string.IsNullOrWhiteSpace(Input.Password))
         {
             ModelState.TryAddModelError(nameof(Input.Password), "You must specify a password!");
@@ -351,6 +356,8 @@ public class LoginModel : PageModel
 
     public async Task<IActionResult> OnGetPasswordless(string token, string userId)
     {
+        await PreparePage();
+
         _logger.Information("Continuing Login Attempt by {user}", userId);
 
         // Get user entry from database
@@ -392,6 +399,8 @@ public class LoginModel : PageModel
 
     public async Task<IActionResult> OnPostTokenLogin()
     {
+        await PreparePage();
+
         if (string.IsNullOrWhiteSpace(Input.Password))
         {
             ModelState.TryAddModelError(nameof(Input.Password), "You must specify a token!");
