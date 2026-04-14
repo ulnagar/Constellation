@@ -25,7 +25,10 @@ public sealed class Assessment : AggregateRoot
     private Assessment(
         string name,
         Course course,
-        Grade grade)
+        Grade grade,
+        DateTimeOffset dueDate,
+        DateTimeOffset availableFrom,
+        DateTimeOffset availableTo)
     {
         Id = new();
 
@@ -33,6 +36,10 @@ public sealed class Assessment : AggregateRoot
         CourseId = course.Id;
         Course = course.ToString();
         Grade = grade;
+
+        DueDate = dueDate;
+        AvailableFrom = availableFrom;
+        AvailableTo = availableTo;
     }
 
     public AssessmentId Id { get; init; }
@@ -42,10 +49,11 @@ public sealed class Assessment : AggregateRoot
     public string Course { get; private set; }
     public Grade Grade { get; private set; }
 
+    public DateTimeOffset DueDate { get; private set; }
+    public DateTimeOffset AvailableTo { get; private set; }
+    public DateTimeOffset AvailableFrom { get; private set; }
+
     public int CanvasId { get; private set; }
-    public DateTime CanvasDueDate { get; private set; }
-    public DateTime? CanvasLockDate { get; private set; } // "Until" in Canvas
-    public DateTime? CanvasUnlockDate { get; private set; } // "Available From" in Canvas
     public int AllowedAttempts { get; private set; }
 
     public IReadOnlyList<AssessmentDownload> Downloads => _downloads.AsReadOnly();
@@ -53,15 +61,9 @@ public sealed class Assessment : AggregateRoot
 
     public void AddCanvasDetails(
         int canvasId,
-        DateTimeOffset dueDate,
-        DateTimeOffset? lockDate,
-        DateTimeOffset? unlockDate,
         int allowedAttempts)
     {
         CanvasId = canvasId;
-        CanvasDueDate = dueDate.LocalDateTime;
-        CanvasLockDate = lockDate?.LocalDateTime;
-        CanvasUnlockDate = unlockDate?.LocalDateTime;
         AllowedAttempts = allowedAttempts;
     }
 
