@@ -46,23 +46,23 @@ public sealed class ErrorDisplay : ModalContent
 {
     private ErrorDisplay() { }
 
-    public static ErrorDisplay Create(
-        Error error)
-    {
-        ErrorDisplay modal = new()
-        {
-            Title = "Error", 
-            Content = $@"<div>{error.Code}</div><span>{error.Message}</span>"
-        };
+    //public static ErrorDisplay Create(
+    //    Error error)
+    //{
+    //    ErrorDisplay modal = new()
+    //    {
+    //        Title = "Error", 
+    //        Content = $@"<div>{error.Code}</div><span>{error.Message}</span>"
+    //    };
 
-        modal.AddButton("Ok", "btn-warning", string.Empty);
+    //    modal.AddButton("Ok", "btn-warning", string.Empty);
 
-        return modal;
-    }
+    //    return modal;
+    //}
 
     public static ErrorDisplay Create(
         Error error,
-        string link)
+        string? link = null)
     {
         ErrorDisplay modal = new()
         {
@@ -70,7 +70,7 @@ public sealed class ErrorDisplay : ModalContent
             Content = $@"<div>{error.Code}</div><span>{error.Message}</span>"
         };
 
-        modal.AddButton("Ok", "btn-warning", link);
+        modal.AddButton("Ok", "btn-warning", link ?? string.Empty);
 
         return modal;
     }

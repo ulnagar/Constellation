@@ -1,0 +1,44 @@
+﻿@page "{id?}"
+@model Constellation.Presentation.Staff.Areas.Staff.Pages.Subject.Assessments.Provisions.UpsertModel
+@{
+}
+
+<h2>Assessment Provision</h2>
+
+<div class="page-menu">
+    <a asp-page="/Subject/Assessments/Provisions/Index" asp-area="Staff" class="btn btn-danger btn-pull-right">Go Back</a>
+</div>
+
+<hr />
+
+<form method="post">
+    <div class="form-horizontal">
+        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+
+        <div class="mb-3 row">
+            <label asp-for="Code" class="col-md-2"></label>
+            <div class="col-md-5">
+                <input asp-for="Code" class="form-control" />
+                <span asp-validation-for="Code" class="text-danger"></span>
+            </div>
+        </div>
+        
+        <div class="mb-3 row">
+            <label asp-for="Description" class="col-md-2"></label>
+            <div class="col-md-5">
+                <input asp-for="Description" class="form-control" />
+                <span asp-validation-for="Description" class="text-danger"></span>
+            </div>
+        </div>
+        
+        <div class="mb-3">
+            <div class="col-md-3 d-grid">
+                <input type="submit" value="Save" class="btn btn-primary btn-block btn-lg" />
+            </div>
+        </div>
+    </div>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

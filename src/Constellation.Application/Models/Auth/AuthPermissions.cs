@@ -31,6 +31,13 @@ public sealed class AuthPermission : StringEnumeration<AuthPermission>
     public const string Messaging_Email_SendFromAll_Value = "Messaging.Email.SendFromAll";
     public const string Messaging_EmergencyConsole_Edit_Value = "Admin.EmergencyConsole.Edit";
 
+    public const string Subjects_AssessmentsProvisions_View_Value = "Subjects.AssessmentProvisions.View";
+    public const string Subjects_AssessmentsProvisions_Edit_Value = "Subjects.AssessmentProvisions.Edit";
+    public const string Subjects_AssessmentsProvisions_Assign_Value = "Subjects.AssessmentProvisions.Assign";
+    public const string Subjects_Assessments_View_Value = "Subjects.Assessments.View";
+    public const string Subjects_Assessments_Edit_Value = "Subjects.Assessments.Edit";
+    public const string Subjects_Assessments_Submit_Value = "Subjects.Assessments.Submit";
+    public const string Subjects_Assessments_Download_Value = "Subjects.Assessments.Download";
     public const string Subjects_Courses_View_Value = "Subjects.Courses.View";
     public const string Subjects_Courses_Edit_Value = "Subjects.Courses.Edit";
     public const string Subjects_Offerings_View_Value = "Subjects.Offerings.View";
@@ -134,7 +141,14 @@ public sealed class AuthPermission : StringEnumeration<AuthPermission>
     public static readonly AuthPermission Messaging_Email_Send = new(Messaging_Email_Send_Value, "Messaging: Email: Send");
     public static readonly AuthPermission Messaging_Email_SendFromAll = new(Messaging_Email_SendFromAll_Value, "Messaging: Email: Send From All");
     public static readonly AuthPermission Messaging_EmergencyConsole_Edit = new(Messaging_EmergencyConsole_Edit_Value, "Admin: Emergency Console: Edit");
-    
+
+    public static readonly AuthPermission Subjects_AssessmentsProvisions_View = new(Subjects_AssessmentsProvisions_View_Value, "Subjects: Assessment Provisions: View");
+    public static readonly AuthPermission Subjects_AssessmentsProvisions_Edit = new(Subjects_AssessmentsProvisions_Edit_Value, "Subjects: Assessment Provisions: Edit");
+    public static readonly AuthPermission Subjects_AssessmentsProvisions_Assign = new(Subjects_AssessmentsProvisions_Assign_Value, "Subjects: Assessment Provisions: Assign");
+    public static readonly AuthPermission Subjects_Assessments_View = new(Subjects_Assessments_View_Value, "Subjects: Assessments: View");
+    public static readonly AuthPermission Subjects_Assessments_Edit = new(Subjects_Assessments_Edit_Value, "Subjects: Assessments: Edit");
+    public static readonly AuthPermission Subjects_Assessments_Submit = new(Subjects_Assessments_Submit_Value, "Subjects: Assessments: Submit");
+    public static readonly AuthPermission Subjects_Assessments_Download = new(Subjects_Assessments_Download_Value, "Subjects: Assessments: Download");
     public static readonly AuthPermission Subjects_Courses_View = new(Subjects_Courses_View_Value, "Subjects: Courses: View");
     public static readonly AuthPermission Subjects_Courses_Edit = new(Subjects_Courses_Edit_Value, "Subjects: Courses: Edit");
     public static readonly AuthPermission Subjects_Offerings_View = new(Subjects_Offerings_View_Value, "Subjects: Offerings: View");

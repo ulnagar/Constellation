@@ -1,0 +1,36 @@
+@model Constellation.Presentation.Staff.Areas.Staff.Pages.Shared.Components.AssignStudentProvision.AssignStudentProvisionSelection
+
+<form asp-page-handler="AssignProvision" method="post">
+    <div class="modal fade" tabindex="-1" id="assign-provision-modal">
+        <div class="modal-dialog wide">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Assign Provision</h5>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3 row">
+                        <label asp-for="StudentId" class="col-md-3">Student</label>
+                        <div class="col-md-9">
+                            <select asp-for="StudentId" asp-items="@Model.StudentList" class="combo">
+                                <option value=""> -- Select Student -- </option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="mb-3 row">
+                        <label asp-for="ProvisionId" class="col-md-3">Provision</label>
+                        <div class="col-md-9">
+                            <select asp-for="ProvisionId" asp-items="@Model.ProvisionList" class="combo">
+                                <option value=""> -- Select Provision -- </option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-primary">Assign Provision</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>

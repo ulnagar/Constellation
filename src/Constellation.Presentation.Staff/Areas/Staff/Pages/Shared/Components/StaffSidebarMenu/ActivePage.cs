@@ -63,6 +63,8 @@ internal static class ActivePage
     public const string ShortTerm_Casuals_Index = "ShortTerm.Casuals.Index";
     public const string ShortTerm_Covers_Index = "ShortTerm.Covers.Index";
 
+    public const string Subject_Assessments_Provisions = "Subject.Assessments.Provisions";
+    public const string Subject_Assessments_Assessments = "Subject.Assessments.Assessments";
     public const string Subject_Courses_Courses = "Subject.Courses.Courses";
     public const string Subject_Offerings_Offerings = "Subject.Offerings.Offerings";
     public const string Subject_Assignments_Assignments = "Subject.Assignments.Assignments";

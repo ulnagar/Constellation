@@ -4,14 +4,14 @@ using System;
 
 public interface IValueObject<TSelf, TValue>
     where TSelf : ValueObject<TSelf, TValue>
-    where TValue : IEquatable<TValue>
+    where TValue : IEquatable<TValue>, IComparable<TValue>
 {
     static abstract TSelf FromValue(TValue value);
 }
 
-public abstract class ValueObject<TSelf, TValue> : IEquatable<TSelf>
+public abstract class ValueObject<TSelf, TValue> : IEquatable<TSelf>, IComparable<TSelf>
     where TSelf : ValueObject<TSelf, TValue>
-    where TValue : IEquatable<TValue>
+    where TValue : IEquatable<TValue>, IComparable<TValue>
 {
     public TValue Value { get; protected init; }
 
@@ -22,6 +22,26 @@ public abstract class ValueObject<TSelf, TValue> : IEquatable<TSelf>
         if (ReferenceEquals(this, other)) return true;
         return Value.Equals(other.Value);
     }
+
+    public int CompareTo(TSelf? other)
+    {
+        if (other is null)
+            return 1;
+
+        return Value.CompareTo(other.Value);
+    }
+
+    public static bool operator <(ValueObject<TSelf, TValue>? left, ValueObject<TSelf, TValue>? right)
+        => left is null ? right is not null : left.CompareTo(right as TSelf) < 0;
+
+    public static bool operator >(ValueObject<TSelf, TValue>? left, ValueObject<TSelf, TValue>? right)
+        => left is not null && left.CompareTo(right as TSelf) > 0;
+
+    public static bool operator <=(ValueObject<TSelf, TValue>? left, ValueObject<TSelf, TValue>? right)
+        => left is null || left.CompareTo(right as TSelf) <= 0;
+
+    public static bool operator >=(ValueObject<TSelf, TValue>? left, ValueObject<TSelf, TValue>? right)
+        => left is null ? right is null : left.CompareTo(right as TSelf) >= 0;
 
     public override bool Equals(object? obj) => obj is TSelf other && Equals(other);
 

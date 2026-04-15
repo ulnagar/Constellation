@@ -49,18 +49,30 @@
         </div>
 
         <div class="card">
-            <div class="card-header" id="assignmentsHeading">
-                <h4 class="sidebar-heading d-flex justify-content-between p-3 mb-1 text-muted" data-toggle="collapse" data-target="#assignments" role="button">
-                    Assignments
+            <div class="card-header" id="assessmentsHeading">
+                <h4 class="sidebar-heading d-flex justify-content-between p-3 mb-1 text-muted" data-toggle="collapse" data-target="#assessments" role="button">
+                    Assessments
                 </h4>
             </div>
 
-            <div id="assignments" class="collapse @(module == "Assignments" ? "show" : "")" data-parent="#accordion">
+            <div id="assessments" class="collapse @(module is "Assessments" or "Assignments" ? "show" : "")" data-parent="#accordion">
                 <div class="card-body">
                     <ul class="nav flex-column">
                         <li class="nav-item">
+                            <a class="nav-link @(Model == ActivePage.Subject_Assessments_Assessments ? "active" : "")" asp-page="/Subject/Assessments/Index" asp-area="Staff">
+                                Assessments
+                            </a>
+                        </li>
+
+                        <li class="nav-item">
+                            <a class="nav-link @(Model == ActivePage.Subject_Assessments_Provisions ? "active" : "")" asp-page="/Subject/Assessments/Provisions/Index" asp-area="Staff">
+                                Provisions
+                            </a>
+                        </li>
+                        
+                        <li class="nav-item">
                             <a class="nav-link @(Model == ActivePage.Subject_Assignments_Assignments ? "active" : "")" asp-page="/Subject/Assignments/Index" asp-area="Staff">
-                                List
+                                Archive
                             </a>
                         </li>
                     </ul>

@@ -23,4 +23,12 @@ public sealed class Provision
     public ProvisionId Id { get; init; }
     public ProvisionCode Code { get; private set; }
     public string Description { get; private set; }
+
+    public void Update(
+        ProvisionCode code,
+        string description)
+    {
+        Code = code;
+        Description = description;
+    }
 }

@@ -29,7 +29,7 @@ internal sealed class SendUploadReceipt
 
     public async Task Handle(AssessmentSubmissionReceivedDomainEvent notification, CancellationToken cancellationToken)
     {
-        Assessment? assessment = await _assessmentRepository.GetById(notification.AssessmentId, cancellationToken);
+        Assessment? assessment = await _assessmentRepository.GetAssessmentById(notification.AssessmentId, cancellationToken);
 
         if (assessment is null)
         {

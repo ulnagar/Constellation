@@ -1,0 +1,67 @@
+﻿@page
+@model Constellation.Presentation.Staff.Areas.Staff.Pages.Subject.Assessments.Provisions.IndexModel
+
+@inject IAuthorizationService AuthorizationService
+@{
+    var canEditTest = await AuthorizationService.AuthorizeAsync(User, AuthPermission.Subjects_AssessmentsProvisions_Edit_Value);
+}
+
+<h2>Assessment Provisions List</h2>
+
+<div class="page-menu">
+    <a asp-page="/Subject/Assessments/Provisions/ByStudent" asp-area="Staff" class="btn btn-warning">By Student</a>
+
+    @if (canEditTest.Succeeded)
+    {
+        <a asp-page="/Subject/Assessments/Provisions/Upsert" asp-area="Staff" class="btn btn-info">Create New</a>
+    }
+</div>
+
+<hr />
+
+<table class="table table-striped table-hover">
+    <thead>
+        <tr>
+            <th>Code</th>
+            <th>Description</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model.Provisions)
+        {
+            <tr>
+                <td>@item.Code</td>
+                <td>@item.Description</td>
+                <td>
+                    <div class="btn-group" role="group">
+                        <button type="button" class="btn btn-warning dropdown-toggle btn-sm btn-show-hover" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> Actions</button>
+                        <div class="dropdown-menu">
+                            @if (canEditTest.Succeeded)
+                            {
+                                <a asp-page="/Subject/Assessments/Provisions/Upsert" asp-area="Staff" asp-route-id="@item.Id" class="dropdown-item">Update</a>
+                            }
+                            <a asp-page-handler="Delete" asp-route-Id="@item.Id" class="dropdown-item">Delete</a>
+                        </div>
+                    </div>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@section Scripts
+{
+    <script>
+        $(document).ready(function (){
+            $('table').DataTable({
+                "order": [
+                    [0, 'asc']
+                ],
+                columnDefs: [
+                    { target: 2, searchable: false, sortable: false }
+                ]
+            });
+        })
+    </script>
+}
