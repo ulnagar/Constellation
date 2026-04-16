@@ -1,4 +1,4 @@
-namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Subject.Archive;
+namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Subject.Assessments.Archive;
 
 using Constellation.Application.Common.PresentationModels;
 using Constellation.Application.Domains.Assessments.Archive.Queries.GetAllAssignmentSubmissionFiles;
