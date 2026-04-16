@@ -24,7 +24,6 @@ using Core.Shared;
 using Core.ValueObjects;
 using Domains.Attendance.Absences.Commands.ConvertAbsenceToAbsenceEntry;
 using Domains.Attendance.Absences.Commands.ConvertResponseToAbsenceExplanation;
-using Domains.Compliance.Assessments.Models;
 using DTOs;
 using DTOs.EmailRequests;
 using System;
@@ -59,8 +58,6 @@ public interface IEmailService
 
     // Assessment Provisions Emails
     Task<Result> SendAssessmentSubmissionReceipt(Assessment assessment, AssessmentStudent student, AssessmentSubmission submission, CancellationToken cancellationToken = default);
-    Task<Result> SendAssessmentProvisionEmailToSchools(List<EmailRecipient> recipients, List<EmailRecipient> ccRecipients, Name contact, List<StudentProvisions> students, CancellationToken cancellationToken = default);
-    Task<Result> SendAssessmentProvisionEmailToFamilies(List<EmailRecipient> recipients, List<EmailRecipient> ccRecipients, StudentProvisions provisions, CancellationToken cancellationToken = default);
 
     // Assignment Emails
     Task<Result> SendAssignmentUploadReceipt(CanvasAssignment assignment, CanvasAssignmentSubmission submission, Course course, Student student, SchoolContact contact, CancellationToken cancellationToken = default);

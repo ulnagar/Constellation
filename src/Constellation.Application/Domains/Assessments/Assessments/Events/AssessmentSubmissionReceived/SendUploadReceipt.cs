@@ -1,4 +1,4 @@
-﻿namespace Constellation.Application.Domains.Assessments.Events.AssessmentSubmissionReceived;
+﻿namespace Constellation.Application.Domains.Assessments.Assessments.Events.AssessmentSubmissionReceived;
 
 using Constellation.Application.Abstractions.Messaging;
 using Core.Models.Assessments;

@@ -1,5 +1,58 @@
 ﻿@page
 @model Constellation.Presentation.Staff.Areas.Staff.Pages.Subject.Assessments.IndexModel
+
+@inject IAuthorizationService AuthorizationService
 @{
+    var canEditTest = await AuthorizationService.AuthorizeAsync(User, AuthPermission.Subjects_Assessments_Edit_Value);
 }
 
+<h2>Assessments</h2>
+
+<div class="page-menu">
+    @if (canEditTest.Succeeded)
+    {
+        <a asp-page="/Subject/Assessments/Upsert" asp-area="Staff" class="btn btn-info">Create New</a>
+    }
+</div>
+
+<hr />
+
+<table class="table table-striped table-hover">
+    <thead>
+    <tr>
+        <th>Course</th>
+        <th>Name</th>
+        <th>Due Date</th>
+        <th></th>
+    </tr>
+    </thead>
+    <tbody>
+        @foreach (var assessment in Model.Assessments)
+        {
+            <tr>
+                <td>@assessment.Course</td>
+                <td>@assessment.Name</td>
+                <td data-order="@assessment.DueDate.ToString("yyyy-MM-dd hh:mm")">@assessment.DueDate.LocalDateTime.ToShortDateString()</td>
+                <td>
+                    <a asp-page="/Subject/Assessments/Details" asp-route-Id="@assessment.Id" class="btn btn-sm btn-info btn-show-hover showLoader">More Info...</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@section Scripts
+{
+    <script>
+        $(document).ready(function (){
+            $('table').DataTable({
+                "order": [
+                    [2, 'desc']
+                ],
+                columnDefs: [
+                    { target: 3, searchable: false, sortable: false }
+                ]
+            });
+        })
+    </script>
+}

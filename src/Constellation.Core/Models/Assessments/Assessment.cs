@@ -22,10 +22,9 @@ public sealed class Assessment : AggregateRoot
     /// </summary>
     private Assessment() { }
 
-    private Assessment(
+    public Assessment(
         string name,
         Course course,
-        Grade grade,
         DateTimeOffset dueDate,
         DateTimeOffset availableFrom,
         DateTimeOffset availableTo)
@@ -35,7 +34,7 @@ public sealed class Assessment : AggregateRoot
         Name = name;
         CourseId = course.Id;
         Course = course.ToString();
-        Grade = grade;
+        Grade = course.Grade;
 
         DueDate = dueDate;
         AvailableFrom = availableFrom;
@@ -65,6 +64,23 @@ public sealed class Assessment : AggregateRoot
     {
         CanvasId = canvasId;
         AllowedAttempts = allowedAttempts;
+    }
+
+    public void Update(
+        string name,
+        Course course,
+        DateTimeOffset dueDate,
+        DateTimeOffset availableFrom,
+        DateTimeOffset availableTo)
+    {
+        Name = name;
+        CourseId = course.Id;
+        Course = course.ToString();
+        Grade = course.Grade;
+
+        DueDate = dueDate;
+        AvailableFrom = availableFrom;
+        AvailableTo = availableTo;
     }
 
     public void AddDownload(AssessmentDownload download) => 
