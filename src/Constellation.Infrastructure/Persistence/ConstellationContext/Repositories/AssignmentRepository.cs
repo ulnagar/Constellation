@@ -1,10 +1,10 @@
 ﻿namespace Constellation.Infrastructure.Persistence.ConstellationContext.Repositories;
 
-using Constellation.Core.Models.Assignments;
-using Constellation.Core.Models.Assignments.Identifiers;
-using Constellation.Core.Models.Assignments.Repositories;
-using Constellation.Core.Models.Subjects.Identifiers;
 using Core.Abstractions.Clock;
+using Core.Models.Assessments.Archive;
+using Core.Models.Assessments.Archive.Identifiers;
+using Core.Models.Assessments.Archive.Repositories;
+using Core.Models.Subjects.Identifiers;
 using Microsoft.EntityFrameworkCore;
 
 internal class AssignmentRepository : IAssignmentRepository
@@ -36,15 +36,12 @@ internal class AssignmentRepository : IAssignmentRepository
             .Where(assignment => assignment.CourseId == courseId)
             .ToListAsync(cancellationToken);
 
-    public async Task<CanvasAssignment> GetById(
+    public async Task<CanvasAssignment?> GetById(
         AssignmentId id,
         CancellationToken cancellationToken = default) =>
         await _context
             .Set<CanvasAssignment>()
             .FirstOrDefaultAsync(assignment => assignment.Id == id, cancellationToken);
-
-    public void Insert(CanvasAssignment entity) =>
-        _context.Set<CanvasAssignment>().Add(entity);
 
     public async Task<bool> IsValidAssignmentId(
         AssignmentId id,

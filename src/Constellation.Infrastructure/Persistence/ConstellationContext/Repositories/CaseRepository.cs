@@ -9,8 +9,6 @@ using Core.Models.WorkFlow.Enums;
 using Core.Models.WorkFlow.Identifiers;
 using Core.Models.WorkFlow.Repositories;
 using Microsoft.EntityFrameworkCore;
-using System;
-using static Constellation.Application.Domains.Assignments.Queries.GetCurrentAssignmentsListing.GetCurrentAssignmentsListingQuery;
 
 internal sealed class CaseRepository : ICaseRepository
 {
@@ -22,7 +20,7 @@ internal sealed class CaseRepository : ICaseRepository
         _context = context;
     }
 
-    public async Task<Case> GetById(
+    public async Task<Case?> GetById(
         CaseId caseId,
         CancellationToken cancellationToken = default) =>
         await _context

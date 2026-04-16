@@ -2,17 +2,15 @@
 
 using Application.Interfaces.Jobs;
 using Application.Interfaces.Repositories;
-using Constellation.Core.Models.Assignments;
-using Constellation.Core.Models.Assignments.Repositories;
 using Constellation.Core.Models.Offerings;
 using Constellation.Core.Models.Offerings.Errors;
 using Constellation.Core.Models.Offerings.Repositories;
 using Constellation.Core.Models.Subjects.Errors;
 using Constellation.Core.Shared;
-using Core.Models.Assignments.Services;
+using Core.Models.Assessments.Archive;
+using Core.Models.Assessments.Archive.Repositories;
 using Core.Models.Canvas.Models;
 using Core.Models.Offerings.Enums;
-using Core.Models.Offerings.ValueObjects;
 using System;
 using System.Threading.Tasks;
 
@@ -20,20 +18,17 @@ internal sealed class AssignmentSubmissionJob : IAssignmentSubmissionJob
 {
     private readonly IAssignmentRepository _assignmentRepository;
     private readonly IOfferingRepository _courseOfferingRepository;
-    private readonly IAssignmentService _assignmentService;
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger _logger;
 
     public AssignmentSubmissionJob(
         IAssignmentRepository assignmentRepository,
         IOfferingRepository courseOfferingRepository,
-        IAssignmentService assignmentService,
         IUnitOfWork unitOfWork,
         ILogger logger)
     {
         _assignmentRepository = assignmentRepository;
         _courseOfferingRepository = courseOfferingRepository;
-        _assignmentService = assignmentService;
         _unitOfWork = unitOfWork;
         _logger = logger;
     }
@@ -83,18 +78,18 @@ internal sealed class AssignmentSubmissionJob : IAssignmentSubmissionJob
 
             foreach (var submission in validSubmissions)
             {
-                Result result = await _assignmentService.UploadSubmissionToCanvas(assignment, submission, resources, cancellationToken);
+                //Result result = await _assignmentService.UploadSubmissionToCanvas(assignment, submission, resources, cancellationToken);
 
-                if (result.IsFailure)
-                {
-                    _logger
-                        .ForContext(nameof(Error), result.Error, true)
-                        .Warning("Failed to upload Assignment Submission to Canvas");
+                //if (result.IsFailure)
+                //{
+                //    _logger
+                //        .ForContext(nameof(Error), result.Error, true)
+                //        .Warning("Failed to upload Assignment Submission to Canvas");
 
-                    continue;
-                }
+                //    continue;
+                //}
 
-                assignment.MarkSubmissionUploaded(submission.Id);
+                //assignment.MarkSubmissionUploaded(submission.Id);
             }
         }
 

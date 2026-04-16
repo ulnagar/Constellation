@@ -1,6 +1,6 @@
 namespace Constellation.Presentation.Schools.Areas.Schools.Pages.ExamSubmission;
 
-using Application.Domains.Assignments.Queries.GetAssignmentsByCourse;
+using Application.Domains.Assessments.Archive.Queries.GetAssignmentsByCourse;
 using Application.Models.Auth;
 using Constellation.Application.Common.PresentationModels;
 using Constellation.Application.Domains.Courses.Queries.GetCoursesForStudent;
@@ -10,7 +10,7 @@ using Constellation.Core.Shared;
 using Constellation.Presentation.Shared.Helpers.Attributes;
 using Constellation.Presentation.Shared.Helpers.Logging;
 using Core.Abstractions.Services;
-using Core.Models.Assignments.Identifiers;
+using Core.Models.Assessments.Archive.Identifiers;
 using Core.Models.Students.Identifiers;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;

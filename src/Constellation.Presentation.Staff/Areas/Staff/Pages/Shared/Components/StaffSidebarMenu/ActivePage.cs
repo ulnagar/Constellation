@@ -65,9 +65,9 @@ internal static class ActivePage
 
     public const string Subject_Assessments_Provisions = "Subject.Assessments.Provisions";
     public const string Subject_Assessments_Assessments = "Subject.Assessments.Assessments";
+    public const string Subject_Assessments_Archive = "Subject.Assessments.Archive";
     public const string Subject_Courses_Courses = "Subject.Courses.Courses";
     public const string Subject_Offerings_Offerings = "Subject.Offerings.Offerings";
-    public const string Subject_Assignments_Assignments = "Subject.Assignments.Assignments";
     public const string Subject_SciencePracs_Lessons = "Subject.SciencePracs.Lessons";
     public const string Subject_SciencePracs_Teachers = "Subject.SciencePracs.Teachers";
     public const string Subject_SciencePracs_Reports = "Subject.SciencePracs.Reports";

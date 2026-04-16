@@ -1,7 +1,6 @@
 namespace Constellation.Presentation.Schools.Areas.Schools.Pages.ExamSubmission;
 
-using Application.Domains.Assignments.Commands.UploadAssignmentSubmission;
-using Application.Domains.Assignments.Queries.GetAssignmentsByCourse;
+using Application.Domains.Assessments.Archive.Queries.GetAssignmentsByCourse;
 using Application.DTOs;
 using Application.Helpers;
 using Application.Models.Auth;
@@ -14,7 +13,7 @@ using Constellation.Core.Shared;
 using Constellation.Presentation.Shared.Helpers.Attributes;
 using Constellation.Presentation.Shared.Helpers.Logging;
 using Core.Abstractions.Services;
-using Core.Models.Assignments.Identifiers;
+using Core.Models.Assessments.Archive.Identifiers;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -110,26 +109,26 @@ public class Step4Model : BasePageModel
             FileType = UploadFile.ContentType
         };
          
-        UploadAssignmentSubmissionCommand command = new(
-            AssignmentId,
-            StudentId,
-            file)
-        {
-            SubmittedBy = _currentUserService.UserName
-        };
+        //UploadAssignmentSubmissionCommand command = new(
+        //    AssignmentId,
+        //    StudentId,
+        //    file)
+        //{
+        //    SubmittedBy = _currentUserService.UserName
+        //};
 
-        _logger.Information("Requested to upload assignment submission by user {user} with file {file}", _currentUserService.UserName, file.FileName);
+        //_logger.Information("Requested to upload assignment submission by user {user} with file {file}", _currentUserService.UserName, file.FileName);
         
-        Result request = await _mediator.Send(command);
+        //Result request = await _mediator.Send(command);
 
-        if (request.IsFailure)
-        {
-            ModalContent = ErrorDisplay.Create(
-                request.Error,
-                _linkGenerator.GetPathByPage("/ExamSubmission/Step1", values: new { area = "Schools" }));
+        //if (request.IsFailure)
+        //{
+        //    ModalContent = ErrorDisplay.Create(
+        //        request.Error,
+        //        _linkGenerator.GetPathByPage("/ExamSubmission/Step1", values: new { area = "Schools" }));
 
-            return Page();
-        }
+        //    return Page();
+        //}
 
         ModalContent = FeedbackDisplay.Create(
             "Upload Successful",

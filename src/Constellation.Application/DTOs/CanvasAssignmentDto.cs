@@ -1,9 +1,10 @@
-﻿using Constellation.Core.Models.Assignments;
-using Constellation.Core.Models.Subjects.Identifiers;
+﻿using Constellation.Core.Models.Subjects.Identifiers;
 using System;
 
 namespace Constellation.Application.DTOs
 {
+    using Core.Models.Assessments.Archive;
+
     public class CanvasAssignmentDto
     {
         public Guid Id { get; set; }

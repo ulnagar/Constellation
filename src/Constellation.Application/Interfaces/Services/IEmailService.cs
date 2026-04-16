@@ -1,7 +1,6 @@
 ﻿namespace Constellation.Application.Interfaces.Services;
 
 using Constellation.Core.Models;
-using Constellation.Core.Models.Assignments.Identifiers;
 using Constellation.Core.Models.Attachments.DTOs;
 using Constellation.Core.Models.Attendance;
 using Constellation.Core.Models.Awards;
@@ -10,7 +9,8 @@ using Constellation.Core.Models.Offerings;
 using Constellation.Core.Models.Students;
 using Constellation.Core.Models.WorkFlow.Identifiers;
 using Core.Models.Assessments;
-using Core.Models.Assignments;
+using Core.Models.Assessments.Archive;
+using Core.Models.Assessments.Archive.Identifiers;
 using Core.Models.Messaging.Drafts;
 using Core.Models.Messaging.Email;
 using Core.Models.Messaging.Sms;

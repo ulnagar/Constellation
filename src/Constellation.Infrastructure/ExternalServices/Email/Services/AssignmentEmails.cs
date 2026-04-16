@@ -1,8 +1,8 @@
 ﻿namespace Constellation.Infrastructure.ExternalServices.Email.Services;
 
 using Constellation.Application.Interfaces.Services;
-using Core.Models.Assignments;
-using Core.Models.Assignments.Identifiers;
+using Core.Models.Assessments.Archive;
+using Core.Models.Assessments.Archive.Identifiers;
 using Core.Models.SchoolContacts;
 using Core.Models.Students;
 using Core.Models.Subjects;

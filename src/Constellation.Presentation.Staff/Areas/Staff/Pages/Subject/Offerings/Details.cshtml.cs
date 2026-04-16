@@ -1,8 +1,8 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Subject.Offerings;
 
 using Application.Common.PresentationModels;
-using Application.Domains.Assignments.Models;
-using Application.Domains.Assignments.Queries.GetRubricAssignmentsFromCourse;
+using Application.Domains.Assessments.Archive.Models;
+using Application.Domains.Assessments.Archive.Queries.GetRubricAssignmentsFromCourse;
 using Application.Domains.Enrolments.Commands.EnrolStudentInOffering;
 using Application.Domains.Enrolments.Commands.UnenrolStudentFromOffering;
 using Application.Domains.LinkedSystems.Canvas.Commands.ExportCanvasAssignmentComments;
@@ -17,7 +17,6 @@ using Constellation.Application.Domains.Offerings.Commands.RemoveTeacherFromOffe
 using Constellation.Application.Domains.Offerings.Queries.GetOfferingDetails;
 using Constellation.Application.Models.Auth;
 using Constellation.Core.Models.Offerings.Identifiers;
-using Constellation.Core.Models.Offerings.ValueObjects;
 using Constellation.Core.Shared;
 using Constellation.Presentation.Shared.Helpers.Attributes;
 using Constellation.Presentation.Staff.Areas;
