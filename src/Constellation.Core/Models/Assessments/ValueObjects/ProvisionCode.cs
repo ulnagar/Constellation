@@ -20,7 +20,7 @@ public sealed class ProvisionCode : ValueObject<ProvisionCode, string>, IValueOb
         if (string.IsNullOrWhiteSpace(code))
             return Result.Failure<ProvisionCode>(ProvisionCodeErrors.EmptyValue);
 
-        return new ProvisionCode();
+        return new ProvisionCode(code);
     }
 
     public override string ToString() => Value;

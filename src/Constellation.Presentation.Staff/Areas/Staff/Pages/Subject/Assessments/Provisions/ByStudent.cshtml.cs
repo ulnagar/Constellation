@@ -2,11 +2,13 @@
 
 using Application.Common.PresentationModels;
 using Application.Domains.Assessments.Provisions.Commands.AssignProvisionToStudent;
+using Application.Domains.Assessments.Provisions.Commands.ImportStudentProvisions;
 using Application.Domains.Assessments.Provisions.Commands.RemoveStudentProvision;
 using Application.Domains.Assessments.Provisions.Models;
 using Application.Domains.Assessments.Provisions.Queries.GetCurrentYearStudentProvisions;
 using Application.Domains.Assessments.Provisions.Queries.GetStudentProvisionById;
 using Application.Domains.Assessments.Provisions.Queries.GetStudentProvisions;
+using Constellation.Application.Helpers;
 using Constellation.Application.Models.Auth;
 using Constellation.Presentation.Shared.Helpers.Attributes;
 using Core.Abstractions.Services;
@@ -21,7 +23,9 @@ using Microsoft.AspNetCore.Routing;
 using Presentation.Shared.Helpers.Logging;
 using Serilog;
 using Shared.Components.AssignStudentProvision;
+using Shared.Components.BulkImportStudentProvisions;
 using Shared.PartialViews.RemoveStudentProvisionConfirmationModal;
+using System.Text;
 
 [HasPermission(AuthPermission.Subjects_AssessmentsProvisions_Assign_Value)]
 public class ByStudentModel : BasePageModel
@@ -149,6 +153,81 @@ public class ByStudentModel : BasePageModel
         }
 
         await PreparePage();
+    }
+
+    public async Task<IActionResult> OnPostImportProvisions(BulkImportStudentProvisionsSelection viewModel)
+    {
+        if (viewModel.UploadFile.Length == 0)
+        {
+            Error error = new("Page Upload", "You must select a valid file for upload");
+
+            ModalContent = ErrorDisplay.Create(error, null);
+
+            return Page();
+        }
+
+        try
+        {
+            if (viewModel.UploadFile.ContentType != FileContentTypes.ExcelModernFile)
+            {
+                Error error = new("Page Upload", "Only XLSX files are accepted");
+
+                ModalContent = ErrorDisplay.Create(error, null);
+
+                return Page();
+            }
+
+            await using MemoryStream target = new();
+            await viewModel.UploadFile.CopyToAsync(target);
+
+            Result<List<string>> result = await _mediator.Send(new ImportStudentProvisionsCommand(target));
+
+            if (result.IsFailure)
+            {
+                _logger
+                    .ForContext(nameof(Error), result.Error, true)
+                    .Warning("Failed to upload Assessment Provisions by user {User}", _currentUserService.UserName);
+
+                ModalContent = ErrorDisplay.Create(
+                    result.Error,
+                    _linkGenerator.GetPathByPage("/Subject/Assessments/Provisions/ByStudent", values: new { area = "Staff" }));
+
+                return Page();
+            }
+
+            if (result.Value.Count > 0)
+            {
+                StringBuilder content = new();
+                content.Append("The following errors occurred while importing the Student Provisions:");
+                content.Append("<ul>");
+                foreach (var item in result.Value)
+                    content.Append($"<li>{item}</li>");
+                content.Append("</ul>");
+
+                ModalContent = FeedbackDisplay.Create(
+                    "Import Errors",
+                    content.ToString(),
+                    "Ok",
+                    "btn-secondary",
+                    _linkGenerator.GetPathByPage("/Subject/Assessments/Provisions/ByStudent", values: new { area = "Staff" }));
+
+                return Page();
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger
+                .ForContext(nameof(Exception), ex, true)
+                .Warning("Failed to upload External Reports by user {User}", _currentUserService.UserName);
+
+            ModalContent = ExceptionDisplay.Create(
+                ex,
+                _linkGenerator.GetPathByPage("/Subject/Assessments/Provisions/ByStudent", values: new { area = "Staff" }));
+
+            return Page();
+        }
+
+        return RedirectToPage();
     }
 
     public enum ProvisionFilter

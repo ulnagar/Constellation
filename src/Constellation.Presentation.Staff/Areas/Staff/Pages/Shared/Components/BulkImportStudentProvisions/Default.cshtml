@@ -1,0 +1,35 @@
+@model Constellation.Presentation.Staff.Areas.Staff.Pages.Shared.Components.BulkImportStudentProvisions.BulkImportStudentProvisionsSelection
+
+<form asp-page-handler="ImportProvisions" method="post" enctype="multipart/form-data">
+    <div class="modal fade" tabindex="-1" id="bulk-import-modal">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Bulk Import Student Provisions</h5>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="mb-3 col">
+                            <label class="form-text">The upload file must be an Excel (.xlsx) file. The first column must be the SRN, and then subsequent columns should have a header (row 1) value of the Provision Code. Each row with any content in the Provision Code column will count as enabled.</label>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="mb-3 col">
+                            <label asp-for="UploadFile" class="control-label">Student Provisions</label>
+                            <input asp-for="UploadFile" class="form-control" type="file"/>
+                            <div class="form-text">All found provisions will be entered for the current year only. This process will NOT disable any existing provisions not found in the import file.</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <div class="pull-right">
+                        <button type="submit" class="btn btn-primary">Import</button>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+

@@ -35,6 +35,7 @@
     @if (canAssignTest.Succeeded)
     {
         <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#assign-provision-modal">Assign Provision</button>
+        <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#bulk-import-modal">Bulk Import</button>
     }
 </div>
 
@@ -59,7 +60,7 @@
             foreach (var year in byYear)
             {
                 <tr>
-                    <td data-search="@student.Key.DisplayName @student.Key.FirstName">@student.Key.DisplayName</td>
+                    <td data-order="@student.Key.SortOrder" data-search="@student.Key.DisplayName @student.Key.FirstName">@student.Key.DisplayName</td>
                     <td>@year.Key</td>
                     <td>
                         @foreach (var provision in year.OrderBy(provision => provision.IsDeleted).ThenBy(provision => provision.Code))
@@ -88,6 +89,7 @@
 @if (canAssignTest.Succeeded)
 {
     <vc:assign-student-provision/>
+    <vc:bulk-import-student-provisions />
 }
 
 @section Scripts

@@ -46,20 +46,6 @@ public sealed class ErrorDisplay : ModalContent
 {
     private ErrorDisplay() { }
 
-    //public static ErrorDisplay Create(
-    //    Error error)
-    //{
-    //    ErrorDisplay modal = new()
-    //    {
-    //        Title = "Error", 
-    //        Content = $@"<div>{error.Code}</div><span>{error.Message}</span>"
-    //    };
-
-    //    modal.AddButton("Ok", "btn-warning", string.Empty);
-
-    //    return modal;
-    //}
-
     public static ErrorDisplay Create(
         Error error,
         string? link = null)
@@ -79,24 +65,10 @@ public sealed class ErrorDisplay : ModalContent
 public sealed class ExceptionDisplay : ModalContent
 {
     private ExceptionDisplay() { }
-
-    public static ExceptionDisplay Create(
-        Exception ex)
-    {
-        ExceptionDisplay modal = new()
-        {
-            Title = "Exception", 
-            Content = $@"<div>{ex.GetType()}</div><span>{ex.Message}</span>"
-        };
-
-        modal.AddButton("Ok", "btn-warning", string.Empty);
-
-        return modal;
-    }
-
+    
     public static ExceptionDisplay Create(
         Exception ex,
-        string link)
+        string? link = null)
     {
         ExceptionDisplay modal = new()
         {
@@ -104,7 +76,7 @@ public sealed class ExceptionDisplay : ModalContent
             Content = $@"<div>{ex.GetType()}</div><span>{ex.Message}</span>"
         };
 
-        modal.AddButton("Ok", "btn-warning", link);
+        modal.AddButton("Ok", "btn-warning", link ?? string.Empty);
 
         return modal;
     }
@@ -118,25 +90,8 @@ public sealed class FeedbackDisplay : ModalContent
         string title,
         string content,
         string buttonText,
-        string buttonColour)
-    {
-        FeedbackDisplay modal = new FeedbackDisplay()
-        {
-            Title = title,
-            Content = content
-        };
-
-        modal.AddButton(buttonText, buttonColour, string.Empty);
-
-        return modal;
-    }
-
-    public static FeedbackDisplay Create(
-        string title,
-        string content,
-        string buttonText,
         string buttonColour,
-        string buttonLink)
+        string? buttonLink = null)
     {
         FeedbackDisplay modal = new FeedbackDisplay()
         {
@@ -144,7 +99,7 @@ public sealed class FeedbackDisplay : ModalContent
             Content = content
         };
 
-        modal.AddButton(buttonText, buttonColour, buttonLink);
+        modal.AddButton(buttonText, buttonColour, buttonLink ?? string.Empty);
 
         return modal;
     }

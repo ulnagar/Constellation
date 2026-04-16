@@ -58,7 +58,7 @@ internal sealed class ImportProvisionsFromFileCommandHandler
     {
         List<AssessmentProvision> importData = [];
 
-        ExcelPackage excel = new(request.ImportFile);
+        using ExcelPackage excel = new(request.ImportFile);
         ExcelWorksheet sheet = excel.Workbook.Worksheets[0];
 
         int numRows = sheet.Dimension.Rows;
