@@ -162,7 +162,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                     b.HasIndex("JobName")
                         .IsUnique();
 
-                    b.ToTable("JobActivations");
+                    b.ToTable("JobActivations", (string)null);
                 });
 
             modelBuilder.Entity("Constellation.Core.Models.Absences.Absence", b =>
@@ -2042,7 +2042,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
 
                     b.HasIndex("SerialNumber");
 
-                    b.ToTable("DeviceNotes");
+                    b.ToTable("DeviceNotes", (string)null);
                 });
 
             modelBuilder.Entity("Constellation.Core.Models.Edval.Difference", b =>
@@ -7313,7 +7313,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
 
                             b1.HasKey("SendEmailActionId");
 
-                            b1.ToTable("WorkFlows_Actions");
+                            b1.ToTable("WorkFlows_Actions", (string)null);
 
                             b1.WithOwner()
                                 .HasForeignKey("SendEmailActionId");

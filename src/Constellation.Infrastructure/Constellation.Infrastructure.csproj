@@ -36,6 +36,7 @@
     <PackageReference Include="System.DirectoryServices" />
     <PackageReference Include="System.DirectoryServices.AccountManagement" />
     <PackageReference Include="System.Management.Automation" />
+    <PackageReference Include="System.Security.Cryptography.Xml" />
   </ItemGroup>
 
 </Project>

@@ -19,6 +19,7 @@
 		<PackageReference Include="Microsoft.Extensions.Identity.Core" />
 		<PackageReference Include="Microsoft.Extensions.Identity.Stores" />
 		<PackageReference Include="Serilog.Extensions.Logging" />
+		<PackageReference Include="System.Security.Cryptography.Xml" />
 	</ItemGroup>
 
 	<ItemGroup>
