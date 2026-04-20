@@ -5,8 +5,8 @@ using System.IO;
 
 public class SystemAttendanceData
 {
-    public HtmlDocument YearToDateDayCalculationDocument { get; set; }
-    public HtmlDocument WeekDayCalculationDocument { get; set; }
-    public Stream YearToDateMinuteCalculationDocument { get; set; }
-    public Stream WeekMinuteCalculationDocument { get; set; }
+    public required HtmlDocument YearToDateDayCalculationDocument { get; set; }
+    public required HtmlDocument WeekDayCalculationDocument { get; set; }
+    public required Stream YearToDateMinuteCalculationDocument { get; set; }
+    public required Stream WeekMinuteCalculationDocument { get; set; }
 }

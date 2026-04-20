@@ -59,7 +59,7 @@ internal sealed class UpdateAttendanceDataForPeriodFromSentralCommandHandler
             return Result.Failure(dateResponse.Error);
         }
 
-        SystemAttendanceData data = await _sentralGateway.GetAttendancePercentages(request.Term, request.Week, request.Year, dateResponse.Value.StartDate, dateResponse.Value.EndDate);
+        SystemAttendanceData? data = await _sentralGateway.GetAttendancePercentages(request.Term, request.Week, request.Year, dateResponse.Value.StartDate, dateResponse.Value.EndDate);
 
         if (data is null)
         {
@@ -79,12 +79,12 @@ internal sealed class UpdateAttendanceDataForPeriodFromSentralCommandHandler
 
         foreach (StudentAttendanceData entry in attendanceData)
         {
-            Student student = students.FirstOrDefault(student => student.StudentReferenceNumber == entry.StudentReferenceNumber);
+            Student? student = students.FirstOrDefault(student => student.StudentReferenceNumber == entry.StudentReferenceNumber);
 
             if (student is null)
                 continue;
 
-            SchoolEnrolment enrolment = student.CurrentEnrolment;
+            SchoolEnrolment? enrolment = student.CurrentEnrolment;
 
             if (enrolment is null)
                 continue;

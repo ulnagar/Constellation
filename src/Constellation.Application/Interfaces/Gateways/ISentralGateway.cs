@@ -30,7 +30,7 @@ public interface ISentralGateway
     Task<HtmlDocument?> GetAwardsListing(string sentralStudentId, string calYear, CancellationToken cancellationToken = default);
     Task<HtmlDocument?> GetIncidentDetailsPage(string uri, CancellationToken cancellationToken = default);
     Task<byte[]> GetAwardDocument(string sentralStudentId, string incidentId);
-    Task<SystemAttendanceData> GetAttendancePercentages(SchoolTerm term, SchoolWeek week, string year, DateOnly startDate, DateOnly endDate);
+    Task<SystemAttendanceData?> GetAttendancePercentages(SchoolTerm term, SchoolWeek week, string year, DateOnly startDate, DateOnly endDate);
     Task<Result<(DateOnly StartDate, DateOnly EndDate)>> GetDatesForWeek(string year, SchoolTerm term, SchoolWeek week);
     Task<Result<(SchoolWeek Week, SchoolTerm Term)>> GetWeekForDate(DateOnly date);
     Task<(Stream BasicFile, Stream DetailFile)> GetNAwardReport(CancellationToken cancellationToken = default);

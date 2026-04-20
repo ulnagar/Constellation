@@ -5,13 +5,13 @@ using Application.Interfaces.Gateways;
 using Application.Interfaces.Jobs;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Services;
-using Constellation.Core.Enums;
-using Constellation.Core.Models.Attendance;
-using Constellation.Core.Models.Students;
-using Constellation.Core.Models.Students.Repositories;
-using Constellation.Core.Shared;
 using Core.Abstractions.Clock;
+using Core.Enums;
+using Core.Models.Attendance;
 using Core.Models.Attendance.Repositories;
+using Core.Models.Students;
+using Core.Models.Students.Repositories;
+using Core.Shared;
 using System;
 using System.Threading.Tasks;
 
@@ -87,7 +87,7 @@ internal sealed class SentralAttendancePercentageSyncJob : ISentralAttendancePer
         }
 
         // Grab the file from Sentral
-        SystemAttendanceData request = await _sentralGateway.GetAttendancePercentages(term, week, _dateTime.CurrentYearAsString, startDate, endDate);
+        SystemAttendanceData? request = await _sentralGateway.GetAttendancePercentages(term, week, _dateTime.CurrentYearAsString, startDate, endDate);
 
         if (request is null)
         {
@@ -106,7 +106,7 @@ internal sealed class SentralAttendancePercentageSyncJob : ISentralAttendancePer
 
         foreach (StudentAttendanceData entry in attendanceData)
         {
-            Student student = await _studentRepository.GetBySRN(entry.StudentReferenceNumber, cancellationToken);
+            Student? student = await _studentRepository.GetBySRN(entry.StudentReferenceNumber, cancellationToken);
 
             if (student is null)
                 continue;
