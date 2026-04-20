@@ -4,6 +4,7 @@ using Abstractions.Messaging;
 using Core.Models.Assessments;
 using Core.Models.Assessments.Repositories;
 using Core.Shared;
+using Models;
 using System.Collections.Generic;
 
 internal sealed class GetCurrentAssessmentsQueryHandler

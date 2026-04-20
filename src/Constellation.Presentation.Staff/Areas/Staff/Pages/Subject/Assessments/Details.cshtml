@@ -1,0 +1,189 @@
+@page "{id}"
+@using Constellation.Core.Extensions
+@model Constellation.Presentation.Staff.Areas.Staff.Pages.Subject.Assessments.DetailsModel
+
+@{
+
+}
+
+<h2>Assessment Details</h2>
+
+<div class="page-menu">
+    <a href="javascript:history.go(-1)" class="btn btn-danger btn-pull-right">Go Back</a>
+</div>
+
+<hr />
+
+<dl class="row">
+    <dt class="col-md-2">
+        <label asp-for="Assessment.Name">Name</label>
+    </dt>
+    <dd class="col-md-10">
+        <span>@Model.Assessment.Name</span>
+    </dd>
+
+    <dt class="col-md-2">
+        <label asp-for="Assessment.Course">Course</label>
+    </dt>
+    <dd class="col-md-10">
+        <span>@Model.Assessment.Course</span>
+    </dd>
+
+    <dt class="col-md-2">
+        <label asp-for="Assessment.DueDate">Due Date</label>
+    </dt>
+    <dd class="col-md-10">
+        <span>@Model.Assessment.DueDate.LocalDateTime.ToString("D") @Model.Assessment.DueDate.LocalDateTime.ToString("h:mm tt")</span>
+    </dd>
+
+    <dt class="col-md-2">
+        <label asp-for="Assessment.AvailableFrom">Available From</label>
+    </dt>
+    <dd class="col-md-10">
+        <span>@Model.Assessment.AvailableFrom.LocalDateTime.ToString("D") @Model.Assessment.AvailableFrom.LocalDateTime.ToString("h:mm tt")</span>
+    </dd>
+
+    <dt class="col-md-2">
+        <label asp-for="Assessment.AvailableTo">Available To</label>
+    </dt>
+    <dd class="col-md-10">
+        <span>@Model.Assessment.AvailableTo.LocalDateTime.ToString("D") @Model.Assessment.AvailableTo.LocalDateTime.ToString("h:mm tt")</span>
+    </dd>
+</dl>
+
+<hr />
+
+<div>
+    <nav class="navbar navbar-expand-xl navbar-toggleable-xl navbar-dark bg-success bg-gradient local-nav">
+        <div class="navbar-collapse collapse d-xl-inline-flex justify-content-between">
+            <ul class="nav navbar-nav flex-grow-1 me-auto ms-3 mb-2">
+                <li class="nav-item">
+                    <a class="nav-link active" href="#students" data-bs-toggle="tab" role="tab">Students</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#downloads" data-bs-toggle="tab" role="tab">Downloads</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#submissions" data-bs-toggle="tab" role="tab">Submissions</a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+    
+    <div class="tab-content">
+        <div id="students" class="tab-pane active">
+            <h3>Students</h3>
+
+            <table class="table table-striped table-hover">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Grade</th>
+                        <th>School</th>
+                        <th>Provisions</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var entry in Model.Assessment.Students)
+                    {
+                        <tr>
+                            <td data-order="@entry.StudentName.SortOrder" data-search="@entry.StudentName.DisplayName @entry.StudentName.FirstName">@entry.StudentName</td>
+                            <td data-order="@entry.StudentGrade.AsNumber()">@entry.StudentGrade.AsName()</td>
+                            <td>@entry.SchoolName</td>
+                            <td>
+                                @foreach (var provision in entry.Provisions)
+                                {
+                                    <button class="btn btn-sm btn-primary me-1">@provision</button>
+                                }
+                            </td>
+                            <td></td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    
+        <div id="downloads" class="tab-pane">
+            <h3>Downloads</h3>
+
+            <table class="table table-striped table-hover">
+                <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Available From</th>
+                    <th>Available To</th>
+                    <th>Restricted?</th>
+                    <th></th>
+                </tr>
+                </thead>
+                <tbody>
+                @foreach (var entry in Model.Assessment.Downloads)
+                {
+                    <tr>
+                        <td>@entry.Name</td>
+                        <td data-order="@entry.AvailableFrom.ToString("yyyy-MM-dd")">@entry.AvailableFrom.ToString("d")</td>
+                        <td data-order="@entry.AvailableTo.ToString("yyyy-MM-dd")">@entry.AvailableTo.ToString("d")</td>
+                        <td>
+                            @if (entry.IsRestricted)
+                            {
+                                <span class="badge bg-danger">Yes</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-secondary">No</span>
+                            }
+                        </td>
+                        <td></td>
+                    </tr>
+                }
+                </tbody>
+            </table>
+        </div>
+    
+        <div id="submissions" class="tab-pane">
+            <h3>Submissions</h3>
+
+            <table class="table table-striped table-hover">
+                <thead>
+                    <tr>
+                        <th>Student</th>
+                        <th>Submitted At</th>
+                        <th>Submitted By</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var entry in Model.Assessment.Submissions)
+                    {
+                        var student = Model.Assessment.Students.FirstOrDefault(student => student.StudentId == entry.StudentId);
+
+                        <tr>
+                            <td data-order="@(student?.StudentName.SortOrder ?? "zzzUnknown")">@(student?.StudentName.DisplayName ?? "Unknown Student")</td>
+                            <td data-order="@entry.SubmittedAt.LocalDateTime.ToString("yyyy-MM-dd HH:mm")">@entry.SubmittedAt.LocalDateTime.ToString("g")</td>
+                            <td>@entry.SubmittedBy</td>
+                            <td></td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+      
+@section Scripts
+{
+    <script>
+        $(document).ready(function (){
+            DataTable.types().forEach(type => {
+                DataTable.type(type, 'detect', () => false);
+            });
+
+            $('table').DataTable({
+                "order": [
+                    [0, 'asc']
+                ]
+            });
+        })
+    </script>
+}

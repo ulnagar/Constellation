@@ -10,6 +10,7 @@ using Core.Models.Subjects.Errors;
 using Core.Models.Subjects.Repositories;
 using Core.Shared;
 using Interfaces.Repositories;
+using Models;
 using Serilog;
 
 internal sealed class UpdateAssessmentCommandHandler

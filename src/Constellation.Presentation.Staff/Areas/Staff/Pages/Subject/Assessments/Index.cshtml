@@ -45,6 +45,10 @@
 {
     <script>
         $(document).ready(function (){
+            DataTable.types().forEach(type => {
+                DataTable.type(type, 'detect', () => false);
+            });
+
             $('table').DataTable({
                 "order": [
                     [2, 'desc']

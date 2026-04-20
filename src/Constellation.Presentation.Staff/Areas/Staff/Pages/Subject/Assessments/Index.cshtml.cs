@@ -1,6 +1,7 @@
 ﻿namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Subject.Assessments;
 
 using Application.Common.PresentationModels;
+using Application.Domains.Assessments.Assessments.Models;
 using Application.Domains.Assessments.Assessments.Queries.GetCurrentAssessments;
 using Constellation.Application.Models.Auth;
 using Constellation.Presentation.Shared.Helpers.Attributes;

@@ -6,6 +6,7 @@ using Core.Models.Assessments.Errors;
 using Core.Models.Assessments.Repositories;
 using Core.Shared;
 using GetCurrentAssessments;
+using Models;
 using Serilog;
 
 internal sealed class GetAssessmentByIdQueryHandler

@@ -1,9 +1,8 @@
-﻿namespace Constellation.Application.Domains.Assessments.Assessments.Queries.GetCurrentAssessments;
+﻿namespace Constellation.Application.Domains.Assessments.Assessments.Models;
 
 using Core.Enums;
 using Core.Models.Assessments.Identifiers;
 using Core.Models.Subjects.Identifiers;
-using System;
 
 public sealed record AssessmentResponse(
     AssessmentId Id,
