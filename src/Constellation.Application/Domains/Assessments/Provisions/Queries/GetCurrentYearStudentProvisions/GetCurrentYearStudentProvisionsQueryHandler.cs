@@ -1,8 +1,12 @@
 ﻿namespace Constellation.Application.Domains.Assessments.Provisions.Queries.GetCurrentYearStudentProvisions;
 
 using Abstractions.Messaging;
+using Constellation.Core.Models.Students.Identifiers;
+using Constellation.Core.Models.Students.Repositories;
+using Core.Enums;
 using Core.Models.Assessments;
 using Core.Models.Assessments.Repositories;
+using Core.Models.Students;
 using Core.Shared;
 using Models;
 using Serilog;
@@ -12,13 +16,16 @@ internal sealed class GetCurrentYearStudentProvisionsQueryHandler
 : IQueryHandler<GetCurrentYearStudentProvisionsQuery, List<StudentProvisionResponse>>
 {
     private readonly IAssessmentRepository _assessmentRepository;
+    private readonly IStudentRepository _studentRepository;
     private readonly ILogger _logger;
 
     public GetCurrentYearStudentProvisionsQueryHandler(
         IAssessmentRepository assessmentRepository,
+        IStudentRepository studentRepository,
         ILogger logger)
     {
         _assessmentRepository = assessmentRepository;
+        _studentRepository = studentRepository;
         _logger = logger;
     }
 
@@ -28,13 +35,20 @@ internal sealed class GetCurrentYearStudentProvisionsQueryHandler
 
         List<StudentProvision> studentProvisions = await _assessmentRepository.GetStudentProvisionsFromCurrentYear(cancellationToken);
 
+        List<StudentId> studentIds = studentProvisions.Select(entry => entry.StudentId).ToList();
+
+        List<Student> students = await _studentRepository.GetListFromIds(studentIds, cancellationToken);
+
         foreach (StudentProvision provision in studentProvisions)
         {
+            Student? student = students.FirstOrDefault(entry => entry.Id == provision.StudentId);
+
             response.Add(new(
                 provision.Id,
                 provision.ProvisionCode,
                 provision.ProvisionDescription,
                 provision.Student,
+                student?.CurrentEnrolment?.Grade ?? Grade.SpecialProgram,
                 provision.Year,
                 provision.IsDeleted));
         }

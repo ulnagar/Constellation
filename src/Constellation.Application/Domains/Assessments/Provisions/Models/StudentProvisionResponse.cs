@@ -1,5 +1,6 @@
 ﻿namespace Constellation.Application.Domains.Assessments.Provisions.Models;
 
+using Core.Enums;
 using Core.Models.Assessments.Identifiers;
 using Core.Models.Assessments.ValueObjects;
 using Core.ValueObjects;
@@ -9,5 +10,6 @@ public sealed record StudentProvisionResponse(
     ProvisionCode Code,
     string Description,
     Name Student,
+    Grade Grade,
     int Year,
     bool IsDeleted);

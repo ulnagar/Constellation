@@ -4,8 +4,7 @@ using DomainEvents;
 using Identifiers;
 using Models.Identifiers;
 
-public sealed record AssessmentSubmissionReceivedDomainEvent(
+public sealed record AssessmentCreatedDomainEvent(
     DomainEventId Id,
-    AssessmentId AssessmentId,
-    SubmissionId SubmissionId)
+    AssessmentId AssessmentId)
     : DomainEvent(Id);

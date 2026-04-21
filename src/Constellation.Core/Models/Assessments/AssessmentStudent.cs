@@ -5,10 +5,11 @@ using Core.ValueObjects;
 using Enums;
 using Identifiers;
 using Models.Identifiers;
+using Primitives;
 using Students;
 using Students.Identifiers;
 
-public sealed class AssessmentStudent
+public sealed class AssessmentStudent : IAuditableEntity
 {
     private readonly List<AssessmentProvision> _provisions = [];
     private readonly List<AssessmentSubmission> _submissions = [];
@@ -42,16 +43,41 @@ public sealed class AssessmentStudent
     public SchoolCode SchoolCode { get; private set; }
     public string SchoolName { get; private set; }
 
+    public string? CreatedBy { get; set; }
+    public DateTime CreatedAt { get; set; }
+    public string? ModifiedBy { get; set; }
+    public DateTime ModifiedAt { get; set; }
+    public bool IsDeleted { get; private set; }
+    public string? DeletedBy { get; set; }
+    public DateTime DeletedAt { get; set; }
+
     public IReadOnlyList<AssessmentProvision> Provisions => _provisions.AsReadOnly();
     public IReadOnlyList<AssessmentSubmission> Submissions => _submissions.AsReadOnly();
 
-    public void AddProvision(Provision provision) =>
+    internal void AddProvision(Provision provision)
+    {
+        if (_provisions.Any(entry => entry.ProvisionId == provision.Id))
+            return;
+
         _provisions.Add(new AssessmentProvision(provision));
+    }
 
     internal SubmissionId AddSubmission(AppUser user)
     {
         AssessmentSubmission submission = new(Id, user);
         _submissions.Add(submission);
         return submission.Id;
+    }
+
+    internal void Delete() => IsDeleted = true;
+
+    internal void Reinstate(List<Provision> provisions)
+    {
+        IsDeleted = false;
+        DeletedBy = null;
+        DeletedAt = DateTime.MinValue;
+
+        foreach (Provision provision in provisions)
+            AddProvision(provision);
     }
 }

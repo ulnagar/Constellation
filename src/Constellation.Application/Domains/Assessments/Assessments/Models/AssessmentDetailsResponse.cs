@@ -26,7 +26,8 @@ public sealed record AssessmentDetailsResponse(
         Grade StudentGrade,
         SchoolCode SchoolCode,
         string SchoolName,
-        List<string> Provisions);
+        List<string> Provisions,
+        bool IsDeleted);
 
     public sealed record Submission(
         SubmissionId SubmissionId,

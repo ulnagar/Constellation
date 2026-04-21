@@ -73,6 +73,25 @@ internal sealed class AssessmentRepository : IAssessmentRepository
             .Set<Provision>()
             .ToListAsync(cancellationToken);
 
+    public async Task<List<Provision>> GetCurrentProvisionsForStudent(
+        StudentId studentId,
+        CancellationToken cancellationToken = default)
+    {
+        List<ProvisionId> provisionIds = await _context
+            .Set<StudentProvision>()
+            .Where(entry =>
+                entry.StudentId == studentId &&
+                !entry.IsDeleted &&
+                entry.Year == DateTime.Today.Year)
+            .Select(entry => entry.ProvisionId)
+            .ToListAsync(cancellationToken);
+
+        return await _context
+            .Set<Provision>()
+            .Where(provision => provisionIds.Contains(provision.Id))
+            .ToListAsync(cancellationToken);
+    }
+
     public async Task<bool> DoesProvisionCodeExist(
         ProvisionCode code,
         CancellationToken cancellationToken = default) =>

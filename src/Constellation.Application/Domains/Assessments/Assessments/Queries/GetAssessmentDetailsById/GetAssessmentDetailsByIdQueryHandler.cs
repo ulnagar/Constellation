@@ -48,7 +48,8 @@ internal sealed class GetAssessmentDetailsByIdQueryHandler
                 student.StudentGrade,
                 student.SchoolCode,
                 student.SchoolName,
-                student.Provisions.Select(entry => $"{entry.Code}: {entry.Description}").ToList()));
+                student.Provisions.Select(entry => $"{entry.Code}: {entry.Description}").ToList(),
+                student.IsDeleted));
 
             foreach (AssessmentSubmission submission in student.Submissions)
             {

@@ -39,6 +39,8 @@ public sealed class Assessment : AggregateRoot
         DueDate = dueDate;
         AvailableFrom = availableFrom;
         AvailableTo = availableTo;
+
+        RaiseDomainEvent(new AssessmentCreatedDomainEvent(new(), Id));
     }
 
     public AssessmentId Id { get; init; }
@@ -88,8 +90,16 @@ public sealed class Assessment : AggregateRoot
 
     public Result AddStudent(Student student, List<Provision> provisions)
     {
-        if (_students.Any(s => s.StudentId == student.Id))
+        AssessmentStudent? existingEntry = _students.FirstOrDefault(entry => entry.StudentId == student.Id);
+
+        if (existingEntry is not null && !existingEntry.IsDeleted)
             return Result.Failure(AssessmentErrors.StudentAlreadyExists(student.Id));
+
+        if (existingEntry is not null)
+        {
+            existingEntry.Reinstate(provisions);
+            return Result.Success();
+        }
 
         AssessmentStudent studentEntry = new(Id, student);
 
@@ -99,6 +109,14 @@ public sealed class Assessment : AggregateRoot
         _students.Add(studentEntry);
 
         return Result.Success();
+    }
+
+    public void RemoveStudent(StudentId studentId)
+    {
+        AssessmentStudent? entry = _students.FirstOrDefault(entry => entry.StudentId == studentId);
+
+        if (entry is not null)
+            entry.Delete();
     }
 
     public Result AddStudentSubmission(StudentId studentId, AppUser user)

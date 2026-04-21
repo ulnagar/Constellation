@@ -1,0 +1,16 @@
+@model Constellation.Presentation.Staff.Areas.Staff.Pages.Shared.PartialViews.ConfirmRemoveStudentFromAssessmentModal.ConfirmRemoveStudentFromAssessmentModalViewModel
+
+<div class="modal-header">
+    <h5 class="modal-title">Remove Student</h5>
+</div>
+<div class="modal-body">
+    <div class="row">
+        <div class="form-group col">
+            <span class="control-label">Are you sure you wish to remove @Model.Student.DisplayName from the Assessment?</span>
+        </div>
+    </div>
+</div>
+<div class="modal-footer">
+    <a asp-page-handler="RemoveStudent" asp-route-studentId="@Model.StudentId" class="btn btn-danger show-loader">Remove</a>
+    <button type="button" class="btn btn-secondary" data-dismiss="modal" data-bs-dismiss="modal">Close</button>
+</div>
