@@ -237,4 +237,9 @@ public class DetailsModel : BasePageModel
 
         return RedirectToPage();
     }
+
+    public async Task<IActionResult> OnPostAddDownload(AddDownloadToAssessmentSelection viewModel)
+    {
+
+    }
 }

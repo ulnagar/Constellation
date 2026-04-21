@@ -10,5 +10,5 @@ public sealed record CreateTrainingCompletionCommand(
     StaffId StaffId,
     TrainingModuleId TrainingModuleId,
     DateOnly CompletedDate,
-    FileDto File)
+    FileDto? File)
     : ICommand;

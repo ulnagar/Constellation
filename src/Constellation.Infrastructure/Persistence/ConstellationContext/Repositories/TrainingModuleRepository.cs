@@ -23,7 +23,7 @@ internal sealed class TrainingModuleRepository
             .Set<TrainingModule>()
             .ToListAsync(cancellationToken);
 
-    public async Task<TrainingModule> GetModuleByName(
+    public async Task<TrainingModule?> GetModuleByName(
         string name, 
         CancellationToken cancellationToken = default) => 
         await _context
@@ -31,7 +31,7 @@ internal sealed class TrainingModuleRepository
             .Where(module => module.Name == name)
             .FirstOrDefaultAsync(cancellationToken);
 
-    public async Task<TrainingModule> GetModuleById(
+    public async Task<TrainingModule?> GetModuleById(
         TrainingModuleId moduleId, 
         CancellationToken cancellationToken = default) => 
         await _context

@@ -35,6 +35,38 @@ public sealed class Attachment
     public string LinkId { get; private set; } = string.Empty;
     public string Checksum { get; private set; } = string.Empty;
 
+    public static Attachment CreateAssessmentDownloadAttachment(
+        string name,
+        string fileType,
+        string recordLinkId,
+        DateTime createdAt)
+    {
+        Attachment attachment = new(
+            name,
+            fileType,
+            AttachmentType.AssessmentDownload,
+            recordLinkId,
+            createdAt);
+
+        return attachment;
+    }
+
+    public static Attachment CreateAssessmentSubmissionAttachment(
+        string name,
+        string fileType,
+        string recordLinkId,
+        DateTime createdAt)
+    {
+        Attachment attachment = new(
+            name,
+            fileType,
+            AttachmentType.AssessmentSubmission,
+            recordLinkId,
+            createdAt);
+
+        return attachment;
+    }
+
     public static Attachment CreateAwardCertificateAttachment(
         string name,
         string fileType,

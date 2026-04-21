@@ -12,7 +12,6 @@ using Core.Models.Attachments;
 using Core.Models.Attachments.Services;
 using Core.Models.Awards;
 using Core.Models.Awards.Events;
-using Core.Models.Students.Enums;
 using Interfaces.Gateways;
 using Interfaces.Repositories;
 using Serilog;
@@ -55,7 +54,7 @@ internal sealed class AwardMatchedToIncidentDomainEvent_DownloadAwardCertificate
 
     public async Task Handle(AwardMatchedToIncidentDomainEvent notification, CancellationToken cancellationToken)
     {
-        StudentAward award = await _awardRepository.GetById(notification.AwardId, cancellationToken);
+        StudentAward? award = await _awardRepository.GetById(notification.AwardId, cancellationToken);
 
         if (award is null)
         {
@@ -66,7 +65,7 @@ internal sealed class AwardMatchedToIncidentDomainEvent_DownloadAwardCertificate
             return;
         }
 
-        Student student = await _studentRepository.GetById(award.StudentId, cancellationToken);
+        Student? student = await _studentRepository.GetById(award.StudentId, cancellationToken);
 
         if (student is null)
         {
@@ -78,7 +77,7 @@ internal sealed class AwardMatchedToIncidentDomainEvent_DownloadAwardCertificate
             return;
         }
 
-        SystemLink link = student.SystemLinks.FirstOrDefault(entry => entry.System == SystemType.Sentral);
+        SystemLink? link = student.SystemLinks.FirstOrDefault(entry => entry.System == SystemType.Sentral);
 
         if (link is null)
         {

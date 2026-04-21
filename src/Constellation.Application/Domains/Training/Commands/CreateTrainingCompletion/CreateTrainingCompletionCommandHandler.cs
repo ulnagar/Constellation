@@ -43,7 +43,7 @@ internal sealed class CreateTrainingCompletionCommandHandler
     }
     public async Task<Result> Handle(CreateTrainingCompletionCommand request, CancellationToken cancellationToken)
     {
-        TrainingModule module = await _trainingRepository.GetModuleById(request.TrainingModuleId, cancellationToken);
+        TrainingModule? module = await _trainingRepository.GetModuleById(request.TrainingModuleId, cancellationToken);
 
         if (module is null)
         {
@@ -62,7 +62,7 @@ internal sealed class CreateTrainingCompletionCommandHandler
                 !record.IsDeleted)
             .ToList();
 
-        TrainingCompletion record = records.MaxBy(record => record.CompletedDate);
+        TrainingCompletion? record = records.MaxBy(record => record.CompletedDate);
 
         if (record is not null && record.CompletedDate == request.CompletedDate)
         {
