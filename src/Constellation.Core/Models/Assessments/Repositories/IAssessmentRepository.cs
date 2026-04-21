@@ -15,6 +15,7 @@ public interface IAssessmentRepository
     Task<Provision?> GetProvisionById(ProvisionId id, CancellationToken cancellationToken = default);
     Task<List<Provision>> GetProvisions(CancellationToken cancellationToken = default);
     Task<List<Provision>> GetCurrentProvisionsForStudent(StudentId studentId, CancellationToken cancellationToken = default);
+    Task<List<Provision>> GetProvisionsFromList(List<ProvisionId> ids, CancellationToken cancellationToken = default);
     Task<bool> DoesProvisionCodeExist(ProvisionCode code, CancellationToken cancellationToken = default);
 
     Task<StudentProvision?> GetStudentProvisionById(StudentProvisionId id, CancellationToken cancellationToken = default);

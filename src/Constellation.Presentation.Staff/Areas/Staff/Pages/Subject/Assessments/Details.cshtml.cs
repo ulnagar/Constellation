@@ -1,7 +1,13 @@
 ﻿namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Subject.Assessments;
 
+using Application.Domains.Assessments.Assessments.Commands.AddProvisionToAssessmentStudent;
+using Application.Domains.Assessments.Assessments.Commands.AddStudentToAssessment;
 using Application.Domains.Assessments.Assessments.Commands.RemoveStudentFromAssessment;
 using Application.Domains.Assessments.Assessments.Queries.GetAssessmentDetailsById;
+using Application.Domains.Assessments.Provisions.Models;
+using Application.Domains.Assessments.Provisions.Queries.GetAssessmentProvisions;
+using Application.Domains.Assessments.Provisions.Queries.GetCurrentStudentProvisionsByStudentId;
+using Application.Domains.Assessments.Provisions.Queries.GetCurrentYearStudentProvisions;
 using Application.Domains.Students.Models;
 using Application.Domains.Students.Queries.GetStudentById;
 using Application.Models.Auth;
@@ -17,6 +23,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using Presentation.Shared.Helpers.Attributes;
 using Serilog;
+using Shared.PartialViews.AddAssessmentProvisionForStudent;
 using Shared.PartialViews.ConfirmRemoveStudentFromAssessmentModal;
 
 [HasPermission(AuthPermission.Subjects_Assessments_View_Value)]
@@ -111,6 +118,116 @@ public class DetailsModel : BasePageModel
                 .ForContext(nameof(Error), result.Error)
                 .Warning("Failed to remove student from Assessment by user {User}", _currentUserService.UserName);
             
+            ModalContent = ErrorDisplay.Create(
+                result.Error,
+                _linkGenerator.GetPathByPage("/Subject/Assessments/Details", values: new { area = "Staff", Id }));
+
+            return Page();
+        }
+
+        return RedirectToPage();
+    }
+
+    public async Task<IActionResult> OnPostAddStudent(StudentId studentId)
+    {
+        if (studentId == StudentId.Empty)
+        {
+            _logger
+                .ForContext(nameof(Error), StudentErrors.InvalidId)
+                .Warning("Failed to add student to Assessment by user {User}", _currentUserService.UserName);
+
+            ModalContent = ErrorDisplay.Create(
+                StudentErrors.InvalidId,
+                _linkGenerator.GetPathByPage("/Subject/Assessments/Details", values: new { area = "Staff", Id }));
+
+            return Page();
+        }
+
+        AddStudentToAssessmentCommand command = new(Id, studentId);
+
+        _logger
+            .ForContext(nameof(AddStudentToAssessmentCommand), command, true)
+            .Information("Requested to add student to Assessment by user {User}", _currentUserService.UserName);
+
+        Result result = await _mediator.Send(command);
+
+        if (result.IsFailure)
+        {
+            _logger
+                .ForContext(nameof(AddStudentToAssessmentCommand), command, true)
+                .ForContext(nameof(Error), result.Error)
+                .Warning("Failed to add student to Assessment by user {User}", _currentUserService.UserName);
+
+            ModalContent = ErrorDisplay.Create(
+                result.Error,
+                _linkGenerator.GetPathByPage("/Subject/Assessments/Details", values: new { area = "Staff", Id }));
+
+            return Page();
+        }
+
+        return RedirectToPage();
+    }
+
+    public async Task<IActionResult> OnPostAjaxAddProvision(StudentId studentId)
+    {
+        Result<StudentResponse> student = await _mediator.Send(new GetStudentByIdQuery(studentId));
+
+        if (student.IsFailure)
+            return BadRequest();
+
+        Result<List<AssessmentProvisionResponse>> enabledProvisions = await _mediator.Send(new GetCurrentStudentProvisionsByStudentIdQuery(studentId, Id));
+
+        if (enabledProvisions.IsFailure)
+            return BadRequest();
+
+        Result<List<AssessmentProvisionResponse>> provisions = await _mediator.Send(new GetAssessmentProvisionsQuery());
+
+        if (provisions.IsFailure)
+            return BadRequest();
+
+        AddAssessmentProvisionForStudentViewModel viewModel = new()
+        {
+            StudentId = student.Value.StudentId,
+            Student = student.Value.Name, 
+            EnabledProvisionIds = enabledProvisions.Value.Select(entry => entry.Id).ToList(),
+            Provisions = provisions.Value
+        };
+
+        return Partial("AddAssessmentProvisionForStudent", viewModel);
+    }
+
+    public async Task<IActionResult> OnPostAddProvision(
+        StudentId studentId, 
+        List<ProvisionId> provisions)
+    {
+        if (studentId == StudentId.Empty)
+        {
+            _logger
+                .ForContext(nameof(Error), StudentErrors.InvalidId)
+                .Warning("Failed to add provision to student in Assessment by user {User}", _currentUserService.UserName);
+
+            ModalContent = ErrorDisplay.Create(
+                StudentErrors.InvalidId,
+                _linkGenerator.GetPathByPage("/Subject/Assessments/Details", values: new { area = "Staff", Id }));
+
+            return Page();
+        }
+
+        AddProvisionToAssessmentStudentCommand command = new(Id, studentId, provisions);
+
+        _logger
+            .ForContext(nameof(AddProvisionToAssessmentStudentCommand), command, true)
+            .Information("Requested to add provision to student in Assessment by user {User}", _currentUserService.UserName);
+
+        Result result = await _mediator.Send(command);
+
+        if (result.IsFailure)
+        {
+            _logger
+                .ForContext(nameof(AddProvisionToAssessmentStudentCommand), command, true)
+                .ForContext(nameof(Error), result.Error)
+                .Warning("Failed to add provision to student in Assessment by user {User}", _currentUserService.UserName);
+
             ModalContent = ErrorDisplay.Create(
                 result.Error,
                 _linkGenerator.GetPathByPage("/Subject/Assessments/Details", values: new { area = "Staff", Id }));

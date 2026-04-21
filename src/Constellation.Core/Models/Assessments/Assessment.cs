@@ -119,6 +119,18 @@ public sealed class Assessment : AggregateRoot
             entry.Delete();
     }
 
+    public Result AddStudentProvision(StudentId studentId, Provision provision)
+    {
+        AssessmentStudent? existingEntry = _students.FirstOrDefault(entry => entry.StudentId == studentId);
+
+        if (existingEntry is null || existingEntry.IsDeleted)
+            return Result.Failure(AssessmentErrors.NoLinkedStudent(studentId));
+
+        existingEntry.AddProvision(provision);
+     
+        return Result.Success();
+    }
+
     public Result AddStudentSubmission(StudentId studentId, AppUser user)
     {
         AssessmentStudent? assessmentStudent = _students.FirstOrDefault(s => s.StudentId == studentId);

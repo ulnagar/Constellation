@@ -92,6 +92,14 @@ internal sealed class AssessmentRepository : IAssessmentRepository
             .ToListAsync(cancellationToken);
     }
 
+    public async Task<List<Provision>> GetProvisionsFromList(
+        List<ProvisionId> ids,
+        CancellationToken cancellationToken = default) =>
+        await _context
+            .Set<Provision>()
+            .Where(provision => ids.Contains(provision.Id))
+            .ToListAsync(cancellationToken);
+
     public async Task<bool> DoesProvisionCodeExist(
         ProvisionCode code,
         CancellationToken cancellationToken = default) =>

@@ -1,0 +1,33 @@
+@model Constellation.Presentation.Staff.Areas.Staff.Pages.Shared.Components.AddStudentToAssessment.AddStudentToAssessmentSelection
+
+<div class="modal fade" tabindex="-1" id="add-student-modal">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form asp-page-handler="AddStudent" method="post">
+                <div class="modal-header">
+                    <h5 class="modal-title">Add Student to Assessment</h5>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="form-group col">
+                            <span class="control-label">Student</span>
+                            <select name="StudentId" asp-items="@(new SelectList(Model.Students, "Key", "Value"))" class="combo" style="width:100%">
+                                <option value="">-- Select --</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="form-group col">
+                            <span>will be added to the assessment "<span clas="font-weight-bold">@Model.AssessmentName</span>".</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <input type="button" class="btn btn-default" data-bs-dismiss="modal" value="Cancel" />
+                    <input type="submit" value="Save" class="btn btn-primary" />
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

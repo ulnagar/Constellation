@@ -1,0 +1,46 @@
+@model Constellation.Presentation.Staff.Areas.Staff.Pages.Shared.PartialViews.AddAssessmentProvisionForStudent.AddAssessmentProvisionForStudentViewModel
+
+<form asp-page-handler="AddProvision" method="post">
+    <div class="modal-header">
+        <h5 class="modal-title">Add Provision For Student</h5>
+    </div>
+    <div class="modal-body">
+        <div class="container-fluid">
+
+            <div class="row">
+                <div class="form-group col">
+                    <h5>Student: @Model.Student.DisplayName</h5>
+                    <input type="hidden" name="StudentId" value="@Model.StudentId" />
+                </div>
+            </div>
+
+            <div class="row">
+                <h5 class="col-md-12">Selected Provisions:</h5>
+                <div class="col-md-12" id="ModalSelectedPrivisionList"> </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-3">
+                    <h5>Student</h5>
+                </div>
+                <div class="col">
+                    @foreach (var provision in Model.Provisions)
+                    {
+                        if (Model.EnabledProvisionIds.Contains(provision.Id))
+                        {
+                            <button id="provisionSelect-@provision.Id" type="button" class="btn btn-success">@provision.Code : @provision.Description</button>
+                        }
+                        else
+                        {
+                            <button id="provisionSelect-@provision.Id" type="button" class="btn btn-outline-info select-button" onClick="toggleProvision('@provision.Id')">@provision.Code : @provision.Description</button>
+                        }
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal-footer">
+        <button type="submit" class="btn btn-success">Add Provisions</button>
+        <button type="button" class="btn btn-secondary" data-dismiss="modal" data-bs-dismiss="modal">Close</button>
+    </div>
+</form>
