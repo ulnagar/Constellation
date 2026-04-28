@@ -221,6 +221,7 @@ internal sealed class ProcessTrackingEventsJob : IProcessTrackingEventsJob
 
         context.Set<EmailTrackingEvent>().Add(new EmailTrackingEvent()
         {
+            Id = new(),
             EmailId = evt.EmailId,
             EventType = EmailEventType.Clicked,
             OccurredAt = evt.OccurredAt,

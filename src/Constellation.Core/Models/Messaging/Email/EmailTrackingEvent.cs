@@ -5,7 +5,7 @@ using Identifiers;
 
 public sealed class EmailTrackingEvent
 {
-    public EmailTrackingEventId Id { get; set; }
+    public required EmailTrackingEventId Id { get; set; }
     public EmailId EmailId { get; set; }
     public EmailEventType EventType { get; set; }
     public DateTimeOffset OccurredAt { get; set; }
