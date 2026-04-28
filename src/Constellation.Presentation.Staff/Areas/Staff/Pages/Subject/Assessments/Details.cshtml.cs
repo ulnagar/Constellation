@@ -1,5 +1,6 @@
 ﻿namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Subject.Assessments;
 
+using Application.Domains.Assessments.Assessments.Commands.AddDownloadToAssessment;
 using Application.Domains.Assessments.Assessments.Commands.AddProvisionToAssessmentStudent;
 using Application.Domains.Assessments.Assessments.Commands.AddStudentToAssessment;
 using Application.Domains.Assessments.Assessments.Commands.RemoveStudentFromAssessment;
@@ -7,15 +8,18 @@ using Application.Domains.Assessments.Assessments.Queries.GetAssessmentDetailsBy
 using Application.Domains.Assessments.Provisions.Models;
 using Application.Domains.Assessments.Provisions.Queries.GetAssessmentProvisions;
 using Application.Domains.Assessments.Provisions.Queries.GetCurrentStudentProvisionsByStudentId;
-using Application.Domains.Assessments.Provisions.Queries.GetCurrentYearStudentProvisions;
+using Application.Domains.Attachments.Queries.GetAttachmentFile;
 using Application.Domains.Students.Models;
 using Application.Domains.Students.Queries.GetStudentById;
+using Application.DTOs;
 using Application.Models.Auth;
 using Constellation.Application.Common.PresentationModels;
 using Constellation.Application.Domains.Assessments.Assessments.Models;
 using Constellation.Core.Abstractions.Services;
+using Constellation.Core.Models.Attachments.Enums;
 using Constellation.Core.Shared;
 using Core.Models.Assessments.Identifiers;
+using Core.Models.Attachments.DTOs;
 using Core.Models.Students.Errors;
 using Core.Models.Students.Identifiers;
 using MediatR;
@@ -23,6 +27,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using Presentation.Shared.Helpers.Attributes;
 using Serilog;
+using Shared.Components.AddDownloadToAssessment;
 using Shared.PartialViews.AddAssessmentProvisionForStudent;
 using Shared.PartialViews.ConfirmRemoveStudentFromAssessmentModal;
 
@@ -54,7 +59,9 @@ public class DetailsModel : BasePageModel
 
     public AssessmentDetailsResponse Assessment { get; set; }
 
-    public async Task OnGet()
+    public async Task OnGet() => await PreparePage();
+
+    private async Task PreparePage()
     {
         Result<AssessmentDetailsResponse> assessment = await _mediator.Send(new GetAssessmentDetailsByIdQuery(Id));
 
@@ -100,6 +107,8 @@ public class DetailsModel : BasePageModel
                 StudentErrors.InvalidId,
                 _linkGenerator.GetPathByPage("/Subject/Assessments/Details", values: new { area = "Staff", Id }));
 
+            await PreparePage();
+
             return Page();
         }
 
@@ -122,6 +131,8 @@ public class DetailsModel : BasePageModel
                 result.Error,
                 _linkGenerator.GetPathByPage("/Subject/Assessments/Details", values: new { area = "Staff", Id }));
 
+            await PreparePage();
+
             return Page();
         }
 
@@ -139,6 +150,8 @@ public class DetailsModel : BasePageModel
             ModalContent = ErrorDisplay.Create(
                 StudentErrors.InvalidId,
                 _linkGenerator.GetPathByPage("/Subject/Assessments/Details", values: new { area = "Staff", Id }));
+
+            await PreparePage();
 
             return Page();
         }
@@ -161,6 +174,8 @@ public class DetailsModel : BasePageModel
             ModalContent = ErrorDisplay.Create(
                 result.Error,
                 _linkGenerator.GetPathByPage("/Subject/Assessments/Details", values: new { area = "Staff", Id }));
+
+            await PreparePage();
 
             return Page();
         }
@@ -210,6 +225,8 @@ public class DetailsModel : BasePageModel
                 StudentErrors.InvalidId,
                 _linkGenerator.GetPathByPage("/Subject/Assessments/Details", values: new { area = "Staff", Id }));
 
+            await PreparePage();
+
             return Page();
         }
 
@@ -232,6 +249,8 @@ public class DetailsModel : BasePageModel
                 result.Error,
                 _linkGenerator.GetPathByPage("/Subject/Assessments/Details", values: new { area = "Staff", Id }));
 
+            await PreparePage();
+
             return Page();
         }
 
@@ -240,6 +259,86 @@ public class DetailsModel : BasePageModel
 
     public async Task<IActionResult> OnPostAddDownload(AddDownloadToAssessmentSelection viewModel)
     {
+        if (viewModel?.UploadFile is not null)
+        {
+            try
+            {
+                _logger.Information("Requested to upload document for Assessment by user {User}", _currentUserService.UserName);
 
+                await using MemoryStream target = new();
+                await viewModel.UploadFile.CopyToAsync(target);
+
+                FileDto file = new FileDto()
+                {
+                    FileData = target.ToArray(),
+                    FileName = viewModel.UploadFile.FileName,
+                    FileType = viewModel.UploadFile.ContentType
+                };
+
+                AddDownloadToAssessmentCommand command = new(
+                    Id,
+                    viewModel.Name,
+                    viewModel.AvailableFrom,
+                    viewModel.AvailableTo,
+                    viewModel.IsRestricted,
+                    file);
+
+                Result request = await _mediator.Send(command);
+
+                if (request.IsFailure)
+                {
+                    _logger
+                        .ForContext(nameof(Error), request.Error, true)
+                        .Warning("Failed to upload document for Assessment by user {User}", _currentUserService.UserName);
+
+                    ModalContent = ErrorDisplay.Create(
+                        request.Error,
+                        _linkGenerator.GetPathByPage("/Subject/Assessments/Details", values: new { area = "Staff", Id }));
+
+                    return Page();
+
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger
+                    .ForContext(nameof(Exception), ex, true)
+                    .Warning("Failed to upload document for Assessment by user {User}", _currentUserService.UserName);
+
+                ModalContent = ErrorDisplay.Create(
+                    new(ex.Source!, ex.Message),
+                    _linkGenerator.GetPathByPage("/Subject/Assessments/Details", values: new { area = "Staff", Id }));
+
+                await PreparePage();
+
+                return Page();
+            }
+        }
+
+        return RedirectToPage();
+    }
+
+    public async Task<IActionResult> OnGetDownloadFile(AssessmentDownloadId downloadId)
+    {
+        _logger.Information("Requested to download document for Assessment by user {User}", _currentUserService.UserName);
+
+        Result<AttachmentResponse> documentRequest = await _mediator.Send(new GetAttachmentFileQuery(AttachmentType.AssessmentDownload, downloadId.ToString()));
+
+        if (documentRequest.IsFailure)
+        {
+            _logger
+                .ForContext(nameof(Error), documentRequest.Error, true)
+                .Warning("Failed to download document for Assessment by user {User}", _currentUserService.UserName);
+
+            ModalContent = ErrorDisplay.Create(
+                documentRequest.Error,
+                _linkGenerator.GetPathByPage("/Subject/Assessments/Details", values: new { area = "Staff", Id }));
+
+            await PreparePage();
+
+            return Page();
+        }
+        
+        return File(documentRequest.Value.FileData, documentRequest.Value.FileType, documentRequest.Value.FileName);
     }
 }
