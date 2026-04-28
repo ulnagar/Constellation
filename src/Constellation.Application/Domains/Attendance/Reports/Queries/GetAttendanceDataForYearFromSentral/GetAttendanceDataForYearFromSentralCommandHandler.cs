@@ -69,7 +69,7 @@ internal sealed class GetAttendanceDataForYearFromSentralCommandHandler
                     continue;
                 }
 
-                SystemAttendanceData data = await _gateway.GetAttendancePercentages(term, week, year, dates.Value.StartDate, dates.Value.EndDate);
+                SystemAttendanceData? data = await _gateway.GetAttendancePercentages(term, week, year, dates.Value.StartDate, dates.Value.EndDate);
                 if (data is null)
                     continue;
 
@@ -82,12 +82,12 @@ internal sealed class GetAttendanceDataForYearFromSentralCommandHandler
 
                 foreach (StudentAttendanceData entry in attendanceData)
                 {
-                    Student student = await _studentRepository.GetBySRN(entry.StudentReferenceNumber, cancellationToken);
+                    Student? student = await _studentRepository.GetBySRN(entry.StudentReferenceNumber, cancellationToken);
 
                     if (student is null)
                         continue;
 
-                    SchoolEnrolment enrolment = student.CurrentEnrolment;
+                    SchoolEnrolment? enrolment = student.CurrentEnrolment;
 
                     if (enrolment is null)
                         continue;

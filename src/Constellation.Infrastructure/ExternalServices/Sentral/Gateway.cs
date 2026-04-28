@@ -1961,15 +1961,13 @@ public class Gateway : ISentralGateway
         return (baseFile, detailFile);
     }
 
-    public async Task<SystemAttendanceData> GetAttendancePercentages(SchoolTerm term, SchoolWeek week, string year, DateOnly startDate, DateOnly endDate)
+    public async Task<SystemAttendanceData?> GetAttendancePercentages(SchoolTerm term, SchoolWeek week, string year, DateOnly startDate, DateOnly endDate)
     {
-        SystemAttendanceData response = new();
-
         if (_logOnly)
         {
             _logger.Information("GetAttendancePercentages: ");
 
-            return response;
+            return null;
         }
 
         List<KeyValuePair<string, string>> payload =
@@ -2022,10 +2020,8 @@ public class Gateway : ISentralGateway
         ];
 
         HtmlDocument? perMinuteYearToDateDocument = await GetPageByPost(new($"{_settings.ServerUrl}/attendance/reports/percentage"), payload);
-        response.YearToDateDayCalculationDocument = perMinuteYearToDateDocument ?? new HtmlDocument();
 
         Stream perMinuteYearToDateCalculationFile = await GetStreamByGet($"{_settings.ServerUrl}/attendancepxp/period/administration/percentage_attendance_report?length=period&year={year}&start_date={_dateTime.FirstDayOfYear.ToString("yyyy-MM-dd", DateTimeFormatInfo.CurrentInfo)}&end_date={endDate.ToString("yyyy-MM-dd", DateTimeFormatInfo.CurrentInfo)}&attendance_source=attendance&enrolled_students=true&group=years&years%5B%5D=5&years%5B%5D=6&years%5B%5D=7&years%5B%5D=8&years%5B%5D=9&years%5B%5D=10&years%5B%5D=11&years%5B%5D=12&action=export");
-        response.YearToDateMinuteCalculationDocument = perMinuteYearToDateCalculationFile.IsExcelFile() ? perMinuteYearToDateCalculationFile : Stream.Null;
 
         payload =
         [
@@ -2077,10 +2073,16 @@ public class Gateway : ISentralGateway
         ];
 
         HtmlDocument? perWeekCalculationFile = await GetPageByPost(new($"{_settings.ServerUrl}/attendance/reports/percentage"), payload);
-        response.WeekDayCalculationDocument = perWeekCalculationFile ?? new HtmlDocument();
 
-        Stream perMinuteWeekCalculationFile = await GetStreamByGet($"{_settings.ServerUrl}/attendancepxp/period/administration/percentage_attendance_report?length=week&term={term}&week={week}&year={year}&attendance_source=attendance&enrolled_students=true&group=years&years%5B%5D=5&years%5B%5D=6&years%5B%5D=7&years%5B%5D=8&years%5B%5D=9&years%5B%5D=10&years%5B%5D=11&years%5B%5D=12&action=export");
-        response.WeekMinuteCalculationDocument = perMinuteWeekCalculationFile.IsExcelFile() ? perMinuteWeekCalculationFile : Stream.Null;
+        Stream perMinuteWeekCalculationFile = await GetStreamByGet($"{_settings.ServerUrl}/attendancepxp/period/administration/percentage_attendance_report?length=week&term={term.Value}&week={week.Value}&year={year}&attendance_source=attendance&enrolled_students=true&group=years&years%5B%5D=5&years%5B%5D=6&years%5B%5D=7&years%5B%5D=8&years%5B%5D=9&years%5B%5D=10&years%5B%5D=11&years%5B%5D=12&action=export");
+
+        SystemAttendanceData response = new()
+        {
+            YearToDateDayCalculationDocument = perMinuteYearToDateDocument ?? new HtmlDocument(),
+            YearToDateMinuteCalculationDocument = perMinuteYearToDateCalculationFile.IsExcelFile() ? perMinuteYearToDateCalculationFile : Stream.Null,
+            WeekDayCalculationDocument = perWeekCalculationFile ?? new HtmlDocument(),
+            WeekMinuteCalculationDocument = perMinuteWeekCalculationFile.IsExcelFile() ? perMinuteWeekCalculationFile : Stream.Null
+        };
 
         return response;
     }
