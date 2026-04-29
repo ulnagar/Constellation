@@ -192,18 +192,19 @@ internal sealed class TrackItSyncJob : ITrackItSyncJob
             
             if (tiCustomer is not null)
             {
-                CheckExistingCustomerDetail(tiCustomer, acosStudent);
+                bool updated = CheckExistingCustomerDetail(tiCustomer, acosStudent);
+                if (updated)
+                    await _tiContext.SaveChangesAsync(cancellationToken);
             }
             else
             {
                 Customer customer = CreateCustomerFromStudent(acosStudent);
                 _tiContext.Customers.Add(customer);
+
+                await _tiContext.SaveChangesAsync(cancellationToken);
             }
         }
-
-        SetNextCustomerSequence();
-        await _tiContext.SaveChangesAsync(cancellationToken);
-
+        
         foreach (StaffMember acosStaffMember in acosStaff.Where(staff => !staff.IsDeleted))
         {
             if (cancellationToken.IsCancellationRequested)
@@ -216,18 +217,18 @@ internal sealed class TrackItSyncJob : ITrackItSyncJob
             
             if (tiCustomer is not null)
             {
-                CheckExistingCustomerDetail(tiCustomer, acosStaffMember);
+                bool updated = CheckExistingCustomerDetail(tiCustomer, acosStaffMember);
+                if (updated)
+                    await _tiContext.SaveChangesAsync(cancellationToken);
             }
             else
             {
                 Customer customer = CreateCustomerFromStaff(acosStaffMember);
                 _tiContext.Customers.Add(customer);
+                await _tiContext.SaveChangesAsync(cancellationToken);
             }
         }
-
-        SetNextCustomerSequence();
-        await _tiContext.SaveChangesAsync(cancellationToken);
-
+        
         foreach (SchoolContact acosContact in acosContacts.Where(contact => !contact.IsDeleted))
         {
             if (cancellationToken.IsCancellationRequested)
@@ -250,17 +251,17 @@ internal sealed class TrackItSyncJob : ITrackItSyncJob
 
             if (tiCustomer is not null)
             {
-                CheckExistingCustomerDetail(tiCustomer, acosContact);
+                bool updated = CheckExistingCustomerDetail(tiCustomer, acosContact);
+                if (updated)
+                    await _tiContext.SaveChangesAsync(cancellationToken);
             }
             else
             {
                 Customer customer = CreateCustomerFromContact(acosContact);
                 _tiContext.Customers.Add(customer);
+                await _tiContext.SaveChangesAsync(cancellationToken);
             }
         }
-
-        SetNextCustomerSequence();
-        await _tiContext.SaveChangesAsync(cancellationToken);
     }
 
     private void CheckExistingLocationDetail(Location location, School school)
@@ -359,18 +360,20 @@ internal sealed class TrackItSyncJob : ITrackItSyncJob
     private static string ConvertEmailToPortalId(string email) =>
         email[..(email.IndexOf('@', StringComparison.OrdinalIgnoreCase) - 1)].ToLower(CultureInfo.InvariantCulture);
 
-    private void CheckExistingCustomerDetail(Customer customer, SchoolContact contact)
+    private bool CheckExistingCustomerDetail(Customer customer, SchoolContact contact)
     {
+        bool updated = false;
+
         // Is this customer linked to an Aurora College staff member as well?
         Department? checkDepartment = _tiDepartments.FirstOrDefault(c => c.Sequence == customer.Dept);
 
         if (checkDepartment?.Name.Contains("Faculty", StringComparison.OrdinalIgnoreCase) ?? false)
-            return;
+            return updated;
 
         string contactPortalId = ConvertEmailToPortalId(contact.EmailAddress.Email);
 
         if (string.IsNullOrWhiteSpace(contactPortalId))
-            return;
+            return updated;
 
         string? schoolCode = contact.Assignments
             .FirstOrDefault(role => 
@@ -380,15 +383,24 @@ internal sealed class TrackItSyncJob : ITrackItSyncJob
             .ToString();
 
         if (!customer.Client.Equals(contactPortalId.ToUpper(CultureInfo.InvariantCulture), StringComparison.OrdinalIgnoreCase))
+        {
             customer.Client = contactPortalId.ToUpper(CultureInfo.InvariantCulture);
+            updated = true;
+        }
 
-        customer.Emailid = ConvertEmailToEmailId(contact.EmailAddress);
+        string convertedEmailId = ConvertEmailToEmailId(contact.EmailAddress);
+        if (customer.Emailid != convertedEmailId)
+        {
+            customer.Emailid = convertedEmailId;
+            updated = true;
+        }
 
         if (customer.Fname != contact.Name.FirstName)
         {
             customer.Fname = contact.Name.FirstName;
 
             _logger.Information("{id}: Contact: Name {contact} - Email {emailAddress}: FirstName updated to {newName}", JobId, contact.DisplayName, contact.EmailAddress, contact.Name.FirstName);
+            updated = true;
         }
 
         if (customer.Name != contact.Name.LastName)
@@ -396,26 +408,44 @@ internal sealed class TrackItSyncJob : ITrackItSyncJob
             customer.Name = contact.Name.LastName;
 
             _logger.Information("{id}: Contact: Name {contact} - Email {emailAddress}: LastName updated to {newName}", JobId, contact.DisplayName, contact.EmailAddress, contact.Name.LastName);
+            updated = true;
         }
 
         Department? department = _tiDepartments.FirstOrDefault(c => c.Name == "Partner School");
-        customer.Dept = department?.Sequence;
+        if (customer.Dept != department?.Sequence)
+        {
+            customer.Dept = department?.Sequence;
+            updated = true;
+        }
 
         if (!string.IsNullOrWhiteSpace(schoolCode))
         {
             Location? location = _tiLocations.FirstOrDefault(c => c.Note == schoolCode);
-            customer.Location = location?.Sequence;
+            if (customer.Location != location?.Sequence)
+            {
+                customer.Location = location?.Sequence;
+                updated = true;
+            }
         }
-        
-        customer.Inactive = 0;
 
-        customer.Updated();
+        if (customer.Inactive != 0)
+        {
+            customer.Inactive = 0;
+            updated = true;
+        }
+
+        if (updated)
+            customer.Updated();
+
+        return updated;
     }
 
-    private void CheckExistingCustomerDetail(Customer customer, Student student)
+    private bool CheckExistingCustomerDetail(Customer customer, Student student)
     {
-        if (!customer.Client.Equals(student.StudentReferenceNumber, StringComparison.OrdinalIgnoreCase))
-            customer.Client = student.StudentReferenceNumber;
+        bool updated = false;
+
+        if (!customer.Client.Equals(student.StudentReferenceNumber.Number.ToUpper(CultureInfo.InvariantCulture), StringComparison.OrdinalIgnoreCase))
+            customer.Client = student.StudentReferenceNumber.Number.ToUpper(CultureInfo.InvariantCulture);
 
         customer.Emailid = ConvertEmailToEmailId(student.EmailAddress);
 
@@ -424,6 +454,7 @@ internal sealed class TrackItSyncJob : ITrackItSyncJob
             customer.Fname = student.Name.PreferredName;
 
             _logger.Information("{id}: Student: Name {student} - Email {emailAddress}: FirstName updated to {newName}", JobId, student.Name.DisplayName, student.EmailAddress, student.Name.PreferredName);
+            updated = true;
         }
 
         if (customer.Name != student.Name.LastName)
@@ -431,21 +462,39 @@ internal sealed class TrackItSyncJob : ITrackItSyncJob
             customer.Name = student.Name.LastName;
 
             _logger.Information("{id}: Student: Name {student} - Email {emailAddress}: LastName updated to {newName}", JobId, student.Name.DisplayName, student.EmailAddress, student.Name.LastName);
+            updated = true;
         }
 
         Department? department = _tiDepartments.FirstOrDefault(c => c.Name == "Students");
-        customer.Dept = department?.Sequence;
+        if (customer.Dept != department?.Sequence)
+        {
+            customer.Dept = department?.Sequence;
+            updated = true;
+        }
 
         Location? location = _tiLocations.FirstOrDefault(c => c.Note == student.CurrentEnrolment?.SchoolCode.ToString());
-        customer.Location = location?.Sequence;
+        if (customer.Location != location?.Sequence)
+        {
+            customer.Location = location?.Sequence;
+            updated = true;
+        }
 
-        customer.Inactive = 0;
+        if (customer.Inactive != 0)
+        {
+            customer.Inactive = 0;
+            updated = true;
+        }
 
-        customer.Updated();
+        if (updated)
+            customer.Updated();
+
+        return updated;
     }
 
-    private void CheckExistingCustomerDetail(Customer customer, StaffMember staff)
+    private bool CheckExistingCustomerDetail(Customer customer, StaffMember staff)
     {
+        bool updated = false;
+
         string staffShortId = staff.EmailAddress.Email.Split('@')[0].ToUpper(CultureInfo.InvariantCulture);
 
         if (!customer.Client.Equals(staffShortId, StringComparison.OrdinalIgnoreCase))
@@ -458,6 +507,7 @@ internal sealed class TrackItSyncJob : ITrackItSyncJob
             customer.Fname = staff.Name.PreferredName;
 
             _logger.Information("{id}: Staff: Name {staff} - Email {emailAddress}: FirstName updated to {newName}", JobId, staff.Name.DisplayName, staff.EmailAddress.Email, staff.Name.PreferredName);
+            updated = true;
         }
 
         if (customer.Name != staff.Name.LastName)
@@ -465,6 +515,7 @@ internal sealed class TrackItSyncJob : ITrackItSyncJob
             customer.Name = staff.Name.LastName;
 
             _logger.Information("{id}: Staff: Name {student} - Email {emailAddress}: LastName updated to {newName}", JobId, staff.Name.DisplayName, staff.EmailAddress, staff.Name.LastName);
+            updated = true;
         }
 
         Faculty? faculty = _faculties.FirstOrDefault(faculty => faculty.Members.Any(member => member.StaffId == staff.Id && !member.IsDeleted));
@@ -472,15 +523,31 @@ internal sealed class TrackItSyncJob : ITrackItSyncJob
         if (faculty is not null) 
         {
             Department? department = _tiDepartments.FirstOrDefault(c => c.Name.Contains(faculty.Name, StringComparison.OrdinalIgnoreCase));
-            customer.Dept = department?.Sequence;
+
+            if (customer.Dept != department?.Sequence)
+            {
+                customer.Dept = department?.Sequence;
+                updated = true;
+            }
         }
         
         Location? location = _tiLocations.FirstOrDefault(c => c.Note == staff.CurrentAssignment?.SchoolCode.ToString());
-        customer.Location = location?.Sequence;
+        if (customer.Location != location?.Sequence)
+        {
+            customer.Location = location?.Sequence;
+            updated = true;
+        }
 
-        customer.Inactive = 0;
+        if (customer.Inactive != 0)
+        {
+            customer.Inactive = 0;
+            updated = true;
+        }
 
-        customer.Updated();
+        if (updated)
+            customer.Updated();
+
+        return updated;
     }
 
     private Customer CreateCustomerFromContact(SchoolContact contact)
