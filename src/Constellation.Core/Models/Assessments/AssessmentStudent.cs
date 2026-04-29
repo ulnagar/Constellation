@@ -1,6 +1,7 @@
 ﻿namespace Constellation.Core.Models.Assessments;
 
 using Auth;
+using Core.Enums;
 using Core.ValueObjects;
 using Enums;
 using Identifiers;
