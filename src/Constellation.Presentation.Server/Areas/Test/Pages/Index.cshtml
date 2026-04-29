@@ -2,3 +2,18 @@
 @model Constellation.Presentation.Server.Areas.Test.Pages.IndexModel
 
 <h2>Test Page</h2>
+
+<form asp-page-handler="Search">
+    <input asp-for="Search" class="form-control" />
+    <input type="submit" class="btn btn-success" value="Search" />
+</form>
+
+@if (Model.Students.Count > 0)
+{
+    <ul>
+        @foreach (var student in Model.Students)
+        {
+            <li>@student.Name.DisplayName</li>
+        }
+    </ul>
+}

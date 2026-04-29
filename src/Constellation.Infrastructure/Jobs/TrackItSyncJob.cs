@@ -444,8 +444,8 @@ internal sealed class TrackItSyncJob : ITrackItSyncJob
     {
         bool updated = false;
 
-        if (!customer.Client.Equals(student.StudentReferenceNumber.Number.ToUpper(CultureInfo.InvariantCulture), StringComparison.OrdinalIgnoreCase))
-            customer.Client = student.StudentReferenceNumber.Number.ToUpper(CultureInfo.InvariantCulture);
+        if (!customer.Client.Equals(student.StudentReferenceNumber.ToString().ToUpper(CultureInfo.InvariantCulture), StringComparison.OrdinalIgnoreCase))
+            customer.Client = student.StudentReferenceNumber.ToString().ToUpper(CultureInfo.InvariantCulture);
 
         customer.Emailid = ConvertEmailToEmailId(student.EmailAddress);
 

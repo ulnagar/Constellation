@@ -14,6 +14,7 @@ using ValueObjects;
 
 public interface IStudentRepository
 {
+    Task<List<Student>> GetFuzzyNameSearch(string name, CancellationToken cancellationToken = default);
     Task<List<Student>> GetAll(CancellationToken cancellationToken = default);
     Task<Student?> GetById(StudentId studentId, CancellationToken cancellationToken = default);
     Task<Student?> GetBySRN(StudentReferenceNumber studentReferenceNumber, CancellationToken cancellationToken = default);

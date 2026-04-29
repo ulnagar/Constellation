@@ -29,6 +29,17 @@ public class StudentRepository : IStudentRepository
         _dateTime = dateTime;
     }
 
+    public async Task<List<Student>> GetFuzzyNameSearch(
+        string name,
+        CancellationToken cancellationToken = default) =>
+        await _context
+            .Set<Student>()
+            .Where(student =>
+                AppDbContext.Soundex(student.Name.FirstName) == AppDbContext.Soundex(name)
+                || AppDbContext.Soundex(student.Name.PreferredName) == AppDbContext.Soundex(name)
+                || AppDbContext.Soundex(student.Name.LastName) == AppDbContext.Soundex(name))
+            .ToListAsync(cancellationToken);
+
     public async Task<List<Student>> GetAll(
         CancellationToken cancellationToken = default) =>
         await _context

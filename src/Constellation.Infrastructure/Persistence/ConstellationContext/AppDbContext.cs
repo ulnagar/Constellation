@@ -21,6 +21,13 @@ public class AppDbContext : IdentityDbContext<AppUser, AppRole, Guid>
 
     public DbSet<JobActivation> JobActivations { get; set; }
 
+    [DbFunction("SOUNDEX", IsBuiltIn = true)]
+    public static string Soundex(string query) => throw new NotImplementedException();
+
+    [DbFunction("DIFFERENCE", IsBuiltIn = true)]
+    public static int Difference(string s1, string s2) => throw new NotImplementedException();
+
+
     protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
     {
         configurationBuilder.Conventions.Add(_ => new StronglyTypedIdConvention());
