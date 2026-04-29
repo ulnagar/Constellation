@@ -120,10 +120,11 @@ public sealed class Service : ISMSService
 
             Result<PhoneNumber> recipientPhoneNumber = PhoneNumber.Create(confirmation.Destination ?? string.Empty);
 
-            SmsRecipient receiver = recipients
-                .FirstOrDefault(recipient => 
+            SmsRecipient receiver = recipientPhoneNumber.IsFailure 
+                ? SmsRecipient.Unknown 
+                : recipients.FirstOrDefault(recipient => 
                     recipient.Number == recipientPhoneNumber.Value.ToString(PhoneNumber.Format.None)) 
-                ?? SmsRecipient.Unknown;
+                    ?? SmsRecipient.Unknown;
 
             SmsMessage message = new(
                 "Absences",
