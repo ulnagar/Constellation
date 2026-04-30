@@ -151,12 +151,15 @@ public sealed class Offering : AggregateRoot
     }
 
     public Result AddResource(
-        ResourceType type,
+        ResourceType? type,
         string resourceId,
         string name,
         string url,
         string? additional = null)
     {
+        if (type is null)
+            return Result.Failure(ResourceErrors.InvalidType(string.Empty));
+
         if (_resources.Any(resource => resource.Type == type && resource.ResourceId == resourceId))
             return Result.Success();
 

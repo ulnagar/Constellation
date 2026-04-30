@@ -16,7 +16,7 @@ public sealed class Assessment : AggregateRoot
 {
     private readonly List<AssessmentDownload> _downloads = [];
     private readonly List<AssessmentStudent> _students = [];
-    private readonly List<AssessmentInstructions> _instructions = [];
+    private readonly List<AssessmentInstruction> _instructions = [];
 
     /// <summary>
     /// Required for EF Core
@@ -58,7 +58,7 @@ public sealed class Assessment : AggregateRoot
     public int CanvasId { get; private set; }
     public int AllowedAttempts { get; private set; }
 
-    public IReadOnlyList<AssessmentInstructions> Instructions => _instructions.AsReadOnly();
+    public IReadOnlyList<AssessmentInstruction> Instructions => _instructions.AsReadOnly();
     public IReadOnlyList<AssessmentDownload> Downloads => _downloads.AsReadOnly();
     public IReadOnlyList<AssessmentStudent> Students => _students.AsReadOnly();
 
@@ -151,19 +151,19 @@ public sealed class Assessment : AggregateRoot
         return Result.Success();
     }
 
-    public void AddInstructions(AssessmentInstructions instructions)
+    public void AddInstructions(AssessmentInstruction instruction)
     {
-        AssessmentInstructions? existingInstructions = _instructions.FirstOrDefault(entry => entry.Category == instructions.Category);
+        AssessmentInstruction? existingInstructions = _instructions.FirstOrDefault(entry => entry.Category == instruction.Category);
 
         if (existingInstructions is not null)
             _instructions.Remove(existingInstructions);
 
-        _instructions.Add(instructions);
+        _instructions.Add(instruction);
     }
 
-    public void RemoveInstructions(AssessmentInstructions instructions)
+    public void RemoveInstructions(AssessmentInstruction instruction)
     {
-        AssessmentInstructions? existingInstructions = _instructions.FirstOrDefault(entry => entry.Id == instructions.Id);
+        AssessmentInstruction? existingInstructions = _instructions.FirstOrDefault(entry => entry.Id == instruction.Id);
 
         if (existingInstructions is not null)
             _instructions.Remove(existingInstructions);

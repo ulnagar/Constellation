@@ -633,7 +633,7 @@ public class OfferingTests
 
         // Assert
         result.IsFailure.Should().BeTrue();
-        result.Error.Should().BeEquivalentTo(ResourceErrors.InvalidType("Blackboard Course"));
+        result.Error.Should().BeEquivalentTo(ResourceErrors.InvalidType(string.Empty));
     }
 
     [Fact]

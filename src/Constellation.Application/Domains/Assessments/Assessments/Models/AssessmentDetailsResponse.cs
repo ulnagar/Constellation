@@ -1,6 +1,7 @@
 ﻿namespace Constellation.Application.Domains.Assessments.Assessments.Models;
 
 using Core.Enums;
+using Core.Models.Assessments.Enums;
 using Core.Models.Assessments.Identifiers;
 using Core.Models.Identifiers;
 using Core.Models.Students.Identifiers;
@@ -18,7 +19,8 @@ public sealed record AssessmentDetailsResponse(
     DateTimeOffset AvailableTo,
     List<AssessmentDetailsResponse.Student> Students,
     List<AssessmentDetailsResponse.Submission> Submissions,
-    List<AssessmentDetailsResponse.Download> Downloads)
+    List<AssessmentDetailsResponse.Download> Downloads,
+    List<AssessmentDetailsResponse.Instruction> Instructions)
 {
     public sealed record Student(
         StudentId StudentId,
@@ -42,4 +44,9 @@ public sealed record AssessmentDetailsResponse(
         DateOnly AvailableFrom,
         DateOnly AvailableTo,
         bool IsRestricted);
+
+    public sealed record Instruction(
+        AssessmentInstructionId InstructionId,
+        UserCategory Category,
+        string Description);
 }

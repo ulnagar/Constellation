@@ -48,5 +48,17 @@ internal sealed class AssessmentConfiguration : IEntityTypeConfiguration<Assessm
             .HasField("_students")
             .UsePropertyAccessMode(PropertyAccessMode.Field)
             .AutoInclude();
+
+        builder
+            .HasMany(assessment => assessment.Instructions)
+            .WithOne()
+            .HasForeignKey(instruction => instruction.AssessmentId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        builder
+            .Navigation(assessment => assessment.Instructions)
+            .HasField("_instructions")
+            .UsePropertyAccessMode(PropertyAccessMode.Field)
+            .AutoInclude();
     }
 }

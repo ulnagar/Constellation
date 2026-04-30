@@ -3,9 +3,9 @@
 using Enums;
 using Identifiers;
 
-public sealed class AssessmentInstructions
+public sealed class AssessmentInstruction
 {
-    public AssessmentInstructions(
+    public AssessmentInstruction(
         AssessmentId assessmentId,
         UserCategory category,
         string details)

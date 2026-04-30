@@ -79,7 +79,7 @@ public abstract class StringEnumeration<TEnum> : IEquatable<StringEnumeration<TE
     where TEnum : StringEnumeration<TEnum>
 {
     private static readonly Dictionary<string, TEnum> Enumerations = CreateEnumerations();
-
+    
     protected StringEnumeration(string value, string name)
     {
         Value = value;

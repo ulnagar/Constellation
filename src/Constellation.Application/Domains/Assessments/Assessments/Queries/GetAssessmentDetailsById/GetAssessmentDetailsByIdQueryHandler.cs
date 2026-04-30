@@ -39,6 +39,7 @@ internal sealed class GetAssessmentDetailsByIdQueryHandler
         List<AssessmentDetailsResponse.Student> students = [];
         List<AssessmentDetailsResponse.Download> downloads = [];
         List<AssessmentDetailsResponse.Submission> submissions = [];
+        List<AssessmentDetailsResponse.Instruction> instructions = [];
 
         foreach (AssessmentStudent student in assessment.Students)
         {
@@ -72,6 +73,14 @@ internal sealed class GetAssessmentDetailsByIdQueryHandler
                 download.IsRestricted));
         }
 
+        foreach (AssessmentInstruction instruction in assessment.Instructions)
+        {
+            instructions.Add(new(
+                instruction.Id,
+                instruction.Category,
+                instruction.Details));
+        }
+
         return new AssessmentDetailsResponse(
             assessment.Id,
             assessment.Name,
@@ -83,6 +92,7 @@ internal sealed class GetAssessmentDetailsByIdQueryHandler
             assessment.AvailableTo,
             students,
             submissions, 
-            downloads);
+            downloads,
+            instructions);
     }
 }
