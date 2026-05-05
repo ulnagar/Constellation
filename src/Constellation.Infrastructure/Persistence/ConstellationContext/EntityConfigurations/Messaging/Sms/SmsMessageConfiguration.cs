@@ -23,43 +23,35 @@ internal class SmsMessageConfiguration : IEntityTypeConfiguration<SmsMessage>
                 value => SmsId.FromValue(value));
 
         builder
-            .OwnsOne(message => message.Sender, owned =>
+            .ComplexProperty(message => message.Sender, propertyBuilder =>
             {
-                owned.WithOwner();
-
-                owned
+                propertyBuilder
                     .Property(r => r.Name)
                     .HasColumnName($"{nameof(SmsMessage.Sender)}_{nameof(SmsRecipient.Name)}")
                     .IsRequired()
                     .HasMaxLength(200);
 
-                owned
+                propertyBuilder
                     .Property(r => r.Number)
                     .HasColumnName($"{nameof(SmsMessage.Sender)}_{nameof(SmsRecipient.Number)}")
                     .IsRequired()
                     .HasMaxLength(320);
-
-                owned.HasIndex(r => r.Number);
-            }); 
+            });
 
         builder
-            .OwnsOne(message => message.Recipient, owned =>
+            .ComplexProperty(message => message.Recipient, propertyBuilder =>
             {
-                owned.WithOwner();
-
-                owned
+                propertyBuilder
                     .Property(r => r.Name)
                     .HasColumnName($"{nameof(SmsMessage.Recipient)}_{nameof(SmsRecipient.Name)}")
                     .IsRequired()
                     .HasMaxLength(200);
 
-                owned
+                propertyBuilder
                     .Property(r => r.Number)
                     .HasColumnName($"{nameof(SmsMessage.Recipient)}_{nameof(SmsRecipient.Number)}")
                     .IsRequired()
                     .HasMaxLength(320);
-
-                owned.HasIndex(r => r.Number);
             });
 
         builder
