@@ -91,55 +91,48 @@ public sealed class Service : ISMSService
 
         string messageText = $"{student.Name.PreferredName} was absent from classes on {absenceDate.ToShortDateString()}. To explain these absences, please login at {link} or reply using the code {absenceDate.ToString("ddMM", DateTimeFormatInfo.InvariantInfo)}";
 
-        List<string> destinations = recipients.Select(recipient => recipient.Number).ToList();
+        List<OutgoingSmsConfirmation> results = [];
 
-        OutgoingSms messageContent = new()
+        foreach (var recipient in recipients)
         {
-            origin = SmsRecipient.Aurora.Number,
-            destinations = destinations,
-            message = messageText
-        };
+            SmsRecipient sender = SmsRecipient.Aurora;
 
-        if (!string.IsNullOrWhiteSpace(_deliveryReceiptUri))
-            messageContent.notifyUrl = $"json+{_deliveryReceiptUri}";
-
-        Result<List<OutgoingSmsConfirmation>> results = await _gateway.SendSms(messageContent, cancellationToken);
-
-        if (results.IsFailure)
-            return results;
-
-        foreach (OutgoingSmsConfirmation confirmation in results.Value)
-        {
-            SmsRecipient sender = SmsRecipient.Unknown;
-
-            if (confirmation.Origin == SmsRecipient.AuroraNoReply.Number)
-                sender = SmsRecipient.AuroraNoReply;
-
-            if (confirmation.Origin == SmsRecipient.Aurora.Number)
-                sender = SmsRecipient.Aurora;
-
-            Result<PhoneNumber> recipientPhoneNumber = PhoneNumber.Create(confirmation.Destination ?? string.Empty);
-
-            SmsRecipient receiver = recipientPhoneNumber.IsFailure 
-                ? SmsRecipient.Unknown 
-                : recipients.FirstOrDefault(recipient => 
-                    recipient.Number == recipientPhoneNumber.Value.ToString(PhoneNumber.Format.None)) 
-                    ?? SmsRecipient.Unknown;
-
-            SmsMessage message = new(
-                "Absences",
-                confirmation.Id ?? string.Empty,
-                sender,
-                receiver,
-                confirmation.Message ?? string.Empty,
-                MessageDirection.Outbound,
-                MessageStatus.Sent,
-                confirmation.DateTime)
+            OutgoingSms messageContent = new()
             {
-                OutgoingId = confirmation.OutgoingId ?? string.Empty,
+                origin = sender.Number,
+                destinations = [ recipient.Number ],
+                message = messageText
             };
 
-            _smsRepository.Insert(message);
+            if (!string.IsNullOrWhiteSpace(_deliveryReceiptUri))
+                messageContent.notifyUrl = $"json+{_deliveryReceiptUri}";
+
+            Result<List<OutgoingSmsConfirmation>> result = await _gateway.SendSms(messageContent, cancellationToken);
+
+            if (result.IsFailure)
+                return Result.Failure<List<OutgoingSmsConfirmation>>(result.Error);
+
+            results.AddRange(result.Value);
+
+            foreach (OutgoingSmsConfirmation confirmation in result.Value)
+            {
+                SmsRecipient receiver = recipient;
+
+                SmsMessage message = new(
+                    "Absences",
+                    confirmation.Id ?? string.Empty,
+                    sender,
+                    receiver,
+                    confirmation.Message ?? string.Empty,
+                    MessageDirection.Outbound,
+                    MessageStatus.Sent,
+                    confirmation.DateTime)
+                {
+                    OutgoingId = confirmation.OutgoingId ?? string.Empty,
+                };
+
+                _smsRepository.Insert(message);
+            }
         }
 
         return results;
