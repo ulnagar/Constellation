@@ -15,10 +15,10 @@
     <div class="container">
     <h1 class="title">Livestream</h1>
 
-    @if (string.IsNullOrWhiteSpace(Model.EmbedCode))
+    @if (string.IsNullOrWhiteSpace(Model.EmbedCode) || !Model.IsValid)
     {
-        <h1>Oops!</h1>
-        <h3>Sorry, we can't find what you're looking for. Please check the link and try again.</h3>
+        <h1 class="is-size-1">Oops!</h1>
+        <h3 class="is-size-3">Sorry, we can't find what you're looking for. Please check the link and try again.</h3>
     }
     else
     {

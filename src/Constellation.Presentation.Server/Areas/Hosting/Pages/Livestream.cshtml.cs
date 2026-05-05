@@ -23,6 +23,7 @@ public sealed class LivestreamModel : PageModel
     [BindProperty(SupportsGet = true)]
     public Guid Id { get; set; }
 
+    public bool IsValid { get; set; } = true;
     public string EmbedCode { get; set; } = string.Empty;
     public string Description { get; set; } = string.Empty;
 
@@ -30,11 +31,14 @@ public sealed class LivestreamModel : PageModel
     {
         Result<Livestream> result = await _mediator.Send(new GetLivestreamQuery(Id));
 
-        if (result.IsSuccess)
+        if (result.IsFailure || !result.Value.IsActive)
         {
-            EmbedCode = result.Value.EmbedCode;
-            Description = result.Value.Description;
+            IsValid = false;
+            return;
         }
+
+        EmbedCode = result.Value.EmbedCode;
+        Description = result.Value.Description;
     }
 }
 
