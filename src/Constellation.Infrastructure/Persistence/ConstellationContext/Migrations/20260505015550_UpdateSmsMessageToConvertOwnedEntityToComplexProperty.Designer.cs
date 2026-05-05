@@ -5,6 +5,7 @@ using Constellation.Infrastructure.Persistence.ConstellationContext;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -12,9 +13,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260505015550_UpdateSmsMessageToConvertOwnedEntityToComplexProperty")]
+    partial class UpdateSmsMessageToConvertOwnedEntityToComplexProperty
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -141,6 +144,151 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                     b.ToTable("AspNetRoles", (string)null);
                 });
 
+            modelBuilder.Entity("Constellation.Application.Models.Identity.AppUser", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("AccessFailedCount")
+                        .HasColumnType("int");
+
+                    b.Property<string>("ConcurrencyStamp")
+                        .IsConcurrencyToken()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Email")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.Property<bool>("EmailConfirmed")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("LockoutEnabled")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTimeOffset?>("LockoutEnd")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("NormalizedEmail")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.Property<string>("NormalizedUserName")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.Property<string>("PasswordHash")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("PhoneNumber")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("PhoneNumberConfirmed")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("SecurityStamp")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("TwoFactorEnabled")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("UserName")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.ComplexProperty(typeof(Dictionary<string, object>), "Name", "Constellation.Application.Models.Identity.AppUser.Name#Name", b1 =>
+                        {
+                            b1.IsRequired();
+
+                            b1.Property<string>("FirstName")
+                                .IsRequired()
+                                .HasColumnType("nvarchar(max)")
+                                .HasColumnName("FirstName");
+
+                            b1.Property<string>("LastName")
+                                .IsRequired()
+                                .HasColumnType("nvarchar(max)")
+                                .HasColumnName("LastName");
+
+                            b1.Property<string>("PreferredName")
+                                .HasColumnType("nvarchar(max)")
+                                .HasColumnName("PreferredName");
+                        });
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("NormalizedEmail")
+                        .HasDatabaseName("EmailIndex");
+
+                    b.HasIndex("NormalizedUserName")
+                        .IsUnique()
+                        .HasDatabaseName("UserNameIndex")
+                        .HasFilter("[NormalizedUserName] IS NOT NULL");
+
+                    b.ToTable("AspNetUsers", (string)null);
+                });
+
+            modelBuilder.Entity("Constellation.Application.Models.Identity.AppUserLink", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("AppUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("DeletedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("DeletedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<Guid>("LinkId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("ModifiedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("ModifiedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AppUserId");
+
+                    b.ToTable("AspNetUserLinks", (string)null);
+                });
+
+            modelBuilder.Entity("Constellation.Application.Models.Identity.AppUserLoginAttempt", b =>
+                {
+                    b.Property<Guid>("AppUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("LoginDateTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("AppUserId", "LoginDateTime");
+
+                    b.ToTable("AspNetUserLoginAttempts", (string)null);
+                });
+
             modelBuilder.Entity("Constellation.Application.Models.JobActivation", b =>
                 {
                     b.Property<Guid>("Id")
@@ -162,7 +310,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                     b.HasIndex("JobName")
                         .IsUnique();
 
-                    b.ToTable("JobActivations", (string)null);
+                    b.ToTable("JobActivations");
                 });
 
             modelBuilder.Entity("Constellation.Core.Models.Absences.Absence", b =>
@@ -551,405 +699,6 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                     b.ToTable("Workflows", "AppSettings");
                 });
 
-            modelBuilder.Entity("Constellation.Core.Models.Assessments.Archive.CanvasAssignment", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<int>("AllowedAttempts")
-                        .HasColumnType("int");
-
-                    b.Property<int>("CanvasId")
-                        .HasColumnType("int");
-
-                    b.Property<Guid>("CourseId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<bool>("DelayForwarding")
-                        .HasColumnType("bit");
-
-                    b.Property<DateTime>("DueDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateOnly>("ForwardingDate")
-                        .HasColumnType("date");
-
-                    b.Property<DateTime?>("LockDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime?>("UnlockDate")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CourseId");
-
-                    b.ToTable("Assignments_Assignments", (string)null);
-                });
-
-            modelBuilder.Entity("Constellation.Core.Models.Assessments.Archive.CanvasAssignmentSubmission", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("AssignmentId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<int>("Attempt")
-                        .HasColumnType("int");
-
-                    b.Property<Guid>("StudentId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("SubmittedBy")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("SubmittedOn")
-                        .HasColumnType("datetime2");
-
-                    b.Property<bool>("Uploaded")
-                        .HasColumnType("bit");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("AssignmentId");
-
-                    b.HasIndex("StudentId");
-
-                    b.ToTable("Assignments_Submissions", (string)null);
-                });
-
-            modelBuilder.Entity("Constellation.Core.Models.Assessments.Assessment", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<int>("AllowedAttempts")
-                        .HasColumnType("int");
-
-                    b.Property<DateTimeOffset>("AvailableFrom")
-                        .HasColumnType("datetimeoffset");
-
-                    b.Property<DateTimeOffset>("AvailableTo")
-                        .HasColumnType("datetimeoffset");
-
-                    b.Property<int>("CanvasId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Course")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<Guid>("CourseId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTimeOffset>("DueDate")
-                        .HasColumnType("datetimeoffset");
-
-                    b.Property<string>("Grade")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CourseId");
-
-                    b.ToTable("Assessments", "Assessments");
-                });
-
-            modelBuilder.Entity("Constellation.Core.Models.Assessments.AssessmentDownload", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("AssessmentId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateOnly>("AvailableFrom")
-                        .HasColumnType("date");
-
-                    b.Property<DateOnly>("AvailableTo")
-                        .HasColumnType("date");
-
-                    b.Property<bool>("IsRestricted")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("AssessmentId");
-
-                    b.ToTable("Downloads", "Assessments");
-                });
-
-            modelBuilder.Entity("Constellation.Core.Models.Assessments.AssessmentDownloadEvent", b =>
-                {
-                    b.Property<Guid>("DownloadId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTimeOffset>("DownloadedAt")
-                        .HasColumnType("datetimeoffset");
-
-                    b.Property<string>("DownloadedBy")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("DownloadedByEmail")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("DownloadId", "UserId", "DownloadedAt");
-
-                    b.ToTable("DownloadEvents", "Assessments");
-                });
-
-            modelBuilder.Entity("Constellation.Core.Models.Assessments.AssessmentInstructions", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("AssessmentId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("Category")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Details")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("AssessmentId");
-
-                    b.ToTable("Instructions", "Assessments");
-                });
-
-            modelBuilder.Entity("Constellation.Core.Models.Assessments.AssessmentProvision", b =>
-                {
-                    b.Property<Guid>("AssessmentStudentId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("ProvisionId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("Code")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("AssessmentStudentId", "ProvisionId");
-
-                    b.ToTable("AssessmentProvisions", "Assessments");
-                });
-
-            modelBuilder.Entity("Constellation.Core.Models.Assessments.AssessmentStudent", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("AssessmentId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("CreatedBy")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("DeletedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("DeletedBy")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("bit");
-
-                    b.Property<DateTime>("ModifiedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("ModifiedBy")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("SchoolCode")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("SchoolName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("StudentGrade")
-                        .HasColumnType("int");
-
-                    b.Property<Guid>("StudentId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.ComplexProperty(typeof(Dictionary<string, object>), "Student", "Constellation.Core.Models.Assessments.AssessmentStudent.Student#Name", b1 =>
-                        {
-                            b1.IsRequired();
-
-                            b1.Property<string>("FirstName")
-                                .IsRequired()
-                                .HasColumnType("nvarchar(max)")
-                                .HasColumnName("FirstName");
-
-                            b1.Property<string>("LastName")
-                                .IsRequired()
-                                .HasColumnType("nvarchar(max)")
-                                .HasColumnName("LastName");
-
-                            b1.Property<string>("PreferredName")
-                                .HasColumnType("nvarchar(max)")
-                                .HasColumnName("PreferredName");
-                        });
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("AssessmentId");
-
-                    b.HasIndex("StudentId");
-
-                    b.ToTable("Students", "Assessments");
-                });
-
-            modelBuilder.Entity("Constellation.Core.Models.Assessments.AssessmentSubmission", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("AssessmentStudentId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTimeOffset>("SubmittedAt")
-                        .HasColumnType("datetimeoffset");
-
-                    b.Property<string>("SubmittedBy")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("SubmittedByEmail")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("AssessmentStudentId");
-
-                    b.ToTable("Submissions", "Assessments");
-                });
-
-            modelBuilder.Entity("Constellation.Core.Models.Assessments.Provision", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("Code")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Provisions", "Assessments");
-                });
-
-            modelBuilder.Entity("Constellation.Core.Models.Assessments.StudentProvision", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("CreatedBy")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("DeletedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("DeletedBy")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("bit");
-
-                    b.Property<DateTime>("ModifiedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("ModifiedBy")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("ProvisionCode")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("ProvisionDescription")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<Guid>("ProvisionId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("StudentId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<int>("Year")
-                        .HasColumnType("int");
-
-                    b.ComplexProperty(typeof(Dictionary<string, object>), "Student", "Constellation.Core.Models.Assessments.StudentProvision.Student#Name", b1 =>
-                        {
-                            b1.IsRequired();
-
-                            b1.Property<string>("FirstName")
-                                .IsRequired()
-                                .HasColumnType("nvarchar(max)")
-                                .HasColumnName("FirstName");
-
-                            b1.Property<string>("LastName")
-                                .IsRequired()
-                                .HasColumnType("nvarchar(max)")
-                                .HasColumnName("LastName");
-
-                            b1.Property<string>("PreferredName")
-                                .HasColumnType("nvarchar(max)")
-                                .HasColumnName("PreferredName");
-                        });
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ProvisionId");
-
-                    b.HasIndex("StudentId");
-
-                    b.HasIndex("Year", "StudentId");
-
-                    b.ToTable("StudentProvisions", "Assessments");
-                });
-
             modelBuilder.Entity("Constellation.Core.Models.Assets.Allocation", b =>
                 {
                     b.Property<Guid>("Id")
@@ -1216,6 +965,79 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                     b.HasIndex("AssetId");
 
                     b.ToTable("Sightings", "Assets");
+                });
+
+            modelBuilder.Entity("Constellation.Core.Models.Assignments.CanvasAssignment", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("AllowedAttempts")
+                        .HasColumnType("int");
+
+                    b.Property<int>("CanvasId")
+                        .HasColumnType("int");
+
+                    b.Property<Guid>("CourseId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<bool>("DelayForwarding")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime>("DueDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateOnly>("ForwardingDate")
+                        .HasColumnType("date");
+
+                    b.Property<DateTime?>("LockDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("UnlockDate")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CourseId");
+
+                    b.ToTable("Assignments_Assignments", (string)null);
+                });
+
+            modelBuilder.Entity("Constellation.Core.Models.Assignments.CanvasAssignmentSubmission", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("AssignmentId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("Attempt")
+                        .HasColumnType("int");
+
+                    b.Property<Guid>("StudentId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("SubmittedBy")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("SubmittedOn")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("Uploaded")
+                        .HasColumnType("bit");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AssignmentId");
+
+                    b.HasIndex("StudentId");
+
+                    b.ToTable("Assignments_Submissions", (string)null);
                 });
 
             modelBuilder.Entity("Constellation.Core.Models.Attachments.Attachment", b =>
@@ -1563,151 +1385,6 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                     b.HasIndex("OfferingId");
 
                     b.ToTable("CheckInResponses", "Attendance");
-                });
-
-            modelBuilder.Entity("Constellation.Core.Models.Auth.AppUser", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<int>("AccessFailedCount")
-                        .HasColumnType("int");
-
-                    b.Property<string>("ConcurrencyStamp")
-                        .IsConcurrencyToken()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Email")
-                        .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)");
-
-                    b.Property<bool>("EmailConfirmed")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("LockoutEnabled")
-                        .HasColumnType("bit");
-
-                    b.Property<DateTimeOffset?>("LockoutEnd")
-                        .HasColumnType("datetimeoffset");
-
-                    b.Property<string>("NormalizedEmail")
-                        .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)");
-
-                    b.Property<string>("NormalizedUserName")
-                        .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)");
-
-                    b.Property<string>("PasswordHash")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("PhoneNumber")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<bool>("PhoneNumberConfirmed")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("SecurityStamp")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<bool>("TwoFactorEnabled")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("UserName")
-                        .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)");
-
-                    b.ComplexProperty(typeof(Dictionary<string, object>), "Name", "Constellation.Core.Models.Auth.AppUser.Name#Name", b1 =>
-                        {
-                            b1.IsRequired();
-
-                            b1.Property<string>("FirstName")
-                                .IsRequired()
-                                .HasColumnType("nvarchar(max)")
-                                .HasColumnName("FirstName");
-
-                            b1.Property<string>("LastName")
-                                .IsRequired()
-                                .HasColumnType("nvarchar(max)")
-                                .HasColumnName("LastName");
-
-                            b1.Property<string>("PreferredName")
-                                .HasColumnType("nvarchar(max)")
-                                .HasColumnName("PreferredName");
-                        });
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("NormalizedEmail")
-                        .HasDatabaseName("EmailIndex");
-
-                    b.HasIndex("NormalizedUserName")
-                        .IsUnique()
-                        .HasDatabaseName("UserNameIndex")
-                        .HasFilter("[NormalizedUserName] IS NOT NULL");
-
-                    b.ToTable("AspNetUsers", (string)null);
-                });
-
-            modelBuilder.Entity("Constellation.Core.Models.Auth.AppUserLink", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("AppUserId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("CreatedBy")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("DeletedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("DeletedBy")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("bit");
-
-                    b.Property<Guid>("LinkId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("ModifiedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("ModifiedBy")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Type")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("AppUserId");
-
-                    b.ToTable("AspNetUserLinks", (string)null);
-                });
-
-            modelBuilder.Entity("Constellation.Core.Models.Auth.AppUserLoginAttempt", b =>
-                {
-                    b.Property<Guid>("AppUserId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("LoginDateTime")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("AppUserId", "LoginDateTime");
-
-                    b.ToTable("AspNetUserLoginAttempts", (string)null);
                 });
 
             modelBuilder.Entity("Constellation.Core.Models.Awards.Nomination", b =>
@@ -2086,7 +1763,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
 
                     b.HasIndex("SerialNumber");
 
-                    b.ToTable("DeviceNotes", (string)null);
+                    b.ToTable("DeviceNotes");
                 });
 
             modelBuilder.Entity("Constellation.Core.Models.Edval.Difference", b =>
@@ -6087,6 +5764,24 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                     b.HasDiscriminator().HasValue("TrainingCaseDetail");
                 });
 
+            modelBuilder.Entity("Constellation.Application.Models.Identity.AppUserLink", b =>
+                {
+                    b.HasOne("Constellation.Application.Models.Identity.AppUser", null)
+                        .WithMany("Links")
+                        .HasForeignKey("AppUserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Constellation.Application.Models.Identity.AppUserLoginAttempt", b =>
+                {
+                    b.HasOne("Constellation.Application.Models.Identity.AppUser", null)
+                        .WithMany("Logins")
+                        .HasForeignKey("AppUserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("Constellation.Core.Models.Absences.Absence", b =>
                 {
                     b.HasOne("Constellation.Core.Models.Students.Student", null)
@@ -6111,114 +5806,6 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                         .WithMany("Responses")
                         .HasForeignKey("AbsenceId")
                         .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("Constellation.Core.Models.Assessments.Archive.CanvasAssignment", b =>
-                {
-                    b.HasOne("Constellation.Core.Models.Subjects.Course", null)
-                        .WithMany()
-                        .HasForeignKey("CourseId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("Constellation.Core.Models.Assessments.Archive.CanvasAssignmentSubmission", b =>
-                {
-                    b.HasOne("Constellation.Core.Models.Assessments.Archive.CanvasAssignment", null)
-                        .WithMany("Submissions")
-                        .HasForeignKey("AssignmentId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Constellation.Core.Models.Students.Student", null)
-                        .WithMany()
-                        .HasForeignKey("StudentId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("Constellation.Core.Models.Assessments.Assessment", b =>
-                {
-                    b.HasOne("Constellation.Core.Models.Subjects.Course", null)
-                        .WithMany()
-                        .HasForeignKey("CourseId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("Constellation.Core.Models.Assessments.AssessmentDownload", b =>
-                {
-                    b.HasOne("Constellation.Core.Models.Assessments.Assessment", null)
-                        .WithMany("Downloads")
-                        .HasForeignKey("AssessmentId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("Constellation.Core.Models.Assessments.AssessmentDownloadEvent", b =>
-                {
-                    b.HasOne("Constellation.Core.Models.Assessments.AssessmentDownload", null)
-                        .WithMany("DownloadEvents")
-                        .HasForeignKey("DownloadId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("Constellation.Core.Models.Assessments.AssessmentInstructions", b =>
-                {
-                    b.HasOne("Constellation.Core.Models.Assessments.Assessment", null)
-                        .WithMany("Instructions")
-                        .HasForeignKey("AssessmentId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("Constellation.Core.Models.Assessments.AssessmentProvision", b =>
-                {
-                    b.HasOne("Constellation.Core.Models.Assessments.AssessmentStudent", null)
-                        .WithMany("Provisions")
-                        .HasForeignKey("AssessmentStudentId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("Constellation.Core.Models.Assessments.AssessmentStudent", b =>
-                {
-                    b.HasOne("Constellation.Core.Models.Assessments.Assessment", null)
-                        .WithMany("Students")
-                        .HasForeignKey("AssessmentId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Constellation.Core.Models.Students.Student", null)
-                        .WithMany()
-                        .HasForeignKey("StudentId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("Constellation.Core.Models.Assessments.AssessmentSubmission", b =>
-                {
-                    b.HasOne("Constellation.Core.Models.Assessments.AssessmentStudent", null)
-                        .WithMany("Submissions")
-                        .HasForeignKey("AssessmentStudentId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("Constellation.Core.Models.Assessments.StudentProvision", b =>
-                {
-                    b.HasOne("Constellation.Core.Models.Assessments.Provision", null)
-                        .WithMany()
-                        .HasForeignKey("ProvisionId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("Constellation.Core.Models.Students.Student", null)
-                        .WithMany()
-                        .HasForeignKey("StudentId")
-                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
                 });
 
@@ -6254,6 +5841,30 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                     b.HasOne("Constellation.Core.Models.Assets.Asset", null)
                         .WithMany("Sightings")
                         .HasForeignKey("AssetId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Constellation.Core.Models.Assignments.CanvasAssignment", b =>
+                {
+                    b.HasOne("Constellation.Core.Models.Subjects.Course", null)
+                        .WithMany()
+                        .HasForeignKey("CourseId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Constellation.Core.Models.Assignments.CanvasAssignmentSubmission", b =>
+                {
+                    b.HasOne("Constellation.Core.Models.Assignments.CanvasAssignment", null)
+                        .WithMany("Submissions")
+                        .HasForeignKey("AssignmentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Constellation.Core.Models.Students.Student", null)
+                        .WithMany()
+                        .HasForeignKey("StudentId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
@@ -6397,24 +6008,6 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                         .WithMany()
                         .HasForeignKey("StudentId")
                         .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("Constellation.Core.Models.Auth.AppUserLink", b =>
-                {
-                    b.HasOne("Constellation.Core.Models.Auth.AppUser", null)
-                        .WithMany("Links")
-                        .HasForeignKey("AppUserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("Constellation.Core.Models.Auth.AppUserLoginAttempt", b =>
-                {
-                    b.HasOne("Constellation.Core.Models.Auth.AppUser", null)
-                        .WithMany("Logins")
-                        .HasForeignKey("AppUserId")
-                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
 
@@ -7233,7 +6826,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<System.Guid>", b =>
                 {
-                    b.HasOne("Constellation.Core.Models.Auth.AppUser", null)
+                    b.HasOne("Constellation.Application.Models.Identity.AppUser", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -7242,7 +6835,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<System.Guid>", b =>
                 {
-                    b.HasOne("Constellation.Core.Models.Auth.AppUser", null)
+                    b.HasOne("Constellation.Application.Models.Identity.AppUser", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -7257,7 +6850,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Constellation.Core.Models.Auth.AppUser", null)
+                    b.HasOne("Constellation.Application.Models.Identity.AppUser", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -7266,7 +6859,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<System.Guid>", b =>
                 {
-                    b.HasOne("Constellation.Core.Models.Auth.AppUser", null)
+                    b.HasOne("Constellation.Application.Models.Identity.AppUser", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -7366,7 +6959,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
 
                             b1.HasKey("SendEmailActionId");
 
-                            b1.ToTable("WorkFlows_Actions", (string)null);
+                            b1.ToTable("WorkFlows_Actions");
 
                             b1.WithOwner()
                                 .HasForeignKey("SendEmailActionId");
@@ -7377,37 +6970,18 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                     b.Navigation("Sender");
                 });
 
+            modelBuilder.Entity("Constellation.Application.Models.Identity.AppUser", b =>
+                {
+                    b.Navigation("Links");
+
+                    b.Navigation("Logins");
+                });
+
             modelBuilder.Entity("Constellation.Core.Models.Absences.Absence", b =>
                 {
                     b.Navigation("Notifications");
 
                     b.Navigation("Responses");
-                });
-
-            modelBuilder.Entity("Constellation.Core.Models.Assessments.Archive.CanvasAssignment", b =>
-                {
-                    b.Navigation("Submissions");
-                });
-
-            modelBuilder.Entity("Constellation.Core.Models.Assessments.Assessment", b =>
-                {
-                    b.Navigation("Downloads");
-
-                    b.Navigation("Instructions");
-
-                    b.Navigation("Students");
-                });
-
-            modelBuilder.Entity("Constellation.Core.Models.Assessments.AssessmentDownload", b =>
-                {
-                    b.Navigation("DownloadEvents");
-                });
-
-            modelBuilder.Entity("Constellation.Core.Models.Assessments.AssessmentStudent", b =>
-                {
-                    b.Navigation("Provisions");
-
-                    b.Navigation("Submissions");
                 });
 
             modelBuilder.Entity("Constellation.Core.Models.Assets.Asset", b =>
@@ -7421,18 +6995,16 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                     b.Navigation("Sightings");
                 });
 
+            modelBuilder.Entity("Constellation.Core.Models.Assignments.CanvasAssignment", b =>
+                {
+                    b.Navigation("Submissions");
+                });
+
             modelBuilder.Entity("Constellation.Core.Models.Attendance.AttendancePlan", b =>
                 {
                     b.Navigation("Notes");
 
                     b.Navigation("Periods");
-                });
-
-            modelBuilder.Entity("Constellation.Core.Models.Auth.AppUser", b =>
-                {
-                    b.Navigation("Links");
-
-                    b.Navigation("Logins");
                 });
 
             modelBuilder.Entity("Constellation.Core.Models.Awards.NominationPeriod", b =>
