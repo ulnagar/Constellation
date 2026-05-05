@@ -162,7 +162,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                     b.HasIndex("JobName")
                         .IsUnique();
 
-                    b.ToTable("JobActivations", (string)null);
+                    b.ToTable("JobActivations");
                 });
 
             modelBuilder.Entity("Constellation.Core.Models.Absences.Absence", b =>
@@ -718,7 +718,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                     b.ToTable("DownloadEvents", "Assessments");
                 });
 
-            modelBuilder.Entity("Constellation.Core.Models.Assessments.AssessmentInstructions", b =>
+            modelBuilder.Entity("Constellation.Core.Models.Assessments.AssessmentInstruction", b =>
                 {
                     b.Property<Guid>("Id")
                         .HasColumnType("uniqueidentifier");
@@ -2086,7 +2086,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
 
                     b.HasIndex("SerialNumber");
 
-                    b.ToTable("DeviceNotes", (string)null);
+                    b.ToTable("DeviceNotes");
                 });
 
             modelBuilder.Entity("Constellation.Core.Models.Edval.Difference", b =>
@@ -6165,7 +6165,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("Constellation.Core.Models.Assessments.AssessmentInstructions", b =>
+            modelBuilder.Entity("Constellation.Core.Models.Assessments.AssessmentInstruction", b =>
                 {
                     b.HasOne("Constellation.Core.Models.Assessments.Assessment", null)
                         .WithMany("Instructions")
@@ -7366,7 +7366,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
 
                             b1.HasKey("SendEmailActionId");
 
-                            b1.ToTable("WorkFlows_Actions", (string)null);
+                            b1.ToTable("WorkFlows_Actions");
 
                             b1.WithOwner()
                                 .HasForeignKey("SendEmailActionId");

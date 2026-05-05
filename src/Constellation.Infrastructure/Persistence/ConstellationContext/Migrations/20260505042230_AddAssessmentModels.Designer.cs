@@ -13,8 +13,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260421003659_AddSoftDeleteColumnsToAssessmentStudentTable")]
-    partial class AddSoftDeleteColumnsToAssessmentStudentTable
+    [Migration("20260505042230_AddAssessmentModels")]
+    partial class AddAssessmentModels
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -719,6 +719,29 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                     b.HasKey("DownloadId", "UserId", "DownloadedAt");
 
                     b.ToTable("DownloadEvents", "Assessments");
+                });
+
+            modelBuilder.Entity("Constellation.Core.Models.Assessments.AssessmentInstruction", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("AssessmentId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Category")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Details")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AssessmentId");
+
+                    b.ToTable("Instructions", "Assessments");
                 });
 
             modelBuilder.Entity("Constellation.Core.Models.Assessments.AssessmentProvision", b =>
@@ -2770,6 +2793,35 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                     b.ToTable("GroupTutorials_Teachers", (string)null);
                 });
 
+            modelBuilder.Entity("Constellation.Core.Models.Hosting.Livestream", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("EmbedCode")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateOnly>("ExpiresOn")
+                        .HasColumnType("date");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateOnly>("StartsOn")
+                        .HasColumnType("date");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Livestreams", "Hosting");
+                });
+
             modelBuilder.Entity("Constellation.Core.Models.Hosting.Newsletter", b =>
                 {
                     b.Property<int>("Issue")
@@ -3117,6 +3169,40 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                     b.Property<string>("Status")
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
+
+                    b.ComplexProperty(typeof(Dictionary<string, object>), "Recipient", "Constellation.Core.Models.Messaging.Sms.SmsMessage.Recipient#SmsRecipient", b1 =>
+                        {
+                            b1.IsRequired();
+
+                            b1.Property<string>("Name")
+                                .IsRequired()
+                                .HasMaxLength(200)
+                                .HasColumnType("nvarchar(200)")
+                                .HasColumnName("Recipient_Name");
+
+                            b1.Property<string>("Number")
+                                .IsRequired()
+                                .HasMaxLength(320)
+                                .HasColumnType("nvarchar(320)")
+                                .HasColumnName("Recipient_Number");
+                        });
+
+                    b.ComplexProperty(typeof(Dictionary<string, object>), "Sender", "Constellation.Core.Models.Messaging.Sms.SmsMessage.Sender#SmsRecipient", b1 =>
+                        {
+                            b1.IsRequired();
+
+                            b1.Property<string>("Name")
+                                .IsRequired()
+                                .HasMaxLength(200)
+                                .HasColumnType("nvarchar(200)")
+                                .HasColumnName("Sender_Name");
+
+                            b1.Property<string>("Number")
+                                .IsRequired()
+                                .HasMaxLength(320)
+                                .HasColumnType("nvarchar(320)")
+                                .HasColumnName("Sender_Number");
+                        });
 
                     b.HasKey("Id");
 
@@ -6082,6 +6168,15 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("Constellation.Core.Models.Assessments.AssessmentInstruction", b =>
+                {
+                    b.HasOne("Constellation.Core.Models.Assessments.Assessment", null)
+                        .WithMany("Instructions")
+                        .HasForeignKey("AssessmentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("Constellation.Core.Models.Assessments.AssessmentProvision", b =>
                 {
                     b.HasOne("Constellation.Core.Models.Assessments.AssessmentStudent", null)
@@ -6728,69 +6823,6 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("Constellation.Core.Models.Messaging.Sms.SmsMessage", b =>
-                {
-                    b.OwnsOne("Constellation.Core.ValueObjects.SmsRecipient", "Recipient", b1 =>
-                        {
-                            b1.Property<Guid>("SmsMessageId")
-                                .HasColumnType("uniqueidentifier");
-
-                            b1.Property<string>("Name")
-                                .IsRequired()
-                                .HasMaxLength(200)
-                                .HasColumnType("nvarchar(200)")
-                                .HasColumnName("Recipient_Name");
-
-                            b1.Property<string>("Number")
-                                .IsRequired()
-                                .HasMaxLength(320)
-                                .HasColumnType("nvarchar(320)")
-                                .HasColumnName("Recipient_Number");
-
-                            b1.HasKey("SmsMessageId");
-
-                            b1.HasIndex("Number");
-
-                            b1.ToTable("Sms", "Messages");
-
-                            b1.WithOwner()
-                                .HasForeignKey("SmsMessageId");
-                        });
-
-                    b.OwnsOne("Constellation.Core.ValueObjects.SmsRecipient", "Sender", b1 =>
-                        {
-                            b1.Property<Guid>("SmsMessageId")
-                                .HasColumnType("uniqueidentifier");
-
-                            b1.Property<string>("Name")
-                                .IsRequired()
-                                .HasMaxLength(200)
-                                .HasColumnType("nvarchar(200)")
-                                .HasColumnName("Sender_Name");
-
-                            b1.Property<string>("Number")
-                                .IsRequired()
-                                .HasMaxLength(320)
-                                .HasColumnType("nvarchar(320)")
-                                .HasColumnName("Sender_Number");
-
-                            b1.HasKey("SmsMessageId");
-
-                            b1.HasIndex("Number");
-
-                            b1.ToTable("Sms", "Messages");
-
-                            b1.WithOwner()
-                                .HasForeignKey("SmsMessageId");
-                        });
-
-                    b.Navigation("Recipient")
-                        .IsRequired();
-
-                    b.Navigation("Sender")
-                        .IsRequired();
-                });
-
             modelBuilder.Entity("Constellation.Core.Models.Offerings.Offering", b =>
                 {
                     b.HasOne("Constellation.Core.Models.Subjects.Course", null)
@@ -7363,6 +7395,8 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
             modelBuilder.Entity("Constellation.Core.Models.Assessments.Assessment", b =>
                 {
                     b.Navigation("Downloads");
+
+                    b.Navigation("Instructions");
 
                     b.Navigation("Students");
                 });

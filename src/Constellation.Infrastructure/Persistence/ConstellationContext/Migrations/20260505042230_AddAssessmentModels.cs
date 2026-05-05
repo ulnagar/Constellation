@@ -24,10 +24,10 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                     CourseId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     Course = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Grade = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    DueDate = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
+                    AvailableTo = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
+                    AvailableFrom = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
                     CanvasId = table.Column<int>(type: "int", nullable: false),
-                    CanvasDueDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    CanvasLockDate = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    CanvasUnlockDate = table.Column<DateTime>(type: "datetime2", nullable: true),
                     AllowedAttempts = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
@@ -80,6 +80,28 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                 });
 
             migrationBuilder.CreateTable(
+                name: "Instructions",
+                schema: "Assessments",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    AssessmentId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Category = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Details = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Instructions", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Instructions_Assessments_AssessmentId",
+                        column: x => x.AssessmentId,
+                        principalSchema: "Assessments",
+                        principalTable: "Assessments",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Students",
                 schema: "Assessments",
                 columns: table => new
@@ -90,6 +112,13 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                     StudentGrade = table.Column<int>(type: "int", nullable: false),
                     SchoolCode = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     SchoolName = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    CreatedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    ModifiedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    ModifiedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    IsDeleted = table.Column<bool>(type: "bit", nullable: false),
+                    DeletedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    DeletedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
                     FirstName = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     LastName = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     PreferredName = table.Column<string>(type: "nvarchar(max)", nullable: true)
@@ -235,6 +264,12 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                 column: "AssessmentId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Instructions_AssessmentId",
+                schema: "Assessments",
+                table: "Instructions",
+                column: "AssessmentId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_StudentProvisions_ProvisionId",
                 schema: "Assessments",
                 table: "StudentProvisions",
@@ -280,6 +315,10 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
 
             migrationBuilder.DropTable(
                 name: "DownloadEvents",
+                schema: "Assessments");
+
+            migrationBuilder.DropTable(
+                name: "Instructions",
                 schema: "Assessments");
 
             migrationBuilder.DropTable(

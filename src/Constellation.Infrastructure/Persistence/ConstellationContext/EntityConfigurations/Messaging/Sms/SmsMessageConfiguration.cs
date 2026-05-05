@@ -37,7 +37,8 @@ internal class SmsMessageConfiguration : IEntityTypeConfiguration<SmsMessage>
                     .IsRequired()
                     .HasMaxLength(320);
 
-                owned.HasIndex(r => r.Number);
+                propertyBuilder
+                    .Ignore(r => r.Value);
             }); 
 
         builder
@@ -54,6 +55,9 @@ internal class SmsMessageConfiguration : IEntityTypeConfiguration<SmsMessage>
                     .HasColumnName($"{nameof(SmsMessage.Recipient)}_{nameof(SmsRecipient.Number)}")
                     .IsRequired()
                     .HasMaxLength(320);
+
+                propertyBuilder
+                    .Ignore(r => r.Value);
             });
 
         builder
