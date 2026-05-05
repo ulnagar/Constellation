@@ -1,10 +1,13 @@
 namespace Constellation.Presentation.Server.Areas.Admin.Pages.Hosting.Livestreams;
 
 using Application.Common.PresentationModels;
+using Application.Domains.Hosting.Commands.UpsertLivestream;
 using Application.Domains.Hosting.Queries.GetLivestream;
 using Application.Models.Auth;
 using BaseModels;
+using Constellation.Application.Domains.Hosting.Commands.UpsertNewsletter;
 using Constellation.Core.Abstractions.Services;
+using Constellation.Core.Models.Hosting.Errors;
 using Core.Models.Hosting;
 using Core.Shared;
 using MediatR;
@@ -88,6 +91,49 @@ public class UpsertModel : BasePageModel
 
     public async Task<IActionResult> OnPost()
     {
-        return RedirectToPage();
+        if (string.IsNullOrWhiteSpace(Name))
+        {
+            _logger
+                .ForContext(nameof(Error), LivestreamErrors.MustIncludeName, true)
+                .Warning("Failed to save Livestream by user {User}", _currentUserService.UserName);
+
+            ModalContent = ErrorDisplay.Create(LivestreamErrors.MustIncludeName, null);
+
+            return Page();
+        }
+
+        if (string.IsNullOrWhiteSpace(EmbedCode))
+        {
+            _logger
+                .ForContext(nameof(Error), LivestreamErrors.MustIncludeEmbedCode, true)
+                .Warning("Failed to save Livestream by user {User}", _currentUserService.UserName);
+
+            ModalContent = ErrorDisplay.Create(LivestreamErrors.MustIncludeEmbedCode, null);
+
+            return Page();
+        }
+
+        UpsertLivestreamCommand command = new(
+            Id,
+            Name,
+            EmbedCode,
+            Description,
+            StartsOn,
+            ExpiresOn);
+
+        Result result = await _mediator.Send(command);
+
+        if (result.IsFailure)
+        {
+            _logger
+                .ForContext(nameof(Error), result.Error, true)
+                .Warning("Failed to save Livestream by user {User}", _currentUserService.UserName);
+
+            ModalContent = ErrorDisplay.Create(result.Error, null);
+
+            return Page();
+        }
+
+        return RedirectToPage("/Hosting/Livestreams/Index", new { area = "Admin" });
     }
 }

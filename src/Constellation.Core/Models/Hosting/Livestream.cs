@@ -2,6 +2,7 @@
 
 using Errors;
 using Shared;
+using System.Runtime.CompilerServices;
 
 public sealed class Livestream
 {
@@ -28,6 +29,21 @@ public sealed class Livestream
 
     public DateOnly StartsOn { get; private set; }
     public DateOnly ExpiresOn { get; private set; }
+
+    public bool IsActive => IsCurrentOrFuture();
+
+    private bool IsCurrentOrFuture()
+    {
+        DateOnly currentDate = DateOnly.FromDateTime(DateTime.Now);
+
+        if (StartsOn >= currentDate)
+            return true;
+
+        if (ExpiresOn >= currentDate)
+            return true;
+
+        return false;
+    }
 
     public static Result<Livestream> Create(
         string name,
