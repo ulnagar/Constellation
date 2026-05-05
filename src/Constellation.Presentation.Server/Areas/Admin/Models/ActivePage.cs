@@ -7,5 +7,6 @@ public static class ActivePage
     public const string Rollover = "Rollover";
     public const string Automation = "Automation";
     public const string Hosting_Newsletters = "Hosting_Newsletters";
+    public const string Hosting_Livestreams = "Hosting_Livestreams";
     public const string Configuration = "Configuration";
 }

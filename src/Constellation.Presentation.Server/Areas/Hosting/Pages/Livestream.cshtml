@@ -1,0 +1,32 @@
+﻿@page "{id:guid}"
+@model Constellation.Presentation.Server.Areas.Hosting.Pages.LivestreamModel
+@{
+}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Aurora College Livestream</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@1.0.4/css/bulma.min.css">
+</head>
+<body>
+<section class="section">
+    <div class="container">
+    <h1 class="title">Livestream</h1>
+
+    @if (string.IsNullOrWhiteSpace(Model.EmbedCode))
+    {
+        <h1>Oops!</h1>
+        <h3>Sorry, we can't find what you're looking for. Please check the link and try again.</h3>
+    }
+    else
+    {
+        @Html.Raw(Model.EmbedCode)
+        <br/>
+        <h3 class="is-size-3">@Html.Raw(Model.Description)</h3>
+    }
+    </div>
+</section>
+</body>
+</html>

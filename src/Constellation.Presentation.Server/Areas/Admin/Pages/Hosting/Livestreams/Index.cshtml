@@ -1,0 +1,94 @@
+﻿@page
+@model Constellation.Presentation.Server.Areas.Admin.Pages.Hosting.Livestreams.IndexModel
+@using Constellation.Application.Models.Auth
+@using Microsoft.AspNetCore.Authorization
+
+@inject IAuthorizationService AuthorizationService
+@inject LinkGenerator LinkGenerator
+
+@{
+    var canEdit = await AuthorizationService.AuthorizeAsync(User, AuthPermission.Admin_Hosting_Edit_Value);
+}
+
+<h2>Livestreams</h2>
+
+<div class="page-menu">
+    @if (canEdit.Succeeded)
+    {
+        <a asp-page="/Hosting/Livestreams/Upsert" asp-area="Admin" class="btn btn-primary">New</a>
+    }
+</div>
+
+<hr />
+
+<table class="table table-striped table-hover">
+    <thead>
+    <tr>
+        <th></th>
+        <th>Name</th>
+        <th>Starts On</th>
+        <th>Expires On</th>
+        <th></th>
+    </tr>
+    </thead>
+    <tbody>
+    @foreach (var item in Model.Livestreams)
+    {
+        <tr>
+            <td>
+                @if (@item.IsActive)
+                {
+                    <i class="far fa-eye"></i>
+                }
+                else
+                {
+                    <i class="far fa-eye-slash"></i>
+                }
+            </td>
+            <td>@item.Name</td>
+            <td data-order="@item.StartsOn.ToString("yyyy-MM-dd")">@item.StartsOn.ToString("dd/MM/yyyy")</td>
+            <td data-order="@item.ExpiresOn.ToString("yyyy-MM-dd")">@item.ExpiresOn.ToString("dd/MM/yyyy")</td>
+            <td>
+                <div class="btn-group" role="group">
+                    <button type="button" class="btn btn-warning dropdown-toggle btn-sm btn-show-hover" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> Actions</button>
+                    <div class="dropdown-menu">
+                        @{
+                            var itemLink = LinkGenerator.GetUriByPage(HttpContext, "/Livestream", values: new { area = "Hosting", id = @item.Id });
+
+                            if (!string.IsNullOrWhiteSpace(itemLink))
+                            {
+                                <button class="dropdown-item copy-link-button" data-link="@itemLink">Copy Link</button>
+                            }
+                        }
+
+                        @if (canEdit.Succeeded)
+                        {
+                            <a asp-page="/Hosting/Livestreams/Upsert" asp-area="Admin" asp-route-id="@item.Id" class="dropdown-item">Edit</a>
+                        }
+                    </div>
+                </div>
+            </td>
+        </tr>
+    }
+    </tbody>
+</table>
+
+@section scripts
+{
+    <script>
+        $(document).ready(function (){
+            $('table').DataTable({
+                "order": [
+                    [2, 'desc']
+                ]
+            });
+        })
+
+        $(document).on('click', '.copy-link-button', async function copyText() {
+            const btn = this;
+            await navigator.clipboard.writeText(btn.dataset.link);
+            btn.textContent = 'Copied!';
+            setTimeout(() => btn.textContent = 'Copy Link', 2000);
+        });
+    </script>
+}
