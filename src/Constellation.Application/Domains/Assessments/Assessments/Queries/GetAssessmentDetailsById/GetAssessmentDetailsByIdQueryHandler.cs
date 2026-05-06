@@ -65,12 +65,23 @@ internal sealed class GetAssessmentDetailsByIdQueryHandler
 
         foreach (AssessmentDownload download in assessment.Downloads)
         {
+            List<AssessmentDetailsResponse.DownloadEvent> downloadEvents = [];
+
+            foreach (AssessmentDownloadEvent downloadEvent in download.DownloadEvents)
+            {
+                downloadEvents.Add(new(
+                    downloadEvent.DownloadedBy,
+                    downloadEvent.DownloadedByEmail.ToString(),
+                    downloadEvent.DownloadedAt));
+            }
+
             downloads.Add(new(
                 download.Id,
                 download.Name,
                 download.AvailableFrom,
                 download.AvailableTo,
-                download.IsRestricted));
+                download.IsRestricted,
+                downloadEvents));
         }
 
         foreach (AssessmentInstruction instruction in assessment.Instructions)

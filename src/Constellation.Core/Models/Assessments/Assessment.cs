@@ -90,6 +90,9 @@ public sealed class Assessment : AggregateRoot
     public void AddDownload(AssessmentDownload download) => 
         _downloads.Add(download);
 
+    public void RemoveDownload(AssessmentDownload download) => 
+        _downloads.Remove(download);
+
     public Result AddStudent(Student student, List<Provision> provisions)
     {
         AssessmentStudent? existingEntry = _students.FirstOrDefault(entry => entry.StudentId == student.Id);

@@ -3,8 +3,11 @@
 using Application.Domains.Assessments.Assessments.Commands.AddDownloadToAssessment;
 using Application.Domains.Assessments.Assessments.Commands.AddProvisionToAssessmentStudent;
 using Application.Domains.Assessments.Assessments.Commands.AddStudentToAssessment;
+using Application.Domains.Assessments.Assessments.Commands.RemoveDownloadFromAssessment;
 using Application.Domains.Assessments.Assessments.Commands.RemoveStudentFromAssessment;
 using Application.Domains.Assessments.Assessments.Queries.GetAssessmentDetailsById;
+using Application.Domains.Assessments.Assessments.Queries.GetAssessmentDownload;
+using Application.Domains.Assessments.Assessments.Queries.GetAssessmentDownloadFile;
 using Application.Domains.Assessments.Provisions.Models;
 using Application.Domains.Assessments.Provisions.Queries.GetAssessmentProvisions;
 using Application.Domains.Assessments.Provisions.Queries.GetCurrentStudentProvisionsByStudentId;
@@ -18,6 +21,7 @@ using Constellation.Application.Domains.Assessments.Assessments.Models;
 using Constellation.Core.Abstractions.Services;
 using Constellation.Core.Models.Attachments.Enums;
 using Constellation.Core.Shared;
+using Core.Models.Assessments.Errors;
 using Core.Models.Assessments.Identifiers;
 using Core.Models.Attachments.DTOs;
 using Core.Models.Students.Errors;
@@ -29,6 +33,7 @@ using Presentation.Shared.Helpers.Attributes;
 using Serilog;
 using Shared.Components.AddDownloadToAssessment;
 using Shared.PartialViews.AddAssessmentProvisionForStudent;
+using Shared.PartialViews.ConfirmRemoveDocumentFromAssessmentModal;
 using Shared.PartialViews.ConfirmRemoveStudentFromAssessmentModal;
 
 [HasPermission(AuthPermission.Subjects_Assessments_View_Value)]
@@ -95,6 +100,20 @@ public class DetailsModel : BasePageModel
         return Partial("ConfirmRemoveStudentFromAssessmentModal", viewModel);
     }
 
+    public async Task<IActionResult> OnPostAjaxRemoveDocument(AssessmentDownloadId documentId)
+    {
+        Result<AssessmentDownloadResponse> download = await _mediator.Send(new GetAssessmentDownloadQuery(Id, documentId));
+
+        if (download.IsFailure)
+            return BadRequest();
+
+        ConfirmRemoveDocumentFromAssessmentModalViewModel viewModel = new(
+            documentId,
+            download.Value.Name);
+
+        return Partial("ConfirmRemoveDocumentFromAssessmentModal", viewModel);
+    }
+
     public async Task<IActionResult> OnGetRemoveStudent(StudentId studentId)
     {
         if (studentId == StudentId.Empty)
@@ -127,6 +146,50 @@ public class DetailsModel : BasePageModel
                 .ForContext(nameof(Error), result.Error)
                 .Warning("Failed to remove student from Assessment by user {User}", _currentUserService.UserName);
             
+            ModalContent = ErrorDisplay.Create(
+                result.Error,
+                _linkGenerator.GetPathByPage("/Subject/Assessments/Details", values: new { area = "Staff", Id }));
+
+            await PreparePage();
+
+            return Page();
+        }
+
+        return RedirectToPage();
+    }
+
+    public async Task<IActionResult> OnGetRemoveDocument(AssessmentDownloadId documentId)
+    {
+        if (documentId == AssessmentDownloadId.Empty)
+        {
+            _logger
+                .ForContext(nameof(Error), AssessmentDownloadErrors.NotFound(documentId), true)
+                .Warning("Failed to remove download from Assessment by user {User}", _currentUserService.UserName);
+
+            ModalContent = ErrorDisplay.Create(
+                StudentErrors.InvalidId,
+                _linkGenerator.GetPathByPage("/Subject/Assessments/Details", values: new { area = "Staff", Id }));
+
+            await PreparePage();
+
+            return Page();
+        }
+
+        RemoveDownloadFromAssessmentCommand command = new(Id, documentId);
+
+        _logger
+            .ForContext(nameof(RemoveDownloadFromAssessmentCommand), command, true)
+            .Information("Requested to remove document from Assessment by user {User}", _currentUserService.UserName);
+
+        Result result = await _mediator.Send(command);
+
+        if (result.IsFailure)
+        {
+            _logger
+                .ForContext(nameof(RemoveDownloadFromAssessmentCommand), command, true)
+                .ForContext(nameof(Error), result.Error)
+                .Warning("Failed to remove document from Assessment by user {User}", _currentUserService.UserName);
+
             ModalContent = ErrorDisplay.Create(
                 result.Error,
                 _linkGenerator.GetPathByPage("/Subject/Assessments/Details", values: new { area = "Staff", Id }));
@@ -322,7 +385,7 @@ public class DetailsModel : BasePageModel
     {
         _logger.Information("Requested to download document for Assessment by user {User}", _currentUserService.UserName);
 
-        Result<AttachmentResponse> documentRequest = await _mediator.Send(new GetAttachmentFileQuery(AttachmentType.AssessmentDownload, downloadId.ToString()));
+        Result<AttachmentResponse> documentRequest = await _mediator.Send(new GetAssessmentDownloadFileQuery(Id, downloadId));
 
         if (documentRequest.IsFailure)
         {

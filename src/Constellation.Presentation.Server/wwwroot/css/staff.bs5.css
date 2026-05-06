@@ -2,6 +2,10 @@
     --sidebar-width: 240px;
 }
 
+.hidden {
+    display: none;
+}
+
 body {
     overflow: hidden;
 }

@@ -32,12 +32,12 @@ internal sealed class CountStocktakeItemsOutstandingQueryHandler
 
     public async Task<Result<(StocktakeEventId EventId, double Percentage)>> Handle(CountStocktakeItemsOutstandingQuery request, CancellationToken cancellationToken)
     {
-        List<Asset> activeAssets = await _assetRepository.GetAllActive(cancellationToken);
-
         List<StocktakeEvent> currentEvents = await _stocktakeRepository.GetCurrentEvents(cancellationToken);
 
         if (currentEvents.Count == 0)
             return Result.Failure<(StocktakeEventId EventId, double Percentage)>(Error.NullValue);
+
+        List<Asset> activeAssets = await _assetRepository.GetAllActive(cancellationToken);
 
         double sightedDeviceCount = currentEvents
             .SelectMany(item => item.Sightings)

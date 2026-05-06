@@ -43,7 +43,13 @@ public sealed record AssessmentDetailsResponse(
         string Name,
         DateOnly AvailableFrom,
         DateOnly AvailableTo,
-        bool IsRestricted);
+        bool IsRestricted,
+        List<DownloadEvent> DownloadEvents);
+
+    public sealed record DownloadEvent(
+        string User,
+        string Email,
+        DateTimeOffset DownloadedOn);
 
     public sealed record Instruction(
         AssessmentInstructionId InstructionId,
