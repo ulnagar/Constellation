@@ -257,11 +257,10 @@ internal sealed class SendAbsenceNotificationToParentCommandHandler
 
                                 continue;
                             }
+
+                            _logger.Error("{id}: Email Sending Failed! No further fallback possible!", request.JobId);
                         }
-
-                        _logger.Error("{id}: Email Sending Failed! No further fallback possible!", request.JobId);
                     }
-
                 }
                 else if (recipients.Count > 0)
                 {

@@ -5,7 +5,7 @@ using System.Text.Json.Serialization;
 
 public sealed class SmsDeliveryReceipt
 {
-    [JsonPropertyName("outgoing_id")]
+    [JsonPropertyName("outgoingId")]
     [JsonConverter(typeof(NumberOrStringConverter))]
     public string? OutgoingId { get; set; }
 
