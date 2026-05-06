@@ -31,6 +31,12 @@ public sealed class PhoneNumber : ValueObject<PhoneNumber, string>, IValueObject
             trimmedNumber = $"02{trimmedNumber}";
         }
 
+        // Does it start with 61? Trim and add the 0
+        if (trimmedNumber.Length == 11 && trimmedNumber[..2] == "61")
+        {
+            trimmedNumber = $"0{trimmedNumber[2..]}";
+        }
+
         if (trimmedNumber.Length != 10)
         {
             return Result.Failure<PhoneNumber>(DomainErrors.ValueObjects.PhoneNumber.NumberInvalid);

@@ -49,30 +49,35 @@ internal sealed class CreateNewIncomingSmsRecordCommandHandler
 
         SmsRecipient receiver = SmsRecipient.Unknown;
 
-        if (recipientPhoneNumber.Value.ToString(PhoneNumber.Format.None) == SmsRecipient.AuroraNoReply.Number)
-            receiver = SmsRecipient.AuroraNoReply;
+        if (recipientPhoneNumber.IsSuccess)
+        {
+            if (recipientPhoneNumber.Value.ToString(PhoneNumber.Format.None) == SmsRecipient.AuroraNoReply.Number)
+                receiver = SmsRecipient.AuroraNoReply;
 
-        if (recipientPhoneNumber.Value.ToString(PhoneNumber.Format.None) == SmsRecipient.Aurora.Number)
-            receiver = SmsRecipient.Aurora;
+            if (recipientPhoneNumber.Value.ToString(PhoneNumber.Format.None) == SmsRecipient.Aurora.Number)
+                receiver = SmsRecipient.Aurora;
+        }
 
         Result<PhoneNumber> senderPhoneNumber = PhoneNumber.Create(request.IncomingSms.From ?? string.Empty);
 
-        SmsRecipient sender = SmsRecipient.Unknown;
+        SmsRecipient? sender = null;
 
-        SchoolContact? contact = await _contactRepository.GetByPhoneNumber(senderPhoneNumber.Value, cancellationToken);
-        if (contact is not null)
-            sender = SmsRecipient.Create(contact.Name, senderPhoneNumber.Value).Value;
+        if (senderPhoneNumber.IsSuccess)
+        {
+            SchoolContact? contact = await _contactRepository.GetByPhoneNumber(senderPhoneNumber.Value, cancellationToken);
+            if (contact is not null)
+                sender = SmsRecipient.Create(contact.Name, senderPhoneNumber.Value).Value;
 
-        StaffMember? teacher = await _staffRepository.GetCurrentByPhoneNumber(senderPhoneNumber.Value, cancellationToken);
-        if (teacher is not null)
-            sender = SmsRecipient.Create(teacher.Name, senderPhoneNumber.Value).Value;
-        
-        Parent? parent = await _familyRepository.GetParentByMobileNumber(senderPhoneNumber.Value, cancellationToken);
-        if (parent is not null && sender == SmsRecipient.Unknown)
-            sender = SmsRecipient.Create(parent.Name, senderPhoneNumber.Value).Value;
+            StaffMember? teacher = await _staffRepository.GetCurrentByPhoneNumber(senderPhoneNumber.Value, cancellationToken);
+            if (teacher is not null)
+                sender = SmsRecipient.Create(teacher.Name, senderPhoneNumber.Value).Value;
 
-        if (sender ==  SmsRecipient.Unknown)
-            sender = SmsRecipient.Create("Unknown", senderPhoneNumber.Value.ToString(PhoneNumber.Format.None)).Value;
+            Parent? parent = await _familyRepository.GetParentByMobileNumber(senderPhoneNumber.Value, cancellationToken);
+            if (parent is not null && sender == null)
+                sender = SmsRecipient.Create(parent.Name, senderPhoneNumber.Value).Value;
+        }
+
+        sender ??= SmsRecipient.Create("Unknown", senderPhoneNumber.Value.ToString(PhoneNumber.Format.None)).Value;
 
         SmsMessage inboundMessage = new(
             string.Empty,
