@@ -136,22 +136,21 @@ public sealed class Assessment : AggregateRoot
         return Result.Success();
     }
 
-    public Result AddStudentSubmission(StudentId studentId, AppUser user)
+    public Result<SubmissionId> AddStudentSubmission(StudentId studentId, AppUser user)
     {
         AssessmentStudent? assessmentStudent = _students.FirstOrDefault(s => s.StudentId == studentId);
         
         if (assessmentStudent is null)
         {
             // Student not found in this assessment, cannot add submission
-
-            return Result.Failure(AssessmentErrors.NoLinkedStudent(studentId));
+            return Result.Failure<SubmissionId>(AssessmentErrors.NoLinkedStudent(studentId));
         }
         
         SubmissionId submissionId = assessmentStudent.AddSubmission(user);
 
-        RaiseDomainEvent(new AssessmentSubmissionReceivedDomainEvent(new(), Id, submissionId));
+        RaiseDomainEvent(new AssessmentSubmissionReceivedDomainEvent(new(), Id, studentId, submissionId));
 
-        return Result.Success();
+        return submissionId;
     }
 
     public void AddInstructions(AssessmentInstruction instruction)

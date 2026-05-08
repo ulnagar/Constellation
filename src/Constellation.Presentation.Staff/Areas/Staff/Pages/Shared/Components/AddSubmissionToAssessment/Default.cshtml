@@ -1,0 +1,35 @@
+﻿@model Constellation.Presentation.Staff.Areas.Staff.Pages.Shared.Components.AddSubmissionToAssessment.AssessmentSubmissionSelection
+
+<form asp-page-handler="UploadSubmission" method="post" enctype="multipart/form-data">
+    <div class="modal fade" tabindex="-1" id="upload-assessment-submission-modal">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Upload Student Submission</h5>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="mb-3 col">
+                            <span class="form-label">Student</span>
+                            <select asp-for="StudentId" asp-items="@(new SelectList(Model.StudentList, "Key", "Value"))" class="combo" style="width:100%">
+                                <option value="">-- Select --</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="mb-3 col">
+                            <label asp-for="File" class="form-label">File</label>
+                            <input asp-for="File" class="form-control" type="file"/>
+                            <div class="form-text"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <input type="button" class="btn btn-default" data-bs-dismiss="modal" value="Cancel" />
+                    <input type="submit" value="Save" class="btn btn-primary" />
+                </div>
+            </div>
+        </div>
+    </div>
+</form>

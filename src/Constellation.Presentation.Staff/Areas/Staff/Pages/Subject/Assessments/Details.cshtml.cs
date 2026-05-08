@@ -3,6 +3,7 @@
 using Application.Domains.Assessments.Assessments.Commands.AddDownloadToAssessment;
 using Application.Domains.Assessments.Assessments.Commands.AddProvisionToAssessmentStudent;
 using Application.Domains.Assessments.Assessments.Commands.AddStudentToAssessment;
+using Application.Domains.Assessments.Assessments.Commands.AddSubmissionToAssessment;
 using Application.Domains.Assessments.Assessments.Commands.RemoveDownloadFromAssessment;
 using Application.Domains.Assessments.Assessments.Commands.RemoveStudentFromAssessment;
 using Application.Domains.Assessments.Assessments.Queries.GetAssessmentDetailsById;
@@ -32,6 +33,7 @@ using Microsoft.AspNetCore.Routing;
 using Presentation.Shared.Helpers.Attributes;
 using Serilog;
 using Shared.Components.AddDownloadToAssessment;
+using Shared.Components.AddSubmissionToAssessment;
 using Shared.PartialViews.AddAssessmentProvisionForStudent;
 using Shared.PartialViews.ConfirmRemoveDocumentFromAssessmentModal;
 using Shared.PartialViews.ConfirmRemoveStudentFromAssessmentModal;
@@ -367,6 +369,64 @@ public class DetailsModel : BasePageModel
                 _logger
                     .ForContext(nameof(Exception), ex, true)
                     .Warning("Failed to upload document for Assessment by user {User}", _currentUserService.UserName);
+
+                ModalContent = ErrorDisplay.Create(
+                    new(ex.Source!, ex.Message),
+                    _linkGenerator.GetPathByPage("/Subject/Assessments/Details", values: new { area = "Staff", Id }));
+
+                await PreparePage();
+
+                return Page();
+            }
+        }
+
+        return RedirectToPage();
+    }
+
+    public async Task<IActionResult> OnPostUploadSubmission(AssessmentSubmissionSelection viewModel)
+    {
+        if (viewModel?.File is not null)
+        {
+            try
+            {
+                _logger.Information("Requested to upload submission for Assessment by user {User}", _currentUserService.UserName);
+
+                await using MemoryStream target = new();
+                await viewModel.File.CopyToAsync(target);
+
+                FileDto file = new()
+                {
+                    FileData = target.ToArray(),
+                    FileName = viewModel.File.FileName,
+                    FileType = viewModel.File.ContentType
+                };
+
+                AddSubmissionToAssessmentCommand command = new(
+                    Id,
+                    viewModel.StudentId,
+                    file);
+
+                Result request = await _mediator.Send(command);
+
+                if (request.IsFailure)
+                {
+                    _logger
+                        .ForContext(nameof(Error), request.Error, true)
+                        .Warning("Failed to upload submission for Assessment by user {User}", _currentUserService.UserName);
+
+                    ModalContent = ErrorDisplay.Create(
+                        request.Error,
+                        _linkGenerator.GetPathByPage("/Subject/Assessments/Details", values: new { area = "Staff", Id }));
+
+                    return Page();
+
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger
+                    .ForContext(nameof(Exception), ex, true)
+                    .Warning("Failed to upload submission for Assessment by user {User}", _currentUserService.UserName);
 
                 ModalContent = ErrorDisplay.Create(
                     new(ex.Source!, ex.Message),
