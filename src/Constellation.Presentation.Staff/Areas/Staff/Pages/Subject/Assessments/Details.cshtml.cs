@@ -9,10 +9,11 @@ using Application.Domains.Assessments.Assessments.Commands.RemoveStudentFromAsse
 using Application.Domains.Assessments.Assessments.Queries.GetAssessmentDetailsById;
 using Application.Domains.Assessments.Assessments.Queries.GetAssessmentDownload;
 using Application.Domains.Assessments.Assessments.Queries.GetAssessmentDownloadFile;
+using Application.Domains.Assessments.Assessments.Queries.GetAssessmentSubmissionFile;
+using Application.Domains.Assessments.Assessments.Queries.GetAssessmentSubmissionsForDownload;
 using Application.Domains.Assessments.Provisions.Models;
 using Application.Domains.Assessments.Provisions.Queries.GetAssessmentProvisions;
 using Application.Domains.Assessments.Provisions.Queries.GetCurrentStudentProvisionsByStudentId;
-using Application.Domains.Attachments.Queries.GetAttachmentFile;
 using Application.Domains.Students.Models;
 using Application.Domains.Students.Queries.GetStudentById;
 using Application.DTOs;
@@ -20,7 +21,6 @@ using Application.Models.Auth;
 using Constellation.Application.Common.PresentationModels;
 using Constellation.Application.Domains.Assessments.Assessments.Models;
 using Constellation.Core.Abstractions.Services;
-using Constellation.Core.Models.Attachments.Enums;
 using Constellation.Core.Shared;
 using Core.Models.Assessments.Errors;
 using Core.Models.Assessments.Identifiers;
@@ -463,5 +463,53 @@ public class DetailsModel : BasePageModel
         }
         
         return File(documentRequest.Value.FileData, documentRequest.Value.FileType, documentRequest.Value.FileName);
+    }
+
+    public async Task<IActionResult> OnGetDownloadAllSubmissions()
+    {
+        _logger.Information("Requested to download all submissions for Assessment by user {User}", _currentUserService.UserName);
+
+        Result<FileDto> downloadRequest = await _mediator.Send(new GetAssessmentSubmissionsForDownloadQuery(Id));
+
+        if (downloadRequest.IsFailure)
+        {
+            _logger
+                .ForContext(nameof(Error), downloadRequest.Error, true)
+                .Warning("Failed to download all submissions for Assessment by user {User}", _currentUserService.UserName);
+
+            ModalContent = ErrorDisplay.Create(
+                downloadRequest.Error,
+                _linkGenerator.GetPathByPage("/Subject/Assessments/Details", values: new { area = "Staff", Id }));
+
+            await PreparePage();
+
+            return Page();
+        }
+
+        return File(downloadRequest.Value.FileData, downloadRequest.Value.FileType, downloadRequest.Value.FileName);
+    }
+
+    public async Task<IActionResult> OnGetDownloadSubmission(SubmissionId submissionId)
+    {
+        _logger.Information("Requested to download submission from Assessment by user {User}", _currentUserService.UserName);
+
+        Result<FileDto> downloadRequest = await _mediator.Send(new GetAssessmentSubmissionFileQuery(Id, submissionId));
+
+        if (downloadRequest.IsFailure)
+        {
+            _logger
+                .ForContext(nameof(Error), downloadRequest.Error, true)
+                .Warning("Failed to download submission from Assessment by user {User}", _currentUserService.UserName);
+
+            ModalContent = ErrorDisplay.Create(
+                downloadRequest.Error,
+                _linkGenerator.GetPathByPage("/Subject/Assessments/Details", values: new { area = "Staff", Id }));
+
+            await PreparePage();
+
+            return Page();
+        }
+
+        return File(downloadRequest.Value.FileData, downloadRequest.Value.FileType, downloadRequest.Value.FileName);
     }
 }

@@ -8,4 +8,8 @@ public static class AssessmentSubmissionErrors
     public static Func<SubmissionId, Error> NotFound = id => new(
         "Assessment.Submission.NotFound",
         $"An Assessment Submission with the Id '{id}' could not be found");
+
+    public static readonly Error NoneFound = new(
+        "Assessment.Submission.NoneFound",
+        "No Assessment Submissions could be found");
 }

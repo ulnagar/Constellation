@@ -216,7 +216,7 @@
             @if (canEditTest.Succeeded)
             {
                 <button data-bs-toggle="modal" data-bs-target="#upload-assessment-submission-modal" class="btn btn-success">Add Submission</button>
-                // Download All Submissions button
+                <a asp-page-handler="DownloadAllSubmissions" class="btn btn-warning">Download All</a>
             }
 
             <table class="table table-striped table-hover submissions-table">
@@ -238,7 +238,10 @@
                             <td data-order="@entry.SubmittedAt.LocalDateTime.ToString("yyyy-MM-dd HH:mm")">@entry.SubmittedAt.LocalDateTime.ToString("g")</td>
                             <td>@entry.SubmittedBy</td>
                             <td>
-                                <!-- Download button -->
+                                @if (canEditTest.Succeeded)
+                                {
+                                    <a asp-page-handler="DownloadSubmission" asp-route-submissionId="@entry.SubmissionId" class="btn btn-warning btn-sm btn-show-hover">Download</a>
+                                }
                             </td>
                         </tr>
                     }
