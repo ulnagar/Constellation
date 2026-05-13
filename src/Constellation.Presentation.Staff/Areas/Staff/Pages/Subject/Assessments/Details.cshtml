@@ -1,5 +1,6 @@
 @page "{id}"
 @using Constellation.Core.Extensions
+@using Constellation.Core.Models.Assessments.Enums
 @model Constellation.Presentation.Staff.Areas.Staff.Pages.Subject.Assessments.DetailsModel
 
 @inject IAuthorizationService AuthorizationService
@@ -63,6 +64,9 @@
                     <a class="nav-link active" href="#students" data-bs-toggle="tab" role="tab">Students</a>
                 </li>
                 <li class="nav-item">
+                    <a class="nav-link" href="#instructions" data-bs-toggle="tab" role="tab">Instructions</a>
+                </li>
+                <li class="nav-item">
                     <a class="nav-link" href="#downloads" data-bs-toggle="tab" role="tab">Downloads</a>
                 </li>
                 <li class="nav-item">
@@ -83,47 +87,104 @@
 
             <table class="table table-striped table-hover students-table">
                 <thead>
-                    <tr>
-                        <th>Name</th>
-                        <th>Grade</th>
-                        <th>School</th>
-                        <th>Provisions</th>
-                        <th></th>
-                    </tr>
+                <tr>
+                    <th>Name</th>
+                    <th>Grade</th>
+                    <th>School</th>
+                    <th>Provisions</th>
+                    <th></th>
+                </tr>
                 </thead>
                 <tbody>
-                    @foreach (var entry in Model.Assessment.Students.Where(student => !student.IsDeleted))
-                    {
-                        <tr>
-                            <td data-order="@entry.StudentName.SortOrder" data-search="@entry.StudentName.DisplayName @entry.StudentName.FirstName">@entry.StudentName</td>
-                            <td data-order="@entry.StudentGrade.AsNumber()">@entry.StudentGrade.AsName()</td>
-                            <td>@entry.SchoolName</td>
-                            <td>
-                                @foreach (var provision in entry.Provisions)
-                                {
-                                    <button class="btn btn-sm btn-primary mb-1">@provision</button>
-                                }
-                            </td>
-                            <td>
-                                <div class="btn-group" role="group">
-                                    <button type="button" class="btn btn-warning dropdown-toggle btn-sm btn-show-hover" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> Actions</button>
-                                    <div class="dropdown-menu">
-                                        @if (canEditProvisionsTest.Succeeded)
-                                        {
-                                            <button class="dropdown-item add-provision-button" data-id="@entry.StudentId">Add Provision</button>
-                                        }
+                @foreach (var entry in Model.Assessment.Students.Where(student => !student.IsDeleted))
+                {
+                    <tr>
+                        <td data-order="@entry.StudentName.SortOrder" data-search="@entry.StudentName.DisplayName @entry.StudentName.FirstName">@entry.StudentName</td>
+                        <td data-order="@entry.StudentGrade.AsNumber()">@entry.StudentGrade.AsName()</td>
+                        <td>@entry.SchoolName</td>
+                        <td>
+                            @foreach (var provision in entry.Provisions)
+                            {
+                                <button class="btn btn-sm btn-primary mb-1">@provision</button>
+                            }
+                        </td>
+                        <td>
+                            <div class="btn-group" role="group">
+                                <button type="button" class="btn btn-warning dropdown-toggle btn-sm btn-show-hover" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> Actions</button>
+                                <div class="dropdown-menu">
+                                    @if (canEditProvisionsTest.Succeeded)
+                                    {
+                                        <button class="dropdown-item add-provision-button" data-id="@entry.StudentId">Add Provision</button>
+                                    }
                                         
-                                        @if (canEditTest.Succeeded)
-                                        {
-                                            <button class="dropdown-item remove-student-button" data-id="@entry.StudentId">Remove Student</button>
-                                        }
-                                    </div>
+                                    @if (canEditTest.Succeeded)
+                                    {
+                                        <button class="dropdown-item remove-student-button" data-id="@entry.StudentId">Remove Student</button>
+                                    }
                                 </div>
-                            </td>
-                        </tr>
-                    }
+                            </div>
+                        </td>
+                    </tr>
+                }
                 </tbody>
             </table>
+        </div>
+        
+        <div id="instructions" class="tab-pane">
+            <h3>Instructions</h3>
+            
+            @if (canEditTest.Succeeded)
+            {
+                <button data-bs-toggle="modal" data-bs-target="#add-assessment-instruction-modal" class="btn btn-success">Add Instruction</button>
+            }
+
+            <div class="row">
+                <div class="col-4">
+                    <div class="card">
+                        <div class="card-header">
+                            Students
+                        </div>
+                        <div class="card-body">
+                            @Html.Raw(Model.Assessment.Instructions.FirstOrDefault(entry => entry.Category == UserCategory.Student)?.Description)
+                        </div>
+                        <div class="card-footer">
+                            <button class="btn btn-primary">Edit</button>
+                            <button class="btn btn-danger">Delete</button>
+
+                        </div>
+                    </div>
+                </div>
+                <div class="col-4">
+                    <div class="card">
+                        <div class="card-header">
+                            Parents
+                        </div>
+                        <div class="card-body">
+                            @Html.Raw(Model.Assessment.Instructions.FirstOrDefault(entry => entry.Category == UserCategory.Parent)?.Description)
+                        </div>
+                        <div class="card-footer">
+                            <button class="btn btn-primary">Edit</button>
+                            <button class="btn btn-danger">Delete</button>
+
+                        </div>
+                    </div>
+                </div>
+                <div class="col-4">
+                    <div class="card">
+                        <div class="card-header">
+                            Coordinators
+                        </div>
+                        <div class="card-body">
+                            @Html.Raw(Model.Assessment.Instructions.FirstOrDefault(entry => entry.Category == UserCategory.Coordinator)?.Description)
+                        </div>
+                        <div class="card-footer">
+                            <button class="btn btn-primary">Edit</button>
+                            <button class="btn btn-danger">Delete</button>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     
         <div id="downloads" class="tab-pane">
