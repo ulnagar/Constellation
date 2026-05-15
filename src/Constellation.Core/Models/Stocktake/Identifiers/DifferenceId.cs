@@ -6,7 +6,7 @@ using System;
 public readonly record struct DifferenceId(Guid Value)
     : IStronglyTypedId<DifferenceId, Guid>
 {
-    public static readonly DifferenceId Empty = new(Guid.Empty);
+    public static DifferenceId Empty => new(Guid.Empty);
 
     public static DifferenceId FromValue(Guid value) =>
         new(value);

@@ -6,6 +6,7 @@ using System;
 public readonly record struct AttachmentId(Guid Value)
     : IStronglyTypedId<AttachmentId, Guid>
 {
+    public static AttachmentId Empty => new(Guid.Empty);
     public static AttachmentId FromValue(Guid value) =>
         new(value);
 

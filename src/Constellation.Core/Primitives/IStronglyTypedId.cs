@@ -8,6 +8,7 @@ public interface IStronglyTypedId<TSelf, TValue> : IStronglyTypedId
     TValue Value { get; }
 
     static abstract TSelf FromValue(TValue value);
+    static abstract TSelf Empty { get; }
 
     static TSelf Parse<TSelf, TValue>(TValue raw)
         where TSelf : IStronglyTypedId<TSelf, TValue>

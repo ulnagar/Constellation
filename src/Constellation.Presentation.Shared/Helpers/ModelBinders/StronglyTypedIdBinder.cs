@@ -12,13 +12,16 @@ public class StronglyTypedIdModelBinder<TSelf, TValue> : IModelBinder
         ValueProviderResult valueProviderResult = bindingContext.ValueProvider
             .GetValue(bindingContext.ModelName);
 
-        if (valueProviderResult == ValueProviderResult.None)
-            return Task.CompletedTask;
-
-        string? rawValue = valueProviderResult.FirstValue;
+        string? rawValue = valueProviderResult == ValueProviderResult.None
+            ? null
+            : valueProviderResult.FirstValue;
 
         if (string.IsNullOrEmpty(rawValue))
+        {
+            bindingContext.Result = ModelBindingResult.Success(TSelf.Empty);
+
             return Task.CompletedTask;
+        }
 
         try
         {

@@ -1,5 +1,5 @@
 <Project>
-	<!--<Target Name="UpdateAssemblyVersion" BeforeTargets="BeforeBuild" Condition="'$(IsHotReloadBuild)' != 'true'">-->
+	<Target Name="UpdateAssemblyVersion" BeforeTargets="BeforeBuild" Condition="'$(IsHotReloadBuild)' != 'true'">
 		<PropertyGroup>
 			<!-- YY -->
 			<_YearYY>$([System.DateTime]::Now.ToString('yy'))</_YearYY>
@@ -15,5 +15,5 @@
 			<FileVersion>$(AssemblyVersion)</FileVersion>
 			<InformationalVersion>$(AssemblyVersion)</InformationalVersion>
 		</PropertyGroup>
-	<!--</Target>-->
+	</Target>
 </Project>

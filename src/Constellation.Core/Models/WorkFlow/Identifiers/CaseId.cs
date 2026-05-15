@@ -6,7 +6,7 @@ using System;
 public readonly record struct CaseId(Guid Value)
     : IStronglyTypedId<CaseId, Guid>
 {
-    public static readonly CaseId Empty = new(Guid.Empty);
+    public static CaseId Empty => new(Guid.Empty);
 
     public static CaseId FromValue(Guid value) =>
         new(value);

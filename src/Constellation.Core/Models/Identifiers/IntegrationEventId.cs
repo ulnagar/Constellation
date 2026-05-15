@@ -6,6 +6,8 @@ using System;
 public record struct IntegrationEventId(Guid Value)
     : IStronglyTypedId<IntegrationEventId, Guid>
 {
+    public static IntegrationEventId Empty => new(Guid.Empty);
+
     public static IntegrationEventId FromValue(Guid value) =>
         new(value);
 

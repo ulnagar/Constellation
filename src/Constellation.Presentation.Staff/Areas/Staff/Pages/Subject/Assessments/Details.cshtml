@@ -132,58 +132,44 @@
         
         <div id="instructions" class="tab-pane">
             <h3>Instructions</h3>
-            
-            @if (canEditTest.Succeeded)
-            {
-                <button data-bs-toggle="modal" data-bs-target="#add-assessment-instruction-modal" class="btn btn-success">Add Instruction</button>
-            }
 
             <div class="row">
-                <div class="col-4">
-                    <div class="card">
-                        <div class="card-header">
-                            Students
-                        </div>
-                        <div class="card-body">
-                            @Html.Raw(Model.Assessment.Instructions.FirstOrDefault(entry => entry.Category == UserCategory.Student)?.Description)
-                        </div>
-                        <div class="card-footer">
-                            <button class="btn btn-primary">Edit</button>
-                            <button class="btn btn-danger">Delete</button>
+                @foreach (var category in UserCategory.GetOptions)
+                {
+                    var instruction = Model.Assessment.Instructions.FirstOrDefault(entry => entry.Category == category);
 
+                    <div class="col-4">
+                        <div class="card">
+                            <div class="card-header">
+                                <h4 class="card-title">@category.Name</h4>
+                            </div>
+                            <div class="card-body">
+                                @Html.Raw(instruction?.Description)
+                            </div>
+                            <div class="card-footer">
+                                <div class="row">
+                                    <div class="col-6 d-grid">
+                                        @if (instruction is null)
+                                        {
+                                            <button class="btn btn-primary instruction-update-button" data-id="" data-category="@category">Create</button>
+                                        }
+                                        else
+                                        {
+                                            <button class="btn btn-primary instruction-update-button" data-id="@instruction.InstructionId" data-category="@category">Edit</button>
+                                        }
+                                    </div>
+                                    <div class="col-6 d-grid">
+                                        @if (instruction is not null)
+                                        {
+                                            <button class="btn btn-danger instruction-delete-button" data-id="@instruction.InstructionId">Delete</button>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                </div>
-                <div class="col-4">
-                    <div class="card">
-                        <div class="card-header">
-                            Parents
-                        </div>
-                        <div class="card-body">
-                            @Html.Raw(Model.Assessment.Instructions.FirstOrDefault(entry => entry.Category == UserCategory.Parent)?.Description)
-                        </div>
-                        <div class="card-footer">
-                            <button class="btn btn-primary">Edit</button>
-                            <button class="btn btn-danger">Delete</button>
+                }
 
-                        </div>
-                    </div>
-                </div>
-                <div class="col-4">
-                    <div class="card">
-                        <div class="card-header">
-                            Coordinators
-                        </div>
-                        <div class="card-body">
-                            @Html.Raw(Model.Assessment.Instructions.FirstOrDefault(entry => entry.Category == UserCategory.Coordinator)?.Description)
-                        </div>
-                        <div class="card-footer">
-                            <button class="btn btn-primary">Edit</button>
-                            <button class="btn btn-danger">Delete</button>
-
-                        </div>
-                    </div>
-                </div>
             </div>
         </div>
     
@@ -378,6 +364,57 @@
                     // Open this row
                     row.child(source.clone()).show();
                 }
+            });
+        });
+
+        $('.instruction-update-button').click(function (event) {
+            var instructionId = $(this).data('id') || null;
+            var category = $(this).data('category');
+            var xsrfHeader = $('input:hidden[name="__RequestVerificationToken"]').val();
+
+            $.ajax({
+                url: "?handler=AjaxUpdateInstructions",
+                type: "POST",
+                headers: {
+                    "RequestVerificationToken": xsrfHeader
+                },
+                data: {
+                    instructionId,
+                    category
+                }
+            }).done(function (data) {
+                $('#page-modal .modal-content').html(data);
+                $('#page-modal .summernote').summernote({
+                    height: 300,
+                    toolbar: [
+                        // [groupName, [list of button]]
+                        ['style', ['bold', 'italic', 'underline', 'clear']],
+                        ['font', ['strikethrough', 'superscript', 'subscript']],
+                        ['fontsize', ['fontsize']],
+                        ['color', ['color']],
+                        ['para', ['ul', 'ol', 'paragraph']],
+                        ['insert', ['link']],
+                        ['height', ['height']]
+                    ]
+                });
+                $('#page-modal').modal('show');
+            });
+        });
+
+        $('.instruction-delete-button').click(function (event) {
+            var instructionId = $(this).data('id');
+            var xsrfHeader = $('input:hidden[name="__RequestVerificationToken"]').val();
+
+            $.ajax({
+                url: "?handler=AjaxRemoveInstruction",
+                type: "POST",
+                data: {
+                    instructionId,
+                    __RequestVerificationToken: xsrfHeader
+                }
+            }).done(function (data) {
+                $('#page-modal .modal-content').html(data);
+                $('#page-modal').modal('show');
             });
         });
 

@@ -1,10 +1,12 @@
 ﻿namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Subject.Assessments;
 
 using Application.Domains.Assessments.Assessments.Commands.AddDownloadToAssessment;
+using Application.Domains.Assessments.Assessments.Commands.AddInstructionsToAssessment;
 using Application.Domains.Assessments.Assessments.Commands.AddProvisionToAssessmentStudent;
 using Application.Domains.Assessments.Assessments.Commands.AddStudentToAssessment;
 using Application.Domains.Assessments.Assessments.Commands.AddSubmissionToAssessment;
 using Application.Domains.Assessments.Assessments.Commands.RemoveDownloadFromAssessment;
+using Application.Domains.Assessments.Assessments.Commands.RemoveInstructionFromAssessment;
 using Application.Domains.Assessments.Assessments.Commands.RemoveStudentFromAssessment;
 using Application.Domains.Assessments.Assessments.Queries.GetAssessmentDetailsById;
 using Application.Domains.Assessments.Assessments.Queries.GetAssessmentDownload;
@@ -22,6 +24,7 @@ using Constellation.Application.Common.PresentationModels;
 using Constellation.Application.Domains.Assessments.Assessments.Models;
 using Constellation.Core.Abstractions.Services;
 using Constellation.Core.Shared;
+using Core.Models.Assessments.Enums;
 using Core.Models.Assessments.Errors;
 using Core.Models.Assessments.Identifiers;
 using Core.Models.Attachments.DTOs;
@@ -36,7 +39,9 @@ using Shared.Components.AddDownloadToAssessment;
 using Shared.Components.AddSubmissionToAssessment;
 using Shared.PartialViews.AddAssessmentProvisionForStudent;
 using Shared.PartialViews.ConfirmRemoveDocumentFromAssessmentModal;
+using Shared.PartialViews.ConfirmRemoveInstructionFromAssessmentModal;
 using Shared.PartialViews.ConfirmRemoveStudentFromAssessmentModal;
+using Shared.PartialViews.UpsertAssessmentInstructions;
 
 [HasPermission(AuthPermission.Subjects_Assessments_View_Value)]
 public class DetailsModel : BasePageModel
@@ -511,5 +516,110 @@ public class DetailsModel : BasePageModel
         }
 
         return File(downloadRequest.Value.FileData, downloadRequest.Value.FileType, downloadRequest.Value.FileName);
+    }
+
+    public async Task<IActionResult> OnPostAjaxUpdateInstructions(AssessmentInstructionId instructionId, UserCategory category)
+    {
+        UpsertAssessmentInstructionsViewModel viewModel = new()
+        {
+            Category = category
+        };
+
+        if (instructionId == AssessmentInstructionId.Empty)
+            return Partial("UpsertAssessmentInstructions", viewModel);
+
+        Result<AssessmentDetailsResponse> assessment = await _mediator.Send(new GetAssessmentDetailsByIdQuery(Id));
+
+        if (assessment.IsFailure)
+            return Partial("UpsertAssessmentInstructions", viewModel);
+            
+        AssessmentDetailsResponse.Instruction? instruction = assessment.Value.Instructions.FirstOrDefault(entry => entry.InstructionId == instructionId);
+
+        if (instruction is null)
+            return Partial("UpsertAssessmentInstructions", viewModel);
+
+        viewModel.Instructions = instruction.Description;
+
+        return Partial("UpsertAssessmentInstructions", viewModel);
+    }
+
+    public async Task<IActionResult> OnPostUpsertInstructions(UpsertAssessmentInstructionsViewModel viewModel)
+    {
+        AddInstructionsToAssessmentCommand command = new(Id, viewModel.Category, viewModel.Instructions);
+
+        _logger
+            .ForContext(nameof(AddInstructionsToAssessmentCommand), command, true)
+            .Information("Requested to add Instructions to Assessment by user {User}", _currentUserService.UserName);
+
+        Result result = await _mediator.Send(command);
+
+        if (result.IsFailure)
+        {
+            _logger
+                .ForContext(nameof(Error), result.Error, true)
+                .Warning("Failed to add Instructions to Assessment by user {User}", _currentUserService.UserName);
+
+            ModalContent = ErrorDisplay.Create(
+                result.Error,
+                _linkGenerator.GetPathByPage("/Subject/Assessments/Details", values: new { area = "Staff", Id }));
+
+            await PreparePage();
+
+            return Page();
+
+        }
+
+        return RedirectToPage();
+    }
+
+    public async Task<IActionResult> OnPostAjaxRemoveInstruction(AssessmentInstructionId instructionId)
+    {
+        ConfirmRemoveInstructionFromAssessmentModalViewModel viewModel = new() { InstructionId = instructionId };
+
+        return Partial("ConfirmRemoveInstructionFromAssessmentModal", viewModel);
+    }
+
+    public async Task<IActionResult> OnGetRemoveInstruction(AssessmentInstructionId instructionId)
+    {
+        if (instructionId == AssessmentInstructionId.Empty)
+        {
+            _logger
+                .ForContext(nameof(Error), AssessmentInstructionErrors.InvalidId)
+                .Warning("Failed to remove instruction from Assessment by user {User}", _currentUserService.UserName);
+
+            ModalContent = ErrorDisplay.Create(
+                AssessmentInstructionErrors.InvalidId,
+                _linkGenerator.GetPathByPage("/Subject/Assessments/Details", values: new { area = "Staff", Id }));
+
+            await PreparePage();
+
+            return Page();
+        }
+
+        RemoveInstructionFromAssessmentCommand command = new(Id, instructionId);
+
+        _logger
+            .ForContext(nameof(RemoveInstructionFromAssessmentCommand), command, true)
+            .Information("Requested to remove instruction from Assessment by user {User}", _currentUserService.UserName);
+
+        Result result = await _mediator.Send(command);
+
+        if (result.IsFailure)
+        {
+            _logger
+                .ForContext(nameof(RemoveInstructionFromAssessmentCommand), command, true)
+                .ForContext(nameof(Error), result.Error)
+                .Warning("Failed to remove instruction from Assessment by user {User}", _currentUserService.UserName);
+
+            ModalContent = ErrorDisplay.Create(
+                result.Error,
+                _linkGenerator.GetPathByPage("/Subject/Assessments/Details", values: new { area = "Staff", Id }));
+
+            await PreparePage();
+
+            return Page();
+        }
+
+        return RedirectToPage();
     }
 }

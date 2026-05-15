@@ -6,7 +6,7 @@ using System;
 public readonly record struct AssetId(Guid Value)
     : IStronglyTypedId<AssetId, Guid>
 {
-    public static readonly AssetId Empty = new(Guid.Empty);
+    public static AssetId Empty => new(Guid.Empty);
 
     public static AssetId FromValue(Guid value) =>
         new(value);

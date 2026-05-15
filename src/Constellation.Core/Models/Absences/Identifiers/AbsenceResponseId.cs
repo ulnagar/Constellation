@@ -6,10 +6,10 @@ using System;
 public readonly record struct AbsenceResponseId(Guid Value)
     : IStronglyTypedId<AbsenceResponseId, Guid>
 {
-    public static AbsenceResponseId Empty = new(Guid.Empty);
+    public static AbsenceResponseId Empty => new(Guid.Empty);
 
-    public static AbsenceResponseId FromValue(Guid Value) =>
-        new(Value);
+    public static AbsenceResponseId FromValue(Guid value) =>
+        new(value);
 
     public AbsenceResponseId()
         : this(Guid.CreateVersion7()) { }

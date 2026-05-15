@@ -6,8 +6,10 @@ using System;
 public readonly record struct AwardNominationId(Guid Value)
     : IStronglyTypedId<AwardNominationId, Guid>
 {
-    public static AwardNominationId FromValue(Guid Value) =>
-        new(Value);
+    public static AwardNominationId Empty => new(Guid.Empty);
+
+    public static AwardNominationId FromValue(Guid value) =>
+        new(value);
 
     public AwardNominationId()
         : this(Guid.CreateVersion7()) { }

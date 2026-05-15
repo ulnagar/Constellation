@@ -6,6 +6,8 @@ using System;
 public readonly record struct AcademicReportId(Guid Value)
     : IStronglyTypedId<AcademicReportId, Guid>
 {
+    public static AcademicReportId Empty => new(Guid.Empty);
+
     public static AcademicReportId FromValue(Guid value) =>
         new(value);
 

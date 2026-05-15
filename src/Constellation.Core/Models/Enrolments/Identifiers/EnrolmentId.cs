@@ -6,8 +6,10 @@ using System;
 public readonly record struct EnrolmentId(Guid Value)
     : IStronglyTypedId<EnrolmentId, Guid>
 {
-    public static EnrolmentId FromValue(Guid Value) =>
-        new(Value);
+    public static EnrolmentId Empty => new(Guid.Empty);
+
+    public static EnrolmentId FromValue(Guid value) =>
+        new(value);
 
     public EnrolmentId()
         : this(Guid.CreateVersion7()) { }

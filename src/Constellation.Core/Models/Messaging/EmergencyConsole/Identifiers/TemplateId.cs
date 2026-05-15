@@ -5,7 +5,7 @@ using Primitives;
 public readonly record struct TemplateId(Guid Value)
     : IStronglyTypedId<TemplateId, Guid>
 {
-    public static readonly TemplateId Empty = new(Guid.Empty);
+    public static TemplateId Empty => new(Guid.Empty);
 
     public static TemplateId FromValue(Guid value) =>
         new(value);

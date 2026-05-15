@@ -6,6 +6,8 @@ using System;
 public readonly record struct ActionNoteId(Guid Value)
     : IStronglyTypedId<ActionNoteId, Guid>
 {
+    public static ActionNoteId Empty => new(Guid.Empty);
+
     public static ActionNoteId FromValue(Guid value) =>
         new(value);
 

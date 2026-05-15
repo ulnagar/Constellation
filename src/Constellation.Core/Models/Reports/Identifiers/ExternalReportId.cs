@@ -6,6 +6,8 @@ namespace Constellation.Core.Models.Reports.Identifiers;
 public readonly record struct ExternalReportId(Guid Value)
     : IStronglyTypedId<ExternalReportId, Guid>
 {
+    public static ExternalReportId Empty => new(Guid.Empty);
+
     public static ExternalReportId FromValue(Guid value) =>
         new(value);
 

@@ -6,6 +6,8 @@ using System;
 public readonly record struct AbsenceId(Guid Value)
     : IStronglyTypedId<AbsenceId, Guid>
 {
+    public static AbsenceId Empty => new(Guid.Empty);
+
     public static AbsenceId FromValue(Guid value) =>
         new(value);
 

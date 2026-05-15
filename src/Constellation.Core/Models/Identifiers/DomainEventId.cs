@@ -6,6 +6,8 @@ using System;
 public readonly record struct DomainEventId(Guid Value)
     : IStronglyTypedId<DomainEventId, Guid>
 {
+    public static DomainEventId Empty => new(Guid.Empty);
+
     public static DomainEventId FromValue(Guid value) =>
         new(value);
 
