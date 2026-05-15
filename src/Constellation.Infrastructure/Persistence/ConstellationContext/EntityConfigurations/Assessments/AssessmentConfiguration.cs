@@ -1,6 +1,7 @@
 ﻿namespace Constellation.Infrastructure.Persistence.ConstellationContext.EntityConfigurations.Assessments;
 
 using Core.Models.Assessments;
+using Core.Models.Canvas.Models;
 using Core.Models.Subjects;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
@@ -24,6 +25,12 @@ internal sealed class AssessmentConfiguration : IEntityTypeConfiguration<Assessm
         builder
             .Property(assessment => assessment.Grade)
             .HasConversion<string>();
+
+        builder
+            .Property(assessment => assessment.CanvasCourse)
+            .HasConversion(
+                course => course.HasValue ? course.Value.ToString() : null,
+                value => CanvasCourseCode.FromValue(value));
 
         builder
             .HasMany(assessment => assessment.Downloads)

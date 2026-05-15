@@ -10,7 +10,8 @@ public readonly record struct CanvasCourseCode : IComparable
 
     private CanvasCourseCode(string value) : this() => _value = value;
     
-    public static CanvasCourseCode FromValue(string value) => new(value);
+    public static CanvasCourseCode FromValue(string? value) => 
+        string.IsNullOrWhiteSpace(value) ? Empty : new(value);
 
     public override string ToString() => _value;
 

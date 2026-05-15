@@ -1,11 +1,12 @@
 namespace Constellation.Presentation.Server.Areas.Test.Pages;
 
-using Application.Domains.Students.Models;
+using Application.Domains.LinkedSystems.Canvas.Models;
+using Application.DTOs;
+using Application.Interfaces.Gateways;
 using Application.Models.Auth;
 using BaseModels;
 using Core.Abstractions.Services;
-using Core.Models.Students;
-using Core.Models.Students.Repositories;
+using Core.Models.Canvas.Models;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -15,39 +16,35 @@ using Serilog;
 public class IndexModel : BasePageModel
 {
     private readonly IMediator _mediator;
-    private readonly IStudentRepository _studentRepository;
+    private readonly ICanvasGateway _canvasGateway;
     private readonly ICurrentUserService _currentUserService;
     private readonly ILogger _logger;
 
     public IndexModel(
         IMediator mediator,
-        IStudentRepository studentRepository,
+        ICanvasGateway canvasGateway,
         ICurrentUserService currentUserService,
         ILogger logger)
     {
         _mediator = mediator;
-        _studentRepository = studentRepository;
+        _canvasGateway = canvasGateway;
         _currentUserService = currentUserService;
         _logger = logger;
     }
 
-    [BindProperty]
-    public string Search { get; set; }
-
-    public List<Student> Students { get; set; } = [];
+    public List<CourseListEntry> Courses { get; set; }
 
     public async Task OnGet()
     {
+        List<CourseListEntry> courses = await _canvasGateway.GetAllCourses("2026");
 
+        Courses = courses;
     }
 
-    public async Task<IActionResult> OnPostSearch()
+    public async Task<IActionResult> OnGetCourseAssignments(CanvasCourseCode course)
     {
-        if (Search is null || Search.Length == 0)
-            return Page();
 
-        Students = await _studentRepository.GetFuzzyNameSearch(Search);
 
-        return Page();
+        List<CanvasAssignmentDto> assignments = await _canvasGateway.GetAllCourseAssignments(course);
     }
 }

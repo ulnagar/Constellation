@@ -207,9 +207,9 @@ internal sealed class Gateway : ICanvasGateway
 
         string responseText = await response.Content.ReadAsStringAsync(cancellationToken);
 
-        List<UserResult> users = JsonConvert.DeserializeObject<List<UserResult>>(responseText);
+        List<UserResult>? users = JsonConvert.DeserializeObject<List<UserResult>>(responseText);
 
-        UserResult user = users.FirstOrDefault(login => login.SISId == userId);
+        UserResult? user = users?.FirstOrDefault(login => login.SISId == userId);
 
         if (user is null)
             return Result.Failure<int>(CanvasGatewayErrors.UserNotFound(userId));
@@ -420,9 +420,9 @@ internal sealed class Gateway : ICanvasGateway
             {
                 CanvasId = assignment.Id,
                 Name = assignment.Name,
-                DueDate = assignment.DueDate ?? DateTime.Today,
-                LockDate = assignment.LockDate,
-                UnlockDate = assignment.UnlockDate,
+                DueDate = assignment.DueDate?.LocalDateTime ?? DateTime.Today,
+                LockDate = assignment.LockDate?.LocalDateTime,
+                UnlockDate = assignment.UnlockDate?.LocalDateTime,
                 AllowedAttempts = assignment.AllowedAttempts
             });
         }
@@ -459,9 +459,9 @@ internal sealed class Gateway : ICanvasGateway
             {
                 CanvasId = assignment.Id,
                 Name = assignment.Name,
-                DueDate = assignment.DueDate ?? DateTime.Today,
-                LockDate = assignment.LockDate,
-                UnlockDate = assignment.UnlockDate,
+                DueDate = assignment.DueDate?.LocalDateTime ?? DateTime.Today,
+                LockDate = assignment.LockDate?.LocalDateTime,
+                UnlockDate = assignment.UnlockDate?.LocalDateTime,
                 AllowedAttempts = assignment.AllowedAttempts
             });
         }
@@ -498,9 +498,9 @@ internal sealed class Gateway : ICanvasGateway
             {
                 CanvasId = assignment.Id,
                 Name = assignment.Name,
-                DueDate = assignment.DueDate ?? DateTime.Today,
-                LockDate = assignment.LockDate,
-                UnlockDate = assignment.UnlockDate,
+                DueDate = assignment.DueDate?.LocalDateTime ?? DateTime.Today,
+                LockDate = assignment.LockDate?.LocalDateTime,
+                UnlockDate = assignment.UnlockDate?.LocalDateTime,
                 AllowedAttempts = assignment.AllowedAttempts
             });
         }
@@ -1063,9 +1063,12 @@ internal sealed class Gateway : ICanvasGateway
 
             string responseText = await response.Content.ReadAsStringAsync(cancellationToken);
 
-            courses.AddRange(JsonConvert.DeserializeObject<List<CourseListResult>>(responseText));
+            List<CourseListResult>? deserilised = JsonConvert.DeserializeObject<List<CourseListResult>>(responseText);
 
-            bool responseHeaders = response.Headers.TryGetValues("link", out IEnumerable<string> linkHeaders);
+            if (deserilised is not null)
+                courses.AddRange(deserilised);
+
+            bool responseHeaders = response.Headers.TryGetValues("link", out IEnumerable<string>? linkHeaders);
 
             if (!responseHeaders)
                 nextPageExists = false;

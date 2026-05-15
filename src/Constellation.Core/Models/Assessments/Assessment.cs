@@ -1,6 +1,7 @@
 ﻿namespace Constellation.Core.Models.Assessments;
 
 using Auth;
+using Canvas.Models;
 using Core.Enums;
 using Errors;
 using Events;
@@ -55,19 +56,26 @@ public sealed class Assessment : AggregateRoot
     public DateTimeOffset AvailableTo { get; private set; }
     public DateTimeOffset AvailableFrom { get; private set; }
 
-    public int CanvasId { get; private set; }
-    public int AllowedAttempts { get; private set; }
+    public bool IsLinkedToCanvas => CanvasCourse.HasValue;
+    public CanvasCourseCode? CanvasCourse { get; private set; }
+    public int? CanvasAssignmentId { get; private set; }
+    public int? AllowedAttempts { get; private set; }
+    public DateTimeOffset? ForwardDate { get; private set; }
 
     public IReadOnlyList<AssessmentInstruction> Instructions => _instructions.AsReadOnly();
     public IReadOnlyList<AssessmentDownload> Downloads => _downloads.AsReadOnly();
     public IReadOnlyList<AssessmentStudent> Students => _students.AsReadOnly();
 
     public void AddCanvasDetails(
-        int canvasId,
-        int allowedAttempts)
+        CanvasCourseCode canvasCourse,
+        int canvasAssignmentId,
+        int allowedAttempts,
+        DateTimeOffset forwardDate)
     {
-        CanvasId = canvasId;
+        CanvasCourse = canvasCourse;
+        CanvasAssignmentId = canvasAssignmentId;
         AllowedAttempts = allowedAttempts;
+        ForwardDate = forwardDate;
     }
 
     public void Update(

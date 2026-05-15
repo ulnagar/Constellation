@@ -17,42 +17,55 @@
 
 <hr />
 
-<dl class="row">
-    <dt class="col-md-2">
-        <label asp-for="Assessment.Name">Name</label>
-    </dt>
-    <dd class="col-md-10">
-        <span>@Model.Assessment.Name</span>
-    </dd>
+<div class="row">
+    <div class="col-6">
+        <dl class="row">
+            <dt class="col-md-3">
+                <label asp-for="Assessment.Name">Name</label>
+            </dt>
+            <dd class="col-md-9">
+                <span>@Model.Assessment.Name</span>
+            </dd>
 
-    <dt class="col-md-2">
-        <label asp-for="Assessment.Course">Course</label>
-    </dt>
-    <dd class="col-md-10">
-        <span>@Model.Assessment.Course</span>
-    </dd>
+            <dt class="col-md-3">
+                <label asp-for="Assessment.Course">Course</label>
+            </dt>
+            <dd class="col-md-9">
+                <span>@Model.Assessment.Course</span>
+            </dd>
 
-    <dt class="col-md-2">
-        <label asp-for="Assessment.DueDate">Due Date</label>
-    </dt>
-    <dd class="col-md-10">
-        <span>@Model.Assessment.DueDate.LocalDateTime.ToString("D") @Model.Assessment.DueDate.LocalDateTime.ToString("h:mm tt")</span>
-    </dd>
+            <dt class="col-md-3">
+                <label asp-for="Assessment.DueDate">Due Date</label>
+            </dt>
+            <dd class="col-md-9">
+                <span>@Model.Assessment.DueDate.LocalDateTime.ToString("D") @Model.Assessment.DueDate.LocalDateTime.ToString("h:mm tt")</span>
+            </dd>
 
-    <dt class="col-md-2">
-        <label asp-for="Assessment.AvailableFrom">Available From</label>
-    </dt>
-    <dd class="col-md-10">
-        <span>@Model.Assessment.AvailableFrom.LocalDateTime.ToString("D") @Model.Assessment.AvailableFrom.LocalDateTime.ToString("h:mm tt")</span>
-    </dd>
+            <dt class="col-md-3">
+                <label asp-for="Assessment.AvailableFrom">Available From</label>
+            </dt>
+            <dd class="col-md-9">
+                <span>@Model.Assessment.AvailableFrom.LocalDateTime.ToString("D") @Model.Assessment.AvailableFrom.LocalDateTime.ToString("h:mm tt")</span>
+            </dd>
 
-    <dt class="col-md-2">
-        <label asp-for="Assessment.AvailableTo">Available To</label>
-    </dt>
-    <dd class="col-md-10">
-        <span>@Model.Assessment.AvailableTo.LocalDateTime.ToString("D") @Model.Assessment.AvailableTo.LocalDateTime.ToString("h:mm tt")</span>
-    </dd>
-</dl>
+            <dt class="col-md-3">
+                <label asp-for="Assessment.AvailableTo">Available To</label>
+            </dt>
+            <dd class="col-md-9">
+                <span>@Model.Assessment.AvailableTo.LocalDateTime.ToString("D") @Model.Assessment.AvailableTo.LocalDateTime.ToString("h:mm tt")</span>
+            </dd>
+        </dl>
+    </div>
+
+    <div class="col-6">
+        <dl class="row">
+            <dt class="col-md-3">Linked to Canvas?</dt>
+            <dd class="col-md-9">
+                <span>@Model.Assessment.IsLinkedToCanvasAssignment</span>
+            </dd>
+        </dl>
+    </div>
+</div>
 
 <hr />
 

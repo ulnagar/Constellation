@@ -101,6 +101,7 @@ internal sealed class GetAssessmentDetailsByIdQueryHandler
             assessment.DueDate,
             assessment.AvailableFrom,
             assessment.AvailableTo,
+            assessment.IsLinkedToCanvas,
             students,
             submissions, 
             downloads,

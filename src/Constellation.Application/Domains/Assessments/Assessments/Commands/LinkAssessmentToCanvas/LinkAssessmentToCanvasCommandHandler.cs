@@ -1,0 +1,58 @@
+﻿namespace Constellation.Application.Domains.Assessments.Assessments.Commands.LinkAssessmentToCanvas;
+
+using Abstractions.Messaging;
+using Constellation.Core.Models.Assessments.Errors;
+using Core.Models.Assessments;
+using Core.Models.Assessments.Repositories;
+using Core.Models.Awards.Events;
+using Core.Models.Tutorials.Enums;
+using Core.Shared;
+using Interfaces.Gateways;
+using Interfaces.Repositories;
+using Serilog;
+
+internal sealed class LinkAssessmentToCanvasCommandHandler
+: ICommandHandler<LinkAssessmentToCanvasCommand>
+{
+    private readonly IAssessmentRepository _assessmentRepository;
+    private readonly ICanvasGateway _gateway;
+    private readonly IUnitOfWork _unitOfWork;
+    private readonly ILogger _logger;
+
+    public LinkAssessmentToCanvasCommandHandler(
+        IAssessmentRepository assessmentRepository,
+        ICanvasGateway gateway,
+        IUnitOfWork unitOfWork,
+        ILogger logger)
+    {
+        _assessmentRepository = assessmentRepository;
+        _gateway = gateway;
+        _unitOfWork = unitOfWork;
+        _logger = logger;
+    }
+
+    public async Task<Result> Handle(LinkAssessmentToCanvasCommand request, CancellationToken cancellationToken)
+    {
+        Assessment? assessment = await _assessmentRepository.GetAssessmentById(request.AssessmentId, cancellationToken);
+
+        if (assessment is null)
+        {
+            _logger
+                .ForContext(nameof(LinkAssessmentToCanvasCommand), request, true)
+                .ForContext(nameof(Error), AssessmentErrors.NotFound(request.AssessmentId), true)
+                .Warning("Failed to add Canvas Link to Assessment");
+
+            return Result.Failure(AssessmentErrors.NotFound(request.AssessmentId));
+        }
+
+        assessment.AddCanvasDetails(
+            request.CanvasCourse,
+            request.CanvasAssignmentId,
+            request.AllowedAttempts,
+            request.ForwardDate);
+
+        await _unitOfWork.CompleteAsync(cancellationToken);
+
+        return Result.Success();
+    }
+}

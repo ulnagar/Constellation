@@ -17,6 +17,7 @@ public sealed record AssessmentDetailsResponse(
     DateTimeOffset DueDate,
     DateTimeOffset AvailableFrom,
     DateTimeOffset AvailableTo,
+    bool IsLinkedToCanvasAssignment,
     List<AssessmentDetailsResponse.Student> Students,
     List<AssessmentDetailsResponse.Submission> Submissions,
     List<AssessmentDetailsResponse.Download> Downloads,

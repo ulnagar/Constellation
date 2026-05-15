@@ -13,17 +13,17 @@ internal class AssignmentResult
     /// The date the assignment is due.
     /// </summary>
     [JsonProperty("due_at")]
-    public DateTime? DueDate { get; set; }
+    public DateTimeOffset? DueDate { get; set; }
     /// <summary>
     /// The date after which submissions are accepted.
     /// </summary>
     [JsonProperty("unlock_at")]
-    public DateTime? UnlockDate { get; set; }
+    public DateTimeOffset? UnlockDate { get; set; }
     /// <summary>
     /// The date after which no more submission are accepted.
     /// </summary>
     [JsonProperty("lock_at")]
-    public DateTime? LockDate { get; set; }
+    public DateTimeOffset? LockDate { get; set; }
     [JsonProperty("allowed_attempts")]
     public int AllowedAttempts { get; set; }
     [JsonProperty("submission_types")]
