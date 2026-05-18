@@ -13,6 +13,7 @@ using Application.Domains.Assessments.Assessments.Queries.GetAssessmentDownload;
 using Application.Domains.Assessments.Assessments.Queries.GetAssessmentDownloadFile;
 using Application.Domains.Assessments.Assessments.Queries.GetAssessmentSubmissionFile;
 using Application.Domains.Assessments.Assessments.Queries.GetAssessmentSubmissionsForDownload;
+using Application.Domains.Assessments.Assessments.Queries.GetCanvasCoursesAndAssessments;
 using Application.Domains.Assessments.Provisions.Models;
 using Application.Domains.Assessments.Provisions.Queries.GetAssessmentProvisions;
 using Application.Domains.Assessments.Provisions.Queries.GetCurrentStudentProvisionsByStudentId;
@@ -23,6 +24,7 @@ using Application.Models.Auth;
 using Constellation.Application.Common.PresentationModels;
 using Constellation.Application.Domains.Assessments.Assessments.Models;
 using Constellation.Core.Abstractions.Services;
+using Constellation.Core.Models.Canvas.Models;
 using Constellation.Core.Shared;
 using Core.Models.Assessments.Enums;
 using Core.Models.Assessments.Errors;
@@ -37,6 +39,7 @@ using Presentation.Shared.Helpers.Attributes;
 using Serilog;
 using Shared.Components.AddDownloadToAssessment;
 using Shared.Components.AddSubmissionToAssessment;
+using Shared.Components.LinkAssessmentToCanvas;
 using Shared.PartialViews.AddAssessmentProvisionForStudent;
 using Shared.PartialViews.ConfirmRemoveDocumentFromAssessmentModal;
 using Shared.PartialViews.ConfirmRemoveInstructionFromAssessmentModal;
@@ -619,6 +622,28 @@ public class DetailsModel : BasePageModel
 
             return Page();
         }
+
+        return RedirectToPage();
+    }
+
+    public async Task<IActionResult> OnGetAjaxLoadCanvasAssignments()
+    {
+        Result<List<CanvasCourseWithAssessmentResponse>> courses = await _mediator.Send(new GetCanvasCoursesAndAssessmentsQuery());
+
+        if (courses.IsFailure)
+            return Content(string.Empty);
+
+        LinkAssessmentToCanvasSelection viewModel = new() { Courses = courses.Value };
+
+        return ViewComponent("LinkAssessmentToCanvas", viewModel);
+    }
+
+    public async Task<IActionResult> OnGetLinkCanvasAssignment(CanvasCourseCode courseCode, int assignmentId)
+    {
+
+
+
+
 
         return RedirectToPage();
     }

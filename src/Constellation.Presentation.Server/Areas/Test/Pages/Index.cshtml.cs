@@ -1,5 +1,6 @@
 namespace Constellation.Presentation.Server.Areas.Test.Pages;
 
+using Application.Domains.Assessments.Assessments.Queries.GetCanvasCoursesAndAssessments;
 using Application.Domains.LinkedSystems.Canvas.Models;
 using Application.DTOs;
 using Application.Interfaces.Gateways;
@@ -7,6 +8,7 @@ using Application.Models.Auth;
 using BaseModels;
 using Core.Abstractions.Services;
 using Core.Models.Canvas.Models;
+using Core.Shared;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -32,19 +34,22 @@ public class IndexModel : BasePageModel
         _logger = logger;
     }
 
-    public List<CourseListEntry> Courses { get; set; }
+    [ViewData] public string ActivePage => "";
+
+    public List<CanvasCourseWithAssessmentResponse> Courses { get; set; }
 
     public async Task OnGet()
     {
-        List<CourseListEntry> courses = await _canvasGateway.GetAllCourses("2026");
+        Result<List<CanvasCourseWithAssessmentResponse>> courses = await _mediator.Send(new GetCanvasCoursesAndAssessmentsQuery());
 
-        Courses = courses;
+        if (courses.IsFailure)
+            return;
+
+        Courses = courses.Value.OrderBy(entry => entry.CourseCode).ToList();
     }
 
-    public async Task<IActionResult> OnGetCourseAssignments(CanvasCourseCode course)
+    public async Task<IActionResult> OnGetLinkCanvasAssignment(CanvasCourseCode courseCode, int assignmentId)
     {
-
-
-        List<CanvasAssignmentDto> assignments = await _canvasGateway.GetAllCourseAssignments(course);
+        return RedirectToPage();
     }
 }

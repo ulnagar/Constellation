@@ -72,9 +72,9 @@ internal sealed class GetRubricAssignmentsFromCourseQueryHandler
                     assignment.Name,
                     courseId,
                     assignment.CanvasId,
-                    assignment.DueDate,
-                    assignment.LockDate,
-                    assignment.UnlockDate,
+                    assignment.DueDate.LocalDateTime,
+                    assignment.LockDate?.LocalDateTime,
+                    assignment.UnlockDate?.LocalDateTime,
                     assignment.AllowedAttempts,
                     dbAssignment is not null));
             }

@@ -7,7 +7,5 @@ using Core.Models.Canvas.Models;
 public sealed record LinkAssessmentToCanvasCommand(
     AssessmentId AssessmentId,
     CanvasCourseCode CanvasCourse,
-    int CanvasAssignmentId,
-    int AllowedAttempts,
-    DateTimeOffset ForwardDate)
+    int CanvasAssignmentId)
     : ICommand;

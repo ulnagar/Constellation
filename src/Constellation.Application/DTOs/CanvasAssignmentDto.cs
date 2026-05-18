@@ -11,9 +11,9 @@ namespace Constellation.Application.DTOs
         public CourseId CourseId { get; set; }
         public string Name { get; set; }
         public int CanvasId { get; set; }
-        public DateTime DueDate { get; set; }
-        public DateTime? LockDate { get; set; }
-        public DateTime? UnlockDate { get; set; }
+        public DateTimeOffset DueDate { get; set; }
+        public DateTimeOffset? LockDate { get; set; }
+        public DateTimeOffset? UnlockDate { get; set; }
         public int AllowedAttempts { get; set; }
 
         public static CanvasAssignmentDto ConvertFromAssignment(CanvasAssignment assignment)

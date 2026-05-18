@@ -48,6 +48,7 @@ public interface ICanvasGateway
     Task<List<CanvasAssignmentDto>> GetAllUploadCourseAssignments(CanvasCourseCode courseId, CancellationToken cancellationToken = default);
     Task<List<CanvasAssignmentDto>> GetAllRubricCourseAssignments(CanvasCourseCode courseId, CancellationToken cancellationToken = default);
 
+    Task<Result<CanvasAssignmentDto>> GetCourseAssignment(CanvasCourseCode courseId, int assignmentId, CancellationToken cancellationToken = default);
     Task<Result<RubricEntry>> GetCourseAssignmentDetails(CanvasCourseCode courseId, int assignmentId, CancellationToken cancellationToken = default);
     Task<Result> UploadAssignmentSubmission(CanvasCourseCode courseId, int canvasAssignmentId, string studentReferenceNumber, AttachmentResponse file, CancellationToken cancellationToken = default);
     Task<List<AssignmentResultEntry>> GetCourseAssignmentSubmissions(CanvasCourseCode courseId, int assignmentId, CancellationToken cancellationToken = default);

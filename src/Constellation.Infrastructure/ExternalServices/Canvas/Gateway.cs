@@ -252,34 +252,44 @@ internal sealed class Gateway : ICanvasGateway
         return data;
     }
 
-    private async Task<Result<List<AssignmentResult>>> SearchForCourseAssignment(
-        string userId,
+    public async Task<Result<CanvasAssignmentDto>> GetCourseAssignment(
         CanvasCourseCode courseId,
+        int assignmentId,
         CancellationToken cancellationToken = default)
     {
-        string path = $"users/sis_user_id:{userId}/courses/sis_course_id:{courseId}/assignments";
+        string path = $"courses/sis_course_id:{courseId}/assignments/{assignmentId}";
 
         if (_logOnly)
         {
-            _logger.Information("SearchForCourseAssignment: UserId={userId}, CourseId={courseId}, path={path}", userId,
-                courseId, path);
+            _logger.Information("SearchForCourseAssignment: CourseId={courseId}, AssignmentId={assignmentId}, path={path}", 
+                courseId, assignmentId, path);
 
-            return new List<AssignmentResult>();
+            return new CanvasAssignmentDto();
         }
 
         HttpResponseMessage response = await RequestAsync(path, HttpVerb.Get, cancellationToken: cancellationToken);
 
         if (!response.IsSuccessStatusCode)
-            return Result.Failure<List<AssignmentResult>>(CanvasGatewayErrors.FailureResponseCode);
+            return Result.Failure<CanvasAssignmentDto>(CanvasGatewayErrors.FailureResponseCode);
 
         string responseText = await response.Content.ReadAsStringAsync(cancellationToken);
 
-        List<AssignmentResult>? assignments = JsonConvert.DeserializeObject<List<AssignmentResult>>(responseText);
+        AssignmentResult? assignment = JsonConvert.DeserializeObject<AssignmentResult>(responseText);
 
-        if (assignments is null)
-            return Result.Failure<List<AssignmentResult>>(CanvasGatewayErrors.InvalidData);
+        if (assignment is null)
+            return Result.Failure<CanvasAssignmentDto>(CanvasGatewayErrors.InvalidData);
 
-        return assignments;
+        CanvasAssignmentDto assignmentDto = new()
+        {
+            CanvasId = assignment.Id,
+            Name = assignment.Name,
+            DueDate = assignment.DueDate?.LocalDateTime ?? DateTime.Today,
+            LockDate = assignment.LockDate?.LocalDateTime,
+            UnlockDate = assignment.UnlockDate?.LocalDateTime,
+            AllowedAttempts = assignment.AllowedAttempts
+        };
+
+        return assignmentDto;
     }
 
     public async Task<Result> UploadAssignmentSubmission(
@@ -1063,10 +1073,10 @@ internal sealed class Gateway : ICanvasGateway
 
             string responseText = await response.Content.ReadAsStringAsync(cancellationToken);
 
-            List<CourseListResult>? deserilised = JsonConvert.DeserializeObject<List<CourseListResult>>(responseText);
+            List<CourseListResult>? deserialized = JsonConvert.DeserializeObject<List<CourseListResult>>(responseText);
 
-            if (deserilised is not null)
-                courses.AddRange(deserilised);
+            if (deserialized is not null)
+                courses.AddRange(deserialized);
 
             bool responseHeaders = response.Headers.TryGetValues("link", out IEnumerable<string>? linkHeaders);
 

@@ -58,6 +58,11 @@
     </div>
 
     <div class="col-6">
+        <div class="row">
+            <div class="col-md-6">
+                <button class="btn btn-success link-canvas-btn">Link Canvas Assignment</button>
+            </div>
+        </div>
         <dl class="row">
             <dt class="col-md-3">Linked to Canvas?</dt>
             <dd class="col-md-9">
@@ -317,6 +322,22 @@
     available-to="Model.Assessment.AvailableTo" />
 <vc:add-submission-to-assessment assessment-id="Model.Id" />
 
+<div class="modal fade" tabindex="-1" id="link-canvas-modal">
+    <div class="modal-dialog modal-lg">
+        <div id="modal-content" class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Link Canvas Assignment</h5>
+            </div>
+            <div class="modal-body">
+                
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 @Html.AntiForgeryToken()
 
 @section Scripts
@@ -377,6 +398,26 @@
                     // Open this row
                     row.child(source.clone()).show();
                 }
+            });
+        });
+
+        $('.link-canvas-btn').on('click', function () {
+            const $modal = $('#link-canvas-modal');
+            const $container = $('#link-canvas-modal .modal-body');
+
+            // Only fetch if not already loaded
+            if ($container.data('loaded')) {
+                $modal.modal('show');
+                return;
+            }
+
+            showLoader();
+
+            $.get('?handler=AjaxLoadCanvasAssignments', function (html) {
+                $container.html(html);
+                $container.data('loaded', true);
+                $modal.modal('show');
+                toggleLoader();
             });
         });
 
