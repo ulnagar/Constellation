@@ -46,7 +46,7 @@ public sealed partial class Service : IEmailService
             viewModel,
             EmailRecipient.NoReply,
             $"[Aurora College] Parent Contact Change Report - {DateTime.Today.ToLongDateString()}",
-            [EmailRecipient.InfoTechTeam, EmailRecipient.AbsencesMailbox, EmailRecipient.AuroraCollege],
+            [EmailRecipient.InfoTechTeam, EmailRecipient.AuroraCollege],
             attachments: [ attachment ],
             cancellationToken: cancellationToken);
     }

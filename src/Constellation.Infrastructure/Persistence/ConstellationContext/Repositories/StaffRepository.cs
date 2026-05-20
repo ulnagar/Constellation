@@ -178,6 +178,38 @@ public class StaffRepository : IStaffRepository
             .ToListAsync(cancellationToken);
     }
 
+    public async Task<List<StaffMember>> GetFacultyApproversForOffering(
+        OfferingId offeringId,
+        CancellationToken cancellationToken = default)
+    {
+        List<CourseId> courseIds = await _context
+            .Set<Offering>()
+            .Where(offering => offering.Id == offeringId)
+            .Select(offering => offering.CourseId)
+            .ToListAsync(cancellationToken);
+
+        List<FacultyId> facultyIds = await _context
+            .Set<Course>()
+            .Where(course => courseIds.Contains(course.Id))
+            .Select(course => course.FacultyId)
+            .ToListAsync(cancellationToken);
+
+        List<StaffId> staffIds = await _context
+            .Set<Faculty>()
+            .Where(faculty => facultyIds.Contains(faculty.Id))
+            .SelectMany(faculty => faculty.Members)
+            .Where(membership =>
+                membership.Role == FacultyMembershipRole.Approver &&
+                !membership.IsDeleted)
+            .Select(membership => membership.StaffId)
+            .ToListAsync(cancellationToken);
+
+        return await _context
+            .Set<StaffMember>()
+            .Where(staff => staffIds.Contains(staff.Id))
+            .ToListAsync(cancellationToken);
+    }
+
     public async Task<List<StaffMember>> GetAllActive(
         CancellationToken cancellationToken = default) =>
         await _context
