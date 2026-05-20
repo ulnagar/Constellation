@@ -99,6 +99,18 @@ internal sealed class GetCourseMembershipByCourseCodeQueryHandler
                     CanvasSectionCode.Empty, 
                     CanvasPermissionLevel.Teacher));
             }
+
+            // Get Faculty Approvers
+            List<StaffMember> approvers = await _staffRepository.GetFacultyApproversForOffering(offering.Id, cancellationToken);
+
+            foreach (StaffMember approver in approvers)
+            {
+                response.Add(new(
+                    request.CourseCode,
+                    approver.EmployeeId.ToString(),
+                    CanvasSectionCode.Empty,
+                    CanvasPermissionLevel.Teacher));
+            }
         }
 
         // Add defined CourseAdmins

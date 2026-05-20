@@ -23,6 +23,7 @@ public interface IStaffRepository
     Task<List<StaffMember>> GetPrimaryTeachersForOffering(OfferingId offeringId, CancellationToken cancellationToken = default);
     Task<List<StaffMember>> GetFacultyHeadTeachers(FacultyId facultyId, CancellationToken cancellationToken = default);
     Task<List<StaffMember>> GetFacultyHeadTeachersForOffering(OfferingId offeringId, CancellationToken cancellationToken = default);
+    Task<List<StaffMember>> GetFacultyApproversForOffering(OfferingId offeringId, CancellationToken cancellationToken = default);
     Task<List<StaffMember>> GetAllActive(CancellationToken cancellationToken = default);
     Task<List<StaffId>> GetAllActiveStaffIds(CancellationToken cancellationToken = default);
     Task<List<StaffMember>> GetActiveFromSchool(SchoolCode schoolCode, CancellationToken cancellationToken = default);
