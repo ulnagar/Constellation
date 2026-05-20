@@ -13,9 +13,9 @@ public sealed class LinkAssessmentToCanvasViewComponent : ViewComponent
         _mediator = mediator;
     }
 
-    public async Task<IViewComponentResult> InvokeAsync()
+    public async Task<IViewComponentResult> InvokeAsync(LinkAssessmentToCanvasSelection viewModel)
     {
-        LinkAssessmentToCanvasSelection viewModel = new();
+        //LinkAssessmentToCanvasSelection viewModel = new([]);
 
         return View(viewModel);
     }

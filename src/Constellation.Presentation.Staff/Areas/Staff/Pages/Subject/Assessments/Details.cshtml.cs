@@ -5,6 +5,7 @@ using Application.Domains.Assessments.Assessments.Commands.AddInstructionsToAsse
 using Application.Domains.Assessments.Assessments.Commands.AddProvisionToAssessmentStudent;
 using Application.Domains.Assessments.Assessments.Commands.AddStudentToAssessment;
 using Application.Domains.Assessments.Assessments.Commands.AddSubmissionToAssessment;
+using Application.Domains.Assessments.Assessments.Commands.LinkAssessmentToCanvas;
 using Application.Domains.Assessments.Assessments.Commands.RemoveDownloadFromAssessment;
 using Application.Domains.Assessments.Assessments.Commands.RemoveInstructionFromAssessment;
 using Application.Domains.Assessments.Assessments.Commands.RemoveStudentFromAssessment;
@@ -633,17 +634,36 @@ public class DetailsModel : BasePageModel
         if (courses.IsFailure)
             return Content(string.Empty);
 
-        LinkAssessmentToCanvasSelection viewModel = new() { Courses = courses.Value };
+        LinkAssessmentToCanvasSelection viewModel = new(courses.Value);
 
         return ViewComponent("LinkAssessmentToCanvas", viewModel);
     }
 
     public async Task<IActionResult> OnGetLinkCanvasAssignment(CanvasCourseCode courseCode, int assignmentId)
     {
+        LinkAssessmentToCanvasCommand command = new(Id, courseCode, assignmentId);
 
+        _logger
+            .ForContext(nameof(LinkAssessmentToCanvasCommand), command, true)
+            .Information("Requested to link Canvas Assignment to Assessment by user {User}", _currentUserService.UserName);
 
+        Result result = await _mediator.Send(command);
 
+        if (result.IsFailure)
+        {
+            _logger
+                .ForContext(nameof(LinkAssessmentToCanvasCommand), command, true)
+                .ForContext(nameof(Error), result.Error)
+                .Information("Requested to link Canvas Assignment to Assessment by user {User}", _currentUserService.UserName);
 
+            ModalContent = ErrorDisplay.Create(
+                result.Error,
+                _linkGenerator.GetPathByPage("/Subject/Assessments/Details", values: new { area = "Staff", Id }));
+
+            await PreparePage();
+
+            return Page();
+        }
 
         return RedirectToPage();
     }
