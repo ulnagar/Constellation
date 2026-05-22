@@ -58,7 +58,9 @@ public sealed class Assessment : AggregateRoot
 
     public bool IsLinkedToCanvas => CanvasCourse.HasValue;
     public CanvasCourseCode? CanvasCourse { get; private set; }
+    public string CanvasCourseName { get; private set; }
     public int? CanvasAssignmentId { get; private set; }
+    public string CanvasAssignmentName { get; private set; }
     public int? AllowedAttempts { get; private set; }
     public DateTimeOffset? ForwardDate { get; private set; }
 
@@ -68,12 +70,16 @@ public sealed class Assessment : AggregateRoot
 
     public void AddCanvasDetails(
         CanvasCourseCode canvasCourse,
+        string canvasCourseName,
         int canvasAssignmentId,
+        string canvasAssignmentName,
         int allowedAttempts,
         DateTimeOffset forwardDate)
     {
         CanvasCourse = canvasCourse;
+        CanvasCourseName = canvasCourseName;
         CanvasAssignmentId = canvasAssignmentId;
+        CanvasAssignmentName = canvasAssignmentName;
         AllowedAttempts = allowedAttempts;
         ForwardDate = forwardDate;
     }

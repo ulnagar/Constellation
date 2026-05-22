@@ -64,14 +64,14 @@ internal sealed class GetUploadAssignmentsFromCourseQueryHandler
 
         foreach (CanvasCourseCode courseId in canvasCourseIds)
         {
-            List<CanvasAssignmentDto> assignments = await _canvasGateway.GetAllUploadCourseAssignments(courseId, cancellationToken);
+            List<CanvasAssignmentDto> assignments = await _canvasGateway.GetAllCourseAssignments(courseId, cancellationToken);
 
             foreach (CanvasAssignmentDto assignment in assignments)
             {
                 CanvasAssignment? dbAssignment = await _assignmentRepository.GetByCanvasId(assignment.CanvasId, cancellationToken);
 
                 response.Add(new(
-                    assignment.Name,
+                    assignment.AssignmentName,
                     courseId,
                     assignment.CanvasId,
                     assignment.DueDate.LocalDateTime,

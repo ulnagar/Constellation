@@ -68,7 +68,7 @@ internal sealed class ExportCanvasRubricResultsQueryHandler
             return Result.Failure<FileDto>(OfferingErrors.NotFound(request.OfferingId));
         }
 
-        Result<RubricEntry> rubric = await _gateway.GetCourseAssignmentDetails(request.CourseCode, request.CanvasAssignmentId, cancellationToken);
+        Result<RubricEntry> rubric = await _gateway.GetCourseAssignmentRubric(request.CourseCode, request.CanvasAssignmentId, cancellationToken);
 
         if (rubric.IsFailure)
         {
@@ -81,7 +81,7 @@ internal sealed class ExportCanvasRubricResultsQueryHandler
         }
 
         List<CourseEnrolmentEntry> enrolments = await _gateway.GetEnrolmentsForCourse(request.CourseCode, cancellationToken);
-        List<AssignmentResultEntry> submissions = await _gateway.GetCourseAssignmentSubmissions(request.CourseCode, request.CanvasAssignmentId, cancellationToken);
+        List<AssignmentResultEntry> submissions = await _gateway.GetAssignmentSubmissionRubricResults(request.CourseCode, request.CanvasAssignmentId, cancellationToken);
 
         List<Student> students = await _studentRepository.GetCurrentEnrolmentsForCourse(offering.CourseId, cancellationToken);
 

@@ -92,6 +92,16 @@ internal sealed class GetAssessmentDetailsByIdQueryHandler
                 instruction.Details));
         }
 
+        AssessmentDetailsResponse.CanvasLink? canvasLink = assessment.CanvasCourse is null
+            ? null
+            : new(
+                assessment.CanvasCourse.Value,
+                assessment.CanvasCourseName,
+                assessment.CanvasAssignmentId.GetValueOrDefault(),
+                assessment.CanvasAssignmentName,
+                assessment.AllowedAttempts.GetValueOrDefault(),
+                assessment.ForwardDate);
+
         return new AssessmentDetailsResponse(
             assessment.Id,
             assessment.Name,
@@ -101,7 +111,7 @@ internal sealed class GetAssessmentDetailsByIdQueryHandler
             assessment.DueDate,
             assessment.AvailableFrom,
             assessment.AvailableTo,
-            assessment.IsLinkedToCanvas,
+            canvasLink,
             students,
             submissions, 
             downloads,

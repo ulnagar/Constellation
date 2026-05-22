@@ -8,6 +8,7 @@ using Core.Shared;
 using DTOs;
 using Interfaces.Gateways;
 using Interfaces.Repositories;
+using LinkedSystems.Canvas.Models;
 using Serilog;
 
 internal sealed class LinkAssessmentToCanvasCommandHandler
@@ -44,6 +45,18 @@ internal sealed class LinkAssessmentToCanvasCommandHandler
             return Result.Failure(AssessmentErrors.NotFound(request.AssessmentId));
         }
 
+        Result<CourseListEntry> course = await _gateway.GetCourse(request.CanvasCourse, cancellationToken);
+
+        if (course.IsFailure)
+        {
+            _logger
+                .ForContext(nameof(LinkAssessmentToCanvasCommand), request, true)
+                .ForContext(nameof(Error), course.Error, true)
+                .Warning("Failed to add Canvas Link to Assessment");
+
+            return Result.Failure(course.Error);
+        }
+
         Result<CanvasAssignmentDto> assignment = await _gateway.GetCourseAssignment(
             request.CanvasCourse, 
             request.CanvasAssignmentId,
@@ -63,7 +76,9 @@ internal sealed class LinkAssessmentToCanvasCommandHandler
 
         assessment.AddCanvasDetails(
             request.CanvasCourse,
+            course.Value.Name,
             request.CanvasAssignmentId,
+            assignment.Value.AssignmentName,
             assignment.Value.AllowedAttempts,
             forwardDate);
 

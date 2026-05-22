@@ -1,35 +1,34 @@
-﻿using Constellation.Core.Models.Subjects.Identifiers;
+﻿namespace Constellation.Application.DTOs;
+
+using Constellation.Core.Models.Subjects.Identifiers;
+using Core.Models.Assessments.Archive;
 using System;
 
-namespace Constellation.Application.DTOs
+public class CanvasAssignmentDto
 {
-    using Core.Models.Assessments.Archive;
+    public Guid Id { get; set; }
+    public CourseId CourseId { get; set; }
+    public string CourseName { get; set; }
+    public string AssignmentName { get; set; }
+    public int CanvasId { get; set; }
+    public DateTimeOffset DueDate { get; set; }
+    public DateTimeOffset? LockDate { get; set; }
+    public DateTimeOffset? UnlockDate { get; set; }
+    public int AllowedAttempts { get; set; }
 
-    public class CanvasAssignmentDto
+    public static CanvasAssignmentDto ConvertFromAssignment(CanvasAssignment assignment)
     {
-        public Guid Id { get; set; }
-        public CourseId CourseId { get; set; }
-        public string Name { get; set; }
-        public int CanvasId { get; set; }
-        public DateTimeOffset DueDate { get; set; }
-        public DateTimeOffset? LockDate { get; set; }
-        public DateTimeOffset? UnlockDate { get; set; }
-        public int AllowedAttempts { get; set; }
-
-        public static CanvasAssignmentDto ConvertFromAssignment(CanvasAssignment assignment)
+        var viewModel = new CanvasAssignmentDto
         {
-            var viewModel = new CanvasAssignmentDto
-            {
-                Id = assignment.Id.Value,
-                CourseId = assignment.CourseId,
-                Name = assignment.Name,
-                DueDate = assignment.DueDate,
-                LockDate = assignment.LockDate,
-                UnlockDate = assignment.UnlockDate,
-                AllowedAttempts = assignment.AllowedAttempts
-            };
+            Id = assignment.Id.Value,
+            CourseId = assignment.CourseId,
+            AssignmentName = assignment.Name,
+            DueDate = assignment.DueDate,
+            LockDate = assignment.LockDate,
+            UnlockDate = assignment.UnlockDate,
+            AllowedAttempts = assignment.AllowedAttempts
+        };
 
-            return viewModel;
-        }
+        return viewModel;
     }
 }

@@ -69,7 +69,7 @@ internal sealed class GetRubricAssignmentsFromCourseQueryHandler
                 CanvasAssignment? dbAssignment = await _assignmentRepository.GetByCanvasId(assignment.CanvasId, cancellationToken);
 
                 response.Add(new(
-                    assignment.Name,
+                    assignment.AssignmentName,
                     courseId,
                     assignment.CanvasId,
                     assignment.DueDate.LocalDateTime,

@@ -68,7 +68,7 @@ internal sealed class ExportCanvasAssignmentCommentsQueryHandler
         }
 
         List<CourseEnrolmentEntry> enrolments = await _gateway.GetEnrolmentsForCourse(request.CourseCode, cancellationToken);
-        List<AssignmentResultEntry> submissions = await _gateway.GetCourseAssignmentSubmissions(request.CourseCode, request.CanvasAssignmentId, cancellationToken);
+        List<AssignmentResultEntry> submissions = await _gateway.GetAssignmentSubmissionRubricResults(request.CourseCode, request.CanvasAssignmentId, cancellationToken);
 
         Dictionary<string, List<Student>> students = await _studentRepository.GetCurrentEnrolmentsForCourseWithOfferingName(offering.CourseId, cancellationToken);
 

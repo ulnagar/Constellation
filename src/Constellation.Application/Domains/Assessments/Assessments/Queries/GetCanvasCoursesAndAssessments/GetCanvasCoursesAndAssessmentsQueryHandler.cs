@@ -51,7 +51,7 @@ internal sealed class GetCanvasCoursesAndAssessmentsQueryHandler
 
                 assessments.Add(new(
                     assignment.CanvasId,
-                    assignment.Name,
+                    assignment.AssignmentName,
                     assignment.DueDate,
                     assignment.UnlockDate,
                     assignment.LockDate,

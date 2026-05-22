@@ -71,7 +71,7 @@ internal sealed class GetPublishedAssignmentsFromCourseQueryHandler
                 CanvasAssignment? dbAssignment = await _assignmentRepository.GetByCanvasId(assignment.CanvasId, cancellationToken);
 
                 response.Add(new(
-                    assignment.Name,
+                    assignment.AssignmentName,
                     courseId,
                     assignment.CanvasId,
                     assignment.DueDate.LocalDateTime,

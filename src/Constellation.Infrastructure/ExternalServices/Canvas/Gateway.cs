@@ -1,5 +1,4 @@
-﻿#nullable enable
-namespace Constellation.Infrastructure.ExternalServices.Canvas;
+﻿namespace Constellation.Infrastructure.ExternalServices.Canvas;
 
 using Application.Domains.LinkedSystems.Canvas.Models;
 using Application.DTOs;
@@ -18,7 +17,6 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
-using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Threading;
 using System.Threading.Tasks;
@@ -26,14 +24,13 @@ using System.Threading.Tasks;
 internal sealed class Gateway : ICanvasGateway
 {
     private readonly HttpClient _client;
-
-    private readonly string _url;
-    private readonly string _apiKey;
+    private readonly HttpClient _uploadClient;
     private readonly ILogger _logger;
-
     private readonly bool _logOnly;
 
     public Gateway(
+        HttpClient client,
+        IHttpClientFactory httpClientFactory,
         IOptions<CanvasGatewayConfiguration> configuration,
         ILogger logger)
     {
@@ -48,17 +45,8 @@ internal sealed class Gateway : ICanvasGateway
             return;
         }
 
-        _url = configuration.Value.ApiEndpoint;
-        _apiKey = configuration.Value.ApiKey;
-
-        HttpClientHandler config = new() { CookieContainer = new CookieContainer() };
-
-        IWebProxy proxy = WebRequest.DefaultWebProxy;
-        config.UseProxy = true;
-        config.Proxy = proxy;
-
-        ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls;
-        _client = new HttpClient(config);
+        _client = client;
+        _uploadClient = httpClientFactory.CreateClient("CanvasFileUpload");
     }
 
     private enum HttpVerb
@@ -76,29 +64,31 @@ internal sealed class Gateway : ICanvasGateway
     {
         try
         {
-            _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _apiKey);
-
-            List<T> completeResponse = new List<T>();
+            List<T> completeResponse = [];
 
             bool nextPageExists = true;
 
             while (nextPageExists)
             {
-                Uri uri = path.StartsWith("http") ? new Uri(path) : new Uri($"{_url}/{path}");
-
-                HttpResponseMessage response = await _client.GetAsync(uri, cancellationToken);
+                HttpResponseMessage response = await _client.GetAsync(path, cancellationToken);
 
                 if (!response.IsSuccessStatusCode)
                     return completeResponse;
 
                 string responseText = await response.Content.ReadAsStringAsync(cancellationToken);
 
-                completeResponse.AddRange(JsonConvert.DeserializeObject<List<T>>(responseText));
+                List<T>? page = JsonConvert.DeserializeObject<List<T>>(responseText);
+
+                if (page is not null)
+                    completeResponse.AddRange(page);
 
                 bool responseHeaders = response.Headers.TryGetValues("link", out IEnumerable<string> linkHeaders);
 
                 if (!responseHeaders)
+                {
                     nextPageExists = false;
+                    continue;
+                }
 
                 string[] links = linkHeaders!.First().Split(',');
                 string nextLinkHeader = links.FirstOrDefault(entry => entry.Contains(@"rel=""next"""));
@@ -129,18 +119,17 @@ internal sealed class Gateway : ICanvasGateway
     private async Task<HttpResponseMessage> RequestAsync(string path, HttpVerb action, object payload = null,
         CancellationToken cancellationToken = default)
     {
+        using HttpResponseMessage badRequest = new(HttpStatusCode.BadRequest);
+
         try
         {
-            Uri uri = path.StartsWith("http") ? new Uri(path) : new Uri($"{_url}/{path}");
-
-            _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _apiKey);
             HttpResponseMessage response = action switch
             {
-                HttpVerb.Get => await _client.GetAsync(uri, cancellationToken),
-                HttpVerb.Post => await _client.PostAsJsonAsync(uri, payload, cancellationToken),
-                HttpVerb.Put => await _client.PutAsJsonAsync(uri, payload, cancellationToken),
-                HttpVerb.Delete => await _client.DeleteAsync(uri, cancellationToken),
-                _ => new HttpResponseMessage { StatusCode = HttpStatusCode.BadRequest }
+                HttpVerb.Get => await _client.GetAsync(path, cancellationToken),
+                HttpVerb.Post => await _client.PostAsJsonAsync(path, payload, cancellationToken),
+                HttpVerb.Put => await _client.PutAsJsonAsync(path, payload, cancellationToken),
+                HttpVerb.Delete => await _client.DeleteAsync(path, cancellationToken),
+                _ => badRequest
             };
             return response;
         }
@@ -222,7 +211,7 @@ internal sealed class Gateway : ICanvasGateway
         CanvasCourseCode courseId,
         CancellationToken cancellationToken = default)
     {
-        List<(int, string)> data = new();
+        List<(int, string)> data = [];
 
         string path = $"courses/sis_course_id:{courseId}/enrollments?sis_user_id={userId}";
 
@@ -261,7 +250,7 @@ internal sealed class Gateway : ICanvasGateway
 
         if (_logOnly)
         {
-            _logger.Information("SearchForCourseAssignment: CourseId={courseId}, AssignmentId={assignmentId}, path={path}", 
+            _logger.Information("GetCourseAssignment: CourseId={courseId}, AssignmentId={assignmentId}, path={path}", 
                 courseId, assignmentId, path);
 
             return new CanvasAssignmentDto();
@@ -282,7 +271,7 @@ internal sealed class Gateway : ICanvasGateway
         CanvasAssignmentDto assignmentDto = new()
         {
             CanvasId = assignment.Id,
-            Name = assignment.Name,
+            AssignmentName = assignment.Name,
             DueDate = assignment.DueDate?.LocalDateTime ?? DateTime.Today,
             LockDate = assignment.LockDate?.LocalDateTime,
             UnlockDate = assignment.UnlockDate?.LocalDateTime,
@@ -323,8 +312,11 @@ internal sealed class Gateway : ICanvasGateway
         
         if (!stepOneResponse.IsSuccessStatusCode)
         {
-            _logger.Error("CanvasGateway.UploadAssignmentSubmission: Failed on step one with response {@response}",
-                stepOneResponse);
+            _logger
+                .ForContext("RequestPath", stepOnePath)
+                .ForContext("RequestPayload", stepOnePayload, true)
+                .ForContext(nameof(HttpResponseMessage), stepOneResponse, true)
+                .Error("CanvasGateway.UploadAssignmentSubmission: Failed on step one");
         
             return Result.Failure(CanvasGatewayErrors.FailureResponseCode);
         }
@@ -335,28 +327,30 @@ internal sealed class Gateway : ICanvasGateway
         if (fileUploadLocation is null)
             return Result.Failure(CanvasGatewayErrors.InvalidData);
 
-        _logger.Information("CanvasGateway.UploadAssignmentSubmission: Succeeded on step one with response {@response}",
-            fileUploadLocation);
-
         int fileId;
 
         // MultipartFormDataContent code taken from https://makolyte.com/csharp-how-to-send-a-file-with-httpclient/
         using (MultipartFormDataContent stepTwoContent = new())
         {
-            stepTwoContent.Add(new StringContent(file.FileName), name: "filename");
-            stepTwoContent.Add(new StringContent(file.FileType), name: "content_type");
+            using StringContent fileName = new(file.FileName);
+            using StringContent fileType = new(file.FileType);
+
+            stepTwoContent.Add(fileName, name: "filename");
+            stepTwoContent.Add(fileType, name: "content_type");
 
             MemoryStream fileStream = new(file.FileData);
-            StreamContent fileStreamContent = new(fileStream);
+            using StreamContent fileStreamContent = new(fileStream);
             fileStreamContent.Headers.ContentType = new(file.FileType);
             stepTwoContent.Add(fileStreamContent, name: "file", fileName: file.FileName);
 
-            HttpResponseMessage stepTwoResponse = await _client.PostAsync(fileUploadLocation.UploadUrl, stepTwoContent, cancellationToken);
+            HttpResponseMessage stepTwoResponse = await _uploadClient.PostAsync(fileUploadLocation.UploadUrl, stepTwoContent, cancellationToken);
             
             if (!stepTwoResponse.IsSuccessStatusCode)
             {
-                _logger.Error("CanvasGateway.UploadAssignmentSubmission: Failed on step two with response {@response}",
-                    stepTwoResponse);
+                _logger
+                    .ForContext("RequestPath", fileUploadLocation.UploadUrl)
+                    .ForContext(nameof(HttpResponseMessage), stepTwoResponse, true)
+                    .Error("CanvasGateway.UploadAssignmentSubmission: Failed on step two");
 
                 return Result.Failure(CanvasGatewayErrors.FailureResponseCode);
             }
@@ -368,15 +362,11 @@ internal sealed class Gateway : ICanvasGateway
                 return Result.Failure(CanvasGatewayErrors.InvalidData);
 
             fileId = fileUploadConfirmation.Id;
-
-            _logger.Information(
-                "CanvasGateway.UploadAssignmentSubmission: Succeeded on step two with response {@response}",
-                fileUploadConfirmation);
         }
 
         Result<int> canvasUserId = await SearchForUser(studentReferenceNumber, cancellationToken);
 
-        string stepThreePath = $"/courses/sis_course_id:{courseId}/assignments/{canvasAssignmentId}/submissions";
+        string stepThreePath = $"courses/sis_course_id:{courseId}/assignments/{canvasAssignmentId}/submissions";
         var stepThreePayload = new
         {
             submission = new
@@ -391,12 +381,14 @@ internal sealed class Gateway : ICanvasGateway
 
         if (!stepThreeResponse.IsSuccessStatusCode)
         {
-            _logger.Error("CanvasGateway.UploadAssignmentSubmission: Failed on step three with response {@response}", stepThreeResponse);
+            _logger
+                .ForContext("RequestPath", stepThreePath)
+                .ForContext("RequestPayload", stepThreePayload, true)
+                .ForContext(nameof(HttpResponseMessage), stepThreeResponse, true)
+                .Error("CanvasGateway.UploadAssignmentSubmission: Failed on step three");
 
             return Result.Failure(CanvasGatewayErrors.FailureResponseCode);
         }
-
-        _logger.Information("CanvasGateway.UploadAssignmentSubmission: Succeeded on step three with response {@response}", stepThreeResponse);
 
         return Result.Success();
     }
@@ -407,13 +399,13 @@ internal sealed class Gateway : ICanvasGateway
     {
         string path = $"courses/sis_course_id:{courseId}/assignments";
         
-        List<CanvasAssignmentDto> returnData = new();
+        List<CanvasAssignmentDto> returnData = [];
         
         if (_logOnly)
         {
             _logger.Information("GetAllCourseAssignments: CourseId={courseId}, path={path}", courseId, path);
 
-            return new List<CanvasAssignmentDto>();
+            return [];
         }
         
         List<AssignmentResult> assignments = await RequestAsync<AssignmentResult>(path, cancellationToken: cancellationToken);
@@ -429,46 +421,7 @@ internal sealed class Gateway : ICanvasGateway
             returnData.Add(new()
             {
                 CanvasId = assignment.Id,
-                Name = assignment.Name,
-                DueDate = assignment.DueDate?.LocalDateTime ?? DateTime.Today,
-                LockDate = assignment.LockDate?.LocalDateTime,
-                UnlockDate = assignment.UnlockDate?.LocalDateTime,
-                AllowedAttempts = assignment.AllowedAttempts
-            });
-        }
-
-        return returnData;
-    }
-
-    public async Task<List<CanvasAssignmentDto>> GetAllUploadCourseAssignments(
-        CanvasCourseCode courseId,
-        CancellationToken cancellationToken = default)
-    {
-        string path = $"courses/sis_course_id:{courseId}/assignments";
-
-        List<CanvasAssignmentDto> returnData = new();
-
-        if (_logOnly)
-        {
-            _logger.Information("GetAllCourseAssignments: CourseId={courseId}, path={path}", courseId, path);
-
-            return new List<CanvasAssignmentDto>();
-        }
-
-        List<AssignmentResult> assignments = await RequestAsync<AssignmentResult>(path, cancellationToken: cancellationToken);
-
-        assignments = assignments
-            .Where(assignment =>
-                assignment.IsPublished &&
-                assignment.SubmissionTypes.Contains("online_upload"))
-            .ToList();
-
-        foreach (AssignmentResult assignment in assignments)
-        {
-            returnData.Add(new()
-            {
-                CanvasId = assignment.Id,
-                Name = assignment.Name,
+                AssignmentName = assignment.Name,
                 DueDate = assignment.DueDate?.LocalDateTime ?? DateTime.Today,
                 LockDate = assignment.LockDate?.LocalDateTime,
                 UnlockDate = assignment.UnlockDate?.LocalDateTime,
@@ -485,21 +438,20 @@ internal sealed class Gateway : ICanvasGateway
     {
         string path = $"courses/sis_course_id:{courseId}/assignments";
 
-        List<CanvasAssignmentDto> returnData = new();
+        List<CanvasAssignmentDto> returnData = [];
 
         if (_logOnly)
         {
-            _logger.Information("GetAllCourseAssignments: CourseId={courseId}, path={path}", courseId, path);
+            _logger.Information("GetAllRubricCourseAssignments: CourseId={courseId}, path={path}", courseId, path);
 
-            return new List<CanvasAssignmentDto>();
+            return [];
         }
 
         List<AssignmentResult> assignments = await RequestAsync<AssignmentResult>(path, cancellationToken: cancellationToken);
 
         assignments = assignments
             .Where(assignment =>
-                assignment.IsPublished &&
-                assignment.Rubric is not null)
+                assignment is { IsPublished: true, Rubric: not null })
             .ToList();
 
         foreach (AssignmentResult assignment in assignments)
@@ -507,7 +459,7 @@ internal sealed class Gateway : ICanvasGateway
             returnData.Add(new()
             {
                 CanvasId = assignment.Id,
-                Name = assignment.Name,
+                AssignmentName = assignment.Name,
                 DueDate = assignment.DueDate?.LocalDateTime ?? DateTime.Today,
                 LockDate = assignment.LockDate?.LocalDateTime,
                 UnlockDate = assignment.UnlockDate?.LocalDateTime,
@@ -518,7 +470,7 @@ internal sealed class Gateway : ICanvasGateway
         return returnData;
     }
 
-    public async Task<Result<RubricEntry>> GetCourseAssignmentDetails(
+    public async Task<Result<RubricEntry>> GetCourseAssignmentRubric(
         CanvasCourseCode courseId,
         int assignmentId,
         CancellationToken cancellationToken = default)
@@ -527,7 +479,7 @@ internal sealed class Gateway : ICanvasGateway
 
         if (_logOnly)
         {
-            _logger.Information("GetAllCourseAssignments: CourseId={courseId}, path={path}", courseId, path);
+            _logger.Information("GetCourseAssignmentRubric: CourseId={courseId}, path={path}", courseId, path);
 
             return Result.Failure<RubricEntry>(CanvasGatewayErrors.FailureResponseCode);
         }
@@ -544,14 +496,14 @@ internal sealed class Gateway : ICanvasGateway
         if (assessmentSettings is null)
             return Result.Failure<RubricEntry>(CanvasGatewayErrors.InvalidData);
 
-        List<RubricEntry.RubricCriterion> criteria = new();
+        List<RubricEntry.RubricCriterion> criteria = [];
 
-        if (assessmentSettings.Rubric is null)
+        if (assessmentSettings.Rubric.Count == 0)
             return Result.Failure<RubricEntry>(CanvasGatewayErrors.RubricNotIncluded);
 
         foreach (AssignmentSettingsResult.RubricItem criterion in assessmentSettings.Rubric)
         {
-            List<RubricEntry.RubricCriterionRating> ratings = new();
+            List<RubricEntry.RubricCriterionRating> ratings = [];
 
             foreach (AssignmentSettingsResult.RubricItem rating in criterion.Ratings)
             {
@@ -577,18 +529,18 @@ internal sealed class Gateway : ICanvasGateway
             criteria);
     }
 
-    public async Task<List<AssignmentResultEntry>> GetCourseAssignmentSubmissions(
+    public async Task<List<AssignmentResultEntry>> GetAssignmentSubmissionRubricResults(
         CanvasCourseCode courseId,
         int assignmentId,
         CancellationToken cancellationToken = default)
     {
-        List<AssignmentResultEntry> results = new();
+        List<AssignmentResultEntry> results = [];
         
         string path = $"courses/sis_course_id:{courseId}/assignments/{assignmentId}/submissions?include[]=rubric_assessment&include[]=submission_comments";
 
         if (_logOnly)
         {
-            _logger.Information("GetAllCourseAssignments: CourseId={courseId}, path={path}", courseId, path);
+            _logger.Information("GetAssignmentSubmissionRubricResults: CourseId={courseId}, path={path}", courseId, path);
 
             return results;
         }
@@ -597,7 +549,7 @@ internal sealed class Gateway : ICanvasGateway
         
         foreach (AssignmentSubmission submission in submissions)
         {
-            List<AssignmentResultEntry.AssignmentRubricResult> marks = new();
+            List<AssignmentResultEntry.AssignmentRubricResult> marks = [];
 
             foreach (KeyValuePair<string, AssignmentSubmission.RubricValue> mark in submission.RubricAssessment)
             {
@@ -608,7 +560,7 @@ internal sealed class Gateway : ICanvasGateway
                     mark.Value.Points));
             }
 
-            List<AssignmentResultEntry.AssignmentComment> comments = new();
+            List<AssignmentResultEntry.AssignmentComment> comments = [];
 
             foreach (AssignmentSubmission.SubmissionComments comment in submission.Comments)
             {
@@ -1026,7 +978,9 @@ internal sealed class Gateway : ICanvasGateway
         {
             _logger.Information("DeleteUser: UserId={userId}, path={path}, payload={@payload}", userId, path, payload);
 
-            response = new(HttpStatusCode.NoContent);
+            using HttpResponseMessage errorResponse = new(HttpStatusCode.NoContent);
+
+            response = errorResponse;
         }
         else
         {
@@ -1052,17 +1006,38 @@ internal sealed class Gateway : ICanvasGateway
             : Result.Failure(CanvasGatewayErrors.FailureResponseCode);
     }
 
+    public async Task<Result<CourseListEntry>> GetCourse(
+        CanvasCourseCode courseCode,
+        CancellationToken cancellationToken = default)
+    {
+        string path = $"accounts/1/courses/sis_course_id:{courseCode}";
+
+        HttpResponseMessage response = await RequestAsync(path, HttpVerb.Get, cancellationToken: cancellationToken);
+
+        if (!response.IsSuccessStatusCode)
+            return Result.Failure<CourseListEntry>(CanvasGatewayErrors.FailureResponseCode);
+
+        string responseText = await response.Content.ReadAsStringAsync(cancellationToken);
+
+        CourseListResult? deserialized = JsonConvert.DeserializeObject<CourseListResult>(responseText);
+
+        if (deserialized is null)
+            return Result.Failure<CourseListEntry>(CanvasGatewayErrors.InvalidData);
+
+        return new CourseListEntry(deserialized.Name, courseCode);
+    }
+
     public async Task<List<CourseListEntry>> GetAllCourses(
         string year,
         CancellationToken cancellationToken = default)
     {
-        List<CourseListEntry> returnData = new();
+        List<CourseListEntry> returnData = [];
 
         string path = $"accounts/1/courses?search_by=course&search_term={year[..^1]}&ends_after={year}-01-01";
 
         bool nextPageExists = true;
 
-        List<CourseListResult> courses = new();
+        List<CourseListResult> courses = [];
 
         while (nextPageExists)
         {
@@ -1081,7 +1056,10 @@ internal sealed class Gateway : ICanvasGateway
             bool responseHeaders = response.Headers.TryGetValues("link", out IEnumerable<string>? linkHeaders);
 
             if (!responseHeaders)
+            {
                 nextPageExists = false;
+                continue;
+            }
 
             string[] links = linkHeaders!.First().Split(',');
             string nextLinkHeader = links.FirstOrDefault(entry => entry.Contains(@"rel=""next"""));
@@ -1107,7 +1085,7 @@ internal sealed class Gateway : ICanvasGateway
         CanvasCourseCode courseId,
         CancellationToken cancellationToken = default)
     {
-        List<CourseEnrolmentEntry> returnData = new();
+        List<CourseEnrolmentEntry> returnData = [];
 
         string path = $"courses/sis_course_id:{courseId}/enrollments";
 
@@ -1167,7 +1145,7 @@ internal sealed class Gateway : ICanvasGateway
                     return categoryCreated;
             }
 
-            var groupCreated = await CreateGroup(courseId, groupId, cancellationToken);
+            Result groupCreated = await CreateGroup(courseId, groupId, cancellationToken);
 
             if (groupCreated.IsFailure)
                 return groupCreated;
@@ -1322,7 +1300,7 @@ internal sealed class Gateway : ICanvasGateway
         CanvasSectionCode groupId,
         CancellationToken cancellationToken = default)
     {
-        List<string> returnData = new();
+        List<string> returnData = [];
 
         string path = $"groups/sis_group_id:{groupId}/memberships";
 

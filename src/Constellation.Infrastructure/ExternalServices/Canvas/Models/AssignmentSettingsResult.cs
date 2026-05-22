@@ -9,7 +9,7 @@ internal class AssignmentSettingsResult
     [JsonProperty("name")]
     public string Name { get; set; }
     [JsonProperty("rubric")]
-    public List<RubricItem> Rubric { get; set; }
+    public List<RubricItem> Rubric { get; set; } = [];
     [JsonProperty("rubric_settings")]
     public RubricSettings Settings { get; set; }
 
@@ -24,7 +24,7 @@ internal class AssignmentSettingsResult
         [JsonProperty("long_description")]
         public string LongDescription { get; set; }
         [JsonProperty("ratings")]
-        public List<RubricItem> Ratings { get; set; }
+        public List<RubricItem> Ratings { get; set; } = [];
     }
 
     internal sealed class RubricSettings

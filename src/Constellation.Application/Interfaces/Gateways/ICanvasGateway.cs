@@ -44,14 +44,14 @@ public interface ICanvasGateway
     /// <returns></returns>
     Task<Result> UnenrolUser(int enrollmentId, CanvasCourseCode courseId, CancellationToken cancellationToken = default);
     Task<Result> DeleteUser(string userId, CancellationToken cancellationToken = default);
+    Task<Result<CourseListEntry>> GetCourse(CanvasCourseCode courseCode, CancellationToken cancellationToken = default);
     Task<List<CanvasAssignmentDto>> GetAllCourseAssignments(CanvasCourseCode courseId, CancellationToken cancellationToken = default);
-    Task<List<CanvasAssignmentDto>> GetAllUploadCourseAssignments(CanvasCourseCode courseId, CancellationToken cancellationToken = default);
     Task<List<CanvasAssignmentDto>> GetAllRubricCourseAssignments(CanvasCourseCode courseId, CancellationToken cancellationToken = default);
 
     Task<Result<CanvasAssignmentDto>> GetCourseAssignment(CanvasCourseCode courseId, int assignmentId, CancellationToken cancellationToken = default);
-    Task<Result<RubricEntry>> GetCourseAssignmentDetails(CanvasCourseCode courseId, int assignmentId, CancellationToken cancellationToken = default);
+    Task<Result<RubricEntry>> GetCourseAssignmentRubric(CanvasCourseCode courseId, int assignmentId, CancellationToken cancellationToken = default);
     Task<Result> UploadAssignmentSubmission(CanvasCourseCode courseId, int canvasAssignmentId, string studentReferenceNumber, AttachmentResponse file, CancellationToken cancellationToken = default);
-    Task<List<AssignmentResultEntry>> GetCourseAssignmentSubmissions(CanvasCourseCode courseId, int assignmentId, CancellationToken cancellationToken = default);
+    Task<List<AssignmentResultEntry>> GetAssignmentSubmissionRubricResults(CanvasCourseCode courseId, int assignmentId, CancellationToken cancellationToken = default);
 
     Task<List<CourseListEntry>> GetAllCourses(string year, CancellationToken cancellationToken = default);
     Task<List<CourseEnrolmentEntry>> GetEnrolmentsForCourse(CanvasCourseCode courseId, CancellationToken cancellationToken = default);

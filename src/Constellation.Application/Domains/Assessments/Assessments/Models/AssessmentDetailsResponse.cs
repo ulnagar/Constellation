@@ -3,6 +3,7 @@
 using Core.Enums;
 using Core.Models.Assessments.Enums;
 using Core.Models.Assessments.Identifiers;
+using Core.Models.Canvas.Models;
 using Core.Models.Identifiers;
 using Core.Models.Students.Identifiers;
 using Core.Models.Subjects.Identifiers;
@@ -17,7 +18,7 @@ public sealed record AssessmentDetailsResponse(
     DateTimeOffset DueDate,
     DateTimeOffset AvailableFrom,
     DateTimeOffset AvailableTo,
-    bool IsLinkedToCanvasAssignment,
+    AssessmentDetailsResponse.CanvasLink? CanvasDetails,
     List<AssessmentDetailsResponse.Student> Students,
     List<AssessmentDetailsResponse.Submission> Submissions,
     List<AssessmentDetailsResponse.Download> Downloads,
@@ -31,6 +32,14 @@ public sealed record AssessmentDetailsResponse(
         string SchoolName,
         List<string> Provisions,
         bool IsDeleted);
+
+    public sealed record CanvasLink(
+        CanvasCourseCode CourseCode,
+        string CourseName,
+        int AssignmentId,
+        string AssignmentName,
+        int AllowedAttempts,
+        DateTimeOffset? ForwardDate);
 
     public sealed record Submission(
         SubmissionId SubmissionId,

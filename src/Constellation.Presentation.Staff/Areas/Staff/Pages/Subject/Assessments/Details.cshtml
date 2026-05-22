@@ -58,16 +58,40 @@
     </div>
 
     <div class="col-6">
-        <div class="row">
+        <div class="row mb-3">
             <div class="col-md-6">
-                <button class="btn btn-success link-canvas-btn">Link Canvas Assignment</button>
+                <button class="btn btn-success btn-sm link-canvas-btn">Update Canvas Link</button>
             </div>
         </div>
         <dl class="row">
-            <dt class="col-md-3">Linked to Canvas?</dt>
-            <dd class="col-md-9">
-                <span>@Model.Assessment.IsLinkedToCanvasAssignment</span>
-            </dd>
+            @if (Model.Assessment.CanvasDetails is not null)
+            {
+                var link = $"https://aurora.instructure.com/courses/sis_course_id:{Model.Assessment.CanvasDetails.CourseCode}/assignments/{Model.Assessment.CanvasDetails.AssignmentId}";
+
+                <dt class="col-md-4">Linked to Canvas?</dt>
+                <dd class="col-md-8">
+                    <span>Yes</span>
+                </dd>
+
+                <dt class="col-md-4">Canvas Course</dt>
+                <dd class="col-md-8">@Model.Assessment.CanvasDetails.CourseName</dd>
+
+                <dt class="col-md-4">Canvas Assignment Name</dt>
+                <dd class="col-md-8">@Model.Assessment.CanvasDetails.AssignmentName</dd>
+
+                <dt>Canvas Assignment Link</dt>
+                <dd><a href="@link" target="_blank">@link</a></dd>
+
+                <dt class="col-md-4">Canvas Submission Date</dt>
+                <dd class="col-md-8">@Model.Assessment.CanvasDetails.ForwardDate?.LocalDateTime.ToString("D")</dd>
+            }
+            else
+            {
+                <dt class="col-md-3">Linked to Canvas?</dt>
+                <dd class="col-md-9">
+                    <span>No</span>
+                </dd>
+            }
         </dl>
     </div>
 </div>
