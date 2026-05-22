@@ -12,6 +12,11 @@
 <h2>Assessment Details</h2>
 
 <div class="page-menu">
+    @if (canEditTest.Succeeded)
+    {
+        <a asp-page="/Subject/Assessments/Upsert" asp-area="Staff" asp-route-id="@Model.Assessment.Id" class="btn btn-warning">Edit</a>
+    }
+
     <a href="javascript:history.go(-1)" class="btn btn-danger btn-pull-right">Go Back</a>
 </div>
 
