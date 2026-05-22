@@ -1,4 +1,4 @@
-﻿namespace Constellation.Presentation.Schools.Pages.Shared.PartialViews.RemoveContactConfirmation;
+﻿namespace Constellation.Presentation.Schools.Areas.Schools.Pages.Shared.RemoveContactConfirmation;
 
 using Application.Domains.SchoolContacts.Queries.GetContactsWithRoleFromSchool;
 using Core.Models.SchoolContacts.Identifiers;

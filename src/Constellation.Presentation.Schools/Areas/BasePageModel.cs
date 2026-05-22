@@ -1,10 +1,8 @@
 ﻿namespace Constellation.Presentation.Schools.Areas;
 
 using Application.Domains.Schools.Queries.GetSchoolsForContact;
-using Application.Models.Identity.Enums;
 using Constellation.Application.Common.PresentationModels;
 using Constellation.Application.Models.Auth;
-using Constellation.Application.Models.Identity;
 using Constellation.Core.Shared;
 using Core.Models.Auth;
 using Core.Models.Auth.Enums;
@@ -15,72 +13,67 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.DependencyInjection;
 using Schools.Pages.Shared.Components.SchoolSelectorModal;
+using System.ComponentModel;
 using System.Security.Claims;
 
 public class BasePageModel : PageModel, IBaseModel
 {
-    private readonly IHttpContextAccessor _httpContextAccessor;
-    private readonly IServiceScopeFactory _serviceFactory;
-    private readonly IAuthorizationService _authService;
+    protected ISender Mediator =>
+        HttpContext.RequestServices.GetRequiredService<ISender>();
+    
+    private IAuthorizationService AuthService =>
+        HttpContext.RequestServices.GetRequiredService<IAuthorizationService>();
+    
+    private UserManager<AppUser> UserManager =>
+        HttpContext.RequestServices.GetRequiredService<UserManager<AppUser>>();
 
-    public BasePageModel(
-        IHttpContextAccessor httpContextAccessor,
-        IServiceScopeFactory serviceFactory,
-        IAuthorizationService authService)
+    public SchoolCode CurrentSchoolCode { get; set; } = SchoolCode.Empty;
+    public ModalContent? ModalContent { get; set; }
+
+    // 2026-05-22: Added to remove the SetDefaultSchool call from the constructor, allowing it to be async
+    public override async Task OnPageHandlerExecutionAsync(
+        PageHandlerExecutingContext context,
+        PageHandlerExecutionDelegate next)
     {
-        _httpContextAccessor = httpContextAccessor;
-        _serviceFactory = serviceFactory;
-        _authService = authService;
+        string? stringCode = HttpContext.Session.GetString(nameof(CurrentSchoolCode));
 
-        if (httpContextAccessor.HttpContext is null)
-            return;
-
-        bool success = httpContextAccessor.HttpContext.Session.TryGetValue(nameof(CurrentSchoolCode), out byte[]? currentSchoolCode);
-
-        if (success && currentSchoolCode.Length > 0)
+        if (!string.IsNullOrWhiteSpace(stringCode))
         {
-            var stringCode = System.Text.Encoding.Default.GetString(currentSchoolCode);
-
-            var schoolCode = SchoolCode.TryFromValue(stringCode);
+            Result<SchoolCode> schoolCode = SchoolCode.TryFromValue(stringCode);
 
             CurrentSchoolCode = schoolCode.IsSuccess
                 ? schoolCode.Value
-                : SetDefaultSchool();
+                : await SetDefaultSchool();
         }
         else
-            CurrentSchoolCode = SetDefaultSchool();
+            CurrentSchoolCode = await SetDefaultSchool();
+
+        await next();
     }
-
-    public SchoolCode CurrentSchoolCode { get; set; } = SchoolCode.Empty;
-
-    public ModalContent? ModalContent { get; set; }
 
     public async Task<IActionResult> OnPostChangeSchool(SchoolSelectorModalViewModel viewModel)
     {
         CurrentSchoolCode = viewModel.NewSchoolCode;
 
-        _httpContextAccessor.HttpContext?.Session.SetString(nameof(BasePageModel.CurrentSchoolCode), viewModel.NewSchoolCode.ToString());
+        HttpContext.Session.SetString(nameof(CurrentSchoolCode), viewModel.NewSchoolCode.ToString());
 
         return RedirectToPage();
     }
 
-    public SchoolCode SetDefaultSchool()
+    private async Task<SchoolCode> SetDefaultSchool()
     {
-        using IServiceScope scope = _serviceFactory.CreateScope();
-        ISender mediator = scope.ServiceProvider.GetRequiredService<ISender>();
-        UserManager<AppUser> userManager = scope.ServiceProvider.GetRequiredService<UserManager<AppUser>>();
+        ClaimsPrincipal? httpContextUser = HttpContext.User;
 
-        ClaimsPrincipal? httpContextUser = _httpContextAccessor.HttpContext?.User;
-
-        if (httpContextUser is null)
+        if (httpContextUser.Identity is null)
             return SchoolCode.Empty;
 
-        AppUser? user = userManager.FindByNameAsync(httpContextUser.Identity?.Name ?? string.Empty).Result;
+        AppUser? user = await UserManager.FindByNameAsync(httpContextUser.Identity.Name ?? string.Empty);
 
-        AuthorizationResult isAdminTest = _authService.AuthorizeAsync(httpContextUser, AuthPolicies.IsSiteAdmin).Result;
+        AuthorizationResult isAdminTest = await AuthService.AuthorizeAsync(httpContextUser, AuthPolicies.IsSiteAdmin);
 
         AppUserLink? contactLink = user?.Links.FirstOrDefault(link => !link.IsDeleted && link.Type == LinkType.Contact);
 
@@ -91,16 +84,18 @@ public class BasePageModel : PageModel, IBaseModel
             ? SchoolContactId.FromValue(contactLink.LinkId)
             : SchoolContactId.Empty;
 
-        Result<List<SchoolResponse>> schoolsRequest = isAdminTest.Succeeded
-            ? mediator.Send(new GetSchoolsForContactQuery(SchoolContactId.Empty, true)).Result
-            : mediator.Send(new GetSchoolsForContactQuery(contactId)).Result;
+        GetSchoolsForContactQuery schoolListQuery = isAdminTest.Succeeded
+            ? new(SchoolContactId.Empty, true)
+            : new(contactId);
+        
+        Result<List<SchoolResponse>> schoolsRequest = await Mediator.Send(schoolListQuery);
 
         if (schoolsRequest.IsFailure || schoolsRequest.Value.Count == 0)
             return SchoolCode.Empty;
 
         SchoolResponse school = schoolsRequest.Value.MinBy(school => school.SchoolCode.ToString())!;
 
-        _httpContextAccessor.HttpContext?.Session.SetString(nameof(CurrentSchoolCode), school!.SchoolCode.ToString());
+        HttpContext.Session.SetString(nameof(CurrentSchoolCode), school.SchoolCode.ToString());
 
         return school.SchoolCode;
     }

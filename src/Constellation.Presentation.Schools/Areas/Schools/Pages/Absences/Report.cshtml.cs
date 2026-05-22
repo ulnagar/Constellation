@@ -12,11 +12,8 @@ using Core.Abstractions.Clock;
 using Core.Abstractions.Services;
 using Core.Models.Students.Identifiers;
 using MediatR;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
-using Microsoft.Extensions.DependencyInjection;
 using Presentation.Shared.Helpers.Attributes;
 using Serilog;
 using System.ComponentModel.DataAnnotations;
@@ -26,24 +23,18 @@ using System.Net.Mime;
 [HasPermission(AuthPermission.SchoolsPortal_Absences_View_Value)]
 public class ReportModel : BasePageModel
 {
-    private readonly ISender _mediator;
+    private ISender _mediator => Mediator;
     private readonly LinkGenerator _linkGenerator;
     private readonly IDateTimeProvider _dateTime;
     private readonly ICurrentUserService _currentUserService;
     private readonly ILogger _logger;
 
     public ReportModel(
-        ISender mediator,
         LinkGenerator linkGenerator,
         IDateTimeProvider dateTime,
         ICurrentUserService currentUserService,
-        ILogger logger,
-        IHttpContextAccessor httpContextAccessor, 
-        IAuthorizationService authorizationService,
-        IServiceScopeFactory serviceFactory) 
-        : base(httpContextAccessor, serviceFactory, authorizationService)
+        ILogger logger)
     {
-        _mediator = mediator;
         _linkGenerator = linkGenerator;
         _dateTime = dateTime;
         _currentUserService = currentUserService;

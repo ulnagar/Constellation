@@ -7,42 +7,33 @@ using Application.Models.Auth;
 using Constellation.Application.Domains.AssetManagement.Stocktake.Commands.CancelSighting;
 using Constellation.Application.Domains.AssetManagement.Stocktake.Models;
 using Constellation.Core.Shared;
+using Constellation.Presentation.Schools.Areas.Schools.Pages.Shared.PartialViews.RemoveSightingConfirmation;
 using Constellation.Presentation.Shared.Helpers.Attributes;
 using Constellation.Presentation.Shared.Helpers.Logging;
 using Core.Abstractions.Clock;
 using Core.Abstractions.Services;
 using Core.Models.Stocktake.Identifiers;
 using MediatR;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.Routing;
-using Microsoft.Extensions.DependencyInjection;
-using Presentation.Schools.Pages.Shared.PartialViews.RemoveSightingConfirmation;
 using Serilog;
 
 [HasPermission(AuthPermission.SchoolsPortal_Stocktake_View_Value)]
 public class IndexModel : BasePageModel
 {
-    private readonly ISender _mediator;
+    private ISender _mediator => Mediator;
     private readonly LinkGenerator _linkGenerator;
     private readonly ICurrentUserService _currentUserService;
     private readonly IDateTimeProvider _dateTime;
     private readonly ILogger _logger;
 
     public IndexModel(
-        ISender mediator,
         LinkGenerator linkGenerator,
         ICurrentUserService currentUserService,
         IDateTimeProvider dateTime,
-        ILogger logger,
-        IHttpContextAccessor httpContextAccessor, 
-        IAuthorizationService authorizationService,
-        IServiceScopeFactory serviceFactory) 
-        : base(httpContextAccessor, serviceFactory, authorizationService)
+        ILogger logger) 
     {
-        _mediator = mediator;
         _linkGenerator = linkGenerator;
         _currentUserService = currentUserService;
         _dateTime = dateTime;

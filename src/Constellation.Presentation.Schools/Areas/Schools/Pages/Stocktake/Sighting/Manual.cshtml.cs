@@ -7,7 +7,6 @@ using Constellation.Application.Domains.StaffMembers.Models;
 using Constellation.Application.Domains.StaffMembers.Queries.GetStaffFromSchool;
 using Constellation.Application.Domains.Students.Models;
 using Constellation.Application.Domains.Students.Queries.GetCurrentStudentsFromSchool;
-using Constellation.Application.DTOs;
 using Constellation.Application.Models.Auth;
 using Constellation.Core.Abstractions.Services;
 using Constellation.Core.Models.Stocktake.Enums;
@@ -17,32 +16,23 @@ using Constellation.Presentation.Shared.Helpers.Attributes;
 using Constellation.Presentation.Shared.Helpers.Logging;
 using Constellation.Presentation.Shared.Helpers.ModelBinders;
 using MediatR;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
-using Microsoft.Extensions.DependencyInjection;
 using Serilog;
 
 [HasPermission(AuthPermission.SchoolsPortal_Stocktake_Edit_Value)]
 public class ManualModel : BasePageModel
 {
-    private readonly ISender _mediator;
+    private ISender _mediator => Mediator;
     private readonly ICurrentUserService _currentUserService;
     private readonly LinkGenerator _linkGenerator;
     private readonly ILogger _logger;
 
     public ManualModel(
-        ISender mediator,
         ICurrentUserService currentUserService,
         LinkGenerator linkGenerator,
-        ILogger logger,
-        IHttpContextAccessor httpContextAccessor,
-        IAuthorizationService authorizationService,
-        IServiceScopeFactory serviceFactory)
-        : base(httpContextAccessor, serviceFactory, authorizationService)
+        ILogger logger)
     {
-        _mediator = mediator;
         _currentUserService = currentUserService;
         _linkGenerator = linkGenerator;
         _logger = logger

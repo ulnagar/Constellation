@@ -22,22 +22,16 @@ using Serilog;
 [HasPermission(AuthPermission.SchoolsPortal_View_Value)]
 public class DashboardModel : BasePageModel
 {
-    private readonly ISender _mediator;
+    private ISender _mediator => Mediator;
     private readonly LinkGenerator _linkGenerator;
     private readonly ICurrentUserService _currentUserService;
     private readonly ILogger _logger;
 
     public DashboardModel(
-        ISender mediator,
         LinkGenerator linkGenerator,
         ICurrentUserService currentUserService,
-        ILogger logger,
-        IHttpContextAccessor httpContextAccessor,
-        IAuthorizationService authorizationService,
-        IServiceScopeFactory scopeFactory)
-        : base(httpContextAccessor, scopeFactory, authorizationService)
+        ILogger logger)
     {
-        _mediator = mediator;
         _linkGenerator = linkGenerator;
         _currentUserService = currentUserService;
         _logger = logger

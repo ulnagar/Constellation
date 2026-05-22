@@ -10,11 +10,8 @@ using Constellation.Presentation.Shared.Helpers.Logging;
 using Core.Abstractions.Services;
 using Core.Shared;
 using MediatR;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
-using Microsoft.Extensions.DependencyInjection;
 using Presentation.Shared.Helpers.Attributes;
 using Serilog;
 using System.ComponentModel.DataAnnotations;
@@ -22,22 +19,16 @@ using System.ComponentModel.DataAnnotations;
 [HasPermission(AuthPermission.SchoolsPortal_SciencePracs_Edit_Value)]
 public class SubmitModel : BasePageModel
 {
-    private readonly ISender _mediator;
+    private ISender _mediator => Mediator;
     private readonly LinkGenerator _linkGenerator;
     private readonly ICurrentUserService _currentUserService;
     private readonly ILogger _logger;
 
     public SubmitModel(
-        ISender mediator,
         LinkGenerator linkGenerator,
         ICurrentUserService currentUserService,
-        ILogger logger,
-        IHttpContextAccessor httpContextAccessor, 
-        IAuthorizationService authorizationService,
-        IServiceScopeFactory serviceFactory) 
-        : base(httpContextAccessor, serviceFactory, authorizationService)
+        ILogger logger) 
     {
-        _mediator = mediator;
         _linkGenerator = linkGenerator;
         _currentUserService = currentUserService;
         _logger = logger

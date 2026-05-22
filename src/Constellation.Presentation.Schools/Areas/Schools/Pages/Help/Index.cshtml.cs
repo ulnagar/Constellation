@@ -3,9 +3,7 @@ namespace Constellation.Presentation.Schools.Areas.Schools.Pages.Help;
 using Application.Models.Auth;
 using Core.Abstractions.Services;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.DependencyInjection;
 using Presentation.Shared.Helpers.Logging;
 using Serilog;
 
@@ -16,12 +14,8 @@ public class IndexModel : BasePageModel
     private readonly ILogger _logger;
 
     public IndexModel(
-        IHttpContextAccessor httpContextAccessor,
-        IServiceScopeFactory serviceFactory,
         ICurrentUserService currentUserService,
-        IAuthorizationService authorizationService,
         ILogger logger)
-        : base(httpContextAccessor, serviceFactory, authorizationService)
     {
         _currentUserService = currentUserService;
         _logger = logger

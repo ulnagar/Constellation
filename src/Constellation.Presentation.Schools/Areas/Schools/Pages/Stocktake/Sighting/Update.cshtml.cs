@@ -20,32 +20,23 @@ using Core.Abstractions.Services;
 using Core.Models.Stocktake.Enums;
 using Core.Models.Stocktake.Identifiers;
 using MediatR;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
-using Microsoft.Extensions.DependencyInjection;
 using Serilog;
 
 [HasPermission(AuthPermission.SchoolsPortal_Stocktake_Edit_Value)]
 public class UpdateModel : BasePageModel
 {
-    private readonly ISender _mediator;
+    private ISender _mediator => Mediator;
     private readonly ICurrentUserService _currentUserService;
     private readonly LinkGenerator _linkGenerator;
     private readonly ILogger _logger;
 
     public UpdateModel(
-        ISender mediator,
         ICurrentUserService currentUserService,
         LinkGenerator linkGenerator,
-        ILogger logger,
-        IAuthorizationService authorizationService,
-        IHttpContextAccessor httpContextAccessor,
-        IServiceScopeFactory serviceFactory)
-        : base(httpContextAccessor, serviceFactory, authorizationService)
+        ILogger logger)
     {
-        _mediator = mediator;
         _currentUserService = currentUserService;
         _linkGenerator = linkGenerator;
         _logger = logger

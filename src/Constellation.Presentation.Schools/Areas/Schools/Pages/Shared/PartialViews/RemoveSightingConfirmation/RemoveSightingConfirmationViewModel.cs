@@ -1,4 +1,4 @@
-﻿namespace Constellation.Presentation.Schools.Pages.Shared.PartialViews.RemoveSightingConfirmation;
+﻿namespace Constellation.Presentation.Schools.Areas.Schools.Pages.Shared.PartialViews.RemoveSightingConfirmation;
 
 using Core.Models.Stocktake.Identifiers;
 using System;

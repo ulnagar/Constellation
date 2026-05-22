@@ -14,33 +14,24 @@ using Core.Models.Attachments.DTOs;
 using Core.Models.Attachments.Enums;
 using Core.Models.Students.Identifiers;
 using MediatR;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
-using Microsoft.Extensions.DependencyInjection;
 using Presentation.Shared.Helpers.Attributes;
 using Serilog;
 
 [HasPermission(AuthPermission.SchoolsPortal_Awards_View_Value)]
 public class IndexModel : BasePageModel
 {
-    private readonly ISender _mediator;
+    private ISender _mediator => Mediator;
     private readonly LinkGenerator _linkGenerator;
     private readonly ICurrentUserService _currentUserService;
     private readonly ILogger _logger;
 
     public IndexModel(
-        ISender mediator,
         LinkGenerator linkGenerator,
         ICurrentUserService currentUserService,
-        ILogger logger,
-        IHttpContextAccessor httpContextAccessor, 
-        IAuthorizationService authorizationService,
-        IServiceScopeFactory serviceFactory)
-        : base(httpContextAccessor, serviceFactory, authorizationService)
+        ILogger logger)
     {
-        _mediator = mediator;
         _linkGenerator = linkGenerator;
         _currentUserService = currentUserService;
         _logger = logger

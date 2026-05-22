@@ -4,9 +4,7 @@ using Application.Models.Auth;
 using Constellation.Presentation.Shared.Helpers.Logging;
 using Core.Abstractions.Services;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.DependencyInjection;
 using Serilog;
 
 [Authorize(Policy = AuthPolicies.IsSchoolContact)]
@@ -16,12 +14,8 @@ public class AbsencesModel : BasePageModel
     private readonly ILogger _logger;
 
     public AbsencesModel(
-        IHttpContextAccessor httpContextAccessor, 
-        IServiceScopeFactory serviceFactory,
         ICurrentUserService currentUserService,
-        IAuthorizationService authorizationService,
-        ILogger logger) 
-        : base(httpContextAccessor, serviceFactory, authorizationService)
+        ILogger logger)
     {
         _currentUserService = currentUserService;
         _logger = logger

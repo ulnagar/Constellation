@@ -115,6 +115,8 @@ public sealed class AuthPermission : StringEnumeration<AuthPermission>
     public const string SchoolsPortal_Timetables_View_Value = "SchoolsPortal.Timetables.View";
     public const string SchoolsPortal_Stocktake_View_Value = "SchoolsPortal.Stocktake.View";
     public const string SchoolsPortal_Stocktake_Edit_Value = "SchoolsPortal.Stocktake.Edit";
+    public const string SchoolsPortal_Assessments_View_Value = "SchoolsPortal.Assessments.View";
+    public const string SchoolsPortal_Assessments_Edit_Value = "SchoolsPortal.Assessments.Edit";
 
     public const string ParentPortal_View_Value = "ParentPortal.View";
 
@@ -226,6 +228,8 @@ public sealed class AuthPermission : StringEnumeration<AuthPermission>
     public static readonly AuthPermission SchoolsPortal_Timetables_View = new(SchoolsPortal_Timetables_View_Value, "SchoolsPortal: Timetables: View");
     public static readonly AuthPermission SchoolsPortal_Stocktake_View = new(SchoolsPortal_Stocktake_View_Value, "SchoolsPortal: Stocktake: View");
     public static readonly AuthPermission SchoolsPortal_Stocktake_Edit = new(SchoolsPortal_Stocktake_Edit_Value, "SchoolsPortal: Stocktake: Edit");
+    public static readonly AuthPermission SchoolsPortal_Assessments_View = new(SchoolsPortal_Assessments_View_Value, "SchoolsPortal: Assessments: View");
+    public static readonly AuthPermission SchoolsPortal_Assessments_Edit = new(SchoolsPortal_Assessments_Edit_Value, "SchoolsPortal: Assessments: Edit");
 
     public static readonly AuthPermission ParentPortal_View = new(ParentPortal_View_Value, "ParentPortal: View");
 

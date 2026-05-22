@@ -7,33 +7,24 @@ using Constellation.Presentation.Shared.Helpers.Logging;
 using Core.Abstractions.Services;
 using Core.Shared;
 using MediatR;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
-using Microsoft.Extensions.DependencyInjection;
 using Presentation.Shared.Helpers.Attributes;
 using Serilog;
 
 [HasPermission(AuthPermission.SchoolsPortal_Absences_View_Value)]
 public class IndexModel : BasePageModel
 {
-    private readonly ISender _mediator;
+    private ISender _mediator => Mediator;
     private readonly LinkGenerator _linkGenerator;
     private readonly ILogger _logger;
     private readonly ICurrentUserService _currentUserService;
 
     public IndexModel(
-        ISender mediator,
         LinkGenerator linkGenerator,
         ILogger logger,
-        ICurrentUserService currentUserService,
-        IHttpContextAccessor httpContextAccessor,
-        IAuthorizationService authorizationService,
-        IServiceScopeFactory serviceFactory) 
-        : base(httpContextAccessor, serviceFactory, authorizationService)
+        ICurrentUserService currentUserService) 
     {
-        _mediator = mediator;
         _linkGenerator = linkGenerator;
         _currentUserService = currentUserService;
         _logger = logger
