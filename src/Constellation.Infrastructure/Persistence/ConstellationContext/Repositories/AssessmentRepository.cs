@@ -1,6 +1,7 @@
 ﻿namespace Constellation.Infrastructure.Persistence.ConstellationContext.Repositories;
 
 using Constellation.Core.Models.Assessments.ValueObjects;
+using Constellation.Core.Models.Identifiers;
 using Constellation.Core.Models.Students.Identifiers;
 using Core.Models.Assessments;
 using Core.Models.Assessments.Identifiers;
@@ -59,7 +60,22 @@ internal sealed class AssessmentRepository : IAssessmentRepository
                 && a.Students.Any(s => s.StudentId == studentId))
             .ToListAsync(cancellationToken);
     }
-    
+
+    public async Task<List<Assessment>> GetCurrentAssessmentsForSchoolCode(
+        SchoolCode schoolCode,
+        CancellationToken cancellationToken = default)
+    {
+        DateTimeOffset now = DateTimeOffset.UtcNow;
+
+        return await _context
+            .Set<Assessment>()
+            .Where(a =>
+                a.AvailableFrom <= now
+                && a.AvailableTo >= now
+                && a.Students.Any(s => s.SchoolCode == schoolCode))
+            .ToListAsync(cancellationToken);
+    }
+
     public async Task<Provision?> GetProvisionById(
         ProvisionId id,
         CancellationToken cancellationToken = default) =>

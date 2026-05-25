@@ -1,6 +1,7 @@
 ﻿namespace Constellation.Core.Models.Assessments.Repositories;
 
 using Identifiers;
+using Models.Identifiers;
 using Students.Identifiers;
 using ValueObjects;
 
@@ -11,6 +12,7 @@ public interface IAssessmentRepository
     Task<List<Assessment>> GetCurrentAssessments(CancellationToken cancellationToken = default);
     Task<List<Assessment>> GetAssessmentsForStudent(StudentId studentId, CancellationToken cancellationToken = default);
     Task<List<Assessment>> GetCurrentAssessmentsForStudent(StudentId studentId, CancellationToken cancellationToken = default);
+    Task<List<Assessment>> GetCurrentAssessmentsForSchoolCode(SchoolCode schoolCode, CancellationToken cancellationToken = default);
 
     Task<Provision?> GetProvisionById(ProvisionId id, CancellationToken cancellationToken = default);
     Task<List<Provision>> GetProvisions(CancellationToken cancellationToken = default);

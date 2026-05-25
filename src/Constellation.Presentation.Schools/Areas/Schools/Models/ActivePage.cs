@@ -7,6 +7,8 @@ public static class ActivePage
 
     public const string Absences = "Absences";
 
+    public const string Assessments = "Assessments";
+
     public const string Awards = "Awards";
 
     public const string Contacts = "Contacts";

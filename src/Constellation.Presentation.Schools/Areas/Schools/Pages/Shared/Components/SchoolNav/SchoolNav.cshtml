@@ -27,6 +27,11 @@
             </a>
         </div>
         <div class="nav-item px-3">
+            <a class="nav-link @(Model == ActivePage.Assessments ? "active" : "")" asp-page="/Assessments/Index" asp-area="Schools" onclick="showLoader()">
+                <i class="fas fa-file-alt" aria-hidden="true"></i> Assessments
+            </a>
+        </div>
+        <div class="nav-item px-3">
             <a class="nav-link @(Model == ActivePage.ScienceRolls ? "active" : "")" asp-page="/ScienceRolls/Index" asp-area="Schools" onclick="showLoader()">
                 <i class="fas fa-flask-potion" aria-hidden="true"></i> Science Rolls
             </a>
