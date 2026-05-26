@@ -187,6 +187,14 @@ builder.Services.Configure<FormOptions>(options =>
 
 builder.WebHost.UseStaticWebAssets();
 
+// Required for the TileProxyController
+builder.Services.AddHttpClient("TileProxy", client =>
+{
+    // OSM requires a proper User-Agent — anonymous requests may be blocked
+    client.DefaultRequestHeaders.UserAgent.ParseAdd("Constellation/1.0");
+    client.Timeout = TimeSpan.FromSeconds(10);
+});
+
 WebApplication app = builder.Build();
 
 if (!app.Environment.IsProduction())
