@@ -138,3 +138,8 @@ main {
         padding-right: 1.5rem !important;
     }
 }
+
+/* Add padding when there is an impersonation banner present */
+body.is-impersonating article {
+    padding-bottom: 4rem !important;
+}

@@ -83,8 +83,7 @@ public class Timetable : ValueObject<Timetable, string>, IValueObject<Timetable,
     public override bool Equals(object obj) =>
         ReferenceEquals(this, obj) || obj is Timetable other && Equals(other);
 
-    public override int GetHashCode() =>
-        HashCode.Combine(base.GetHashCode(), Code);
+    public override int GetHashCode() => Code.GetHashCode(StringComparison.InvariantCultureIgnoreCase);
 
     private static Dictionary<string, Timetable> CreateEnumerations()
     {

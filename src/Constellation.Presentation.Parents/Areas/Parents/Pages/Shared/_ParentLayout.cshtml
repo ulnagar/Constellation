@@ -1,4 +1,8 @@
-﻿@model Constellation.Presentation.Parents.Areas.Parents.Models.BasePageModel
+﻿@using System.Security.Claims
+@using Constellation.Application.Interfaces.Services
+@model Constellation.Presentation.Parents.Areas.Parents.Models.BasePageModel
+
+@inject IAuthService AuthService
 
 @{
     var activePageAvailable = ViewData.TryGetValue("ActivePage", out var activePage);
@@ -19,81 +23,105 @@
 
         <script src="~/lib/jquery/jquery.min.js"></script>
     </head>
-    <body>
-        <div id="app">
-            <div class="spinner-overlay">
-                <div class="d-flex justify-content-center h-100">  
-                    <div class="spinner-grow text-primary" role="status">
-                        <span class="sr-only">Loading...</span>
-                    </div>
-                    <div class="spinner-grow text-info spinner-0" role="status"></div>
-                    <div class="spinner-grow text-primary spinner-1" role="status"></div>
-                    <div class="spinner-grow text-info spinner-2" role="status"></div>
-                    <div class="spinner-grow text-primary spinner-3" role="status"></div>
-                    <div class="spinner-grow text-info spinner-4" role="status"></div>
-                    <div class="spinner-grow text-primary spinner-5" role="status"></div>
-                    <div class="spinner-grow text-info spinner-6" role="status"></div>
-                    <div class="spinner-grow text-primary spinner-7" role="status"></div>
-                    <div class="spinner-grow text-info spinner-8" role="status"></div>
-                </div>
+<body class="@(AuthService.IsImpersonating(User) ? "is-impersonating" : "")">
+<div id="app">
+    <div class="spinner-overlay">
+        <div class="d-flex justify-content-center h-100">
+            <div class="spinner-grow text-primary" role="status">
+                <span class="sr-only">Loading...</span>
             </div>
-
-            <div class="page">
-                <div class="sidebar">
-                    <vc:parent-nav active-page="@activePage?.ToString()" />
-                </div>
-
-                <main>
-                    <div class="navbar sticky-top top-row">
-                        <div class="col-md-8">
-                        </div>
-                        <div class="col">
-                            @if (User?.Identity is not null && User.Identity.IsAuthenticated)
-                            {
-                                <a class="btn btn-sm btn-warning ml-4" asp-area="" asp-page="/Auth/Logout">Log Out</a>
-                            }
-                            else
-                            {
-                                <a class="btn btn-sm btn-success" asp-area="" asp-page="/Auth/Login">Log In</a>
-                            }
-                        </div>
-                    </div>
-
-                    <article class="content px-4">
-                        @RenderBody()
-                    </article>
-                </main>
-            </div>
+            <div class="spinner-grow text-info spinner-0" role="status"></div>
+            <div class="spinner-grow text-primary spinner-1" role="status"></div>
+            <div class="spinner-grow text-info spinner-2" role="status"></div>
+            <div class="spinner-grow text-primary spinner-3" role="status"></div>
+            <div class="spinner-grow text-info spinner-4" role="status"></div>
+            <div class="spinner-grow text-primary spinner-5" role="status"></div>
+            <div class="spinner-grow text-info spinner-6" role="status"></div>
+            <div class="spinner-grow text-primary spinner-7" role="status"></div>
+            <div class="spinner-grow text-info spinner-8" role="status"></div>
         </div>
-        
-        @if (Model.ModalContent is not null)
-        {
-            <vc:modal-content-display content="@Model.ModalContent" />
+    </div>
 
-            <script>
+    <div class="page">
+        <div class="sidebar">
+            <vc:parent-nav active-page="@activePage?.ToString()"/>
+        </div>
+
+        <main>
+            <div class="navbar sticky-top top-row">
+                <div class="col-md-8">
+                </div>
+                <div class="col">
+                    @if (User?.Identity is not null && User.Identity.IsAuthenticated)
+                    {
+                        <a class="btn btn-sm btn-warning ml-4" asp-area="" asp-page="/Auth/Logout">Log Out</a>
+                    }
+                    else
+                    {
+                        <a class="btn btn-sm btn-success" asp-area="" asp-page="/Auth/Login">Log In</a>
+                    }
+                </div>
+            </div>
+
+            <article class="content px-4">
+                @RenderBody()
+            </article>
+        </main>
+    </div>
+
+
+    <div class="footer fixed-bottom">
+        @if (AuthService.IsImpersonating(User))
+        {
+            var originalName = User.FindFirstValue(AuthClaimType.OriginalUserName);
+
+            <div class="alert alert-warning alert-dismissible d-flex align-items-center 
+                justify-content-between mb-0 rounded-0 border-0 border-bottom"
+                 role="alert" style="position: sticky; top: 0; z-index: 1050;">
+                <div>
+                    <i class="bi bi-person-fill-gear me-2"></i>
+                    <strong>Impersonation active.</strong>
+                    You are viewing this page as <strong>@User.Identity!.Name</strong>.
+                    Logged in as: <em>@originalName</em>
+                </div>
+                <form method="post" asp-area="" asp-page="/Auth/Impersonation" asp-page-handler="StopImpersonating" class="mb-0">
+                    <button type="submit" class="btn btn-sm btn-warning fw-semibold">
+                        <i class="bi bi-x-circle me-1"></i>End Impersonation
+                    </button>
+                </form>
+            </div>
+        }
+    </div>
+</div>
+
+@if (Model.ModalContent is not null)
+{
+    <vc:modal-content-display content="@Model.ModalContent"/>
+
+    <script>
                 $(document).ready(function () {
                     $('#ux-modal').modal('show');
                 });
             </script>
-        }
-        
-        <div class="modal fade" tabindex="-1" id="page-modal">
-            <div class="modal-dialog" style="max-width: 600px;">
-                <div id="modal-content" class="modal-content">
-                </div>
-            </div>
-        </div>
+}
 
-        <script src="~/lib/bootstrap5/js/bootstrap.min.js"></script>
-        <script src="~/js/parents.js"></script>
-        @await RenderSectionAsync("Scripts", required: false)
-        
-        <script>
+<div class="modal fade" tabindex="-1" id="page-modal">
+    <div class="modal-dialog" style="max-width: 600px;">
+        <div id="modal-content" class="modal-content">
+        </div>
+    </div>
+</div>
+
+<script src="~/lib/bootstrap5/js/bootstrap.min.js"></script>
+<script src="~/js/parents.js"></script>
+@await RenderSectionAsync("Scripts", required: false)
+
+<script>
             $(document).ready(function () {
                 setTimeout(function () {
                     $('.spinner-overlay').addClass('d-none');
                 }, 1000);
             });
         </script>
-    </body>
+</body>
 </html>

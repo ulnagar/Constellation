@@ -158,6 +158,15 @@
                             <div class="dropdown-menu">
                                 <a asp-page="/Auth/Users/Details" asp-area="Admin" asp-route-id="@user.Id" class="dropdown-item">View Info...</a>
                                 <a asp-page-handler="Audit" asp-route-userId="@user.Id" class="dropdown-item">Audit Access</a>
+                                @if (user.Links.Any(link => link.Type == LinkType.Parent || link.Type == LinkType.Family))
+                                {
+                                    <form method="post" asp-page="/Auth/Impersonation" asp-area="" asp-page-handler="Impersonate">
+                                        <input type="hidden" name="TargetUserId" value="@user.Id" />
+                                        <button type="submit" class="dropdown-item">
+                                            Impersonate
+                                        </button>
+                                    </form>
+                                }
                             </div>
                         </div>
                     }

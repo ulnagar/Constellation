@@ -7,7 +7,6 @@ using Core.Models.Attendance.Repositories;
 using Core.Models.Offerings;
 using Core.Models.Offerings.Enums;
 using Core.Models.Offerings.Repositories;
-using Core.Models.Offerings.ValueObjects;
 using Core.Models.StaffMembers;
 using Core.Models.StaffMembers.Repositories;
 using Core.Models.Students;
@@ -63,7 +62,7 @@ internal sealed class GetStudentTimetableDataQueryHandler
     {
         StudentTimetableDataDto response = new();
 
-        Student student = await _studentRepository.GetById(request.StudentId, cancellationToken);
+        Student? student = await _studentRepository.GetById(request.StudentId, cancellationToken);
 
         if (student is null)
         {
@@ -164,13 +163,13 @@ internal sealed class GetStudentTimetableDataQueryHandler
 
             if (periodIds.Contains(period.Id))
             {
-                Offering offering = offerings
+                Offering? offering = offerings
                     .FirstOrDefault(offering =>
                         offering.Sessions.Any(session =>
                             !session.IsDeleted &&
                             session.PeriodId == period.Id));
 
-                Tutorial tutorial = tutorials
+                Tutorial? tutorial = tutorials
                     .FirstOrDefault(tutorial =>
                         tutorial.Sessions.Any(session =>
                             !session.IsDeleted &&
@@ -181,7 +180,7 @@ internal sealed class GetStudentTimetableDataQueryHandler
 
                 if (tutorial is null)
                 {
-                    entry.ClassName = offering.Name;
+                    entry.ClassName = offering!.Name;
 
                     List<TeacherAssignment> assignments = offering
                         .Teachers
@@ -192,7 +191,7 @@ internal sealed class GetStudentTimetableDataQueryHandler
 
                     foreach (TeacherAssignment assignment in assignments)
                     {
-                        StaffMember teacher = await _staffRepository.GetById(assignment.StaffId, cancellationToken);
+                        StaffMember? teacher = await _staffRepository.GetById(assignment.StaffId, cancellationToken);
 
                         if (teacher is null)
                             continue;
@@ -203,7 +202,7 @@ internal sealed class GetStudentTimetableDataQueryHandler
 
                 if (offering is null)
                 {
-                    entry.ClassName = tutorial.Name;
+                    entry.ClassName = tutorial!.Name;
 
                     List<TutorialSession> tutorialSessions = tutorial
                         .Sessions
@@ -214,7 +213,7 @@ internal sealed class GetStudentTimetableDataQueryHandler
 
                     foreach (TutorialSession tutorialSession in tutorialSessions)
                     {
-                        StaffMember teacher = await _staffRepository.GetById(tutorialSession.StaffId, cancellationToken);
+                        StaffMember? teacher = await _staffRepository.GetById(tutorialSession.StaffId, cancellationToken);
 
                         if (teacher is null)
                             continue;
