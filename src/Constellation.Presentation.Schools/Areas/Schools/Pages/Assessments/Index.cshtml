@@ -23,7 +23,7 @@
                     <h4>@assessment.Course: @assessment.Name</h4>
                 </div>
                 <div class="col-auto upload-wrapper" style="display:none">
-                    <button class="btn btn-success">Upload File</button>
+                    <a asp-page="/Assessments/Upload" asp-area="Schools" asp-route-assessmentId="@assessment.Id" class="btn btn-success">Upload File</a>
                 </div>
             </span>
         </div>
