@@ -8,18 +8,18 @@ using Presentation.Shared.Helpers.Logging;
 using Serilog;
 
 [Authorize(Policy = AuthPolicies.IsSchoolContact)]
-public class ExamSubmissionModel : BasePageModel
+public class AssessmentsModel : BasePageModel
 {
     private readonly ICurrentUserService _currentUserService;
     private readonly ILogger _logger;
 
-    public ExamSubmissionModel(
+    public AssessmentsModel(
         ICurrentUserService currentUserService,
         ILogger logger)
     {
         _currentUserService = currentUserService;
         _logger = logger
-            .ForContext<ExamSubmissionModel>()
+            .ForContext<AssessmentsModel>()
             .ForContext(LogDefaults.Application, LogDefaults.SchoolsPortal);
     }
 
@@ -27,6 +27,6 @@ public class ExamSubmissionModel : BasePageModel
 
     public void OnGet()
     {
-        _logger.Information("Requested to retrieve exam submission help page by user {user} for school {school}", _currentUserService.UserName, CurrentSchoolCode);
+        _logger.Information("Requested to retrieve assessment help page by user {user} for school {school}", _currentUserService.UserName, CurrentSchoolCode);
     }
 }
