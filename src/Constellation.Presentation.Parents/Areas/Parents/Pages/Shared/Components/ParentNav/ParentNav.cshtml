@@ -22,6 +22,11 @@
             </a>
         </div>
         <div class="nav-item px-3">
+            <a class="nav-link @(Model.ActivePage == ActivePage.Assessments ? "active" : "")" asp-page="/Assessments/Index" asp-area="Parents">
+                <i class="fas fa-file-alt" aria-hidden="true"></i> Assessments
+            </a>
+        </div>
+        <div class="nav-item px-3">
             <a class="nav-link @(Model.ActivePage == ActivePage.Awards ? "active" : "")" asp-page="/Awards/Index" asp-area="Parents">
                 <i class="fas fa-award" aria-hidden="true"></i> Awards
             </a>
