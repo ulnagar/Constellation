@@ -2,12 +2,12 @@
 
 using Application.Domains.AppSettings.Models;
 using Application.Domains.Attendance.Reports.Commands.UpdateAttendanceDataForPeriodFromSentral;
+using Application.Domains.LinkedSystems.Sentral.Queries.GetTermsAndWeeksForCurrentYear;
 using Application.DTOs;
 using Application.Extensions;
 using Application.Interfaces.Configuration;
 using Application.Interfaces.Gateways;
 using Application.Interfaces.Services;
-using Constellation.Application.Domains.Attendance.Reports.Queries.GetValidAttendanceReportDates;
 using Constellation.Application.Domains.MeritAwards.Awards.Enums;
 using Constellation.Core.Enums;
 using Constellation.Core.Models.Students.ValueObjects;
@@ -334,7 +334,7 @@ public class Gateway : ISentralGateway
         return imageResponse;
     }
 
-    public async Task<List<ValidAttendenceReportDate>> GetTermsAndWeeksFromApi(string year, CancellationToken cancellationToken = default)
+    public async Task<List<SchoolCalendarWeek>> GetTermsAndWeeksFromApi(string year, CancellationToken cancellationToken = default)
     {
         Uri path = new($"{_settings.ApiUrl}/restapi/v1/core/date");
 
@@ -363,7 +363,7 @@ public class Gateway : ISentralGateway
             }
         }
 
-        List<ValidAttendenceReportDate> response = [];
+        List<SchoolCalendarWeek> response = [];
 
         for (int i = 1; i < 5; i++)
         {
@@ -1653,128 +1653,6 @@ public class Gateway : ISentralGateway
             return (startDate, endDate);
 
         return Result.Failure<(DateOnly, DateOnly)>(SentralGatewayErrors.IncorrectResponseFromServer);
-    }
-
-    public async Task<List<ValidAttendenceReportDate>> GetValidAttendanceReportDatesFromCalendar(string year)
-    {
-        if (_logOnly)
-        {
-            _logger.Information("GetValidAttendanceReportDatesFromCalendar: year={year}", year);
-
-            return [];
-        }
-
-        List<ValidAttendenceReportDate> validDates = [];
-
-        HtmlDocument? page = await GetPageByGet($"{_settings.ServerUrl}/admin/settings/school/calendar/{year}/term");
-
-        if (page == null)
-            return validDates;
-
-        SentralConfiguration? termCalendarTable = await _appSettings.Sentral(SentralPath.TermCalendarTable);
-
-        if (termCalendarTable is null)
-            return validDates;
-
-        HtmlNode? calendarTable = page.DocumentNode.SelectSingleNode(termCalendarTable.Path);
-
-        if (calendarTable is null)
-            return validDates;
-
-        string TermName = string.Empty;
-
-        List<HtmlNode> rows = calendarTable.Descendants("tr").ToList();
-
-        for (int row = 0; row < rows.Count - 1; row++)
-        {
-            HtmlNode firstChildNode = rows[row].ChildNodes.Where(node => node.Name != "#text").First();
-
-            if (firstChildNode.Name == "td" && firstChildNode.GetAttributeValue("colspan", 0) > 1)
-            {
-                // This is a header row with the term name
-                IEnumerable<HtmlNode> nodes = firstChildNode.Descendants("b");
-                foreach (HtmlNode node in nodes)
-                {
-                    if (node.InnerText.Contains("Term", StringComparison.InvariantCultureIgnoreCase))
-                    {
-                        TermName = node.InnerText.Trim();
-                    }
-                }
-            }
-
-            if (firstChildNode.Name == "th")
-            {
-                string WeekName;
-                if (firstChildNode.InnerText.Trim() == "11")
-                {
-                    // This is a calendar row starting with the week number
-                    WeekName = $"Week {firstChildNode.InnerText.Trim()}";
-
-                    DateOnly startDate = new();
-                    DateOnly endDate = new();
-
-                    string startDateAction = rows[row].ChildNodes.Where(node => node.Name != "#text").ToArray()[1].GetAttributeValue("onclick", "");
-                    if (!string.IsNullOrWhiteSpace(startDateAction))
-                    {
-                        string detectedDate = startDateAction.Split('\'')[1];
-                        DateOnly date = DateOnly.Parse(detectedDate, DateTimeFormatInfo.CurrentInfo);
-
-                        startDate = date;
-                    }
-
-                    string endDateAction = rows[row].ChildNodes.Where(node => node.Name != "#text").ToArray()[5].GetAttributeValue("onclick", "");
-                    if (!string.IsNullOrWhiteSpace(endDateAction))
-                    {
-                        string detectedDate = endDateAction.Split('\'')[1];
-                        DateOnly date = DateOnly.Parse(detectedDate, DateTimeFormatInfo.CurrentInfo);
-
-                        endDate = date;
-                    }
-
-                    validDates.Add(new ValidAttendenceReportDate(
-                        TermName,
-                        startDate.ToDateTime(TimeOnly.MinValue),
-                        endDate.ToDateTime(TimeOnly.MinValue),
-                        $"{TermName} {WeekName}"));
-                }
-                else
-                {
-                    // This is a calendar row starting with the week number
-                    WeekName = $"Week {firstChildNode.InnerText.Trim()} - Week {rows[row + 1].ChildNodes.Where(node => node.Name != "#text").First().InnerText.Trim()}";
-                    
-                    DateOnly startDate = new();
-                    DateOnly endDate = new();
-
-                    string startDateAction = rows[row].ChildNodes.Where(node => node.Name != "#text").ToArray()[1].GetAttributeValue("onclick", "");
-                    if (!string.IsNullOrWhiteSpace(startDateAction))
-                    {
-                        string detectedDate = startDateAction.Split('\'')[1];
-                        DateOnly date = DateOnly.Parse(detectedDate, DateTimeFormatInfo.CurrentInfo);
-
-                        startDate = date;
-                    }
-
-                    string endDateAction = rows[row + 1].ChildNodes.Where(node => node.Name != "#text").ToArray()[5].GetAttributeValue("onclick", "");
-                    if (!string.IsNullOrWhiteSpace(endDateAction))
-                    {
-                        string detectedDate = endDateAction.Split('\'')[1];
-                        DateOnly date = DateOnly.Parse(detectedDate, DateTimeFormatInfo.CurrentInfo);
-
-                        endDate = date;
-                    }
-
-                    validDates.Add(new ValidAttendenceReportDate(
-                        TermName,
-                        startDate.ToDateTime(TimeOnly.MinValue),
-                        endDate.ToDateTime(TimeOnly.MinValue),
-                        $"{TermName} {WeekName}"));
-
-                    row++;
-                }
-            }
-        }
-
-        return validDates.OrderBy(date => date.StartDate).ToList();
     }
 
     public async Task<ICollection<RollMarkReportDto>> GetRollMarkingReportAsync(DateOnly date)

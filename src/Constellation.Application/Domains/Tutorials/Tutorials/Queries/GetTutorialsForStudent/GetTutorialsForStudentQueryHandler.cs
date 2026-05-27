@@ -1,7 +1,6 @@
 ﻿namespace Constellation.Application.Domains.Tutorials.Tutorials.Queries.GetTutorialsForStudent;
 
 using Abstractions.Messaging;
-using Attendance.Reports.Queries.GetValidAttendanceReportDates;
 using Core.Abstractions.Clock;
 using Core.Models.StaffMembers;
 using Core.Models.StaffMembers.Identifiers;
@@ -13,6 +12,7 @@ using Core.Models.Tutorials;
 using Core.Models.Tutorials.Repositories;
 using Core.Shared;
 using Interfaces.Gateways;
+using LinkedSystems.Sentral.Queries.GetTermsAndWeeksForCurrentYear;
 using Serilog;
 using System;
 using System.Collections.Generic;
@@ -51,17 +51,17 @@ internal sealed class GetTutorialsForStudentQueryHandler
     {
         List<TutorialResponse> responses = [];
 
-        List<ValidAttendenceReportDate> weekDescriptors = await _sentralGateway.GetTermsAndWeeksFromApi(_dateTime.CurrentYearAsString, cancellationToken);
+        List<SchoolCalendarWeek> weekDescriptors = await _sentralGateway.GetTermsAndWeeksFromApi(_dateTime.CurrentYearAsString, cancellationToken);
 
         List<Tutorial> tutorials = await _tutorialRepository.GetAllForStudent(request.StudentId, cancellationToken);
 
         foreach (Tutorial tutorial in tutorials)
         {
-            ValidAttendenceReportDate startWeek = weekDescriptors.FirstOrDefault(entry =>
+            SchoolCalendarWeek startWeek = weekDescriptors.FirstOrDefault(entry =>
                 entry.StartDate <= tutorial.StartDate.ToDateTime(TimeOnly.MinValue) &&
                 entry.EndDate >= tutorial.StartDate.ToDateTime(TimeOnly.MinValue));
 
-            ValidAttendenceReportDate endWeek = weekDescriptors.FirstOrDefault(entry =>
+            SchoolCalendarWeek endWeek = weekDescriptors.FirstOrDefault(entry =>
                 entry.StartDate <= tutorial.EndDate.ToDateTime(TimeOnly.MinValue) &&
                 entry.EndDate >= tutorial.EndDate.ToDateTime(TimeOnly.MinValue));
 

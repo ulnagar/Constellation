@@ -1,6 +1,6 @@
 ﻿namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Shared.Components.ScheduleTutorialRequest;
 
-using Application.Domains.Attendance.Reports.Queries.GetValidAttendanceReportDates;
+using Application.Domains.LinkedSystems.Sentral.Queries.GetTermsAndWeeksForCurrentYear;
 using Constellation.Application.Domains.StaffMembers.Models;
 using Core.Models.StaffMembers.Identifiers;
 using Core.Models.Timetables.Identifiers;
@@ -20,7 +20,7 @@ public sealed class ScheduleTutorialRequestSelection
     public TutorialName Name { get; set; }
 
     public List<StaffSelectionListResponse> StaffMembers = [];
-    public List<ValidAttendenceReportDate> ValidStartDates = [];
+    public List<SchoolCalendarWeek> ValidStartDates = [];
 
     public sealed class PeriodDecision
     {

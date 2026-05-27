@@ -1,4 +1,4 @@
-@using Constellation.Application.Domains.Attendance.Reports.Queries.GetValidAttendanceReportDates
+@using Constellation.Application.Domains.LinkedSystems.Sentral.Queries.GetTermsAndWeeksForCurrentYear
 @using Constellation.Core.Models.StaffMembers.Identifiers
 @model Constellation.Presentation.Staff.Areas.Staff.Pages.Shared.Components.ScheduleTutorialRequest.ScheduleTutorialRequestSelection
 
@@ -56,7 +56,7 @@
                     <div class="form-group row">
                         <label class="col-12">Start Week</label>
                         <div class="col-12">
-                            <select asp-for="StartWeek" asp-items="new SelectList(Model.ValidStartDates, nameof(ValidAttendenceReportDate.StartDate), nameof(ValidAttendenceReportDate.Description), null, nameof(ValidAttendenceReportDate.TermGroup))" class="combo">
+                            <select asp-for="StartWeek" asp-items="new SelectList(Model.ValidStartDates, nameof(SchoolCalendarWeek.StartDate), nameof(SchoolCalendarWeek.Description), null, nameof(SchoolCalendarWeek.TermGroup))" class="combo">
                                 <option value=""> -- None -- </option>
                             </select>
                         </div>

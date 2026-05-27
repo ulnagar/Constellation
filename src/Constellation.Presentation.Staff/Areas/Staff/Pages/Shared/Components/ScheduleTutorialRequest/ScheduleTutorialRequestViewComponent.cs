@@ -1,6 +1,5 @@
 ﻿namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Shared.Components.ScheduleTutorialRequest;
 
-using Application.Domains.Attendance.Reports.Queries.GetValidAttendanceReportDates;
 using Application.Domains.LinkedSystems.Sentral.Queries.GetTermsAndWeeksForCurrentYear;
 using Application.Domains.StaffMembers.Models;
 using Application.Domains.StaffMembers.Queries.GetStaffForSelectionList;
@@ -50,7 +49,7 @@ public sealed class ScheduleTutorialRequestViewComponent : ViewComponent
 
         viewModel.StaffMembers = staffMembers.Value;
 
-        Result<List<ValidAttendenceReportDate>> validDates = await _mediator.Send(new GetTermsAndWeeksForCurrentYearQuery());
+        Result<List<SchoolCalendarWeek>> validDates = await _mediator.Send(new GetTermsAndWeeksForCurrentYearQuery());
 
         if (validDates.IsFailure)
             return Content(string.Empty);

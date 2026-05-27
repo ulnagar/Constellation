@@ -1,7 +1,6 @@
 ﻿namespace Constellation.Application.Domains.Tutorials.Requests.Events.TutorialRequestScheduled;
 
 using Abstractions.Messaging;
-using Constellation.Application.Domains.Attendance.Reports.Queries.GetValidAttendanceReportDates;
 using Constellation.Core.Models.StaffMembers.Identifiers;
 using Constellation.Core.Models.Students;
 using Constellation.Core.Models.Students.Errors;
@@ -16,6 +15,7 @@ using Core.Models.Tutorials.Events;
 using Core.Models.Tutorials.ValueObjects;
 using Interfaces.Gateways;
 using Interfaces.Repositories;
+using LinkedSystems.Sentral.Queries.GetTermsAndWeeksForCurrentYear;
 using Serilog;
 using System;
 using System.Collections.Generic;
@@ -85,16 +85,16 @@ public sealed class AddTutorial
             return;
         }
 
-        List<ValidAttendenceReportDate> weekDescriptors = await _sentralGateway.GetTermsAndWeeksFromApi(_dateTime.CurrentYearAsString, cancellationToken);
+        List<SchoolCalendarWeek> weekDescriptors = await _sentralGateway.GetTermsAndWeeksFromApi(_dateTime.CurrentYearAsString, cancellationToken);
 
-        ValidAttendenceReportDate startWeek = weekDescriptors.FirstOrDefault(entry =>
+        SchoolCalendarWeek startWeek = weekDescriptors.FirstOrDefault(entry =>
             entry.StartDate == tutorialRequest.Plan.StartDate.ToDateTime(TimeOnly.MinValue));
 
         int index = weekDescriptors.IndexOf(startWeek);
 
         int endWeekIndex = index + 10;
 
-        ValidAttendenceReportDate endWeek = (endWeekIndex > weekDescriptors.Count - 1)
+        SchoolCalendarWeek endWeek = (endWeekIndex > weekDescriptors.Count - 1)
             ? weekDescriptors.Last()
             : weekDescriptors[endWeekIndex];
 

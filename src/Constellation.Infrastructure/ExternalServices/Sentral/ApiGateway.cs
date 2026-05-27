@@ -281,7 +281,7 @@ public sealed class ApiGateway
     //    return excludedDates.Select(entry => entry.Date).ToList();
     //}
 
-    //public async Task<List<ValidAttendenceReportDate>> GetValidAttendanceReportDatesFromCalendar(string year)
+    //public async Task<List<SchoolCalendarWeek>> GetValidAttendanceReportDatesFromCalendar(string year)
     //{
     //    Uri path = new($"https://admin.aurora.dec.nsw.gov.au/restapi/v1/core/date");
 
@@ -310,7 +310,7 @@ public sealed class ApiGateway
     //        }
     //    }
 
-    //    List<ValidAttendenceReportDate> response = new();
+    //    List<SchoolCalendarWeek> response = new();
 
     //    for (int i = 1; i < 5; i++)
     //    {

@@ -1,6 +1,5 @@
 ﻿namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Shared.Components.ExtendTutorial;
 
-using Constellation.Application.Domains.Attendance.Reports.Queries.GetValidAttendanceReportDates;
 using Constellation.Application.Domains.LinkedSystems.Sentral.Queries.GetTermsAndWeeksForCurrentYear;
 using Constellation.Core.Shared;
 using MediatR;
@@ -21,7 +20,7 @@ public sealed class ExtendTutorialViewComponent : ViewComponent
     {
         ExtendTutorialSelection viewModel = new();
 
-        Result<List<ValidAttendenceReportDate>> validDates = await _mediator.Send(new GetTermsAndWeeksForCurrentYearQuery());
+        Result<List<SchoolCalendarWeek>> validDates = await _mediator.Send(new GetTermsAndWeeksForCurrentYearQuery());
 
         if (validDates.IsFailure)
             return Content(string.Empty);

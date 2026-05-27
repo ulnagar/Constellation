@@ -2,12 +2,11 @@ namespace Constellation.Presentation.Parents.Areas.Parents.Pages.Attendance;
 
 using Application.Common.PresentationModels;
 using Application.Domains.Families.Queries.GetParentWithStudentIds;
+using Application.Domains.LinkedSystems.Sentral.Queries.GetTermsAndWeeksForCurrentYear;
 using Application.DTOs;
 using Application.Models.Auth;
 using Constellation.Application.Domains.Attendance.Reports.Queries.GenerateAttendanceReportForStudent;
-using Constellation.Application.Domains.Attendance.Reports.Queries.GetValidAttendanceReportDates;
 using Constellation.Application.Domains.Students.Queries.GetStudentsByParentEmail;
-using Constellation.Application.Models.Identity;
 using Constellation.Core.Shared;
 using Constellation.Presentation.Shared.Helpers.Attributes;
 using Constellation.Presentation.Shared.Helpers.Logging;
@@ -56,7 +55,7 @@ public class ReportsModel : BasePageModel
 
     public List<StudentResponse> Students { get; set; } = new();
 
-    public List<ValidAttendenceReportDate> ValidDates { get; set; } = new();
+    public List<SchoolCalendarWeek> ValidDates { get; set; } = new();
 
     public async Task OnGet() => await PreparePage();
 
@@ -132,7 +131,7 @@ public class ReportsModel : BasePageModel
         {
             _logger.Information("Requested to retrieve absence report dates by parent {name}", _currentUserService.UserName);
 
-            Result<List<ValidAttendenceReportDate>> datesRequest = await _mediator.Send(new GetValidAttendenceReportDatesQuery());
+            Result<List<SchoolCalendarWeek>> datesRequest = await _mediator.Send(new GetTermsAndWeeksForCurrentYearQuery());
 
             if (datesRequest.IsFailure)
             {

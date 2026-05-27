@@ -1,6 +1,5 @@
 ﻿namespace Constellation.Application.Interfaces.Gateways;
 
-using Constellation.Application.Domains.Attendance.Reports.Queries.GetValidAttendanceReportDates;
 using Constellation.Application.Domains.MeritAwards.Awards.Enums;
 using Constellation.Application.DTOs;
 using Constellation.Core.Enums;
@@ -8,6 +7,7 @@ using Constellation.Core.Models.Students.Enums;
 using Constellation.Core.Models.Students.ValueObjects;
 using Constellation.Core.Shared;
 using Domains.Attendance.Reports.Commands.UpdateAttendanceDataForPeriodFromSentral;
+using Domains.LinkedSystems.Sentral.Queries.GetTermsAndWeeksForCurrentYear;
 using HtmlAgilityPack;
 using Serilog;
 using System;
@@ -22,7 +22,6 @@ public interface ISentralGateway
     Task<List<SentralPeriodAbsenceDto>> GetAbsenceDataAsync(string sentralStudentId);
     Task<string> GetSentralStudentIdFromSRN(string srn, string grade);
     Task<List<DateOnly>> GetExcludedDatesFromCalendar(string year);
-    Task<List<ValidAttendenceReportDate>> GetValidAttendanceReportDatesFromCalendar(string year);
     Task<ICollection<RollMarkReportDto>> GetRollMarkingReportAsync(DateOnly date);
     Task<ICollection<SentralReportDto>> GetStudentReportList(string sentralStudentId);
     Task<byte[]> GetStudentReport(string sentralStudentId, string reportId);
@@ -45,5 +44,5 @@ public interface ISentralGateway
     Task<ICollection<FamilyDetailsDto>> GetFamilyDetailsReportFromApi(ILogger logger, CancellationToken cancellationToken = default);
     Task<FamilyDetailsDto> GetParentContactEntryFromApi(string sentralStudentId, CancellationToken cancellationToken = default);
     Task<byte[]> GetSentralStudentPhotoFromApi(string sentralStudentId, CancellationToken cancellationToken = default);
-    Task<List<ValidAttendenceReportDate>> GetTermsAndWeeksFromApi(string year, CancellationToken cancellationToken = default);
+    Task<List<SchoolCalendarWeek>> GetTermsAndWeeksFromApi(string year, CancellationToken cancellationToken = default);
 }
