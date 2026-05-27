@@ -6,9 +6,11 @@ using Core.Models.Assessments;
 using Core.Models.Assessments.Repositories;
 using Core.Shared;
 using DTOs;
+using Interfaces.Configuration;
 using Interfaces.Gateways;
 using Interfaces.Repositories;
 using LinkedSystems.Canvas.Models;
+using Microsoft.Extensions.Options;
 using Serilog;
 
 internal sealed class LinkAssessmentToCanvasCommandHandler
@@ -16,17 +18,20 @@ internal sealed class LinkAssessmentToCanvasCommandHandler
 {
     private readonly IAssessmentRepository _assessmentRepository;
     private readonly ICanvasGateway _gateway;
+    private readonly CanvasGatewayConfiguration _configuration;
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger _logger;
 
     public LinkAssessmentToCanvasCommandHandler(
         IAssessmentRepository assessmentRepository,
         ICanvasGateway gateway,
+        IOptions<CanvasGatewayConfiguration> configuration,
         IUnitOfWork unitOfWork,
         ILogger logger)
     {
         _assessmentRepository = assessmentRepository;
         _gateway = gateway;
+        _configuration = configuration.Value;
         _unitOfWork = unitOfWork;
         _logger = logger;
     }
@@ -74,12 +79,21 @@ internal sealed class LinkAssessmentToCanvasCommandHandler
 
         DateTimeOffset forwardDate = assignment.Value.LockDate?.AddDays(-1) ?? assignment.Value.DueDate.AddDays(1);
 
+        UriBuilder uriBuilder = new(_configuration.ApiEndpoint)
+        {
+            Path = $"/courses/sis_course_id:{request.CanvasCourse}/assignments/{assignment.Value.CanvasId}",
+            Query = string.Empty
+        };
+        
+        Uri canvasAssignmentLink = uriBuilder.Uri;
+
         assessment.AddCanvasDetails(
             request.CanvasCourse,
             course.Value.Name,
             request.CanvasAssignmentId,
             assignment.Value.AssignmentName,
             assignment.Value.AllowedAttempts,
+            canvasAssignmentLink,
             forwardDate);
 
         await _unitOfWork.CompleteAsync(cancellationToken);

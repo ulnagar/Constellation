@@ -1,0 +1,14 @@
+.fa-icon-sizing {
+    width: 60px;
+}
+
+.chevron-icon {
+    transition: transform 0.2s ease;
+    display: inline-block;
+    flex-shrink: 0;
+    width: auto;
+}
+
+.collapse-toggle[aria-expanded="true"] .chevron-icon {
+    transform: rotate(90deg);
+}

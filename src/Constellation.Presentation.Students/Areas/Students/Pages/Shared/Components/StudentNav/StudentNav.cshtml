@@ -30,6 +30,11 @@
             <a class="nav-link @(Model == ActivePage.Attendance ? "active" : "")" asp-page="/Attendance/Index" asp-area="Students">
                 <i class="fas fa-calendar-day" aria-hidden="true"></i> Attendance
             </a>
+        </div>        
+        <div class="nav-item px-3">
+            <a class="nav-link @(Model == ActivePage.Assessment ? "active" : "")" asp-page="/Assessments/Index" asp-area="Students">
+                <i class="fas fa-file-alt" aria-hidden="true"></i> Assessments
+            </a>
         </div>
         <div class="nav-item px-3">
             <a class="nav-link @(Model == ActivePage.Reports ? "active" : "")" asp-page="/Reports/Index" asp-area="Students">

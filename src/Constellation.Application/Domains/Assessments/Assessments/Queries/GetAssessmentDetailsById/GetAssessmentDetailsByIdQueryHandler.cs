@@ -100,7 +100,8 @@ internal sealed class GetAssessmentDetailsByIdQueryHandler
                 assessment.CanvasAssignmentId.GetValueOrDefault(),
                 assessment.CanvasAssignmentName,
                 assessment.AllowedAttempts.GetValueOrDefault(),
-                assessment.ForwardDate);
+                assessment.ForwardDate,
+                assessment.CanvasAssessmentLink);
 
         return new AssessmentDetailsResponse(
             assessment.Id,

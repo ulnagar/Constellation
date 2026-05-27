@@ -39,7 +39,8 @@ public sealed record AssessmentDetailsResponse(
         int AssignmentId,
         string AssignmentName,
         int AllowedAttempts,
-        DateTimeOffset? ForwardDate);
+        DateTimeOffset? ForwardDate,
+        Uri AssessmentLink);
 
     public sealed record Submission(
         SubmissionId SubmissionId,

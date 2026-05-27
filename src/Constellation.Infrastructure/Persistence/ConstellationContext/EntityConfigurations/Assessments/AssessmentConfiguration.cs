@@ -33,6 +33,13 @@ internal sealed class AssessmentConfiguration : IEntityTypeConfiguration<Assessm
                 value => CanvasCourseCode.FromValue(value));
 
         builder
+            .Property(e => e.CanvasAssessmentLink)
+            .HasConversion(
+                uri => uri == null ? null : uri.ToString(),
+                value => value == null ? null : new Uri(value))
+            .HasMaxLength(2048);
+
+        builder
             .HasMany(assessment => assessment.Downloads)
             .WithOne()
             .HasForeignKey(download => download.AssessmentId)

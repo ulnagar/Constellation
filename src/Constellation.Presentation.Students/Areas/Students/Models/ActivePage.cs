@@ -5,6 +5,8 @@ public static class ActivePage
 {
     public const string Dashboard = "Dashboard";
 
+    public const string Assessment = "Assessment";
+
     public const string Attendance = "Attendance";
 
     public const string Awards = "Awards";

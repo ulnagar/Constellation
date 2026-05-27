@@ -62,6 +62,7 @@ public sealed class Assessment : AggregateRoot
     public int? CanvasAssignmentId { get; private set; }
     public string CanvasAssignmentName { get; private set; }
     public int? AllowedAttempts { get; private set; }
+    public Uri? CanvasAssessmentLink { get; private set; }
     public DateTimeOffset? ForwardDate { get; private set; }
 
     public IReadOnlyList<AssessmentInstruction> Instructions => _instructions.AsReadOnly();
@@ -74,6 +75,7 @@ public sealed class Assessment : AggregateRoot
         int canvasAssignmentId,
         string canvasAssignmentName,
         int allowedAttempts,
+        Uri canvasAssessmentLink,
         DateTimeOffset forwardDate)
     {
         CanvasCourse = canvasCourse;
@@ -81,6 +83,7 @@ public sealed class Assessment : AggregateRoot
         CanvasAssignmentId = canvasAssignmentId;
         CanvasAssignmentName = canvasAssignmentName;
         AllowedAttempts = allowedAttempts;
+        CanvasAssessmentLink = canvasAssessmentLink;
         ForwardDate = forwardDate;
     }
 
