@@ -25,7 +25,8 @@ public sealed partial class Service : IEmailService
             StudentName = student.Student,
             CourseName = assessment.Course,
             AssignmentName = assessment.Name,
-            SubmittedOn = submission.SubmittedAt.ToLocalTime().LocalDateTime
+            SubmittedOn = submission.SubmittedAt.ToLocalTime().LocalDateTime,
+            SubmissionId = submission.Id
         };
 
         Result<EmailRecipient> recipient = EmailRecipient.Create(submission.SubmittedBy, submission.SubmittedByEmail);
@@ -41,6 +42,31 @@ public sealed partial class Service : IEmailService
             "Assessments",
             viewModel.Title,
             [ recipient.Value ],
+            cancellationToken: cancellationToken);
+    }
+
+    public async Task<Result> SendAssessmentNotificationToSchools(
+        Assessment assessment,
+        List<EmailRecipient> recipients,
+        CancellationToken cancellationToken = default)
+    {
+        AssessmentNotificationForSchoolsEmailViewModel viewModel = new()
+        {
+            Title = "Assessment Notification",
+            SenderName = "Aurora College",
+            SenderTitle = "",
+            Preheader = "",
+            AssessmentName = assessment.Name,
+            CourseName = assessment.Course,
+            DueDate = DateOnly.FromDateTime(assessment.DueDate.LocalDateTime)
+        };
+
+        return await BuildAndSendEmail(
+            viewModel,
+            EmailRecipient.AuroraCollege,
+            "Assessments",
+            viewModel.Title,
+            recipients,
             cancellationToken: cancellationToken);
     }
 }

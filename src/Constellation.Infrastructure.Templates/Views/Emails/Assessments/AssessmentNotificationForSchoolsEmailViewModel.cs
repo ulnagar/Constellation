@@ -1,17 +1,15 @@
 ﻿namespace Constellation.Infrastructure.Templates.Views.Emails.Assessments;
 
 using Constellation.Infrastructure.Templates.Views.Shared;
-using Core.Models.Assessments.Identifiers;
 using System;
 
-public class AssessmentSubmissionReceiptEmailViewModel : EmailLayoutBaseViewModel
+public sealed class AssessmentNotificationForSchoolsEmailViewModel : EmailLayoutBaseViewModel
 {
     private const string _viewLocation = "/Views/Emails/Assessments/AssessmentSubmissionReceiptEmail.cshtml";
     public override string ViewLocation => _viewLocation;
 
-    public required SubmissionId SubmissionId { get; init; }
-    public required string StudentName { get; init; }
+    public string PortalLink => BaseUrl;
     public required string CourseName { get; init; }
-    public required string AssignmentName { get; init; }
-    public required DateTime SubmittedOn { get; init; }
+    public required string AssessmentName { get; init; }
+    public required DateOnly DueDate { get; init; }
 }

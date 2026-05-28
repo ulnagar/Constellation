@@ -1,0 +1,27 @@
+@model Constellation.Infrastructure.Templates.Views.Emails.Assessments.AssessmentNotificationForSchoolsEmailViewModel
+
+@{
+    Layout = "/Views/Shared/EmailLayout.cshtml";
+
+    ViewData["Preheader"] = Model.Preheader;
+    ViewData["Title"] = Model.Title;
+    ViewData["SenderName"] = Model.SenderName;
+    ViewData["SenderTitle"] = Model.SenderTitle;
+}
+
+<h3>Assessment Notification</h3>
+
+<p>A new assessment has been release for students shared with your school.</p>
+
+<dl>
+    <dt>Course</dt>
+    <dd>@Model.CourseName</dd>
+    
+    <dt>Assessment</dt>
+    <dd>@Model.AssessmentName</dd>
+    
+    <dt>Due Date</dt>
+    <dd>@Model.DueDate.ToLongDateString()</dd>
+</dl>
+
+<p>Please check the <a href="@Model.PortalLink" target="_blank">Aurora College Schools Portal</a> for details and any approved student provisions for this assessment.</p>

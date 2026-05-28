@@ -1,5 +1,4 @@
-﻿@using Constellation.Infrastructure.Templates.Views.Emails.Assignments
-@model AssignmentSubmissionUploadReceiptEmailViewModel
+﻿@model Constellation.Infrastructure.Templates.Views.Emails.Assessments.AssessmentSubmissionReceiptEmailViewModel
 
 @{
     Layout = "/Views/Shared/EmailLayout.cshtml";
@@ -23,4 +22,6 @@
     <dd>@Model.AssignmentName</dd>
     <dt>Submitted On</dt>
     <dd>@Model.SubmittedOn.ToLongDateString()</dd>
+    <dt>Receipt Id</dt>
+    <dd>@Model.SubmissionId.ToString()</dd>
 </dl>
