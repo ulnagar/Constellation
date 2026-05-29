@@ -153,6 +153,19 @@ public class SchoolContactRepository : ISchoolContactRepository
                     role.SchoolCode == schoolCode &&
                     role.Role == selectedRole))
             .ToListAsync(cancellationToken);
+    
+    public async Task<List<SchoolContact>> GetBySchoolAndRole(
+        List<SchoolCode> schoolCodes,
+        Position selectedRole,
+        CancellationToken cancellationToken = default) =>
+        await _context
+            .Set<SchoolContact>()
+            .Where(contact =>
+                contact.Assignments.Any(role =>
+                    !role.IsDeleted
+                    && role.Role == selectedRole
+                    && schoolCodes.Contains(role.SchoolCode)))
+            .ToListAsync(cancellationToken);
 
     public async Task<List<SchoolContact>> GetAllByRole(
         Position selectedRole,

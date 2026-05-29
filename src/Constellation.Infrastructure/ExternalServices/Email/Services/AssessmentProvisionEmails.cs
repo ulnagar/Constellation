@@ -2,6 +2,7 @@
 
 using Constellation.Application.Interfaces.Services;
 using Constellation.Core.Models.Assessments;
+using Core.Models.Messaging.Email;
 using Core.Shared;
 using Core.ValueObjects;
 using System.Threading.Tasks;
@@ -45,7 +46,7 @@ public sealed partial class Service : IEmailService
             cancellationToken: cancellationToken);
     }
 
-    public async Task<Result> SendAssessmentNotificationToSchools(
+    public async Task<Dictionary<Result, List<EmailRecipient>>> SendAssessmentNotificationToSchools(
         Assessment assessment,
         List<EmailRecipient> recipients,
         CancellationToken cancellationToken = default)
@@ -61,12 +62,24 @@ public sealed partial class Service : IEmailService
             DueDate = DateOnly.FromDateTime(assessment.DueDate.LocalDateTime)
         };
 
-        return await BuildAndSendEmail(
-            viewModel,
-            EmailRecipient.AuroraCollege,
-            "Assessments",
-            viewModel.Title,
-            recipients,
-            cancellationToken: cancellationToken);
+        Dictionary<Result, List<EmailRecipient>> response = new();
+
+        foreach (EmailRecipient recipient in recipients)
+        {
+            Result<EmailMessage> result = await BuildAndSendEmail(
+                viewModel,
+                EmailRecipient.AuroraCollege,
+                "Assessments",
+                viewModel.Title,
+                [ recipient ],
+                cancellationToken: cancellationToken);
+
+            if (!response.ContainsKey(result))
+                response[result] = [];
+            
+            response[result].Add(recipient);
+        }
+
+        return response;
     }
 }

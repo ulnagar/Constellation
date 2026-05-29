@@ -9,6 +9,7 @@ using Application.Domains.Assessments.Assessments.Commands.LinkAssessmentToCanva
 using Application.Domains.Assessments.Assessments.Commands.RemoveDownloadFromAssessment;
 using Application.Domains.Assessments.Assessments.Commands.RemoveInstructionFromAssessment;
 using Application.Domains.Assessments.Assessments.Commands.RemoveStudentFromAssessment;
+using Application.Domains.Assessments.Assessments.Commands.SendAssessmentNotificationToSchools;
 using Application.Domains.Assessments.Assessments.Queries.GetAssessmentDetailsById;
 using Application.Domains.Assessments.Assessments.Queries.GetAssessmentDownload;
 using Application.Domains.Assessments.Assessments.Queries.GetAssessmentDownloadFile;
@@ -662,6 +663,26 @@ public class DetailsModel : BasePageModel
             ModalContent = ErrorDisplay.Create(
                 result.Error,
                 _linkGenerator.GetPathByPage("/Subject/Assessments/Details", values: new { area = "Staff", Id }));
+
+            await PreparePage();
+
+            return Page();
+        }
+
+        return RedirectToPage();
+    }
+    
+    public async Task<IActionResult> OnPostSendNotifications()
+    {
+        // Send emails
+
+        SendAssessmentNotificationToSchoolsCommand command = new(Id);
+
+        var result = await _mediator.Send(command);
+
+        if (result.IsFailure)
+        {
+            ModalContent = ErrorDisplay.Create(result.Error);
 
             await PreparePage();
 

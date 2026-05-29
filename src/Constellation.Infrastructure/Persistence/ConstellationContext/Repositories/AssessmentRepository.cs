@@ -3,6 +3,7 @@
 using Constellation.Core.Models.Assessments.ValueObjects;
 using Constellation.Core.Models.Identifiers;
 using Constellation.Core.Models.Students.Identifiers;
+using Core.Abstractions.Clock;
 using Core.Models.Assessments;
 using Core.Models.Assessments.Identifiers;
 using Core.Models.Assessments.Repositories;
@@ -11,11 +12,14 @@ using Microsoft.EntityFrameworkCore;
 internal sealed class AssessmentRepository : IAssessmentRepository
 {
     private readonly AppDbContext _context;
+    private readonly IDateTimeProvider _dateTime;
 
     public AssessmentRepository(
-        AppDbContext context)
+        AppDbContext context,
+        IDateTimeProvider dateTime)
     {
         _context = context;
+        _dateTime = dateTime;
     }
 
     public async Task<Assessment?> GetAssessmentById(
@@ -161,6 +165,24 @@ internal sealed class AssessmentRepository : IAssessmentRepository
                     && provision.Year == year
                     && !provision.IsDeleted,
                 cancellationToken);
+
+    public async Task<List<Assessment>> GetAllDueForUploadToday(
+        CancellationToken cancellationToken = default)
+    {
+        DateTime today = _dateTime.Today.ToDateTime(TimeOnly.MinValue);
+        TimeSpan offset = TimeZoneInfo.Local.GetUtcOffset(today);
+
+        DateTimeOffset startOfDay = new DateTimeOffset(today, offset);
+        DateTimeOffset startOfTomorrow = startOfDay.AddDays(1);
+
+        return await _context
+            .Set<Assessment>()
+            .Where(assignment =>
+                assignment.ForwardDate.HasValue 
+                && assignment.ForwardDate >= startOfDay 
+                && assignment.ForwardDate < startOfTomorrow)
+            .ToListAsync(cancellationToken);
+    }
 
     public void Insert(Assessment assessment) => _context.Set<Assessment>().Add(assessment);
     public void Insert(Provision provision) => _context.Set<Provision>().Add(provision);

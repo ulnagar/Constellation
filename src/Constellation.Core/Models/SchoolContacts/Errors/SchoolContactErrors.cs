@@ -14,6 +14,11 @@ public static class SchoolContactErrors
         "SchoolContact.NotFound",
         $"Could not find a School Contact with the name {name}");
 
+    public static readonly Error NoneFound = new(
+        "SchoolContact.NoneFound",
+        "Could not find any matching school contacts");
+
+
     public static class Validation
     {
         public static readonly Error FirstNameEmpty = new(

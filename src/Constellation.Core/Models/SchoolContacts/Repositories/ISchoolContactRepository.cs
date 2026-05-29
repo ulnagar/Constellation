@@ -22,6 +22,7 @@ public interface ISchoolContactRepository
     Task<List<SchoolContact>> GetByGrade(Grade grade, CancellationToken cancellationToken = default);
     Task<SchoolContact?> GetByPhoneNumber(PhoneNumber number, CancellationToken cancellationToken = default);
     Task<List<SchoolContact>> GetBySchoolAndRole(SchoolCode schoolCode, Position selectedRole, CancellationToken cancellationToken = default);
+    Task<List<SchoolContact>> GetBySchoolAndRole(List<SchoolCode> schoolCodes, Position selectedRole, CancellationToken cancellationToken = default);
     Task<SchoolContact?> GetById(SchoolContactId contactId, CancellationToken cancellationToken = default);
     Task<SchoolContact?> GetByNameAndSchool(string name, SchoolCode schoolCode, CancellationToken cancellationToken = default);
     Task<List<SchoolContact>> GetAllByRole(Position selectedRole, CancellationToken cancellationToken = default);

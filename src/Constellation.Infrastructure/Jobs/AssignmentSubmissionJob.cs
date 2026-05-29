@@ -1,35 +1,39 @@
 ﻿namespace Constellation.Infrastructure.Jobs;
 
+using Application.Interfaces.Gateways;
 using Application.Interfaces.Jobs;
-using Application.Interfaces.Repositories;
-using Constellation.Core.Models.Offerings;
-using Constellation.Core.Models.Offerings.Errors;
-using Constellation.Core.Models.Offerings.Repositories;
-using Constellation.Core.Models.Subjects.Errors;
 using Constellation.Core.Shared;
-using Core.Models.Assessments.Archive;
-using Core.Models.Assessments.Archive.Repositories;
-using Core.Models.Canvas.Models;
-using Core.Models.Offerings.Enums;
+using Core.Models.Assessments;
+using Core.Models.Assessments.Errors;
+using Core.Models.Assessments.Repositories;
+using Core.Models.Attachments.DTOs;
+using Core.Models.Attachments.Enums;
+using Core.Models.Attachments.Services;
+using Core.Models.Students;
+using Core.Models.Students.Errors;
+using Core.Models.Students.Repositories;
 using System;
 using System.Threading.Tasks;
 
 internal sealed class AssignmentSubmissionJob : IAssignmentSubmissionJob
 {
-    private readonly IAssignmentRepository _assignmentRepository;
-    private readonly IOfferingRepository _courseOfferingRepository;
-    private readonly IUnitOfWork _unitOfWork;
+    private readonly IAssessmentRepository _assessmentRepository;
+    private readonly IStudentRepository _studentRepository;
+    private readonly IAttachmentService _attachmentService;
+    private readonly ICanvasGateway _canvasGateway;
     private readonly ILogger _logger;
 
     public AssignmentSubmissionJob(
-        IAssignmentRepository assignmentRepository,
-        IOfferingRepository courseOfferingRepository,
-        IUnitOfWork unitOfWork,
+        IAssessmentRepository assessmentRepository,
+        IStudentRepository studentRepository,
+        IAttachmentService attachmentService,
+        ICanvasGateway canvasGateway,
         ILogger logger)
     {
-        _assignmentRepository = assignmentRepository;
-        _courseOfferingRepository = courseOfferingRepository;
-        _unitOfWork = unitOfWork;
+        _assessmentRepository = assessmentRepository;
+        _studentRepository = studentRepository;
+        _attachmentService = attachmentService;
+        _canvasGateway = canvasGateway;
         _logger = logger;
     }
 
@@ -39,61 +43,70 @@ internal sealed class AssignmentSubmissionJob : IAssignmentSubmissionJob
         // Scan for any assignments that are due for delayed forwarding today
         // Gather all submissions
         // Forward to Canvas 
-        List<CanvasAssignment> assignments = await _assignmentRepository.GetAllDueForUpload(cancellationToken);
+        List<Assessment> assessments = await _assessmentRepository.GetAllDueForUploadToday(cancellationToken);
 
-        foreach (CanvasAssignment assignment in assignments)
+        foreach (Assessment assessment in assessments)
         {
-            List<Offering> offerings = await _courseOfferingRepository.GetByCourseId(assignment.CourseId, cancellationToken);
+            if (!assessment.CanvasCourse.HasValue || !assessment.CanvasAssignmentId.HasValue)
+                continue;
 
-            if (offerings is null)
+            foreach (AssessmentStudent assessmentStudent in assessment.Students)
             {
-                _logger
-                    .ForContext(nameof(Error), CourseErrors.NotFound(assignment.CourseId), true)
-                    .Error("Failed to upload Assignment Submission to Canvas");
+                Student? student = await _studentRepository.GetById(assessmentStudent.StudentId, cancellationToken);
 
-                return;
-            }
+                if (student is null)
+                {
+                    _logger
+                        .ForContext(nameof(Assessment), assessment.Name)
+                        .ForContext(nameof(Error), StudentErrors.NotFound(assessmentStudent.StudentId), true)
+                        .Warning("Failed to upload Assessment Submission to Canvas");
 
-            List<CanvasCourseCode> resources = offerings
-                .Where(offering => offering.IsCurrent)
-                .SelectMany(offering => offering.Resources)
-                .Where(resource => resource.Type == ResourceType.CanvasCourse)
-                .Select(resource => ((CanvasCourseResource)resource).CourseId)
-                .Distinct()
-                .ToList();
+                    continue;
+                }
 
-            if (!resources.Any())
-            {
-                _logger
-                    .ForContext(nameof(Error), ResourceErrors.NoneOfTypeFound(ResourceType.CanvasCourse), true)
-                    .Warning("Failed to upload Assignment Submission to Canvas");
+                AssessmentSubmission? submission = assessmentStudent.Submissions.OrderByDescending(entry => entry.SubmittedAt).FirstOrDefault();
 
-                return;
-            }
+                if (submission is null)
+                {
+                    _logger
+                        .ForContext(nameof(Assessment), assessment.Name)
+                        .ForContext(nameof(Student), student.Name.DisplayName)
+                        .ForContext(nameof(Error), AssessmentSubmissionErrors.NoneFound, true)
+                        .Warning("Failed to upload Assessment Submission to Canvas");
 
-            List<CanvasAssignmentSubmission> validSubmissions = assignment
-                .Submissions
-                .Where(submission => !submission.Uploaded)
-                .ToList();
+                    continue;
+                }
 
-            foreach (var submission in validSubmissions)
-            {
-                //Result result = await _assignmentService.UploadSubmissionToCanvas(assignment, submission, resources, cancellationToken);
+                Result<AttachmentResponse> file = await _attachmentService.GetAttachmentFile(AttachmentType.AssessmentSubmission, submission.Id.ToString(), cancellationToken);
 
-                //if (result.IsFailure)
-                //{
-                //    _logger
-                //        .ForContext(nameof(Error), result.Error, true)
-                //        .Warning("Failed to upload Assignment Submission to Canvas");
+                if (file.IsFailure)
+                {
+                    _logger
+                        .ForContext(nameof(Assessment), assessment.Name)
+                        .ForContext(nameof(Student), student.Name.DisplayName)
+                        .ForContext(nameof(Error), file.Error, true)
+                        .Warning("Failed to upload Assessment Submission to Canvas");
 
-                //    continue;
-                //}
+                    continue;
+                }
 
-                //assignment.MarkSubmissionUploaded(submission.Id);
+                Result result = await _canvasGateway.UploadAssignmentSubmission(
+                    assessment.CanvasCourse.Value,
+                    assessment.CanvasAssignmentId.Value, 
+                    student.StudentReferenceNumber, 
+                    file.Value, 
+                    cancellationToken);
+
+                if (result.IsFailure)
+                {
+                    _logger
+                        .ForContext(nameof(Assessment), assessment.Name)
+                        .ForContext(nameof(Student), student.Name.DisplayName)
+                        .ForContext(nameof(Error), result.Error, true)
+                        .Warning("Failed to upload Assessment Submission to Canvas");
+                }
             }
         }
-
-        await _unitOfWork.CompleteAsync(cancellationToken);
     }
 }
 

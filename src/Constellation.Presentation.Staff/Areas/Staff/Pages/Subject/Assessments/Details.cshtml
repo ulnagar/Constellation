@@ -15,6 +15,11 @@
     @if (canEditTest.Succeeded)
     {
         <a asp-page="/Subject/Assessments/Upsert" asp-area="Staff" asp-route-id="@Model.Assessment.Id" class="btn btn-warning">Edit</a>
+        
+        @if (Model.Assessment.AvailableFrom <= DateTimeOffset.Now && Model.Assessment.AvailableTo >= DateTimeOffset.Now)
+        {
+            <button class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#confirm-notifications-modal">Send Notifications</button>
+        }
     }
 
     <a href="javascript:history.go(-1)" class="btn btn-danger btn-pull-right">Go Back</a>
@@ -348,6 +353,7 @@
     available-from="Model.Assessment.AvailableFrom" 
     available-to="Model.Assessment.AvailableTo" />
 <vc:add-submission-to-assessment assessment-id="Model.Id" />
+<vc:confirm-assessment-notification-send />
 
 <div class="modal fade" tabindex="-1" id="link-canvas-modal">
 </div>

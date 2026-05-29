@@ -58,7 +58,7 @@ public interface IEmailService
 
     // Assessment Provisions Emails
     Task<Result> SendAssessmentSubmissionReceipt(Assessment assessment, AssessmentStudent student, AssessmentSubmission submission, CancellationToken cancellationToken = default);
-    Task<Result> SendAssessmentNotificationToSchools(Assessment assessment, List<EmailRecipient> recipients, CancellationToken cancellationToken = default);
+    Task<Dictionary<Result, List<EmailRecipient>>> SendAssessmentNotificationToSchools(Assessment assessment, List<EmailRecipient> recipients, CancellationToken cancellationToken = default);
 
     // Assignment Emails
     Task<Result> SendAssignmentUploadReceipt(CanvasAssignment assignment, CanvasAssignmentSubmission submission, Course course, Student student, SchoolContact contact, CancellationToken cancellationToken = default);

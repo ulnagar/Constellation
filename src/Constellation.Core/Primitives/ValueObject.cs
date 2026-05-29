@@ -45,7 +45,7 @@ public abstract class ValueObject<TSelf, TValue> : IEquatable<TSelf>, IComparabl
 
     public override bool Equals(object? obj) => obj is TSelf other && Equals(other);
 
-    public override int GetHashCode() => Value.GetHashCode();
+    public override int GetHashCode() => Value?.GetHashCode() ?? 0;
 
     public override string ToString() => Value.ToString()!;
 

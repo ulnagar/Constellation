@@ -5,7 +5,7 @@ using System;
 
 public sealed class AssessmentNotificationForSchoolsEmailViewModel : EmailLayoutBaseViewModel
 {
-    private const string _viewLocation = "/Views/Emails/Assessments/AssessmentSubmissionReceiptEmail.cshtml";
+    private const string _viewLocation = "/Views/Emails/Assessments/AssessmentNotificationForSchoolsEmail.cshtml";
     public override string ViewLocation => _viewLocation;
 
     public string PortalLink => BaseUrl;

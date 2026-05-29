@@ -25,6 +25,7 @@ public interface IAssessmentRepository
     Task<List<StudentProvision>> GetStudentProvisions(CancellationToken cancellationToken = default);
     Task<bool> DoesCurrentStudentProvisionExist(StudentId studentId, ProvisionId provisionId, int year, CancellationToken cancellationToken = default);
 
+    Task<List<Assessment>> GetAllDueForUploadToday(CancellationToken cancellationToken = default);
 
     void Insert(Assessment assessment);
     void Insert(Provision provision);
