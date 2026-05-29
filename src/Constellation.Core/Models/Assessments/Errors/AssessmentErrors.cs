@@ -17,4 +17,9 @@ public static class AssessmentErrors
     public static readonly Func<StudentId, Error> StudentAlreadyExists = id => new(
         "Assessment.StudentAlreadyExists",
         $"A student with the Id '{id}' already exists in the Assessment");
+
+    public static readonly Func<DateOnly, DateOnly, Error> ForwardDateAndLockDateConflict = (forwardDate, lockDate) =>
+        new(
+            "Assessment.ForwardDateAndLockDateConflict",
+            $"The selected Forward Date ({forwardDate.ToString("d")}) is invalid when matched to the Canvas Assignment Lock Date ({lockDate.ToString("d")})");
 }

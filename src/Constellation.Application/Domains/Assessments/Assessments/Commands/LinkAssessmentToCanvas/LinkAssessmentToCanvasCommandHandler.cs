@@ -4,6 +4,7 @@ using Abstractions.Messaging;
 using Constellation.Core.Models.Assessments.Errors;
 using Core.Models.Assessments;
 using Core.Models.Assessments.Repositories;
+using Core.Models.Tutorials.Enums;
 using Core.Shared;
 using DTOs;
 using Interfaces.Configuration;
@@ -77,7 +78,17 @@ internal sealed class LinkAssessmentToCanvasCommandHandler
             return Result.Failure(assignment.Error);
         }
 
-        DateTimeOffset forwardDate = assignment.Value.LockDate?.AddDays(-1) ?? assignment.Value.DueDate.AddDays(1);
+        if (assignment.Value.LockDate.HasValue && request.ForwardDate >= DateOnly.FromDateTime(assignment.Value.LockDate.Value.LocalDateTime))
+        {
+            _logger
+                .ForContext(nameof(LinkAssessmentToCanvasCommand), request, true)
+                .ForContext(nameof(Error), AssessmentErrors.ForwardDateAndLockDateConflict(request.ForwardDate, DateOnly.FromDateTime(assignment.Value.LockDate.Value.LocalDateTime)), true)
+                .Warning("Failed to add Canvas Link to Assessment");
+
+            return Result.Failure(AssessmentErrors.ForwardDateAndLockDateConflict(request.ForwardDate, DateOnly.FromDateTime(assignment.Value.LockDate.Value.LocalDateTime)));
+        }
+
+        DateTimeOffset forwardDate = new(request.ForwardDate.ToDateTime(TimeOnly.MinValue), TimeZoneInfo.Local.GetUtcOffset(request.ForwardDate.ToDateTime(TimeOnly.MinValue)));
 
         UriBuilder uriBuilder = new(_configuration.ApiEndpoint)
         {

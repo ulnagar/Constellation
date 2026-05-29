@@ -22,7 +22,12 @@
     }); 
 
     // Activate any comboboxes
-    $(".combo").select2({ theme: 'bootstrap' });
+    $(".combo").each(function () {
+        $(this).select2({
+            theme: 'bootstrap',
+            dropdownParent: $(this).parent()
+        });
+    });
 
     // Activate any comboboxes with free-text entry
     $(".combo-with-tag").select2({

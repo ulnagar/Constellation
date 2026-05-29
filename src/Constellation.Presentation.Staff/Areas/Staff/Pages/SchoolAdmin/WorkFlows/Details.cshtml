@@ -128,7 +128,10 @@
                 $('#page-modal').modal('show');
 
                 // Activate any comboboxes
-                $("#page-modal .combo").select2({ theme: 'bootstrap' });
+                $("#page-modal .combo").select2({
+                    theme: 'bootstrap',
+                    dropdownParent: $("#page-modal .combo").parent()
+                });
             });
         });
 
@@ -150,7 +153,10 @@
                 $('#page-modal .modal-content').html(data);
                 $('#page-modal').modal('show');
 
-                $('#page-modal .combo').select2({ theme: 'bootstrap' });
+                $("#page-modal .combo").select2({
+                    theme: 'bootstrap',
+                    dropdownParent: $("#page-modal .combo").parent()
+                });
             });
         });
     </script>

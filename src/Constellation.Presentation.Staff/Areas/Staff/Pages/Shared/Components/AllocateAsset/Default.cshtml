@@ -115,6 +115,9 @@
     });
 
     $(document).ready(function () {
-        $('#AllocateSchoolCode').select2({ theme: 'bootstrap' });
+        $('#AllocateSchoolCode').select2({
+            theme: 'bootstrap',
+            dropdownParent: $('#AllocateSchoolCode').parent()
+        });
     });
 </script>

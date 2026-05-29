@@ -132,7 +132,10 @@
                             });
 
                             $('#Submitter')
-                                .select2({ theme: 'bootstrap' });
+                                .select2({
+                                    theme: 'bootstrap',
+                                    dropdownParent: $('#Submitter').parent()
+                                });
                         }
                     }),
 

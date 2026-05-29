@@ -634,14 +634,17 @@ public class DetailsModel : BasePageModel
         if (courses.IsFailure)
             return Content(string.Empty);
 
-        LinkAssessmentToCanvasSelection viewModel = new(courses.Value);
-
-        return ViewComponent("LinkAssessmentToCanvas", viewModel);
+        return ViewComponent("LinkAssessmentToCanvas", courses.Value);
     }
 
-    public async Task<IActionResult> OnGetLinkCanvasAssignment(CanvasCourseCode courseCode, int assignmentId)
+    public async Task<IActionResult> OnPostLinkCanvasAssignment(LinkAssessmentToCanvasSelection viewModel)
     {
-        LinkAssessmentToCanvasCommand command = new(Id, courseCode, assignmentId);
+        string[] parts = viewModel.SelectedAssessment.Split(':');
+        string courseCodeValue = parts[0];
+        CanvasCourseCode courseCode = CanvasCourseCode.FromValue(courseCodeValue);
+        int assessmentId = int.Parse(parts[1]);
+
+        LinkAssessmentToCanvasCommand command = new(Id, courseCode, assessmentId, viewModel.ForwardDate);
 
         _logger
             .ForContext(nameof(LinkAssessmentToCanvasCommand), command, true)

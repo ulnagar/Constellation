@@ -319,7 +319,10 @@
             $('#SentimentListModal').modal('show');
         });
 
-        var $schoolOption = $("#custom-combo").select2({ theme: 'bootstrap' });
+        var $schoolOption = $("#custom-combo").select2({
+            theme: 'bootstrap',
+            dropdownParent: $("#custom-combo").parent()
+        });
 
         $schoolOption.on('select2:select', function(e) {
             var code = e.params.data.id;

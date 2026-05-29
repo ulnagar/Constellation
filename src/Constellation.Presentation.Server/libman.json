@@ -58,12 +58,12 @@
       "destination": "wwwroot/lib/datatables.net/"
     },
     {
-      "library": "datatables.net-dt@2.3.4",
-      "destination": "wwwroot/lib/datatables.net-dt/"
-    },
-    {
       "library": "datatables.net-bs5@2.3.4",
       "destination": "wwwroot/lib/datatables.net-bs5/"
+    },
+    {
+      "library": "datatables.net-bs4@2.3.4",
+      "destination": "wwwroot/lib/datatables.net-bs4/"
     },
     {
       "library": "moment.js@2.8.4",

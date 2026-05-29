@@ -210,7 +210,10 @@
             $('#GradeListModal').modal('show');
         });
 
-        var $studentOption = $("#custom-student-combo").select2({ theme: 'bootstrap' });
+        var $studentOption = $("#custom-student-combo").select2({
+            theme: 'bootstrap',
+            dropdownParent: $("#custom-student-combo").parent()
+        });
 
         $studentOption.on('select2:select', function (e) {
             var code = e.params.data.id;

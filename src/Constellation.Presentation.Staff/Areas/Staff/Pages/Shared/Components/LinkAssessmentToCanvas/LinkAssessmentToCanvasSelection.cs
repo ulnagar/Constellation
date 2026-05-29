@@ -1,9 +1,15 @@
 ﻿namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Shared.Components.LinkAssessmentToCanvas;
 
-using Application.Domains.Assessments.Assessments.Queries.GetCanvasCoursesAndAssessments;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 
-public sealed class LinkAssessmentToCanvasSelection(List<CanvasCourseWithAssessmentResponse> courses)
+public sealed class LinkAssessmentToCanvasSelection
 {
-    public List<CanvasCourseWithAssessmentResponse> Courses { get; private set; } = courses;
+    public required List<SelectListItem> Courses { get; init; }
+
+    public string SelectedAssessment { get; set; }
+
+    [DataType(DataType.Date), DisplayFormat(DataFormatString = "{0:yyyy-MM-dd}", ApplyFormatInEditMode = true)]
+    public DateOnly ForwardDate { get; set; } = DateOnly.FromDateTime(DateTime.Today);
 }

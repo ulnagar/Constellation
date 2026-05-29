@@ -350,19 +350,6 @@
 <vc:add-submission-to-assessment assessment-id="Model.Id" />
 
 <div class="modal fade" tabindex="-1" id="link-canvas-modal">
-    <div class="modal-dialog modal-lg">
-        <div id="modal-content" class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Link Canvas Assignment</h5>
-            </div>
-            <div class="modal-body">
-                
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-            </div>
-        </div>
-    </div>
 </div>
 
 @Html.AntiForgeryToken()
@@ -430,7 +417,7 @@
 
         $('.link-canvas-btn').on('click', function () {
             const $modal = $('#link-canvas-modal');
-            const $container = $('#link-canvas-modal .modal-body');
+            const $container = $('#link-canvas-modal');
 
             // Only fetch if not already loaded
             if ($container.data('loaded')) {
@@ -443,6 +430,30 @@
             $.get('?handler=AjaxLoadCanvasAssignments', function (html) {
                 $container.html(html);
                 $container.data('loaded', true);
+                $container.find('.combo').select2({
+                    theme: 'bootstrap-5',
+                    dropdownParent: $container,
+                    matcher: function (params, data) {
+                        // If no search term, return everything
+                        if (!params.term || params.term.trim() === '') {
+                            return data;
+                        }
+
+                        const term = params.term.trim().toLowerCase();
+                        const optionText = data.text.toLowerCase();
+                        const groupText = (data.element && data.element.parentElement
+                            ? data.element.parentElement.label
+                            : ''
+                        ).toLowerCase();
+
+                        // Match on either the option text or the group label
+                        if (optionText.includes(term) || groupText.includes(term)) {
+                            return data;
+                        }
+
+                        return null;
+                    }
+                });
                 $modal.modal('show');
                 toggleLoader();
             });

@@ -124,7 +124,10 @@
                 }
             }).done(function (data) {
                 $('#page-modal .modal-content').html(data);
-                $(".combo").select2({ theme: 'bootstrap' });
+                $("#page-modal .combo").select2({
+                    theme: 'bootstrap',
+                    dropdownParent: $("#page-modal .combo").parent()
+                });
                 $('#moduleModal').submit(function (e) {
                     $('#page-modal').modal('hide');
                     return true;
@@ -146,7 +149,10 @@
                 }
             }).done(function (data) {
                 $('#page-modal .modal-content').html(data);
-                $(".combo").select2({ theme: 'bootstrap' });
+                $("#page-modal .combo").select2({
+                    theme: 'bootstrap',
+                    dropdownParent: $("#page-modal .combo").parent()
+                });
                 $('#staffModal').submit(function (e) {
                     $('#page-modal').modal('hide');
                     return true;
