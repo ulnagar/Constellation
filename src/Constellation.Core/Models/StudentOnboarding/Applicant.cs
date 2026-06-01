@@ -10,6 +10,7 @@ using Students.ValueObjects;
 using System;
 using System.Collections.Generic;
 using ValueObjects;
+using ParentId = Models.Identifiers.ParentId;
 
 public sealed class Applicant : AggregateRoot, IAuditableEntity
 {
@@ -50,9 +51,10 @@ public sealed class Parent
 {
     private Parent()
     {
-        
+        Id = new();
     }
 
+    public ParentId Id { get; private set; }
     public ApplicantId ApplicantId { get; private set; }
     public string Title { get; private set; }
     public Name Name { get; private set; }
