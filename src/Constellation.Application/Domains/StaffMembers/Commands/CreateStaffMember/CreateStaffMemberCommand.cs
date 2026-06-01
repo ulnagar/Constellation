@@ -1,7 +1,7 @@
 ﻿namespace Constellation.Application.Domains.StaffMembers.Commands.CreateStaffMember;
 
 using Abstractions.Messaging;
-using Constellation.Core.Models.Students.Enums;
+using Core.Models.Common.Enums;
 using Core.Models.Identifiers;
 
 public sealed record CreateStaffMemberCommand(

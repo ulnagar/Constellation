@@ -1,6 +1,6 @@
 ﻿namespace Constellation.Core.Models.Operations.Enums;
 
-using Common;
+using Core.Common;
 
 public sealed class CanvasAction : StringEnumeration<CanvasAction>
 {

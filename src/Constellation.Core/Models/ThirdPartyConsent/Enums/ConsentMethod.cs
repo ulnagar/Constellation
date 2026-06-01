@@ -1,6 +1,6 @@
 ﻿namespace Constellation.Core.Models.ThirdPartyConsent.Enums;
 
-using Common;
+using Core.Common;
 
 public class ConsentMethod : StringEnumeration<ConsentMethod>
 {

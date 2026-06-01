@@ -1,10 +1,10 @@
 namespace Constellation.Infrastructure.Persistence.ConstellationContext.EntityConfigurations.StaffMembers;
 
 using Converters;
+using Core.Models.Common.Enums;
 using Core.Models.StaffMembers;
 using Core.Models.StaffMembers.Identifiers;
 using Core.Models.StaffMembers.ValueObjects;
-using Core.Models.Students.Enums;
 using Core.ValueObjects;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;

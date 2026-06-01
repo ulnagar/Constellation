@@ -1,6 +1,6 @@
 ﻿namespace Constellation.Core.Models.Covers.Enums;
 
-using Common;
+using Core.Common;
 using System.Collections.Generic;
 
 public sealed class CoverTeacherType : StringEnumeration<CoverTeacherType>

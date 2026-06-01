@@ -1,10 +1,10 @@
 namespace Constellation.Core.Models.Students;
 
 using Abstractions.Clock;
+using Common.Enums;
 using Constellation.Core.Enums;
 using Constellation.Core.Errors;
 using Constellation.Core.ValueObjects;
-using Enums;
 using Errors;
 using Events;
 using Identifiers;

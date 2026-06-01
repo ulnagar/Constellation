@@ -1,9 +1,6 @@
-﻿using System.Buffers.Text;
-using System.Collections.Generic;
+﻿namespace Constellation.Core.Models.Assets.Enums;
 
-namespace Constellation.Core.Models.Assets.Enums;
-
-using Common;
+using Core.Common;
 
 public sealed class AssetCategory : StringEnumeration<AssetCategory>
 {

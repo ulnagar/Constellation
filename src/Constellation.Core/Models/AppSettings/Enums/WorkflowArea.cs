@@ -1,6 +1,6 @@
 ﻿namespace Constellation.Core.Models.AppSettings.Enums;
 
-using Common;
+using Core.Common;
 
 public sealed class WorkflowArea : StringEnumeration<WorkflowArea>
 {

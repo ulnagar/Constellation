@@ -1,6 +1,6 @@
 ﻿namespace Constellation.Core.Models.Attendance.Enums;
 
-using Common;
+using Core.Common;
 using System.Collections.Generic;
 
 public sealed class AttendancePlanStatus : StringEnumeration<AttendancePlanStatus>

@@ -1,6 +1,6 @@
 ﻿namespace Constellation.Core.Models.Awards.Enums;
 
-using Common;
+using Core.Common;
 using Core.Enums;
 
 public sealed class AwardType : StringEnumeration<AwardType>

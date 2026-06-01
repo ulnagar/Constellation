@@ -1,7 +1,6 @@
-﻿namespace Constellation.Core.Models.Students.Enums;
+﻿namespace Constellation.Core.Models.Common.Enums;
 
-using Common;
-using System.Collections.Generic;
+using Core.Common;
 
 public sealed class IndigenousStatus : IntEnumeration<IndigenousStatus>
 {

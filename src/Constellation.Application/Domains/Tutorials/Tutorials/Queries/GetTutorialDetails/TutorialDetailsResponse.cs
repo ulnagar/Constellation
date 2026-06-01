@@ -1,10 +1,10 @@
 ﻿namespace Constellation.Application.Domains.Tutorials.Tutorials.Queries.GetTutorialDetails;
 
 using Constellation.Core.Enums;
+using Core.Models.Common.Enums;
 using Core.Models.Identifiers;
 using Core.Models.StaffMembers.Identifiers;
 using Core.Models.StaffMembers.ValueObjects;
-using Core.Models.Students.Enums;
 using Core.Models.Students.Identifiers;
 using Core.Models.Students.ValueObjects;
 using Core.Models.Timetables.Enums;

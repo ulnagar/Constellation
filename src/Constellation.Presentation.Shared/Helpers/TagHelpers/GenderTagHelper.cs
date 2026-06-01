@@ -1,6 +1,6 @@
 ﻿namespace Constellation.Presentation.Shared.Helpers.TagHelpers;
 
-using Core.Models.Students.Enums;
+using Core.Models.Common.Enums;
 using Microsoft.AspNetCore.Razor.TagHelpers;
 
 public class GenderTagHelper : TagHelper

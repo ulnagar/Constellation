@@ -1,7 +1,7 @@
 ﻿namespace Constellation.Application.Domains.Attendance.Reports.Queries.GenerateCustomReportForPeriod;
 
 using Core.Enums;
-using Core.Models.Students.Enums;
+using Core.Models.Common.Enums;
 using Core.Models.Students.ValueObjects;
 using Core.ValueObjects;
 

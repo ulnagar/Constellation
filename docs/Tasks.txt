@@ -30,9 +30,6 @@ OPERATIONS:
 COVERS:
 	Add link landing page that checks access dates before sending people to the actual teams link
 
-LINK SHORTENER:
-	Provide interface for custom shortening of long URLs on custom domain
-
 TRACKITSYNC JOB:
 	Convert to individual MEDIATR actions, to allow for calling immediately when relevant records change
 

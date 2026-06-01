@@ -1,6 +1,6 @@
 ﻿namespace Constellation.Core.Models.Faculties.Enums;
 
-using Common;
+using Core.Common;
 
 public sealed class FacultyMembershipRole : StringEnumeration<FacultyMembershipRole>
 {

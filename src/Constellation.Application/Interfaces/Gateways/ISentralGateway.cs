@@ -3,9 +3,9 @@
 using Constellation.Application.Domains.MeritAwards.Awards.Enums;
 using Constellation.Application.DTOs;
 using Constellation.Core.Enums;
-using Constellation.Core.Models.Students.Enums;
 using Constellation.Core.Models.Students.ValueObjects;
 using Constellation.Core.Shared;
+using Core.Models.Common.Enums;
 using Domains.Attendance.Reports.Commands.UpdateAttendanceDataForPeriodFromSentral;
 using Domains.LinkedSystems.Sentral.Queries.GetTermsAndWeeksForCurrentYear;
 using HtmlAgilityPack;

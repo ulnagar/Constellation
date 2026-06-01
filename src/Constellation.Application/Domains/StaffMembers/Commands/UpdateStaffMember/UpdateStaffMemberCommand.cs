@@ -1,9 +1,9 @@
 ﻿namespace Constellation.Application.Domains.StaffMembers.Commands.UpdateStaffMember;
 
 using Abstractions.Messaging;
+using Core.Models.Common.Enums;
 using Core.Models.Identifiers;
 using Core.Models.StaffMembers.Identifiers;
-using Core.Models.Students.Enums;
 
 public sealed record UpdateStaffMemberCommand(
     StaffId StaffId,
