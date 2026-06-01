@@ -1,6 +1,7 @@
 ﻿namespace Constellation.Core.Models.Absences.Enums;
 
 using Common;
+using Core.Common;
 using System;
 
 public class AbsenceType : StringEnumeration<AbsenceType>, IEquatable<AbsenceType>

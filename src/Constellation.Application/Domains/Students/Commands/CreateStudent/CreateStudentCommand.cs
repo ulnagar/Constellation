@@ -2,8 +2,8 @@
 
 using Abstractions.Messaging;
 using Core.Enums;
+using Core.Models.Common.Enums;
 using Core.Models.Identifiers;
-using Core.Models.Students.Enums;
 
 public sealed record CreateStudentCommand(
     string SRN,

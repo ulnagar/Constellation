@@ -1,6 +1,6 @@
 ﻿namespace Constellation.Core.Models.Timetables.Enums;
 
-using Common;
+using Core.Common;
 using System;
 using System.Collections.Generic;
 using System.Linq;

@@ -1,6 +1,6 @@
 ﻿namespace Constellation.Core.Models.Absences.Enums;
 
-using Common;
+using Core.Common;
 using System;
 
 public sealed class AbsenceSource : StringEnumeration<AbsenceSource>, IEquatable<AbsenceSource>
@@ -16,12 +16,12 @@ public sealed class AbsenceSource : StringEnumeration<AbsenceSource>, IEquatable
     public static implicit operator string(AbsenceSource value) =>
         value is null ? string.Empty : value.Name;
 
-    public override bool Equals(object obj)
+    public override bool Equals(object? obj)
     {
         if (ReferenceEquals(this, obj)) return true;
         if (obj?.GetType() != GetType()) return false;
-        
-        AbsenceType other = obj as AbsenceType;
+
+        AbsenceSource? other = obj as AbsenceSource;
 
         return Value == other?.Value && Name == other.Name;
     }

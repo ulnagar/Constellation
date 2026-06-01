@@ -1,6 +1,6 @@
 ﻿namespace Constellation.Core.Models.Messaging.Enums;
 
-using Common;
+using Core.Common;
 
 public sealed class RecipientGroup : StringEnumeration<RecipientGroup>
 {

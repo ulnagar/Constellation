@@ -1,9 +1,9 @@
 ﻿namespace Constellation.Application.Domains.StaffMembers.Queries.GetStaffById;
 
+using Core.Models.Common.Enums;
 using Core.Models.Identifiers;
 using Core.Models.StaffMembers.Identifiers;
 using Core.Models.StaffMembers.ValueObjects;
-using Core.Models.Students.Enums;
 using Core.ValueObjects;
 
 public sealed record StaffResponse(

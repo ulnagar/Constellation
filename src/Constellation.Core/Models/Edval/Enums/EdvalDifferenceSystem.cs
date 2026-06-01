@@ -1,6 +1,6 @@
 ﻿namespace Constellation.Core.Models.Edval.Enums;
 
-using Common;
+using Core.Common;
 
 public sealed class EdvalDifferenceSystem : StringEnumeration<EdvalDifferenceSystem>
 {

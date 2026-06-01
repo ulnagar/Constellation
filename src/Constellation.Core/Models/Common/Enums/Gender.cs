@@ -1,7 +1,6 @@
-﻿namespace Constellation.Core.Models.Students.Enums;
+﻿namespace Constellation.Core.Models.Common.Enums;
 
-using Constellation.Core.Common;
-using System.Collections.Generic;
+using Core.Common;
 
 public sealed class Gender : StringEnumeration<Gender>
 {

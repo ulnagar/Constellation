@@ -1,6 +1,6 @@
 ﻿namespace Constellation.Core.Models.WorkFlow.Enums;
 
-using Common;
+using Core.Common;
 
 public class AttendanceSeverity : StringEnumeration<AttendanceSeverity>
 {

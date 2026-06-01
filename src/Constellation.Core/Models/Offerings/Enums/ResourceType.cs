@@ -1,6 +1,6 @@
 ﻿namespace Constellation.Core.Models.Offerings.Enums;
 
-using Common;
+using Core.Common;
 
 public sealed class ResourceType : StringEnumeration<ResourceType>
 {

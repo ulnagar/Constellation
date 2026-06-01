@@ -3,7 +3,7 @@
 using Constellation.Core.Models.Students;
 using Converters;
 using Core.Models.Absences;
-using Core.Models.Students.Enums;
+using Core.Models.Common.Enums;
 using Core.Models.Students.Identifiers;
 using Core.ValueObjects;
 using Microsoft.EntityFrameworkCore;

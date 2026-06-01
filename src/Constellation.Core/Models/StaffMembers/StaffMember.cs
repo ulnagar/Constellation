@@ -1,7 +1,7 @@
 ﻿namespace Constellation.Core.Models.StaffMembers;
 
 using Abstractions.Clock;
-using Constellation.Core.Models.Students.Enums;
+using Common.Enums;
 using Constellation.Core.Shared;
 using Constellation.Core.ValueObjects;
 using Core.Errors;

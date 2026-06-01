@@ -1,6 +1,6 @@
 ﻿namespace Constellation.Core.Models.Absences.Enums;
 
-using Common;
+using Core.Common;
 
 public class ResponseType : StringEnumeration<ResponseType>
 {

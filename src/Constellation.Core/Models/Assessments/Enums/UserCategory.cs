@@ -1,6 +1,6 @@
 ﻿namespace Constellation.Core.Models.Assessments.Enums;
 
-using Common;
+using Core.Common;
 using System.Collections.Generic;
 
 public sealed class UserCategory : StringEnumeration<UserCategory>
