@@ -24,6 +24,7 @@
     <Project Path="src/Constellation.Infrastructure.HangfireServer/Constellation.Infrastructure.HangfireServer.csproj" />
     <Project Path="src/Constellation.Infrastructure.Templates/Constellation.Infrastructure.Templates.csproj" />
     <Project Path="src/Constellation.Infrastructure/Constellation.Infrastructure.csproj" />
+    <Project Path="src/Constellation.Presentation.Applicants/Constellation.Presentation.Applicants.csproj" Id="b61a02ce-8d38-4684-9db2-a04813055639" />
     <Project Path="src/Constellation.Presentation.Parents/Constellation.Presentation.Parents.csproj" />
     <Project Path="src/Constellation.Presentation.Schools/Constellation.Presentation.Schools.csproj" />
     <Project Path="src/Constellation.Presentation.Server/Constellation.Presentation.Server.csproj" />

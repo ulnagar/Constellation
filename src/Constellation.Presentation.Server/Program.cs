@@ -7,6 +7,7 @@ using Constellation.Infrastructure.Identity.Authorization;
 using Constellation.Infrastructure.Identity.ClaimsPrincipalFactories;
 using Constellation.Infrastructure.Identity.MagicLink;
 using Constellation.Infrastructure.Persistence.ConstellationContext;
+using Constellation.Presentation.Applicants.Helpers.Routing;
 using Constellation.Presentation.Server.Areas.API.Endpoints;
 using Constellation.Presentation.Server.Helpers.HtmlGenerator;
 using Constellation.Presentation.Server.Helpers.Identity;
@@ -131,13 +132,18 @@ GlobalJobFilters.Filters.Add(new AutomaticRetryAttribute { Attempts = 0 });
 
 builder.Services.AddTransient<HangfireAuthorizationFilter>();
 
-builder.Services.AddRazorPages()
+builder.Services.AddRazorPages(
+        options =>
+        {
+            options.Conventions.Add(new AreaRouteParameterConvention("Applicants", "{applicantId:guid}"));
+        })
     .AddSessionStateTempDataProvider()
     .AddApplicationPart(Constellation.Presentation.Shared.AssemblyReference.Assembly)
     .AddApplicationPart(Constellation.Presentation.Staff.AssemblyReference.Assembly)
     .AddApplicationPart(Constellation.Presentation.Schools.AssemblyReference.Assembly)
     .AddApplicationPart(Constellation.Presentation.Parents.AssemblyReference.Assembly)
-    .AddApplicationPart(Constellation.Presentation.Students.AssemblyReference.Assembly);
+    .AddApplicationPart(Constellation.Presentation.Students.AssemblyReference.Assembly)
+    .AddApplicationPart(Constellation.Presentation.Applicants.AssemblyReference.Assembly);
 
 builder.Services.AddSession(options =>
 {
@@ -230,6 +236,8 @@ app.UseRouting();
 
 app.UseAuthentication();
 app.UseAuthorization();
+
+app.UseMiddleware<ApplicantValidationMiddleware>();
 
 app.MapRazorPages();
 app.MapControllers();

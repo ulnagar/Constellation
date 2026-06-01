@@ -1,0 +1,16 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Razor">
+
+	<PropertyGroup>
+		<AddRazorSupportForMvc>true</AddRazorSupportForMvc>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<PackageReference Include="System.Security.Cryptography.Xml" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\Constellation.Application\Constellation.Application.csproj" />
+		<ProjectReference Include="..\Constellation.Presentation.Shared\Constellation.Presentation.Shared.csproj" />
+	</ItemGroup>
+
+</Project>
