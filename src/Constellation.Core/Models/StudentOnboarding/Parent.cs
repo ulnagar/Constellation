@@ -1,25 +1,26 @@
 ﻿namespace Constellation.Core.Models.StudentOnboarding;
 
-using Common.Enums;
 using Identifiers;
 using Primitives;
-using Students.ValueObjects;
 using ValueObjects;
 
-public sealed class Applicant : IAuditableEntity
+public sealed class Parent : IAuditableEntity
 {
-    private Applicant()
+    private readonly List<Application> _applications = [];
+
+    private Parent()
     {
         Id = new();
     }
 
-    public ApplicantId Id { get; private set; }
-    public StudentReferenceNumber? StudentReferenceNumber { get; private set; }
+    public ParentId Id { get; private set; }
     public Name Name { get; private set; }
+    public PhoneNumber? MobileNumber { get; private set; }
     public EmailAddress? EmailAddress { get; private set; }
-    public Gender? Gender { get; private set; }
-    public IndigenousStatus IndigenousStatus { get; private set; } = IndigenousStatus.Unknown;
-    
+    public MailingAddress? MailingAddress { get; private set; }
+
+    public IReadOnlyList<Application> Applications => _applications.AsReadOnly();
+
     public string? CreatedBy { get; set; }
     public DateTime CreatedAt { get; set; }
     public string? ModifiedBy { get; set; }
