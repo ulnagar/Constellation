@@ -5,14 +5,35 @@ using Enums;
 using Identifiers;
 using Models.Identifiers;
 using Primitives;
+using Shared;
 
 public sealed class Application : AggregateRoot, IAuditableEntity
 {
     private readonly List<Parent> _parents = [];
 
-    private Application()
+    private Application() { }
+
+    private Application(
+        Applicant applicant,
+        Program program,
+        string year,
+        Grade grade,
+        SchoolCode? schoolCode = null,
+        string? schoolName = null)
     {
         Id = new();
+
+        ApplicantId = applicant.Id;
+        Applicant = applicant;
+        Program = program;
+        Year = year;
+        Grade = grade;
+
+        if (schoolCode is not null)
+        {
+            SchoolCode = schoolCode;
+            SchoolName = schoolName;
+        }
     }
 
     public ApplicationId Id { get; private set; }
@@ -35,5 +56,19 @@ public sealed class Application : AggregateRoot, IAuditableEntity
     public string? DeletedBy { get; set; }
     public DateTime DeletedAt { get; set; }
 
-
+    public static Result<Application> Create(
+        Applicant applicant,
+        Program program,
+        string year,
+        Grade grade,
+        School? school)
+    {
+        return new Application(
+            applicant,
+            program,
+            year,
+            grade,
+            school?.Code,
+            school?.Name);
+    }
 }
