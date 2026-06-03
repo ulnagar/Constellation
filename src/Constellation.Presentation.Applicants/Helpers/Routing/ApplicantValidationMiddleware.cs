@@ -1,14 +1,12 @@
 ﻿namespace Constellation.Presentation.Applicants.Helpers.Routing;
 
-using Application.Domains.StudentOnboarding.Queries.DoesApplicantIdExist;
-using Constellation.Core.Models.StudentOnboarding;
-using Constellation.Core.Models.ThirdPartyConsent.Identifiers;
-using Core.Models.StudentOnboarding.Identifiers;
+using Application.Domains.StudentOnboarding.Queries.DoesApplicationIdExist;
 using Core.Shared;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.Caching.Memory;
+using ApplicationId = Core.Models.StudentOnboarding.Identifiers.ApplicationId;
 
 public sealed class ApplicantValidationMiddleware
 {
@@ -23,21 +21,30 @@ public sealed class ApplicantValidationMiddleware
     {
         RouteValueDictionary routeValues = context.GetRouteData().Values;
         
-        if (routeValues.TryGetValue("applicantId", out var idValue)
-            && Guid.TryParse(idValue?.ToString(), out var applicantGuid))
-        {
-            ApplicantId applicantId = ApplicantId.FromValue(applicantGuid);
+        // ensure that only pages in the Applicants area run this code
+        bool isApplicantsArea = context.Request.Path.StartsWithSegments("/Applicants", StringComparison.OrdinalIgnoreCase);
 
-            Result<bool>? result = await cache.GetOrCreateAsync($"applicant:{applicantId}", async entry =>
+        // ensure that any pages in the /Applicants/Error folder do not run this code
+        bool isErrorPage = routeValues.TryGetValue("page", out var page)
+            && page?.ToString().StartsWith("/Error/", StringComparison.OrdinalIgnoreCase) == true;
+        
+        if (isApplicantsArea
+            && !isErrorPage
+            && routeValues.TryGetValue("applicationId", out var idValue)
+            && Guid.TryParse(idValue?.ToString(), out var applicationGuid))
+        {
+            ApplicationId applicationId = ApplicationId.FromValue(applicationGuid);
+
+            Result<bool>? result = await cache.GetOrCreateAsync($"application:{applicationId}", async entry =>
             {
                 entry.SlidingExpiration = TimeSpan.FromMinutes(10);
                 entry.AbsoluteExpiration = DateTimeOffset.UtcNow.AddMinutes(30);
-                return await mediator.Send(new DoesApplicantIdExistQuery(applicantId));
+                return await mediator.Send(new DoesApplicationIdExistQuery(applicationId));
             });
 
             if (result is null || result.IsFailure || !result.Value)
             {
-                context.Response.StatusCode = StatusCodes.Status404NotFound;
+                context.Response.Redirect($"/Applicants/{applicationGuid}/Error/InvalidApplicant");
                 return;
             }
         }

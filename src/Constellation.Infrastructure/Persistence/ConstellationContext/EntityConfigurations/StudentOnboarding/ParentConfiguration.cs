@@ -2,7 +2,7 @@
 
 using Converters;
 using Core.Models.StudentOnboarding;
-using Core.ValueObjects;
+using Extensions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -17,32 +17,22 @@ internal sealed record ParentConfiguration : IEntityTypeConfiguration<Parent>
 
         builder
             .ComplexProperty(entry => entry.Name)
-            .IsRequired();
-
-        builder
-            .ComplexProperty(entry => entry.Name)
-            .Property(name => name.FirstName)
-            .HasColumnName(nameof(Name.FirstName))
-            .IsRequired();
-
-        builder
-            .ComplexProperty(entry => entry.Name)
-            .Property(name => name.PreferredName)
-            .HasColumnName(nameof(Name.PreferredName))
-            .IsRequired(false);
-
-        builder
-            .ComplexProperty(entry => entry.Name)
-            .Property(name => name.LastName)
-            .HasColumnName(nameof(Name.LastName))
+            .ApplyConfiguration()
             .IsRequired();
 
         builder
             .Property(entry => entry.EmailAddress)
-            .HasConversion<EmailAddressConverter>();
+            .HasConversion<EmailAddressConverter>()
+            .IsRequired(false);
 
         builder
             .Property(entry => entry.MobileNumber)
-            .HasConversion<PhoneNumberConverter>();
+            .HasConversion<PhoneNumberConverter>()
+            .IsRequired(false);
+
+        builder
+            .Property(entry => entry.MailingAddress)
+            .HasConversion<MailingAddressConverter>()
+            .IsRequired(false);
     }
 }

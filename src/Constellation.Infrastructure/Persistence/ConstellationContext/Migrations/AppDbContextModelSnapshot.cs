@@ -162,7 +162,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                     b.HasIndex("JobName")
                         .IsUnique();
 
-                    b.ToTable("JobActivations");
+                    b.ToTable("JobActivations", (string)null);
                 });
 
             modelBuilder.Entity("Constellation.Core.Models.Absences.Absence", b =>
@@ -2104,7 +2104,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
 
                     b.HasIndex("SerialNumber");
 
-                    b.ToTable("DeviceNotes");
+                    b.ToTable("DeviceNotes", (string)null);
                 });
 
             modelBuilder.Entity("Constellation.Core.Models.Edval.Difference", b =>
@@ -4105,138 +4105,6 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                     b.HasIndex("StocktakeEventId");
 
                     b.ToTable("Sightings", "Stocktake");
-                });
-
-            modelBuilder.Entity("Constellation.Core.Models.StudentOnboarding.Applicant", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("CreatedBy")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("DeletedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("DeletedBy")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("EmailAddress")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Gender")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("Grade")
-                        .HasColumnType("int");
-
-                    b.Property<int>("IndigenousStatus")
-                        .HasColumnType("int");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("bit");
-
-                    b.Property<DateTime>("ModifiedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("ModifiedBy")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Program")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("SchoolCode")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(4)");
-
-                    b.Property<string>("SchoolName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("StudentReferenceNumber")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Year")
-                        .IsRequired()
-                        .HasMaxLength(4)
-                        .HasColumnType("nvarchar(4)");
-
-                    b.ComplexProperty(typeof(Dictionary<string, object>), "Name", "Constellation.Core.Models.StudentOnboarding.Applicant.Name#Name", b1 =>
-                        {
-                            b1.IsRequired();
-
-                            b1.Property<string>("FirstName")
-                                .IsRequired()
-                                .HasColumnType("nvarchar(max)")
-                                .HasColumnName("FirstName");
-
-                            b1.Property<string>("LastName")
-                                .IsRequired()
-                                .HasColumnType("nvarchar(max)")
-                                .HasColumnName("LastName");
-
-                            b1.Property<string>("PreferredName")
-                                .HasColumnType("nvarchar(max)")
-                                .HasColumnName("PreferredName");
-                        });
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("SchoolCode");
-
-                    b.ToTable("Applicants", "Onboarding");
-                });
-
-            modelBuilder.Entity("Constellation.Core.Models.StudentOnboarding.Parent", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("ApplicantId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("EmailAddress")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("MobileNumber")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Title")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.ComplexProperty(typeof(Dictionary<string, object>), "Name", "Constellation.Core.Models.StudentOnboarding.Parent.Name#Name", b1 =>
-                        {
-                            b1.IsRequired();
-
-                            b1.Property<string>("FirstName")
-                                .IsRequired()
-                                .HasColumnType("nvarchar(max)")
-                                .HasColumnName("FirstName");
-
-                            b1.Property<string>("LastName")
-                                .IsRequired()
-                                .HasColumnType("nvarchar(max)")
-                                .HasColumnName("LastName");
-
-                            b1.Property<string>("PreferredName")
-                                .HasColumnType("nvarchar(max)")
-                                .HasColumnName("PreferredName");
-                        });
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ApplicantId");
-
-                    b.ToTable("Parents", "Onboarding");
                 });
 
             modelBuilder.Entity("Constellation.Core.Models.Students.AbsenceConfiguration", b =>
@@ -7150,22 +7018,6 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("Constellation.Core.Models.StudentOnboarding.Applicant", b =>
-                {
-                    b.HasOne("Constellation.Core.Models.School", null)
-                        .WithMany()
-                        .HasForeignKey("SchoolCode");
-                });
-
-            modelBuilder.Entity("Constellation.Core.Models.StudentOnboarding.Parent", b =>
-                {
-                    b.HasOne("Constellation.Core.Models.StudentOnboarding.Applicant", null)
-                        .WithMany("Parents")
-                        .HasForeignKey("ApplicantId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-                });
-
             modelBuilder.Entity("Constellation.Core.Models.Students.AbsenceConfiguration", b =>
                 {
                     b.HasOne("Constellation.Core.Models.Students.Student", null)
@@ -7532,7 +7384,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
 
                             b1.HasKey("SendEmailActionId");
 
-                            b1.ToTable("WorkFlows_Actions");
+                            b1.ToTable("WorkFlows_Actions", (string)null);
 
                             b1.WithOwner()
                                 .HasForeignKey("SendEmailActionId");
@@ -7695,11 +7547,6 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                     b.Navigation("Differences");
 
                     b.Navigation("Sightings");
-                });
-
-            modelBuilder.Entity("Constellation.Core.Models.StudentOnboarding.Applicant", b =>
-                {
-                    b.Navigation("Parents");
                 });
 
             modelBuilder.Entity("Constellation.Core.Models.Students.Student", b =>
