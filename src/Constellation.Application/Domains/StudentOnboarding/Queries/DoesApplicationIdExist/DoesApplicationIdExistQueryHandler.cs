@@ -8,17 +8,17 @@ using Serilog;
 internal sealed class DoesApplicationIdExistQueryHandler
 : IQueryHandler<DoesApplicationIdExistQuery, bool>
 {
-    private readonly IApplicantRepository _applicantRepository;
+    private readonly IOnboardingRepository _onboardingRepository;
     private readonly ILogger _logger;
 
     public DoesApplicationIdExistQueryHandler(
-        IApplicantRepository applicantRepository,
+        IOnboardingRepository onboardingRepository,
         ILogger logger)
     {
-        _applicantRepository = applicantRepository;
+        _onboardingRepository = onboardingRepository;
         _logger = logger;
     }
 
     public async Task<Result<bool>> Handle(DoesApplicationIdExistQuery request, CancellationToken cancellationToken) 
-        => await _applicantRepository.DoesApplicationIdExist(request.ApplicationId, cancellationToken);
+        => await _onboardingRepository.DoesApplicationIdExist(request.ApplicationId, cancellationToken);
 }

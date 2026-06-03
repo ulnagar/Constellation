@@ -1,50 +1,5 @@
 ﻿@page
 @model Constellation.Presentation.Server.Areas.Test.Pages.IndexModel
 
-@* <style>
-    body {
-        overflow: auto !important;
-    }
-</style> *@
-
 <h2>Test Page</h2>
 
-<div class="d-flex flex-column justify-content-around">
-    <div class="accordion accordion-flush" id="accordion">
-
-        @foreach (var course in Model.Courses.Where(course => course.Assessments.Count > 0))
-        {
-            <div class="accordion-item">
-                <h2 class="accordion-header" id="accordion-header-@course.CourseCode">
-                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#accordion-item-@course.CourseCode" aria-expanded="false" aria-controls="accordion-item-@course.CourseCode">
-                        @course.CourseName
-                    </button>
-                </h2>
-                <div id="accordion-item-@course.CourseCode" class="accordion-collapse collapse" aria-labelledby="accordion-header-@course.CourseCode" data-bs-parent="#accordion">
-                    <div class="accordion-body">
-                        @foreach (var assessment in course.Assessments.OrderBy(entry => entry.DueDate))
-                        {
-                            <div class="w-auto p-3 mb-2 shadow position-relative">
-                                <div class="row d-flex align-items-center">
-                                    @*Display as flex to enable vertical centering of the button in the second div*@
-                                    <div class="col-lg-8">
-                                        <div class="h5">@assessment.Name</div>
-
-                                        @*Turn the entire entry into a clickable element*@
-                                        <span class="fst-italic d-block">Due Date: @assessment.DueDate?.ToString()</span>
-                                        <span class="fst-italic d-block">Available Dates: @assessment.AvailableFrom?.ToString() - @assessment.AvailableTo?.ToString()</span>
-                                        <span class="fst-italic d-block">Attempts: @(assessment.AllowedAttempts == -1 ? "Unlimited" : assessment.AllowedAttempts)</span>
-
-                                        <div class="d-block">
-                                            <a asp-page-handler="LinkCanvasAssignment" asp-route-courseCode="@course.CourseCode" asp-route-assignmentId="@assessment.AssessmentId" class="stretched-link"></a>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        }
-                    </div>
-                </div>
-            </div>
-        }
-    </div>
-</div>

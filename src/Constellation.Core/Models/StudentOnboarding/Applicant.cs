@@ -6,11 +6,27 @@ using Primitives;
 using Students.ValueObjects;
 using ValueObjects;
 
-public sealed class Applicant : IAuditableEntity
+public sealed class Applicant : AggregateRoot, IAuditableEntity
 {
     private Applicant()
     {
         Id = new();
+    }
+
+    public Applicant(
+        StudentReferenceNumber? srn,
+        Name name,
+        EmailAddress? emailAddress,
+        Gender? gender,
+        IndigenousStatus indigenousStatus)
+    {
+        Id = new();
+
+        StudentReferenceNumber = srn;
+        Name = name;
+        EmailAddress = emailAddress;
+        Gender = gender;
+        IndigenousStatus = indigenousStatus;
     }
 
     public ApplicantId Id { get; private set; }

@@ -2,8 +2,10 @@
 
 using Enums;
 using Identifiers;
+using Students.ValueObjects;
+using ValueObjects;
 
-public interface IApplicantRepository
+public interface IOnboardingRepository
 {
     Task<Application?> GetApplicationById(ApplicationId applicationId, CancellationToken cancellationToken = default);
     Task<List<Application>> GetApplicationsByApplicantId(ApplicantId applicantId, CancellationToken cancellationToken = default);
@@ -15,5 +17,10 @@ public interface IApplicantRepository
 
     Task<bool> DoesApplicationIdExist(ApplicationId applicationId, CancellationToken cancellationToken = default);
 
+    Task<Applicant?> GetApplicantById(ApplicantId applicantId, CancellationToken cancellationToken = default);
+    Task<Applicant?> GetApplicantByStudentReferenceNumber(StudentReferenceNumber srn, CancellationToken cancellationToken = default);
+    Task<Applicant?> GetApplicantByEmailAddress(EmailAddress emailAddress, CancellationToken cancellationToken = default);
+
     void Insert(Application application);
+    void Insert(Applicant applicant);
 }

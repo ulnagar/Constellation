@@ -1,17 +1,19 @@
 ﻿namespace Constellation.Infrastructure.Persistence.ConstellationContext.Repositories;
 
 using Constellation.Core.Models.StudentOnboarding.Enums;
+using Constellation.Core.Models.Students.ValueObjects;
 using Core.Models.StudentOnboarding;
 using Core.Models.StudentOnboarding.Identifiers;
 using Core.Models.StudentOnboarding.Repositories;
+using Core.ValueObjects;
 using Microsoft.EntityFrameworkCore;
 
-internal sealed class ApplicantRepository
-    : IApplicantRepository
+internal sealed class OnboardingRepository
+    : IOnboardingRepository
 {
     private readonly AppDbContext _context;
 
-    public ApplicantRepository(
+    public OnboardingRepository(
         AppDbContext context)
     {
         _context = context;
@@ -68,5 +70,27 @@ internal sealed class ApplicantRepository
             .Set<Application>()
             .AnyAsync(entry => entry.Id == applicationId, cancellationToken);
 
+    public async Task<Applicant?> GetApplicantById(
+        ApplicantId applicantId,
+        CancellationToken cancellationToken = default) =>
+        await _context
+            .Set<Applicant>()
+            .FirstOrDefaultAsync(entry => entry.Id == applicantId, cancellationToken);
+
+    public async Task<Applicant?> GetApplicantByStudentReferenceNumber(
+        StudentReferenceNumber srn,
+        CancellationToken cancellationToken = default) =>
+        await _context
+            .Set<Applicant>()
+            .FirstOrDefaultAsync(entry => entry.StudentReferenceNumber == srn, cancellationToken);
+
+    public async Task<Applicant?> GetApplicantByEmailAddress(
+        EmailAddress emailAddress,
+        CancellationToken cancellationToken = default) =>
+        await _context
+            .Set<Applicant>()
+            .FirstOrDefaultAsync(entry => entry.EmailAddress == emailAddress, cancellationToken);
+
     public void Insert(Application application) => _context.Set<Application>().Add(application);
+    public void Insert(Applicant applicant) => _context.Set<Applicant>().Add(applicant);
 }
