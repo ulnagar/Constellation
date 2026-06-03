@@ -26,12 +26,12 @@ public class AreaRouteParameterConvention : IPageRouteModelConvention
             string newTemplate;
             if (existing.Equals(_areaName, StringComparison.OrdinalIgnoreCase))
             {
-                // Index page: "Applicants" → "Applicants/{applicantId:guid}"
+                // Index page: "Applicants" → "Applicants/{applicationId:guid}"
                 newTemplate = $"{_areaName}/{_prefix}";
             }
             else if (existing.StartsWith(_areaName + "/", StringComparison.OrdinalIgnoreCase))
             {
-                // Other pages: "Applicants/Review" → "Applicants/{applicantId:guid}/Review"
+                // Other pages: "Applicants/Review" → "Applicants/{applicationId:guid}/Review"
                 string remainder = existing[(_areaName.Length + 1)..];
                 newTemplate = $"{_areaName}/{_prefix}/{remainder}";
             }

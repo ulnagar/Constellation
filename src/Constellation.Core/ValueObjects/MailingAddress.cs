@@ -57,6 +57,21 @@ public sealed class MailingAddress : ValueObject, IComparable, IEquatable<Mailin
             state,
             postcode);
     }
+    
+    // EF Core use only
+    public static MailingAddress FromValue(string title,
+        string line1,
+        string? line2,
+        string town,
+        string state,
+        string postcode) => 
+        new MailingAddress(
+            title,
+            line1,
+            line2 ?? string.Empty,
+            town,
+            state,
+            postcode);
 
     public string Title { get; }
     public string Line1 { get; }

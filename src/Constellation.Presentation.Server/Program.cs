@@ -135,7 +135,7 @@ builder.Services.AddTransient<HangfireAuthorizationFilter>();
 builder.Services.AddRazorPages(
         options =>
         {
-            options.Conventions.Add(new AreaRouteParameterConvention("Applicants", "{applicantId:guid}"));
+            options.Conventions.Add(new AreaRouteParameterConvention("Applicants", "{applicationId:guid}"));
         })
     .AddSessionStateTempDataProvider()
     .AddApplicationPart(Constellation.Presentation.Shared.AssemblyReference.Assembly)
