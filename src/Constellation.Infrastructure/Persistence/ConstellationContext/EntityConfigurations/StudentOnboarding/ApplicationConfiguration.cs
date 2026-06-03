@@ -38,6 +38,18 @@ internal sealed class ApplicationConfiguration : IEntityTypeConfiguration<Applic
             .IsRequired(false);
 
         builder
+            .Property(entry => entry.Phase)
+            .HasConversion(
+                phase => phase.Value,
+                value => ApplicationPhase.FromValue(value));
+
+        builder
+            .Property(entry => entry.Status)
+            .HasConversion(
+                status => status.Value,
+                value => ApplicationStatus.FromValue(value));
+
+        builder
             .HasMany(entry => entry.Parents)
             .WithMany(entry => entry.Applications)
             .UsingEntity(join =>

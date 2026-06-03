@@ -34,6 +34,10 @@ public sealed class Application : AggregateRoot, IAuditableEntity
             SchoolCode = schoolCode;
             SchoolName = schoolName;
         }
+
+        Phase = ApplicationPhase.DataEntry;
+        Status = ApplicationStatus.Pending;
+        Deadline = DateOnly.MaxValue;
     }
 
     public ApplicationId Id { get; private set; }
@@ -47,6 +51,10 @@ public sealed class Application : AggregateRoot, IAuditableEntity
     public Grade Grade { get; private set; }
     public SchoolCode? SchoolCode { get; private set; }
     public string? SchoolName { get; private set; }
+
+    public ApplicationPhase Phase { get; private set; }
+    public ApplicationStatus Status { get; private set; }
+    public DateOnly Deadline { get; private set; }
 
     public string? CreatedBy { get; set; }
     public DateTime CreatedAt { get; set; }
