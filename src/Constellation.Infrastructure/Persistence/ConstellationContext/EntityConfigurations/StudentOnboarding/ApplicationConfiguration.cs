@@ -4,6 +4,7 @@ using Converters;
 using Core.Models.Identifiers;
 using Core.Models.StudentOnboarding;
 using Core.Models.StudentOnboarding.Enums;
+using Core.Models.StudentOnboarding.Policy;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -38,16 +39,21 @@ internal sealed class ApplicationConfiguration : IEntityTypeConfiguration<Applic
             .IsRequired(false);
 
         builder
-            .Property(entry => entry.Phase)
-            .HasConversion(
-                phase => phase.Value,
-                value => ApplicationPhase.FromValue(value));
+            .ComplexProperty(entry => entry.State,
+                complexBuilder =>
+                {
+                    complexBuilder
+                        .Property(complex => complex.Phase)
+                        .HasColumnName(nameof(ApplicationState.Phase))
+                        .HasConversion<string>()
+                        .HasMaxLength(Enum.GetNames<ApplicationPhase>().Max(n => n.Length));
 
-        builder
-            .Property(entry => entry.Status)
-            .HasConversion(
-                status => status.Value,
-                value => ApplicationStatus.FromValue(value));
+                    complexBuilder
+                        .Property(complex => complex.Status)
+                        .HasColumnName(nameof(ApplicationState.Status))
+                        .HasConversion<string>()
+                        .HasMaxLength(Enum.GetNames<ApplicationStatus>().Max(n => n.Length));
+                });
 
         builder
             .HasMany(entry => entry.Parents)

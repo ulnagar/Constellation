@@ -13,7 +13,7 @@ public interface IOnboardingRepository
     Task<List<Application>> GetApplicationsByProgram(Program program, CancellationToken cancellationToken = default);
 
     Task<List<Application>> GetAllApplications(CancellationToken cancellationToken = default);
-    Task<List<Application>> GetCurrentApplications(CancellationToken cancellationToken = default);
+    Task<List<Application>> GetApplicationsByPhase(ApplicationPhase phase, CancellationToken cancellationToken = default);
 
     Task<bool> DoesApplicationIdExist(ApplicationId applicationId, CancellationToken cancellationToken = default);
 
