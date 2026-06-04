@@ -1,10 +1,10 @@
 ﻿namespace Constellation.Core.Models.StudentOnboarding.Enums;
 
-using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
 
 public enum ApplicationPhase
 {
-    [Description("Data Entry")]
+    [Display(Name = "Data Entry")]
     DataEntry,
     Placement,
     Approval,

@@ -59,6 +59,9 @@ public sealed class AuthPermission : StringEnumeration<AuthPermission>
     public const string ShortTerm_Covers_View_Value = "ShortTerm.Covers.View";
     public const string ShortTerm_Covers_Edit_Value = "ShortTerm.Covers.Edit";
 
+    public const string Onboarding_Enrolments_View_Value = "Onboarding.Enrolments.View";
+    public const string Onboarding_Enrolments_Edit_Value = "Onboarding.Enrolments.Edit";
+
     public const string StudentAdmin_AttendanceList_View_Value = "StudentAdmin.AttendanceList.View";
     public const string StudentAdmin_AttendanceList_Notify_Value = "StudentAdmin.AttendanceList.Notify";
     public const string StudentAdmin_AttendancePlans_View_Value = "StudentAdmin.AttendancePlans.View";
@@ -172,6 +175,9 @@ public sealed class AuthPermission : StringEnumeration<AuthPermission>
     public static readonly AuthPermission ShortTerm_Covers_View = new(ShortTerm_Covers_View_Value, "ShortTerm: Covers: View");
     public static readonly AuthPermission ShortTerm_Covers_Edit = new(ShortTerm_Covers_Edit_Value, "ShortTerm: Covers: Edit");
 
+    public static readonly AuthPermission Onboarding_Enrolments_View = new(Onboarding_Enrolments_View_Value, "Onboarding: Enrolments: View");
+    public static readonly AuthPermission Onboarding_Enrolments_Edit = new(Onboarding_Enrolments_Edit_Value, "Onboarding: Enrolments: Edit");
+    
     public static readonly AuthPermission StudentAdmin_AttendanceList_View = new(StudentAdmin_AttendanceList_View_Value, "StudentAdmin: Attendance List: View");
     public static readonly AuthPermission StudentAdmin_AttendanceList_Notify = new(StudentAdmin_AttendanceList_Notify_Value, "StudentAdmin: Attendance List: Notify");
     public static readonly AuthPermission StudentAdmin_AttendancePlans_View = new(StudentAdmin_AttendancePlans_View_Value, "StudentAdmin: Attendance Plans: View");
