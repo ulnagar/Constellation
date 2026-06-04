@@ -57,10 +57,12 @@ internal sealed class OnboardingRepository
             .Set<Application>()
             .ToListAsync(cancellationToken);
 
-    public async Task<List<Application>> GetCurrentApplications(
+    public async Task<List<Application>> GetApplicationsByPhase(
+        ApplicationPhase phase,
         CancellationToken cancellationToken = default) =>
         await _context
             .Set<Application>()
+            .Where(entry => entry.State.Phase == phase)
             .ToListAsync(cancellationToken);
 
     public async Task<bool> DoesApplicationIdExist(

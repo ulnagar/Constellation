@@ -31,6 +31,7 @@ public class AppDbContext : IdentityDbContext<AppUser, AppRole, Guid>
     protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
     {
         configurationBuilder.Conventions.Add(_ => new StronglyTypedIdConvention());
+        //configurationBuilder.Conventions.Add(_ => new EnumToStringConvention());
     }
 
     protected override void OnModelCreating(ModelBuilder builder)
