@@ -23,6 +23,9 @@ internal static class ActivePage
     public const string Equipment_Stocktake_List = "Equipment.Stocktake.List";
     public const string Equipment_Devices_Devices = "Equipment.Devices.Devices";
 
+    public const string Onboarding_Application_List = "Onboarding.Application.List";
+    public const string Onboarding_Enrolment_List = "Onboarding.Enrolment.List";
+
     public const string Partner_Schools_Schools = "Partner.Schools.Schools";
     public const string Partner_Schools_Contacts = "Partner.Schools.Contacts";
     public const string Partner_Schools_ContactReports = "Partner.Schools.ContactReports";

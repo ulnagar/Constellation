@@ -56,6 +56,7 @@ public class StaffSidebarMenuViewComponent : ViewComponent
             "Dashboard" => View("Dashboard", await GenerateDashboardData(staffId)),
             "Messaging" => View("Messaging", (activePage, showEmergencyConsole)),
             "Equipment" => View("Equipment", activePage),
+            "Onboarding" => View("Onboarding", activePage),
             "Partner" => View("Partner", activePage),
             "ShortTerm" => View("ShortTerm", activePage),
             "SchoolAdmin" => View("SchoolAdmin", (activePage, staffId)),

@@ -1,0 +1,50 @@
+﻿@page
+@using Constellation.Core.Extensions
+@model Constellation.Presentation.Staff.Areas.Staff.Pages.Onboarding.Enrolments.IndexModel
+@{
+}
+
+<h2>Applications</h2>
+
+<div class="page-menu">
+
+</div>
+
+<hr />
+
+<table class="table table-striped table-hover">
+    <thead>
+    <tr>
+        <th>Applicant</th>
+        <th>Applied For</th>
+        <th>School</th>
+        <th>Status</th>
+        <th></th>
+    </tr>
+    </thead>
+    <tbody>
+    @foreach (var entry in Model.Applications)
+    {
+        <tr>
+            <td data-order="@entry.Name.SortOrder" data-search="@entry.Name.FirstName @entry.Name.DisplayName">@entry.Name.DisplayName</td>
+            <td>@entry.Program.Name - @entry.Grade.AsName()</td>
+            <td>@entry.SchoolName</td>
+            <td>@entry.State.Phase.GetDisplayName() / @entry.State.Status</td>
+            <td></td>
+        </tr>
+    }
+    </tbody>
+</table>
+
+@section Scripts
+{
+    <script>
+        $(document).ready(function (){
+            $('table').DataTable({ 
+                "order": [
+                    [0, 'asc']
+                ] 
+            });
+        })
+    </script>
+}
