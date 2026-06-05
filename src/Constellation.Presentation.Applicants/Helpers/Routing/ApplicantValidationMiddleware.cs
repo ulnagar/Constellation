@@ -44,7 +44,8 @@ public sealed class ApplicantValidationMiddleware
 
             if (result is null || result.IsFailure || !result.Value)
             {
-                context.Response.Redirect($"/Applicants/{applicationGuid}/Error/InvalidApplicant");
+                context.Response.StatusCode = StatusCodes.Status422UnprocessableEntity;
+                context.Response.Headers.Location = "/Error";
                 return;
             }
         }

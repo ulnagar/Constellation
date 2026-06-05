@@ -1,187 +1,412 @@
 ﻿@page
 @model ErrorModel
+@{
+    Layout = null;
+}
 
-<div class="error__container">
-    <div class="error__">
-        <div class="error__text">
-            <h1 class="error__title">An error occured <b>:(</b></h1>
-            <h2 class="error__title">@Model.ProblemDetails?.Title</h2>
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>@Model.Code — Constellation</title>
+        
+        <style>
+            /* ================================================================
+               Constellation — Error Page
+               Supports: 403, 404 (default), 500, 503
+               Toggle variants via:  body data-error="@Model.StatusCode"
+               ================================================================ */
+
+            :root {
+                --cns-dark: #080D1A;
+                --cns-border: rgba(255, 255, 255, 0.07);
+                --cns-border-subtle: rgba(255, 255, 255, 0.05);
+                --cns-text: #E8EDF7;
+                --cns-muted: #4B5675;
+                --cns-footer: #1E2D45;
+                --cns-accent: #3B5FC4;
+                --cns-accent-hover: #4F7FE8;
+                --cns-accent-light: #7BA3F0;
+                --cns-accent-glow: rgba(59, 95, 196, 0.10);
+                --cns-accent-border: rgba(59, 95, 196, 0.26);
+            }
+
+            /* ── Reset ── */
+            html, body {
+                margin: 0;
+                padding: 0;
+                height: 100%;
+            }
+
+            /* ── Page shell ── */
+            .cns-error {
+                background-color: var(--cns-dark);
+                min-height: 100vh;
+                display: flex;
+                flex-direction: column;
+                font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, system-ui, sans-serif;
+                color: var(--cns-text);
+                position: relative;
+                overflow: hidden;
+            }
+
+            /* ── Atmospheric glow ── */
+            .cns-error__bg {
+                overflow: hidden;
+                position: absolute;
+                inset: 0;
+                pointer-events: none;
+                background: radial-gradient(ellipse 58% 80% at 82% 50%, rgba(59, 95, 196, 0.10) 0%, transparent 68%), radial-gradient(ellipse 42% 60% at 10% 18%, rgba(99, 59, 212, 0.06) 0%, transparent 72%);
+            }
+
+            /* ── CSS-only star field ── */
+            .cns-error__stars {
+                background-image: radial-gradient(2px 2px at 20px 30px, #eee, rgba(0,0,0,0)), radial-gradient(2px 2px at 40px 70px, #fff, rgba(0,0,0,0)), radial-gradient(2px 2px at 50px 160px, #ddd, rgba(0,0,0,0)), radial-gradient(2px 2px at 90px 40px, #fff, rgba(0,0,0,0)), radial-gradient(2px 2px at 130px 80px, #fff, rgba(0,0,0,0)), radial-gradient(2px 2px at 160px 120px, #ddd, rgba(0,0,0,0));
+                background-repeat: repeat;
+                background-size: 200px 200px;
+                animation: zoom 5s infinite;
+                opacity: 0;
+                inset: 0;
+                position: absolute;
+            }
+
+                .cns-error__stars:nth-child(1) {
+                    background-position: 50% 50%;
+                    animation-delay: 0s;
+                }
+
+                .cns-error__stars:nth-child(2) {
+                    background-position: 20% 60%;
+                    animation-delay: 1s;
+                }
+
+                .cns-error__stars:nth-child(3) {
+                    background-position: -20% -30%;
+                    animation-delay: 2s;
+                }
+
+                .cns-error__stars:nth-child(4) {
+                    background-position: 40% -80%;
+                    animation-delay: 3s;
+                }
+
+                .cns-error__stars:nth-child(5) {
+                    background-position: -20% 30%;
+                    animation-delay: 4s;
+                }
+
+            @@keyframes zoom {
+                0% {
+                    opacity: 0;
+                    transform: scale(0.5);
+                    animation-timing-function: ease-in;
+                }
+
+                85% {
+                    opacity: 1;
+                    transform: scale(2.8);
+                    animation-timing-function: linear;
+                }
+
+                100% {
+                    opacity: 0;
+                    transform: scale(3.5);
+                }
+            }
+
+            /* ── Ghost error code ── */
+            .cns-error__ghost {
+                position: absolute;
+                right: -0.04em;
+                top: 50%;
+                transform: translateY(-50%);
+                font-size: clamp(120px, 22vw, 240px);
+                font-weight: 700;
+                color: rgba(255, 255, 255, 0.026);
+                line-height: 1;
+                letter-spacing: -0.05em;
+                pointer-events: none;
+                user-select: none;
+            }
+
+                .cns-error__ghost > img {
+                    opacity: 0.26;
+                    filter: saturate(0.5);
+                }
+
+            /* ── Navigation ── */
+            .cns-error__nav {
+                position: relative;
+                z-index: 1;
+                padding: 0.875rem 1.5rem;
+                border-bottom: 0.5px solid var(--cns-border);
+                display: flex;
+                align-items: center;
+            }
+
+            .cns-error__brand {
+                display: inline-flex;
+                align-items: center;
+                gap: 0.5rem;
+                color: rgba(255, 255, 255, 0.9);
+                text-decoration: none;
+                font-size: 1rem;
+                font-weight: 500;
+                letter-spacing: -0.2px;
+            }
+                .cns-error__brand>img{
+                    height: 35px;
+                    width: 35px;
+                }
+
+                .cns-error__brand:hover {
+                    color: #fff;
+                }
+
+            /* ── Main content ── */
+            .cns-error__main {
+                position: relative;
+                z-index: 1;
+                flex: 1;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                padding: 2.5rem 1.5rem;
+            }
+
+            .cns-error__content {
+                text-align: center;
+                max-width: 440px;
+            }
+
+            /* ── Status badge ── */
+            .cns-error__badge {
+                display: inline-flex;
+                align-items: center;
+                gap: 0.375rem;
+                border-radius: 2rem;
+                padding: 0.25rem 0.75rem;
+                font-size: 1.2rem;
+                font-weight: 500;
+                letter-spacing: 0.05em;
+                text-transform: uppercase;
+                margin-bottom: 1.25rem;
+                background: var(--cns-accent-glow);
+                border: 0.5px solid var(--cns-accent-border);
+                color: var(--cns-accent-light);
+            }
+
+            /* Badge variants — driven by data-error on body */
+            [data-error="403"] .cns-error__badge {
+                background: rgba(202, 138, 4, 0.09);
+                border-color: rgba(202, 138, 4, 0.28);
+                color: #CA8A04;
+            }
+
+            [data-error="500"] .cns-error__badge {
+                background: rgba(239, 68, 68, 0.09);
+                border-color: rgba(239, 68, 68, 0.28);
+                color: #F87171;
+            }
+
+            [data-error="503"] .cns-error__badge {
+                background: rgba(139, 92, 246, 0.09);
+                border-color: rgba(139, 92, 246, 0.28);
+                color: #A78BFA;
+            }
+
+            /* ── Heading ── */
+            .cns-error__title {
+                font-size: 2.5rem;
+                font-weight: 500;
+                color: var(--cns-text);
+                margin: 0 0 0.75rem;
+                line-height: 1.5;
+            }
+
+            .cns-error__desc {
+                font-size: 1.25rem;
+                color: var(--cns-muted);
+                line-height: 1.75;
+                margin: 0 0 1.75rem;
+            }
+
+            /* ── Action buttons ── */
+            .cns-error__actions {
+                display: flex;
+                gap: 0.625rem;
+                justify-content: center;
+                flex-wrap: wrap;
+            }
+
+            .cns-error__btn-primary {
+                display: inline-flex;
+                align-items: center;
+                gap: 0.4rem;
+                background: var(--cns-accent);
+                color: #fff !important;
+                border: none;
+                padding: 0.5rem 1.125rem;
+                border-radius: 0.375rem;
+                font-size: 1rem;
+                font-weight: 500;
+                text-decoration: none;
+                letter-spacing: -0.1px;
+                transition: background 0.15s ease;
+            }
+
+                .cns-error__btn-primary:hover {
+                    background: var(--cns-accent-hover);
+                }
+
+            .cns-error__btn-ghost {
+                display: inline-flex;
+                align-items: center;
+                gap: 0.4rem;
+                background: transparent;
+                color: rgba(255, 255, 255, 0.45) !important;
+                border: 0.5px solid rgba(255, 255, 255, 0.11);
+                padding: 0.5rem 1.125rem;
+                border-radius: 0.375rem;
+                font-size: 1rem;
+                font-weight: 400;
+                text-decoration: none;
+                transition: border-color 0.15s ease, color 0.15s ease;
+            }
+
+                .cns-error__btn-ghost:hover {
+                    border-color: rgba(255, 255, 255, 0.22);
+                    color: rgba(255, 255, 255, 0.65) !important;
+                }
+
+            /* ── Support / request ID note ── */
+            /* Shown automatically for 500 and 503 via data-error selector */
+            .cns-error__ref {
+                display: none;
+            }
+
+            [data-error="500"] .cns-error__ref,
+            [data-error="503"] .cns-error__ref {
+                display: block;
+                font-size: 0.75rem;
+                color: #283044;
+                margin-top: 1.25rem;
+            }
+
+            .cns-error__ref code {
+                background: rgba(255, 255, 255, 0.06);
+                color: #6B7FA8;
+                padding: 1px 6px;
+                border-radius: 3px;
+                font-size: 0.6875rem;
+            }
+
+            /* ── Footer ── */
+            .cns-error__footer {
+                position: relative;
+                z-index: 1;
+                padding: 0.8rem 1.5rem;
+                border-top: 0.5px solid var(--cns-border-subtle);
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                flex-wrap: wrap;
+                gap: 0.5rem;
+            }
+
+            .cns-error__footer-copy {
+                font-size: 1rem;
+                /* color: var(--cns-footer); */
+                color: var(--cns-text);
+            }
+
+            .cns-error__footer a {
+                font-size: 1rem;
+                color: var(--cns-accent);
+                text-decoration: none;
+            }
+
+            .cns-error__footer a:hover {
+                color: var(--cns-accent-light);
+            }
+        </style>
+    </head>
+
+    <body class="cns-error" data-error="@Model.StatusCode">
+
+        <!-- Atmospheric background layers (decorative, hidden from AT) -->
+        <div class="cns-error__bg" aria-hidden="true">
+            <div class="cns-error__stars" aria-hidden="true"></div>
+            <div class="cns-error__stars" aria-hidden="true"></div>
+            <div class="cns-error__stars" aria-hidden="true"></div>
+            <div class="cns-error__stars" aria-hidden="true"></div>
+            <div class="cns-error__stars" aria-hidden="true"></div>
         </div>
-    </div>
 
-    <div class="error__">
-        <div class="error__text">
-            <p>You can go back to our <a href="/">home page</a>.</p>
-        </div>
-    </div>
+        <!-- Ghost error code watermark (decorative) -->
+        <div class="cns-error__ghost" aria-hidden="true"><img src="~/logo.svg" /> @Model.StatusCode</div>
 
-    <div class="gears">
-        <div class="gear one">
-            <div class="bar"></div>
-            <div class="bar"></div>
-            <div class="bar"></div>
-        </div>
-        <div class="gear two">
-            <div class="bar"></div>
-            <div class="bar"></div>
-            <div class="bar"></div>
-        </div>
-        <div class="gear three">
-            <div class="bar"></div>
-            <div class="bar"></div>
-            <div class="bar"></div>
-        </div>
-    </div>
-    
-    <div class="error__">
-        <button class="btn btn-warning" type="button" data-toggle="collapse" data-target="#errorDetailCollapse">Show Error Details</button>
-        <div class="error__text collapse" id="errorDetailCollapse" style="text-align: left">
-            <p>Error eventDetails: @Model.ProblemDetails?.Detail</p>
-        </div>
-    </div>
+        <!-- ── Navigation ── -->
+        <nav class="cns-error__nav" aria-label="Application">
+            <a href="/" class="cns-error__brand">
+                <img src="~/logo.svg" />
+                Constellation
+            </a>
+        </nav>
 
-</div>
+        <!-- ── Main error content ── -->
+        <main class="cns-error__main" id="main-content">
+            <div class="cns-error__content">
 
-<style>
-    .error__container {
-        margin-top: 100px;
-    }
+                <!-- Status badge -->
+                <div class="cns-error__badge" role="status" aria-live="polite">
+                    <svg width="7" height="7" viewBox="0 0 10 10" fill="currentColor" aria-hidden="true">
+                        <circle cx="5" cy="5" r="5"/>
+                    </svg>
+                    @Model.BadgeText
+                </div>
 
-    h1.error__title {
-        color: #5d862e;
-        line-height: 4rem;
-        font-weight: bolder;
-    }
+                <!-- Title -->
+                <h1 class="cns-error__title">@Model.Title</h1>
 
-    h2.error__title {
-        line-height: 3rem;
-    }
+                <!-- Description -->
+                <p class="cns-error__desc">@Model.Description</p>
 
-    .error__ {
-        text-align: center;
-        overflow: hidden;
-    }
+                <!-- Actions -->
+                <div class="cns-error__actions">
+                    <a href="/" class="cns-error__btn-primary">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                             stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/>
+                            <polyline points="9 22 9 12 15 12 15 22"/>
+                        </svg>
+                        Dashboard
+                    </a>
+                    <a href="javascript:history.back()" class="cns-error__btn-ghost">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                             stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <line x1="19" y1="12" x2="5" y2="12"/>
+                            <polyline points="12 19 5 12 12 5"/>
+                        </svg>
+                        Go back
+                    </a>
+                </div>
 
-    .error__text {
-        z-index: 1001;
-    }
+                <!-- Support reference (rendered for 500/503 via CSS data-error selector) -->
+                <p class="cns-error__ref">
+                    Our team has been notified. Reference:
+                    <code>@Model.RequestId</code>
+                </p>
 
-    .gears {
-      position: relative;
-      margin: 50px auto 200px auto;
-      width: auto; height: 0;
-    }
+            </div>
+        </main>
 
-    .gear {
-      position: relative;
-      z-index: 0;
-      width: 120px; height: 120px;
-      margin: 0 auto;
-      border-radius: 50%;
-      background: #5d862e;
-    }
-
-    .gear:before{
-      position: absolute; left: 5px; top: 5px; right: 5px; bottom: 5px;
-      z-index: 2;
-      content: "";
-      border-radius: 50%;
-      background: white;
-    }
-
-    .gear:after {
-      position: absolute; left: 25px; top: 25px;
-      z-index: 3;
-      content: "";
-      width: 70px; height: 70px;
-      border-radius: 50%;
-      border: 5px solid #5d862e;
-      box-sizing: border-box;
-      background: white;
-    }
-
-    .gear.one {
-      left: -130px;
-    }
-
-    .gear.two {
-      top: -75px;
-    }
-
-    .gear.three {
-      top: -235px;
-      left: 130px;
-    }
-
-    .gear .bar {
-      position: absolute; left: -15px; top: 50%;
-      z-index: 0;
-      width: 150px; height: 30px;
-      margin-top: -15px;
-      border-radius: 5px;
-      background: #5d862e;
-    }
-
-    .gear .bar:before {
-      position: absolute; left: 5px; top: 5px; right: 5px; bottom: 5px;
-      z-index: 1;
-      content: "";
-      border-radius: 2px;
-      background: white;
-    }
-
-    .gear .bar:nth-child(2) {
-      transform: rotate(60deg);
-      -webkit-transform: rotate(60deg);
-    }
-
-    .gear .bar:nth-child(3) {
-      transform: rotate(120deg);
-      -webkit-transform: rotate(120deg);
-    }
-
-    @@-webkit-keyframes clockwise {
-      0% { -webkit-transform: rotate(0deg);}
-      100% { -webkit-transform: rotate(360deg);}
-    }
-
-    @@-webkit-keyframes anticlockwise {
-      0% { -webkit-transform: rotate(360deg);}
-      100% { -webkit-transform: rotate(0deg);}
-    }
-
-    @@-webkit-keyframes clockwiseError {
-      0% { -webkit-transform: rotate(0deg);}
-      20% { -webkit-transform: rotate(30deg);}
-      40% { -webkit-transform: rotate(25deg);}
-      60% { -webkit-transform: rotate(30deg);}
-      100% { -webkit-transform: rotate(0deg);}
-    }
-
-    @@-webkit-keyframes anticlockwiseErrorStop {
-      0% { -webkit-transform: rotate(0deg);}
-      20% { -webkit-transform: rotate(-30deg);}
-      60% { -webkit-transform: rotate(-30deg);}
-      100% { -webkit-transform: rotate(0deg);}
-    }
-
-    @@-webkit-keyframes anticlockwiseError {
-      0% { -webkit-transform: rotate(0deg);}
-      20% { -webkit-transform: rotate(-30deg);}
-      40% { -webkit-transform: rotate(-25deg);}
-      60% { -webkit-transform: rotate(-30deg);}
-      100% { -webkit-transform: rotate(0deg);}
-    }
-
-    .gear.one {
-      -webkit-animation: anticlockwiseErrorStop 2s linear infinite;
-    }
-
-    .gear.two {
-      -webkit-animation: anticlockwiseError 2s linear infinite;
-    }
-
-    .gear.three {
-      -webkit-animation: clockwiseError 2s linear infinite;
-    }
-</style>
+        <!-- ── Footer ── -->
+        <footer class="cns-error__footer">
+            <span class="cns-error__footer-copy">Aurora College - Constellation</span>
+            <a href="mailto:support@aurora.nsw.edu.au">Contact support</a>
+        </footer>
+        
+    </body>
+</html>

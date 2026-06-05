@@ -67,6 +67,7 @@ builder.Services.ConfigureApplicationCookie(options =>
     options.SlidingExpiration = true;
     options.LoginPath = new PathString("/Auth/Login");
     options.LogoutPath = new PathString("/Auth/Logout");
+    options.AccessDeniedPath = "/Error";
 });
 
 builder.Services
@@ -82,6 +83,7 @@ builder.Services
         options.SlidingExpiration = true;
         options.LoginPath = new PathString("/Auth/Login");
         options.LogoutPath = new PathString("/Auth/Logout");
+        options.AccessDeniedPath = "/Error";
     })
     .AddOpenIdConnect(options =>
     {
@@ -205,10 +207,13 @@ WebApplication app = builder.Build();
 
 if (!app.Environment.IsProduction())
 {
-    app.UseDeveloperExceptionPage();
+    //app.UseDeveloperExceptionPage();
+    app.UseStatusCodePagesWithReExecute("/Error", "?statusCode={0}");
+    app.UseExceptionHandler("/Error");
 }
 else
 {
+    app.UseStatusCodePagesWithReExecute("/Error", "?statusCode={0}");
     app.UseExceptionHandler("/Error");
     // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
