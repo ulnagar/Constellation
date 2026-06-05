@@ -1,8 +1,77 @@
 ﻿@page
+@using Constellation.Core.Extensions
+@using Constellation.Core.Models.StudentOnboarding.Enums
 @model Constellation.Presentation.Applicants.Areas.Applicants.Pages.IndexModel
 @{
 }
 
 <h2>Applicants Portal</h2>
 
-@Model.ApplicationId
+<div>
+    Metadata
+    
+    <dl>
+        <dt>Phase</dt>
+        <dd>@Model.Application.State.Phase.GetDisplayName()</dd>
+        
+        <dt>Status</dt>
+        <dd>@Model.Application.State.Status.GetDisplayName()</dd>
+        
+        <dt>Due Date</dt>
+        <dd>@Model.Application.Deadline.ToLongDateString()</dd>
+    </dl>
+</div>
+
+<div>
+    Applicant
+    
+    <dl>
+        <dt>Name</dt>
+        <dd>@(Model.Application.Name.FirstName != Model.Application.Name.PreferredName ? $"{Model.Application.Name.FirstName} \"{Model.Application.Name.PreferredName}\" {Model.Application.Name.LastName}" : @Model.Application.Name.DisplayName)</dd>
+        
+        <dt>Student Reference Number</dt>
+        <dd>@Model.Application.StudentReferenceNumber</dd>
+        
+        <dt>Gender</dt>
+        <dd>@Model.Application.Gender?.Name</dd>
+        
+        <dt>Indigenous Status</dt>
+        <dd>@Model.Application.IndigenousStatus.Name</dd>
+        
+        <dt>Email Address</dt>
+        <dd>@Model.Application.EmailAddress</dd>
+    </dl>
+</div>
+
+<div>
+    Application
+    
+    <dl>
+        <dt>Year</dt>
+        <dd>@Model.Application.Year</dd>
+
+        <dt>Program</dt>
+        <dd>@Model.Application.Program</dd>
+
+        <dt>Grade</dt>
+        <dd>@Model.Application.Grade.AsName()</dd>
+
+        <dt>School</dt>
+        <dd>@Model.Application.SchoolName</dd>
+    </dl>
+</div>
+
+<div>
+    Actions
+    
+    <dl>
+        @if (Model.Application.State is { Phase: ApplicationPhase.Placement, Status: ApplicationStatus.Pending })
+        {
+            <dt>Accept</dt>
+            <dd><button class="btn btn-success">Accept</button></dd>
+
+            <dt>Decline</dt>
+            <dd><button class="btn btn-danger">Decline</button></dd>
+        }
+    </dl>
+</div>

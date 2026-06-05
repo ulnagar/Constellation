@@ -1,14 +1,13 @@
-﻿namespace Constellation.Application.Domains.StudentOnboarding.Queries.GetEnrolmentApplications;
+﻿namespace Constellation.Application.Domains.StudentOnboarding.Models;
 
-using Constellation.Core.Enums;
-using Constellation.Core.Models.Common.Enums;
-using Constellation.Core.Models.Identifiers;
-using Constellation.Core.Models.StudentOnboarding.Enums;
-using Constellation.Core.Models.StudentOnboarding.Identifiers;
-using Constellation.Core.Models.StudentOnboarding.Policy;
-using Constellation.Core.Models.Students.ValueObjects;
+using Core.Enums;
+using Core.Models.Common.Enums;
+using Core.Models.Identifiers;
+using Core.Models.StudentOnboarding.Enums;
+using Core.Models.StudentOnboarding.Identifiers;
+using Core.Models.StudentOnboarding.Policy;
+using Core.Models.Students.ValueObjects;
 using Core.ValueObjects;
-using System;
 using ApplicationId = Core.Models.StudentOnboarding.Identifiers.ApplicationId;
 
 public sealed record EnrolmentApplicationResponse(

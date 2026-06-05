@@ -1,5 +1,6 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Onboarding.Enrolments;
 
+using Application.Domains.StudentOnboarding.Models;
 using Application.Domains.StudentOnboarding.Queries.GetEnrolmentApplications;
 using Application.Models.Auth;
 using Core.Abstractions.Services;

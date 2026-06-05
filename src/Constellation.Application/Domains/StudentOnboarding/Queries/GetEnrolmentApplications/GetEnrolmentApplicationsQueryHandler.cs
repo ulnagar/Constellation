@@ -4,6 +4,7 @@ using Abstractions.Messaging;
 using Core.Models.StudentOnboarding;
 using Core.Models.StudentOnboarding.Repositories;
 using Core.Shared;
+using Models;
 using Serilog;
 using System.Collections.Generic;
 
