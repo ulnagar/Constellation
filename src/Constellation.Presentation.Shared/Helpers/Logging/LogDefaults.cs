@@ -7,4 +7,5 @@ public static class LogDefaults
     public const string StudentPortal = "Student Portal";
     public const string ParentPortal = "Parent Portal";
     public const string SchoolsPortal = "Schools Portal";
+    public const string ApplicantsPortal = "Applicant Portal";
 }

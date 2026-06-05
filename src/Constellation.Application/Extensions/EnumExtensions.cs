@@ -6,20 +6,25 @@ using System.Reflection;
 
 public static class EnumExtensions
 {
-    public static string GetDisplayName(this Enum value)
+    extension(Enum value)
     {
-        Type enumType = value.GetType();
-        string enumValue = Enum.GetName(enumType, value);
-        MemberInfo member = enumType.GetMember(enumValue)[0];
-
-        object[] attrs = member.GetCustomAttributes(typeof(DisplayAttribute), false);
-        string outString = ((DisplayAttribute)attrs[0]).Name;
-
-        if (((DisplayAttribute)attrs[0]).ResourceType != null)
+        public string GetDisplayName()
         {
-            outString = ((DisplayAttribute)attrs[0]).GetName();
-        }
+            Type enumType = value.GetType();
+            string enumValue = Enum.GetName(enumType, value);
+            MemberInfo member = enumType.GetMember(enumValue)[0];
 
-        return outString;
+            object[] attrs = member.GetCustomAttributes(typeof(DisplayAttribute), false);
+
+            if (attrs.Length == 0)
+                return enumValue;
+
+            var displayAttribute = (DisplayAttribute)attrs[0];
+
+            if (displayAttribute.ResourceType != null)
+                return displayAttribute.GetName();
+
+            return displayAttribute.Name ?? enumValue;
+        }
     }
 }
