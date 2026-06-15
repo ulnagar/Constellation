@@ -18,6 +18,7 @@ public sealed record ApplicationState
         };
 
     public static readonly ApplicationState NewApplication = new(DataEntry, Pending);
+    public static readonly ApplicationState PendingOfferResponse = new(Placement, Pending);
 
     public ApplicationPhase Phase { get; }
     public ApplicationStatus Status { get; }
