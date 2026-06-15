@@ -42,6 +42,9 @@ public sealed class Assessment : AggregateRoot
         AvailableFrom = availableFrom;
         AvailableTo = availableTo;
 
+        CanvasCourseName = string.Empty;
+        CanvasAssignmentName = string.Empty;
+
         RaiseDomainEvent(new AssessmentCreatedDomainEvent(new(), Id));
     }
 
