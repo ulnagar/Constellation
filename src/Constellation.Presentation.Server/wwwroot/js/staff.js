@@ -24,6 +24,12 @@
     // Activate any comboboxes
     $(".combo").select2({ theme: 'bootstrap' });
 
+    $(document).on('focusin', function (e) {
+        if ($(e.target).closest('.select2-container').length) {
+            e.stopImmediatePropagation();
+        }
+    });
+
     // Activate any comboboxes with free-text entry
     $(".combo-with-tag").select2({
         theme: 'bootstrap',
