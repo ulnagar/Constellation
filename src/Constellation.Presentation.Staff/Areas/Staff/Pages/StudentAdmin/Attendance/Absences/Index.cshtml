@@ -208,7 +208,7 @@
                             <div class="col">
                                 @foreach (var offering in grade)
                                 {
-                                    <button id="offeringSelect-@offering.Id" class="btn btn-outline-info select-button" onClick="toggleClass(@offering.Id)">@offering.Name (@offering.Teacher)</button>
+                                    <button id="offeringSelect-@offering.Id" class="btn btn-outline-info select-button" onClick="toggleClass('@offering.Id')">@offering.Name (@offering.Teacher)</button>
                                 }
                             </div>
                         </div>
@@ -293,12 +293,12 @@
 
                 @foreach (var offering in Model.Filter.Offerings)
                 {
-                    @:toggleClass(@offering);
+                    @:toggleClass('@offering');
                 }
 
                 @foreach (var school in Model.Filter.Schools)
                 {
-                    @:toggleSchool(@school);
+                    @:toggleSchool('@school');
                 }
             });
 
@@ -328,9 +328,9 @@
             $('#filterForm').submit();
         });
 
-        var $schoolOption = $("#custom-school-combo").select2({
+        var $schoolOption = $("#custom-school-combo").select2({ 
             theme: 'bootstrap',
-            dropdownParent: $("#custom-school-combo").parent()
+            dropdownParent: $('#custom-school-combo').closest('.modal')
         });
 
         $schoolOption.on('select2:select', function (e) {
@@ -343,9 +343,9 @@
             toggleSchool(code);
         });
 
-        var $studentOption = $("#custom-student-combo").select2({
+        var $studentOption = $("#custom-student-combo").select2({ 
             theme: 'bootstrap',
-            dropdownParent: $("#custom-student-combo").parent()
+            dropdownParent: $('#custom-student-combo').closest('.modal')
         });
 
         $studentOption.on('select2:select', function (e) {
