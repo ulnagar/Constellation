@@ -16,6 +16,12 @@
         });
     });
 
+    $(document).on('focusin', function (e) {
+        if ($(e.target).closest('.select2-container').length) {
+            e.stopImmediatePropagation();
+        }
+    });
+
     $(document).on('click', '.show-loader', function () {
         showLoader()
     });
