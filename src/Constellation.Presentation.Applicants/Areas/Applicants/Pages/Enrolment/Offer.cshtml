@@ -1,20 +1,94 @@
 ﻿@page
+@using Constellation.Core.Extensions
 @model Constellation.Presentation.Applicants.Areas.Applicants.Pages.Enrolment.OfferModel
 @{
 }
 
-<h2>Applicants Portal</h2>
+<h2>Offer of Enrolment</h2>
 
-** Show details of offer **
+<form method="post">
+    <h5 class="mt-3 w-100">@Model.Application.Name.DisplayName has been offered enrolment at Aurora College in @Model.Application.Grade.AsName() of the @Model.Application.Program.</h5>
+    
+    @{
+        var offerResponseId = Html.IdFor(m => m.OfferResponse).ToString();
+    }
 
-** Show Accept/Refuse button **
- * If Refuse, post immediately
- * If Accept, expand to show the additional required responses:
+    <div class="w-100">
+        <h5>Do you accept or decline this offer of enrolment?</h5>
+    </div>
 
-** Ask about Court Arrangements **
+    <div class="btn-group w-100" role="group">
+        <input type="radio" class="btn-check" asp-for="OfferResponse" id="@(offerResponseId)-accept" value="Accept" autocomplete="off">
+        <label class="btn btn-outline-success" for="@(offerResponseId)-accept">Accept</label>
 
-** Ask about Wellbeing Conditions **
+        <input type="radio" class="btn-check" asp-for="OfferResponse" id="@(offerResponseId)-unset" value="Unset" autocomplete="off">
+        <label class="btn btn-outline-secondary" for="@(offerResponseId)-unset" data-unset>Please Select</label>
 
-** Ask about ?? **
+        <input type="radio" class="btn-check" asp-for="OfferResponse" id="@(offerResponseId)-decline" value="Decline" autocomplete="off">
+        <label class="btn btn-outline-danger" for="@(offerResponseId)-decline">Decline</label>
+    </div>
 
-** Show Submit button **
+    <div class="w-100">
+        <span class="text-danger" asp-validation-for="OfferResponse"></span>
+    </div>
+    
+    <div data-show-when="OfferResponse=Accept">
+        <hr />
+
+        @{
+            var courtOrderId = Html.IdFor(m => m.CourtOrders).ToString();
+        }
+
+        <div class="w-100">
+            <h5>Are there any Court Orders that apply to @Model.Application.Name.PreferredName?</h5>
+            <p class="text-muted">This could include Family Court orders, access orders (e.g. AVO), or any others that determine care arrangements for the student.</p>
+        </div>
+
+        <div class="btn-group w-100" role="group">
+            <input type="radio" class="btn-check" asp-for="CourtOrders" id="@(courtOrderId)-yes" value="Yes" autocomplete="off">
+            <label class="btn btn-outline-success" for="@(courtOrderId)-yes">Yes</label>
+
+            <input type="radio" class="btn-check" asp-for="CourtOrders" id="@(courtOrderId)-unset" value="Unset" autocomplete="off">
+            <label class="btn btn-outline-secondary" for="@(courtOrderId)-unset" data-unset>Please Select</label>
+
+            <input type="radio" class="btn-check" asp-for="CourtOrders" id="@(courtOrderId)-no" value="No" autocomplete="off">
+            <label class="btn btn-outline-danger" for="@(courtOrderId)-no">No</label>
+        </div>
+
+        <div class="w-100">
+            <span class="text-danger" asp-validation-for="CourtOrders"></span>
+            <span class="text-muted" data-show-when="CourtOrders=Yes">A member of staff will be in contact to discuss specific details.</span>
+        </div>
+
+        <hr/>
+
+        @{
+            var healthConditionsId = Html.IdFor(m => m.HealthConditions).ToString();
+        }
+
+        <div class="w-100">
+            <h5>Does @Model.Application.Name.PreferredName have any Health Conditions?</h5>
+            <p class="text-muted">This could include conditions such as anaphylaxis or any other allergies, or ADD/ADHD.</p>
+        </div>
+
+        <div class="btn-group w-100" role="group">
+            <input type="radio" class="btn-check" asp-for="HealthConditions" id="@(healthConditionsId)-yes" value="Yes" autocomplete="off">
+            <label class="btn btn-outline-success" for="@(healthConditionsId)-yes">Yes</label>
+
+            <input type="radio" class="btn-check" asp-for="HealthConditions" id="@(healthConditionsId)-unset" value="Unset" autocomplete="off">
+            <label class="btn btn-outline-secondary" for="@(healthConditionsId)-unset" data-unset>Please Select</label>
+
+            <input type="radio" class="btn-check" asp-for="HealthConditions" id="@(healthConditionsId)-no" value="No" autocomplete="off">
+            <label class="btn btn-outline-danger" for="@(healthConditionsId)-no">No</label>
+        </div>
+
+        <div class="w-100">
+            <span class="text-danger" asp-validation-for="HealthConditions"></span>
+            <span class="text-muted" data-show-when="HealthConditions=Yes">A member of staff will be in contact to discuss specific details.</span>
+        </div>
+    </div>
+    
+    <div class="mt-3">
+        <input type="submit" class="btn btn-success" value="Save" />
+    </div>
+</form>

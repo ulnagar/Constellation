@@ -1,4 +1,6 @@
-﻿<div class="top-row ps-3 navbar navbar-dark">
+﻿@model ApplicantNavViewModel
+
+<div class="top-row ps-3 navbar navbar-dark">
     <div class="container-fluid">
         <a class="navbar-brand" asp-page="/Index" asp-area="">Applicant Portal</a>
         <button title="Navigation menu" class="navbar-toggler" data-bs-toggle="collapse" data-bs-target="#nav-sidebar">
@@ -10,22 +12,22 @@
 <div class="collapse navbar-collapse" id="nav-sidebar">
     <nav class="flex-column">
         <div class="nav-item px-3">
-            <a class="nav-link disabled" asp-page="/Index" asp-area="Applicants" onclick="showLoader()">
+            <a class="nav-link disabled" asp-page="/Index" asp-area="Applicants" asp-route-applicationId="@Model.ApplicationId" onclick="showLoader()">
                 <i class="fas fa-home-lg" aria-hidden="true"></i> Home
             </a>
         </div>
         <div class="nav-item px-3">
-            <a class="nav-link" asp-page="/Enrolment/Offer" asp-area="Applicants">
+            <a class="nav-link" asp-page="/Enrolment/Offer" asp-area="Applicants" asp-route-applicationId="@Model.ApplicationId" onclick="showLoader()">
                 <i class="fas fa-calendar-day" aria-hidden="true"></i> Enrolment
             </a>
         </div>
         <div class="nav-item px-3">
-            <a class="nav-link disabled" asp-page="/Wellbeing" asp-area="Applicants" disabled="disabled">
+            <a class="nav-link disabled" asp-page="/Wellbeing" asp-area="Applicants" asp-route-applicationId="@Model.ApplicationId" onclick="showLoader()">
                 <i class="fas fa-file-alt" aria-hidden="true"></i> Wellbeing
             </a>
         </div>
         <div class="nav-item px-3">
-            <a class="nav-link disabled" asp-page="/Contacts" asp-area="Applicants">
+            <a class="nav-link disabled" asp-page="/Contacts" asp-area="Applicants" asp-route-applicationId="@Model.ApplicationId" onclick="showLoader()">
                 <i class="fas fa-mail-bulk" aria-hidden="true"></i> Contacts
             </a>
         </div>

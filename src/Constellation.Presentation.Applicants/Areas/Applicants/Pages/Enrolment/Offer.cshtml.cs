@@ -42,7 +42,59 @@ public class OfferModel : PageModel
     public EnrolmentApplicationResponse Application { get; set; }
     public bool Responded { get; set; }
 
+    [BindProperty] 
+    public string? CourtOrders { get; set; } = "Unset";
+
+    [BindProperty]
+    public string? OfferResponse { get; set; } = "Unset";
+
+    [BindProperty]
+    public string? HealthConditions { get; set; } = "Unset";
+
     public async Task OnGet()
+    {
+        await PreparePage();
+    }
+
+    public async Task<IActionResult> OnPost()
+    {
+        if (OfferResponse == "Unset")
+        {
+            ModelState.AddModelError(nameof(OfferResponse), "You must either Accept or Decline the offer of enrolment to continue.");
+
+            await PreparePage();
+            return Page();
+        }
+
+        if (OfferResponse == "Decline")
+        {
+            // Process Decline response
+
+            return RedirectToPage("/Index", new { area = "Applicants", ApplicationId });
+        }
+
+        if (CourtOrders == "Unset")
+        {
+            ModelState.AddModelError(nameof(CourtOrders), "You must select either Yes or No to the question about court orders.");
+
+            await PreparePage();
+            return Page();
+        }
+
+        if (HealthConditions == "Unset")
+        {
+            ModelState.AddModelError(nameof(HealthConditions), "You must select either Yes or No to the question about health conditions.");
+
+            await PreparePage();
+            return Page();
+        }
+
+        // Process Accept response;
+
+        return RedirectToPage("/Index", new { area = "Applicants", ApplicationId });
+    }
+
+    private async Task PreparePage()
     {
         GetEnrolmentApplicationByIdQuery command = new(ApplicationId);
 
@@ -64,12 +116,7 @@ public class OfferModel : PageModel
 
         if (application.Value.State != ApplicationState.PendingOfferResponse)
             Responded = true;
-            
-        Application = application.Value;
-    }
 
-    public async Task<IActionResult> OnPostAccept()
-    {
-        return Page();
+        Application = application.Value;
     }
 }
