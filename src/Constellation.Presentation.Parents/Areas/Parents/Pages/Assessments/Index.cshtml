@@ -39,7 +39,7 @@ else
         </span>
     </div>
 
-    @foreach (var group in Model.Assessments)
+    @foreach (var group in Model.Assessments.OrderBy(entry => entry.Key.EndDate))
     {
         <h3>@group.Key.Description</h3>
 
@@ -76,11 +76,11 @@ else
                         <div class="accordion accordion-flush" id="accordion">
                             <div class="accordion-item">
                                 <h2 class="accordion-header">
-                                    <button class="accordion-button collapsed fs-5" type="button" data-bs-toggle="collapse" data-bs-target="#provisions" aria-expanded="false" aria-controls="provisions">
+                                    <button class="accordion-button collapsed fs-5" type="button" data-bs-toggle="collapse" data-bs-target="#provisions-@collapseId" aria-expanded="false" aria-controls="provisions">
                                         Student Provisions
                                     </button>
                                 </h2>
-                                <div id="provisions" class="accordion-collapse collapse" data-bs-parent="#accordion">
+                                <div id="provisions-@collapseId" class="accordion-collapse collapse" data-bs-parent="#accordion">
                                     <div class="accordion-body">
                                         @foreach (var student in assessment.Students.OrderBy(entry => entry.StudentName.SortOrder))
                                         {
@@ -105,11 +105,11 @@ else
 
                             <div class="accordion-item">
                                 <h2 class="accordion-header">
-                                    <button class="accordion-button collapsed fs-5" type="button" data-bs-toggle="collapse" data-bs-target="#instructions" aria-expanded="false" aria-controls="instructions">
+                                    <button class="accordion-button collapsed fs-5" type="button" data-bs-toggle="collapse" data-bs-target="#instructions-@collapseId" aria-expanded="false" aria-controls="instructions">
                                         Instructions
                                     </button>
                                 </h2>
-                                <div id="instructions" class="accordion-collapse collapse" data-bs-parent="#accordion">
+                                <div id="instructions-@collapseId" class="accordion-collapse collapse" data-bs-parent="#accordion">
                                     <div class="accordion-body">
                                         @Html.Raw(assessment.Instructions.FirstOrDefault(entry => entry.Category == UserCategory.Parent)?.Description ?? "<p>None</p>")
                                     </div>
@@ -118,11 +118,11 @@ else
 
                             <div class="accordion-item">
                                 <h2 class="accordion-header">
-                                    <button class="accordion-button collapsed fs-5" type="button" data-bs-toggle="collapse" data-bs-target="#downloads" aria-expanded="false" aria-controls="downloads">
+                                    <button class="accordion-button collapsed fs-5" type="button" data-bs-toggle="collapse" data-bs-target="#downloads-@collapseId" aria-expanded="false" aria-controls="downloads">
                                         Downloads
                                     </button>
                                 </h2>
-                                <div id="downloads" class="accordion-collapse collapse" data-bs-parent="#accordion">
+                                <div id="downloads-@collapseId" class="accordion-collapse collapse" data-bs-parent="#accordion">
                                     <div class="accordion-body">
                                         @foreach (var download in assessment.Downloads)
                                         {
