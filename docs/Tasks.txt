@@ -15,7 +15,7 @@ Because .gitattributes with merge=ours auto-resolves the snapshot conflict witho
 
 VS Git Changes panel — find AppDbContextModelSnapshot.cs in the changed files, right-click and choose Revert... then manually copy the file from the upstream branch, or
 PMC which is more reliable:
-powershellgit checkout MERGE_HEAD -- src/Constellation.Infrastructure/Persistence/AppDbContextModelSnapshot.cs
+git checkout HEAD^2 -- src/Constellation.Infrastructure/Persistence/ConstellationContext/Migrations/AppDbContextModelSnapshot.cs
 The value of merge=ours in .gitattributes isn't that it resolves it the right way — it's that it prevents an unresolvable wall of merge conflict markers appearing in an already-complex generated file. You're trading an ugly conflict for a clean but wrong file, which you then deliberately correct in step 3.
 
 Step 4: Add a new migration callsed _SnapshotRebuild, then delete the .cs and .Designer.cs files for this migration
