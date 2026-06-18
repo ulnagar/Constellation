@@ -11,7 +11,12 @@ internal sealed class EmailLinkConfiguration : IEntityTypeConfiguration<EmailLin
         builder.ToTable("EmailLinks", "Messages");
 
         builder
-            .HasKey(link => new { link.EmailId, link.DestinationUrl });
+            .HasKey(link => new { link.EmailId, link.UrlHash });
+
+        builder
+            .Property(link => link.UrlHash)
+            .IsRequired()
+            .HasColumnType("binary(32)");
 
         builder
             .Property(link => link.DestinationUrl)
