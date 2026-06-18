@@ -176,10 +176,6 @@ public sealed class EmailMessage : IHasCreatedAt
         if (_links.Any(l => l.DestinationUrl.Equals(destinationUrl, StringComparison.OrdinalIgnoreCase)))
             return; // Already registered — not an error, just a duplicate link in the template
 
-        _links.Add(new EmailLink
-        {
-            DestinationUrl = destinationUrl,
-            EmailId = Id
-        });
+        _links.Add(EmailLink.Create(Id, destinationUrl));
     }
 }
