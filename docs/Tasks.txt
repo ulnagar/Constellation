@@ -1,14 +1,26 @@
 ~~~~~~~~~~~~~~~~~~~~~~~~
-CURRENT TASK
+BRINGING DB MIGRATIONS FORWARD TO NEWER BRANCHES
 ~~~~~~~~~~~~~~~~~~~~~~~~
-SSO: Integrate OIDC to enable connection to DoE SSO platform
-	https://learn.microsoft.com/en-us/aspnet/core/security/authentication/configure-oidc-web-authentication?view=aspnetcore-10.0
 
-AppSetting Realignment:
-	Canvas - UseGroups, UseSections, CourseAdmins
-	Sentral - ContactPreference, XPaths
-	Teams - MandatoryOwnerIds, StudentTeamOwnerIds, StudentTeamChannelOwnerIds
+Step 1: (ONCE ONLY) Configure .gitattributes to suppress snapshot conflicts
+Add this to your .gitattributes so git never tries to auto-merge the snapshot:
+*ModelSnapshot.cs merge=ours
+This always keeps the current branch's snapshot during a merge, avoiding conflicts. The snapshot will be wrong after the merge, but you'll fix it with the script below.
 
+Step 2: Merge the upstream (older) branch into the next-in-line (newer) branch, accepting the merge commit that git creates
+e.g. BugFix -> Release (current) -> Pre-release -> Dev
+
+Step 3: After the merge completes, explicitly take the upstream version of AppDbContextModelSnapshot.cs via PMC
+Because .gitattributes with merge=ours auto-resolves the snapshot conflict without showing it in the VS conflict UI, the snapshot won't appear as a conflicted file for you to resolve — git will have already silently kept yours. You'll need to explicitly switch it to theirs after the merge completes, either via:
+
+VS Git Changes panel — find AppDbContextModelSnapshot.cs in the changed files, right-click and choose Revert... then manually copy the file from the upstream branch, or
+PMC which is more reliable:
+git checkout HEAD^2 -- src/Constellation.Infrastructure/Persistence/ConstellationContext/Migrations/AppDbContextModelSnapshot.cs
+The value of merge=ours in .gitattributes isn't that it resolves it the right way — it's that it prevents an unresolvable wall of merge conflict markers appearing in an already-complex generated file. You're trading an ugly conflict for a clean but wrong file, which you then deliberately correct in step 3.
+
+Step 4: Add a new migration callsed _SnapshotRebuild, then delete the .cs and .Designer.cs files for this migration
+
+Step 5: Push the updates for this branch, then move on to the new next-in-line branch to update
 
 
 ~~~~~~~~~~~~~~~~~~~~~~~~
@@ -38,127 +50,3 @@ GRADES:
 
 ATTENDANCE REPORT JOB:
 	Save generated files to database
-
-~~~~~~~~~~~~~~~~~~~~~~~~
-DONE
-~~~~~~~~~~~~~~~~~~~~~~~~
-
-R1.4:
-	SCHOOLS PORTAL:
-		Add Stocktake function listing all sighted devices for the linked school
-		Add Stocktake sighting function, allowing users to submit stocktake information
-		Show list and tally of awards listings per student
-
-	EQUIPMENT:
-		Add Stocktake function to create stocktake events
-		Add Stocktake details view to list all reported device sightings
-		Add Stocktake Staff Dashboard to allow staff to review their sighted devices
-		Add Staff sighting function, allowing staff to submit stocktake information
-
-	REPORTS:
-		Change Awards Report to use locally cached data instead of uploaded Sentral extract
-		Create new Awards Report views, including graph dashboard
-
-	JOBS:
-		Create new SentralAwardSyncJob to cache student awards locally
-
-	SCHOOL CONTACTS:
-		Add school contact to role from the School Contact view
-		Add new School Contact to role at creation
-
-	ASSIGNMENTS:
-		Add details view for Assignments including list of submissions
-		Allow teachers to re-push submissions to Canvas if required
-
-R1.3:
-	PTO EXPORT FILE:
-		Update to use Student Families instead of pulling from Sentral each time
-		Update to create a single parent entry for families with a single email address
-		Update to support separate parent accounts for families with different email addresses
-		Update to support selectable per-family or per-parent details export
-
-	SCHOOLS PORTAL:
-		Add timetables view and download options
-
-	SCHOOLS:
-		Add titles to set school maps pages
-
-	COVERS:
-		Send calendar appointment for notification of single day covers
-		Add timetable sheet to multi-day covers
-
-	SENTRAL FAMILY DETAILS SYNC JOB:
-		Migrate to using different sources to make it more reliable and take advantage of the new 3PI data
-
-R1.2:
-	WEB LOGON:
-		Add client-side validation rules to ensure email address uses correct domain
-		
-	PARENT CONTACTS:
-		Report any empty email addresses to school administration for investigation
-
-	JOBS:
-		Confirm that only one copy of a job can be queued at a single time. Subsequent jobs are stopped and not left queued.
-		Add log text when cancelled
-		Confirm that cancellation token implementation will exit jobs
-
-	SENTRALPHOTOSYNC:
-		Photos are always being replaced in database. Resolve check for uniqueness first.
-
-	MISSED CLASSWORK:
-		Remove outstanding entries when students withdraw
-
-	SCHOOL CONTACTS:
-		Remove duplicate entries in search results before showing
-		
-	ABSENCES:
-		Migrate Externally Explained to an actual Response record instead of top level fields
-
-	LESSON ROLLS:
-		Trigger update of Lesson Rolls when a student is moved between schools
-		Update Admin Portal to include grade in search results
-
-	REPORTS:
-		FTE Calculation now includes breakdown by gender per grade
-
-R1.1:
-	CHANGE LOG:
-		Include link in footer to changelog for current release
-	
-	STAFF:
-		Fix bug where faculty membership was not being saved to the database
-
-	ADOBE CONNECT ACTIONS:
-		Complete migration of action to scan for new rooms
-
-	TEAMS:
-		Cache team ids in database to prevent needing to search for teams at start of operations
-
-	PARENT CONTACTS:
-		Convert all parent contact jobs to use the local contact details before attempting to reach out to Sentral
-
-	CLEANARCH:
-		Move CQRS handlers to Infrastructure project
-
-	BUD GRAPHS:
-		Complete migration of api endpoints to allow for graphs to be saved at end of day
-
-	EMAILS:
-		Convert all images to use BASE64 values instead of linked files
-
-	SCHOOL PORTAL:
-		Migrate functions to school portal
-
-	ERROR:
-		Modify error page to give some information on what is happening.
-
-	EMAILS:
-		Make sure every email process dedups the list of contacts before added them.
-
-	CANVAS:
-		Paper Exam Submission Portal => take file uploads from ACC and proxy it up to CANVAS as student submission of assignment
-
-	PARENT CONTACTS:
-		https://admin.aurora.dec.nsw.gov.au/enquiry/export/view_export?name=complete&inputs[class]=&inputs[roll_class]=&inputs[schyear]=&format=csv&headings=1&action=Download
-		Sync parent contacts from Sentral once per day
-			Do not replace local details if the source is blank/missing from Sentral

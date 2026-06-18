@@ -5,7 +5,7 @@ using Core.ValueObjects;
 
 public sealed class NewACCoordinatorEmailViewModel : EmailLayoutBaseViewModel
 {
-    private const string _viewLocation = "/Views/Emails/Contacts/NewACCordinatorEmail.cshtml";
+    private const string _viewLocation = "/Views/Emails/Contacts/NewACCoordinatorEmail.cshtml";
     public override string ViewLocation => _viewLocation;
 
     public readonly string Link = $"{BaseUrl}";
