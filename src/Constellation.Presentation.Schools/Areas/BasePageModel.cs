@@ -25,7 +25,7 @@ public class BasePageModel : PageModel, IBaseModel
     protected ISender Mediator =>
         HttpContext.RequestServices.GetRequiredService<ISender>();
     
-    private IAuthorizationService AuthService =>
+    protected IAuthorizationService AuthService =>
         HttpContext.RequestServices.GetRequiredService<IAuthorizationService>();
     
     private UserManager<AppUser> UserManager =>

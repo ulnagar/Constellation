@@ -1,6 +1,7 @@
 ﻿namespace Constellation.Infrastructure.Services;
 
 using Application.Models.Auth;
+using Application.Models.Identity;
 using Constellation.Application.Interfaces.Services;
 using Constellation.Core.Models.Auth;
 using Microsoft.AspNetCore.Authentication;
@@ -10,15 +11,18 @@ using System.Security.Claims;
 internal class AuthService : IAuthService
 {
     private readonly UserManager<AppUser> _userManager;
+    private readonly RoleManager<AppRole> _roleManager;
     private readonly SignInManager<AppUser> _signInManager;
     private readonly ILogger _logger;
 
     public AuthService(
         UserManager<AppUser> userManager,
+        RoleManager<AppRole> roleManager,
         SignInManager<AppUser> signInManager,
         ILogger logger)
     {
         _userManager = userManager;
+        _roleManager = roleManager;
         _signInManager = signInManager;
         _logger = logger
             .ForContext<IAuthService>();
@@ -90,4 +94,26 @@ internal class AuthService : IAuthService
 
     public bool IsImpersonating(ClaimsPrincipal principal) =>
         principal.FindFirstValue(AuthClaimType.IsImpersonating) == "true";
+
+    public async Task<bool> UserHasPermission(AppUser user, AuthPermission permission, CancellationToken cancellationToken = default)
+    {
+        IList<Claim> userClaims = await _userManager.GetClaimsAsync(user);
+        if (userClaims.Any(c => c.Type == AuthClaimType.Permission && c.Value == permission.Value))
+            return true;
+
+        // 2. Check claims on each role the user belongs to
+        IList<string> roleNames = await _userManager.GetRolesAsync(user);
+
+        foreach (string roleName in roleNames)
+        {
+            AppRole? role = await _roleManager.FindByNameAsync(roleName);
+            if (role is null) continue;
+
+            IList<Claim> roleClaims = await _roleManager.GetClaimsAsync(role);
+            if (roleClaims.Any(c => c.Type == AuthClaimType.Permission && c.Value == permission.Value))
+                return true;
+        }
+
+        return false;
+    }
 }

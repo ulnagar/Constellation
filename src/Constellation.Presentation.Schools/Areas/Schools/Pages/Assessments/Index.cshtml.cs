@@ -13,6 +13,7 @@ using Core.Abstractions.Services;
 using Core.Models.Assessments.Identifiers;
 using Core.Shared;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using Presentation.Shared.Helpers.Attributes;
@@ -44,6 +45,8 @@ public class IndexModel : BasePageModel
     [ViewData] public string ActivePage => Models.ActivePage.Assessments;
 
     public Dictionary<SchoolCalendarWeek, List<AssessmentDetailsResponse>> Assessments { get; set; } = new();
+    public bool CanAccessRestrictedFiles { get; set; }
+    public bool CanSubmitFiles { get; set; }
 
     public async Task OnGet() => await PreparePage();
 
@@ -192,6 +195,14 @@ public class IndexModel : BasePageModel
                     Assessments.Add(matchedWeek, [assessment]);
             }
         }
+
+        AuthorizationResult canAccessRestrictedFilesTest = await AuthService.AuthorizeAsync(User, AuthPermission.SchoolsPortal_Assessments_ViewRestrictedDocuments_Value);
+        if (canAccessRestrictedFilesTest.Succeeded)
+            CanAccessRestrictedFiles = true;
+
+        AuthorizationResult canSubmitFilesTest = await AuthService.AuthorizeAsync(User, AuthPermission.SchoolsPortal_Assessments_Submit_Value);
+        if (canSubmitFilesTest.Succeeded)
+            CanSubmitFiles = true;
     }
 
     public async Task<IActionResult> OnGetDownloadFile(AssessmentId assessmentId, AssessmentDownloadId downloadId)

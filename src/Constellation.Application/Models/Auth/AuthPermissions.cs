@@ -1,6 +1,7 @@
 ﻿namespace Constellation.Application.Models.Auth;
 
 using Constellation.Core.Common;
+using Microsoft.Extensions.Primitives;
 
 // ReSharper disable InconsistentNaming
 #pragma warning disable CA1707 // Identifiers should not contain underscores
@@ -38,6 +39,7 @@ public sealed class AuthPermission : StringEnumeration<AuthPermission>
     public const string Subjects_Assessments_Edit_Value = "Subjects.Assessments.Edit";
     public const string Subjects_Assessments_Submit_Value = "Subjects.Assessments.Submit";
     public const string Subjects_Assessments_Download_Value = "Subjects.Assessments.Download";
+    public const string Subjects_Assessments_ViewRestrictedDocuments_Value = "Subjects.Assessments.ViewRestrictedDocuments";
     public const string Subjects_Courses_View_Value = "Subjects.Courses.View";
     public const string Subjects_Courses_Edit_Value = "Subjects.Courses.Edit";
     public const string Subjects_Offerings_View_Value = "Subjects.Offerings.View";
@@ -116,7 +118,8 @@ public sealed class AuthPermission : StringEnumeration<AuthPermission>
     public const string SchoolsPortal_Stocktake_View_Value = "SchoolsPortal.Stocktake.View";
     public const string SchoolsPortal_Stocktake_Edit_Value = "SchoolsPortal.Stocktake.Edit";
     public const string SchoolsPortal_Assessments_View_Value = "SchoolsPortal.Assessments.View";
-    public const string SchoolsPortal_Assessments_Edit_Value = "SchoolsPortal.Assessments.Edit";
+    public const string SchoolsPortal_Assessments_Submit_Value = "SchoolsPortal.Assessments.Submit";
+    public const string SchoolsPortal_Assessments_ViewRestrictedDocuments_Value = "SchoolsPortal.Assessments.ViewRestrictedDocuments";
 
     public const string ParentPortal_View_Value = "ParentPortal.View";
 
@@ -150,6 +153,7 @@ public sealed class AuthPermission : StringEnumeration<AuthPermission>
     public static readonly AuthPermission Subjects_Assessments_View = new(Subjects_Assessments_View_Value, "Subjects: Assessments: View");
     public static readonly AuthPermission Subjects_Assessments_Edit = new(Subjects_Assessments_Edit_Value, "Subjects: Assessments: Edit");
     public static readonly AuthPermission Subjects_Assessments_Submit = new(Subjects_Assessments_Submit_Value, "Subjects: Assessments: Submit");
+    public static readonly AuthPermission Subjects_Assessments_ViewRestrictedDocuments = new(Subjects_Assessments_ViewRestrictedDocuments_Value, "Subjects: Assessments: View Restricted Documents");
     public static readonly AuthPermission Subjects_Assessments_Download = new(Subjects_Assessments_Download_Value, "Subjects: Assessments: Download");
     public static readonly AuthPermission Subjects_Courses_View = new(Subjects_Courses_View_Value, "Subjects: Courses: View");
     public static readonly AuthPermission Subjects_Courses_Edit = new(Subjects_Courses_Edit_Value, "Subjects: Courses: Edit");
@@ -229,7 +233,8 @@ public sealed class AuthPermission : StringEnumeration<AuthPermission>
     public static readonly AuthPermission SchoolsPortal_Stocktake_View = new(SchoolsPortal_Stocktake_View_Value, "SchoolsPortal: Stocktake: View");
     public static readonly AuthPermission SchoolsPortal_Stocktake_Edit = new(SchoolsPortal_Stocktake_Edit_Value, "SchoolsPortal: Stocktake: Edit");
     public static readonly AuthPermission SchoolsPortal_Assessments_View = new(SchoolsPortal_Assessments_View_Value, "SchoolsPortal: Assessments: View");
-    public static readonly AuthPermission SchoolsPortal_Assessments_Edit = new(SchoolsPortal_Assessments_Edit_Value, "SchoolsPortal: Assessments: Edit");
+    public static readonly AuthPermission SchoolsPortal_Assessments_Submit = new(SchoolsPortal_Assessments_Submit_Value, "SchoolsPortal: Assessments: Submit");
+    public static readonly AuthPermission SchoolsPortal_Assessments_ViewRestrictedDocuments = new(SchoolsPortal_Assessments_ViewRestrictedDocuments_Value, "SchoolsPortal: Assessments: View Restricted Documents");
 
     public static readonly AuthPermission ParentPortal_View = new(ParentPortal_View_Value, "ParentPortal: View");
 

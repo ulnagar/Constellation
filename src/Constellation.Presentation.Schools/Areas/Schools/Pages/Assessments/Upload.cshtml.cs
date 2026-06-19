@@ -20,7 +20,7 @@ using Microsoft.AspNetCore.Routing;
 using Presentation.Shared.Helpers.Attributes;
 using Serilog;
 
-[HasPermission(AuthPermission.SchoolsPortal_Assessments_Edit_Value)]
+[HasPermission(AuthPermission.SchoolsPortal_Assessments_Submit_Value)]
 [RequestSizeLimit(10485760)]
 public class UploadModel : BasePageModel
 {

@@ -7,6 +7,8 @@
 @{
     var canEditTest = await AuthorizationService.AuthorizeAsync(User, AuthPermission.Subjects_Assessments_Edit_Value);
     var canEditProvisionsTest = await AuthorizationService.AuthorizeAsync(User, AuthPermission.Subjects_AssessmentsProvisions_Assign_Value);
+    var canSubmitTest = await AuthorizationService.AuthorizeAsync(User, AuthPermission.Subjects_Assessments_Submit_Value);
+    var canAccessRestrictedFilesTest = await AuthorizationService.AuthorizeAsync(User, AuthPermission.Subjects_Assessments_ViewRestrictedDocuments_Value);
 }
 
 <h2>Assessment Details</h2>
@@ -70,7 +72,10 @@
     <div class="col-6">
         <div class="row mb-3">
             <div class="col-md-6">
-                <button class="btn btn-success btn-sm link-canvas-btn">Update Canvas Link</button>
+                @if (canEditTest.Succeeded)
+                {
+                    <button class="btn btn-success btn-sm link-canvas-btn">Update Canvas Link</button>
+                }
             </div>
         </div>
         <dl class="row">
@@ -197,24 +202,27 @@
                                 @Html.Raw(instruction?.Description)
                             </div>
                             <div class="card-footer">
-                                <div class="row">
-                                    <div class="col-6 d-grid">
-                                        @if (instruction is null)
-                                        {
-                                            <button class="btn btn-primary instruction-update-button" data-id="" data-category="@category">Create</button>
-                                        }
-                                        else
-                                        {
-                                            <button class="btn btn-primary instruction-update-button" data-id="@instruction.InstructionId" data-category="@category">Edit</button>
-                                        }
+                                @if (canEditTest.Succeeded)
+                                {
+                                    <div class="row">
+                                        <div class="col-6 d-grid">
+                                            @if (instruction is null)
+                                            {
+                                                <button class="btn btn-primary instruction-update-button" data-id="" data-category="@category">Create</button>
+                                            }
+                                            else
+                                            {
+                                                <button class="btn btn-primary instruction-update-button" data-id="@instruction.InstructionId" data-category="@category">Edit</button>
+                                            }
+                                        </div>
+                                        <div class="col-6 d-grid">
+                                            @if (instruction is not null)
+                                            {
+                                                <button class="btn btn-danger instruction-delete-button" data-id="@instruction.InstructionId">Delete</button>
+                                            }
+                                        </div>
                                     </div>
-                                    <div class="col-6 d-grid">
-                                        @if (instruction is not null)
-                                        {
-                                            <button class="btn btn-danger instruction-delete-button" data-id="@instruction.InstructionId">Delete</button>
-                                        }
-                                    </div>
-                                </div>
+                                }
                             </div>
                         </div>
                     </div>
@@ -264,8 +272,10 @@
                             <div class="btn-group" role="group">
                                 <button type="button" class="btn btn-warning dropdown-toggle btn-sm btn-show-hover" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> Actions</button>
                                 <div class="dropdown-menu">
-                                    <a asp-page-handler="DownloadFile" class="dropdown-item" asp-route-downloadId="@entry.DownloadId">Download</a>
-
+                                    @if (canAccessRestrictedFilesTest.Succeeded || !entry.IsRestricted)
+                                    {
+                                        <a asp-page-handler="DownloadFile" class="dropdown-item" asp-route-downloadId="@entry.DownloadId">Download</a>
+                                    }
                                     @if (canEditTest.Succeeded)
                                     {
                                         <button class="dropdown-item remove-document-button" data-id="@entry.DownloadId">Remove Document</button>
@@ -310,7 +320,7 @@
         <div id="submissions" class="tab-pane">
             <h3>Submissions</h3>
             
-            @if (canEditTest.Succeeded)
+            @if (canSubmitTest.Succeeded || canEditTest.Succeeded)
             {
                 <button data-bs-toggle="modal" data-bs-target="#upload-assessment-submission-modal" class="btn btn-success">Add Submission</button>
                 <a asp-page-handler="DownloadAllSubmissions" class="btn btn-warning">Download All</a>
@@ -335,7 +345,7 @@
                             <td data-order="@entry.SubmittedAt.LocalDateTime.ToString("yyyy-MM-dd HH:mm")">@entry.SubmittedAt.LocalDateTime.ToString("g")</td>
                             <td>@entry.SubmittedBy</td>
                             <td>
-                                @if (canEditTest.Succeeded)
+                                @if (canSubmitTest.Succeeded || canEditTest.Succeeded)
                                 {
                                     <a asp-page-handler="DownloadSubmission" asp-route-submissionId="@entry.SubmissionId" class="btn btn-warning btn-sm btn-show-hover">Download</a>
                                 }
