@@ -39,4 +39,10 @@
     <PackageReference Include="System.Security.Cryptography.Xml" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Persistence\EnrolmentContext\EntityConfigurations\" />
+    <Folder Include="Persistence\EnrolmentContext\Migrations\" />
+    <Folder Include="Persistence\EnrolmentContext\Repositories\" />
+  </ItemGroup>
+
 </Project>

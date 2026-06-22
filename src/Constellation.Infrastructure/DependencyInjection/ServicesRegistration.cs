@@ -13,6 +13,7 @@ using Constellation.Infrastructure.Jobs;
 using Constellation.Infrastructure.Persistence.ConstellationContext;
 using Constellation.Infrastructure.Persistence.ConstellationContext.Interceptors;
 using Constellation.Infrastructure.Persistence.ConstellationContext.Repositories;
+using Constellation.Infrastructure.Persistence.EnrolmentContext;
 using Constellation.Infrastructure.Persistence.TrackItContext;
 using Constellation.Infrastructure.Services;
 using Constellation.Infrastructure.Templates.Services;
@@ -32,7 +33,7 @@ public static class ServicesRegistration
         // Add Logging
         services.AddSingleton(Log.Logger);
 
-        // Add Constellation Context
+        // Add ConstellationDbContext
 
         services.AddSingleton<ConvertDomainEventsToOutboxMessagesInterceptor>();
         services.AddSingleton<UpdateAuditableEntitiesInterceptor>();
@@ -72,6 +73,22 @@ public static class ServicesRegistration
         });
 
         services.AddScoped<ITrackItSyncJob, TrackItSyncJob>();
+
+        // Add EnrolmentDbContext
+
+        services.AddDbContextFactory<EnrolmentDbContext>((sp, options) =>
+        {
+            options.UseSqlServer(
+                configuration.GetConnectionString("EnrolmentConnection"),
+                b =>
+                {
+                    b.MigrationsAssembly(typeof(EnrolmentDbContext).Assembly.FullName);
+                    b.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery);
+                    b.CommandTimeout(120);
+                });
+
+            options.EnableSensitiveDataLogging();
+        });
 
         services.Decorate(typeof(INotificationHandler<>), typeof(IdempotentDomainEventHandler<>));
 
