@@ -11,6 +11,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="Models\EnrolmentContext\Application\Enums\" />
     <Folder Include="Models\LinkedSystems\Errors\" />
     <Folder Include="Models\ThirdPartyConsent\Events\" />
     <Folder Include="Models\Timetables\Events\" />
