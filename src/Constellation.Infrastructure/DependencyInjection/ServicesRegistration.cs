@@ -14,6 +14,7 @@ using Constellation.Infrastructure.Persistence.ConstellationContext;
 using Constellation.Infrastructure.Persistence.ConstellationContext.Interceptors;
 using Constellation.Infrastructure.Persistence.ConstellationContext.Repositories;
 using Constellation.Infrastructure.Persistence.EnrolmentContext;
+using Constellation.Infrastructure.Persistence.EnrolmentContext.Interceptors;
 using Constellation.Infrastructure.Persistence.TrackItContext;
 using Constellation.Infrastructure.Services;
 using Constellation.Infrastructure.Templates.Services;
@@ -76,6 +77,8 @@ public static class ServicesRegistration
 
         // Add EnrolmentDbContext
 
+        services.AddScoped<AuditInterceptor>();
+
         services.AddDbContextFactory<EnrolmentDbContext>((sp, options) =>
         {
             options.UseSqlServer(
@@ -88,6 +91,8 @@ public static class ServicesRegistration
                 });
 
             options.EnableSensitiveDataLogging();
+            
+            options.AddInterceptors(sp.GetRequiredService<AuditInterceptor>());
         });
 
         services.Decorate(typeof(INotificationHandler<>), typeof(IdempotentDomainEventHandler<>));

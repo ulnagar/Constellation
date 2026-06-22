@@ -18,14 +18,9 @@ public class CurrentUserService : ICurrentUserService
         _httpContextAccessor = httpContextAccessor;
     }
 
-    private ClaimsPrincipal User => _httpContextAccessor.HttpContext?.User;
+    private ClaimsPrincipal? User => _httpContextAccessor.HttpContext?.User;
 
-    public string UserName =>
-        User is null ? string.Empty :
-        User.Identity is null ? string.Empty :
-        User.Claims.FirstOrDefault(claim => claim.Type == ClaimTypes.GivenName) is null ? User.Identity.Name :
-        User.Claims.FirstOrDefault(claim => claim.Type == ClaimTypes.Surname) is null ? User.Identity.Name :
-        $"{User.Claims.First(claim => claim.Type == ClaimTypes.GivenName).Value} {User.Claims.First(claim => claim.Type == ClaimTypes.Surname).Value}";
+    public string UserName => Identify();
 
     public string EmailAddress =>
         User is null ? string.Empty :
@@ -50,5 +45,23 @@ public class CurrentUserService : ICurrentUserService
             return StaffId.Empty;
 
         return StaffId.FromValue(guidStaffId);
+    }
+
+    private string Identify()
+    {
+        HttpContext? ctx = _httpContextAccessor.HttpContext;
+
+        if (ctx is null)
+            return "System";
+
+        if (User is not null
+            && User.Claims.FirstOrDefault(claim => claim.Type == ClaimTypes.GivenName) is not null
+            && User.Claims.FirstOrDefault(claim => claim.Type == ClaimTypes.Surname) is not null)
+            return $"{User.Claims.First(claim => claim.Type == ClaimTypes.GivenName).Value} {User.Claims.First(claim => claim.Type == ClaimTypes.Surname).Value}";
+        
+        if (ctx.Items.TryGetValue("OfferToken", out var token) && token is string offerToken)
+            return $"Anonymous via offer token {offerToken}";
+
+        return "Anonymous";
     }
 }
