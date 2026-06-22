@@ -9,10 +9,10 @@ using Microsoft.EntityFrameworkCore;
 internal sealed class TrainingModuleRepository
     : ITrainingModuleRepository
 {
-    private readonly AppDbContext _context;
+    private readonly ConstellationDbContext _context;
 
     public TrainingModuleRepository(
-        AppDbContext context)
+        ConstellationDbContext context)
     {
         _context = context;
     }

@@ -40,7 +40,7 @@ builder.Services
 // Configuration Authentication and Authorization
 builder.Services.AddIdentity<AppUser, AppRole>()
     .AddClaimsPrincipalFactory<CustomUserPropertiesClaimsFactory>()
-    .AddEntityFrameworkStores<AppDbContext>()
+    .AddEntityFrameworkStores<ConstellationDbContext>()
     .AddDefaultTokenProviders()
     .AddPasswordlessLoginProvider();
 

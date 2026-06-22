@@ -11,11 +11,11 @@ using Newtonsoft.Json;
 using Outbox;
 using System.Reflection;
 
-public class AppDbContext : IdentityDbContext<AppUser, AppRole, Guid>
+public class ConstellationDbContext : IdentityDbContext<AppUser, AppRole, Guid>
 {
     public const string TeamsOperationId = "TeamsOperationId";
 
-    public AppDbContext(DbContextOptions<AppDbContext> options)
+    public ConstellationDbContext(DbContextOptions<ConstellationDbContext> options)
         : base(options)
     { }
 

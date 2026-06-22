@@ -17,10 +17,10 @@ public sealed class CanEditWorkFlowActionRequirement : IAuthorizationRequirement
 
 public sealed class IsAssignedToActionByRoute : AuthorizationHandler<CanEditWorkFlowActionRequirement>
 {
-    private readonly AppDbContext _context;
+    private readonly ConstellationDbContext _context;
 
     public IsAssignedToActionByRoute(
-        AppDbContext context)
+        ConstellationDbContext context)
     {
         _context = context;
     }
@@ -68,11 +68,11 @@ public sealed class IsAssignedToActionByRoute : AuthorizationHandler<CanEditWork
 
 public sealed class IsAssignedToActionByResource : AuthorizationHandler<CanEditWorkFlowActionRequirement, Guid>
 {
-    private readonly AppDbContext _context;
+    private readonly ConstellationDbContext _context;
     private readonly ILogger _logger;
 
     public IsAssignedToActionByResource(
-        AppDbContext _context,
+        ConstellationDbContext _context,
         ILogger logger)
     {
         this._context = _context;

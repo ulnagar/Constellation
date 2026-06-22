@@ -14,11 +14,11 @@ using Microsoft.EntityFrameworkCore;
 
 public class EnrolmentRepository : IEnrolmentRepository
 {
-    private readonly AppDbContext _context;
+    private readonly ConstellationDbContext _context;
     private readonly IDateTimeProvider _dateTime;
 
     public EnrolmentRepository(
-        AppDbContext context,
+        ConstellationDbContext context,
         IDateTimeProvider dateTime)
     {
         _context = context;

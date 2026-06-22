@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migrations
 {
-    [DbContext(typeof(AppDbContext))]
+    [DbContext(typeof(ConstellationDbContext))]
     [Migration("20221117034630_ConvertToFacultyObject")]
     partial class ConvertToFacultyObject
     {

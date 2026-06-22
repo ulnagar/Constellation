@@ -7,9 +7,9 @@ using Microsoft.EntityFrameworkCore;
 
 public class DeviceRepository : IDeviceRepository
 {
-    private readonly AppDbContext _context;
+    private readonly ConstellationDbContext _context;
 
-    public DeviceRepository(AppDbContext context)
+    public DeviceRepository(ConstellationDbContext context)
     {
         _context = context;
     }

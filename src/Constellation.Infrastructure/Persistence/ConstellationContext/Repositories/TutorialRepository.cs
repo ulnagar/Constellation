@@ -18,11 +18,11 @@ using System.Threading.Tasks;
 
 internal sealed class TutorialRepository : ITutorialRepository
 {
-    private readonly AppDbContext _context;
+    private readonly ConstellationDbContext _context;
     private readonly IDateTimeProvider _dateTime;
 
     public TutorialRepository(
-        AppDbContext context,
+        ConstellationDbContext context,
         IDateTimeProvider dateTime)
     {
         _context = context;

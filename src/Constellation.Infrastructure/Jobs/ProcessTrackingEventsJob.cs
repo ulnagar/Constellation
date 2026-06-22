@@ -17,14 +17,14 @@ using System.Text.Json;
 
 internal sealed class ProcessTrackingEventsJob : IProcessTrackingEventsJob
 {
-    private readonly AppDbContext _context;
+    private readonly ConstellationDbContext _context;
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger _logger;
     private const int _maxAttempts = 5;
     private const int _batchSize = 50;
 
-    private static readonly Func<AppDbContext, DateTime, IAsyncEnumerable<TrackingQueueEntry>> _getPendingEntries =
-        EF.CompileAsyncQuery((AppDbContext db, DateTime now) =>
+    private static readonly Func<ConstellationDbContext, DateTime, IAsyncEnumerable<TrackingQueueEntry>> _getPendingEntries =
+        EF.CompileAsyncQuery((ConstellationDbContext db, DateTime now) =>
             db.Set<TrackingQueueEntry>()
                 .Where(e => e.RetryAfter == null || e.RetryAfter <= now)
                 .OrderBy(e => e.EnqueuedAt)
@@ -32,7 +32,7 @@ internal sealed class ProcessTrackingEventsJob : IProcessTrackingEventsJob
                 .AsNoTracking());
 
     public ProcessTrackingEventsJob(
-        AppDbContext context,
+        ConstellationDbContext context,
         IUnitOfWork unitOfWork,
         ILogger logger)
     {
@@ -169,7 +169,7 @@ internal sealed class ProcessTrackingEventsJob : IProcessTrackingEventsJob
             _ => null
         };
 
-    private static async Task<bool> ParentExists(TrackingEvent evt, AppDbContext context, CancellationToken ct) =>
+    private static async Task<bool> ParentExists(TrackingEvent evt, ConstellationDbContext context, CancellationToken ct) =>
         evt switch
         {
             EmailOpenEvent e => await context.Set<EmailMessage>().AnyAsync(m => m.Id == e.EmailId, ct),
@@ -178,7 +178,7 @@ internal sealed class ProcessTrackingEventsJob : IProcessTrackingEventsJob
             _ => true
         };
 
-    private static async Task HandleEmailOpen(EmailOpenEvent evt, AppDbContext context, CancellationToken ct)
+    private static async Task HandleEmailOpen(EmailOpenEvent evt, ConstellationDbContext context, CancellationToken ct)
     {
         context.Set<EmailTrackingEvent>().Add(new EmailTrackingEvent
         {
@@ -198,7 +198,7 @@ internal sealed class ProcessTrackingEventsJob : IProcessTrackingEventsJob
                 .SetProperty(m => m.FirstOpenedAt, m => m.FirstOpenedAt ?? evt.OccurredAt), ct);
     }
 
-    private async Task HandleEmailClick(EmailClickEvent evt, AppDbContext context, CancellationToken ct)
+    private async Task HandleEmailClick(EmailClickEvent evt, ConstellationDbContext context, CancellationToken ct)
     {
         var now = evt.OccurredAt;
 
@@ -240,7 +240,7 @@ internal sealed class ProcessTrackingEventsJob : IProcessTrackingEventsJob
                 ct);
     }
 
-    private static async Task HandleSmsDelivery(SmsDeliveryReceiptEvent evt, AppDbContext context, CancellationToken ct)
+    private static async Task HandleSmsDelivery(SmsDeliveryReceiptEvent evt, ConstellationDbContext context, CancellationToken ct)
     {
         IQueryable<SmsMessage> query = context.Set<SmsMessage>()
             .Where(m => m.OutgoingId == evt.OutgoingId);

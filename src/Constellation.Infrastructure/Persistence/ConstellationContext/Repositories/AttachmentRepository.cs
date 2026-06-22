@@ -7,9 +7,9 @@ using Microsoft.EntityFrameworkCore;
 
 internal class AttachmentRepository : IAttachmentRepository
 {
-    private readonly AppDbContext _context;
+    private readonly ConstellationDbContext _context;
 
-    public AttachmentRepository(AppDbContext context)
+    public AttachmentRepository(ConstellationDbContext context)
     {
         _context = context;
     }

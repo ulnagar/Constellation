@@ -19,7 +19,7 @@ public static class DependencyInjection
             .AddInfrastructure(config, environment);
 
         services.AddIdentity<AppUser, AppRole>()
-            .AddEntityFrameworkStores<AppDbContext>();
+            .AddEntityFrameworkStores<ConstellationDbContext>();
 
         services.AddHangfire((provider, configuration) => configuration
                 .SetDataCompatibilityLevel(CompatibilityLevel.Version_180)

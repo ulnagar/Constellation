@@ -17,9 +17,9 @@ public sealed class CanViewTrainingCompletionRecordRequirement : IAuthorizationR
 
 public sealed class OwnsTrainingCompletionRecordByRoute : AuthorizationHandler<CanViewTrainingCompletionRecordRequirement>
 {
-    private readonly AppDbContext _context;
+    private readonly ConstellationDbContext _context;
 
-    public OwnsTrainingCompletionRecordByRoute(AppDbContext context)
+    public OwnsTrainingCompletionRecordByRoute(ConstellationDbContext context)
     {
         _context = context;
     }
@@ -60,9 +60,9 @@ public sealed class OwnsTrainingCompletionRecordByRoute : AuthorizationHandler<C
 
 public sealed class OwnsTrainingCompletionRecordByResource : AuthorizationHandler<CanViewTrainingCompletionRecordRequirement, Guid>
 {
-    private readonly AppDbContext _context;
+    private readonly ConstellationDbContext _context;
 
-    public OwnsTrainingCompletionRecordByResource(AppDbContext context)
+    public OwnsTrainingCompletionRecordByResource(ConstellationDbContext context)
     {
         _context = context;
     }

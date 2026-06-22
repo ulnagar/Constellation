@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migrations
 {
-    [DbContext(typeof(AppDbContext))]
+    [DbContext(typeof(ConstellationDbContext))]
     [Migration("20230731031048_AddAuditEntries")]
     partial class AddAuditEntries
     {

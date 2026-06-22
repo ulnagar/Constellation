@@ -6,10 +6,10 @@ using Application.Domains.ScheduledReports.Repositories;
 
 internal sealed class ScheduledReportRepository : IScheduledReportRepository
 {
-    private readonly AppDbContext _context;
+    private readonly ConstellationDbContext _context;
 
     public ScheduledReportRepository(
-        AppDbContext context)
+        ConstellationDbContext context)
     {
         _context = context;
     }

@@ -18,12 +18,12 @@ public sealed class IdentityRepository : IIdentityRepository
 {
     private readonly UserManager<AppUser> _userManager;
     private readonly RoleManager<AppRole> _roleManager;
-    private readonly AppDbContext _context;
+    private readonly ConstellationDbContext _context;
 
     public IdentityRepository(
         UserManager<AppUser> userManager,
         RoleManager<AppRole> roleManager,
-        AppDbContext context)
+        ConstellationDbContext context)
     {
         _userManager = userManager;
         _roleManager = roleManager;

@@ -13,9 +13,9 @@ public sealed record CanSubmitGroupTutorialRollRequirement : IAuthorizationRequi
 
 public sealed class IsCurrentTeacherAddedToTutorial : AuthorizationHandler<CanSubmitGroupTutorialRollRequirement, Guid>
 {
-    private readonly AppDbContext _context;
+    private readonly ConstellationDbContext _context;
 
-    public IsCurrentTeacherAddedToTutorial(AppDbContext context)
+    public IsCurrentTeacherAddedToTutorial(ConstellationDbContext context)
     {
         _context = context;
     }

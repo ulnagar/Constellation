@@ -14,7 +14,7 @@ internal sealed class TeamOperationConfiguration : IEntityTypeConfiguration<Team
 
         builder
             .Property(operation => operation.Id)
-            .UseSequence(AppDbContext.TeamsOperationId);
+            .UseSequence(ConstellationDbContext.TeamsOperationId);
 
         builder
             .HasDiscriminator<string>("OperationType")

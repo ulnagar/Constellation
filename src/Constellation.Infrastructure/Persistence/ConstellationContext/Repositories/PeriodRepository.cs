@@ -13,9 +13,9 @@ using Microsoft.EntityFrameworkCore;
 
 public class PeriodRepository : IPeriodRepository
 {
-    private readonly AppDbContext _context;
+    private readonly ConstellationDbContext _context;
 
-    public PeriodRepository(AppDbContext context)
+    public PeriodRepository(ConstellationDbContext context)
     {
         _context = context;
     }

@@ -6,10 +6,10 @@ using Microsoft.EntityFrameworkCore;
 
 internal sealed class TeamOperationRepository : ITeamOperationRepository
 {
-    private readonly AppDbContext _context;
+    private readonly ConstellationDbContext _context;
 
     public TeamOperationRepository(
-        AppDbContext context)
+        ConstellationDbContext context)
     {
         _context = context;
     }

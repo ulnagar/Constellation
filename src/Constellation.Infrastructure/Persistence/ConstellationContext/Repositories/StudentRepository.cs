@@ -18,11 +18,11 @@ using System.Collections.Generic;
 
 public class StudentRepository : IStudentRepository
 {
-    private readonly AppDbContext _context;
+    private readonly ConstellationDbContext _context;
     private readonly IDateTimeProvider _dateTime;
 
     public StudentRepository(
-        AppDbContext context,
+        ConstellationDbContext context,
         IDateTimeProvider dateTime)
     {
         _context = context;
@@ -35,9 +35,9 @@ public class StudentRepository : IStudentRepository
         await _context
             .Set<Student>()
             .Where(student =>
-                AppDbContext.Soundex(student.Name.FirstName) == AppDbContext.Soundex(name)
-                || AppDbContext.Soundex(student.Name.PreferredName) == AppDbContext.Soundex(name)
-                || AppDbContext.Soundex(student.Name.LastName) == AppDbContext.Soundex(name))
+                ConstellationDbContext.Soundex(student.Name.FirstName) == ConstellationDbContext.Soundex(name)
+                || ConstellationDbContext.Soundex(student.Name.PreferredName) == ConstellationDbContext.Soundex(name)
+                || ConstellationDbContext.Soundex(student.Name.LastName) == ConstellationDbContext.Soundex(name))
             .ToListAsync(cancellationToken);
 
     public async Task<List<Student>> GetAll(

@@ -37,7 +37,7 @@ internal sealed class TrackingEventQueueService
             };
 
             using IServiceScope scope = _scopeFactory.CreateScope();
-            AppDbContext context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+            ConstellationDbContext context = scope.ServiceProvider.GetRequiredService<ConstellationDbContext>();
 
             context.ChangeTracker.AutoDetectChangesEnabled = false;
             context.Set<TrackingQueueEntry>().Add(entry);

@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migrations
 {
-    [DbContext(typeof(AppDbContext))]
+    [DbContext(typeof(ConstellationDbContext))]
     [Migration("20260129010946_RemoveOldTeamOperations")]
     partial class RemoveOldTeamOperations
     {

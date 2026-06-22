@@ -10,11 +10,11 @@ using Microsoft.EntityFrameworkCore;
 
 internal sealed class GroupTutorialRepository : IGroupTutorialRepository
 {
-    private readonly AppDbContext _dbContext;
+    private readonly ConstellationDbContext _dbContext;
     private readonly IDateTimeProvider _dateTime;
 
     public GroupTutorialRepository(
-        AppDbContext dbContext,
+        ConstellationDbContext dbContext,
         IDateTimeProvider dateTime)
     {
         _dbContext = dbContext;

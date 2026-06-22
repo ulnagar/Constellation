@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migrations
 {
-    [DbContext(typeof(AppDbContext))]
+    [DbContext(typeof(ConstellationDbContext))]
     [Migration("20250923042150_UpdateGroupTutorialMSTeamOperationToIncludeTeamDescription")]
     partial class UpdateGroupTutorialMSTeamOperationToIncludeTeamDescription
     {

@@ -9,11 +9,11 @@ using Microsoft.EntityFrameworkCore;
 
 internal sealed class ReportRepository : IReportRepository
 {
-    private readonly AppDbContext _context;
+    private readonly ConstellationDbContext _context;
 
-    public ReportRepository(AppDbContext appDbContext)
+    public ReportRepository(ConstellationDbContext constellationDbContext)
     {
-        _context = appDbContext;
+        _context = constellationDbContext;
     }
 
     public async Task<AcademicReport?> GetAcademicReportById(

@@ -14,11 +14,11 @@ using System.Threading.Tasks;
 
 internal class AttendanceRepository : IAttendanceRepository
 {
-    private readonly AppDbContext _context;
+    private readonly ConstellationDbContext _context;
     private readonly IDateTimeProvider _dateTime;
 
     public AttendanceRepository(
-        AppDbContext context,
+        ConstellationDbContext context,
         IDateTimeProvider dateTime)
     {
         _context = context;

@@ -65,7 +65,7 @@ public class ClassMonitorCacheService : IClassMonitorCacheService
     private async Task GetUsers()
     {
         using var scope = _scopeFactory.CreateScope();
-        var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+        var context = scope.ServiceProvider.GetRequiredService<ConstellationDbContext>();
 
         var students = await context
             .Set<Student>()
@@ -132,7 +132,7 @@ public class ClassMonitorCacheService : IClassMonitorCacheService
     private async Task GetPeriods()
     {
         using var scope = _scopeFactory.CreateScope();
-        var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+        var context = scope.ServiceProvider.GetRequiredService<ConstellationDbContext>();
 
         var periods = await context
             .Set<Period>()

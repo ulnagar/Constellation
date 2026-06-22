@@ -11,10 +11,10 @@ using System.Threading.Tasks;
 
 public class CanvasOperationsRepository : ICanvasOperationsRepository
 {
-    private readonly AppDbContext _context;
+    private readonly ConstellationDbContext _context;
 
     public CanvasOperationsRepository(
-        AppDbContext context)
+        ConstellationDbContext context)
     {
         _context = context;
     }

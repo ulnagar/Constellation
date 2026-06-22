@@ -13,13 +13,13 @@ using Persistence.ConstellationContext;
 
 internal sealed class ProcessQueuedMessagesJob : IProcessQueuedMessagesJob
 {
-    private readonly AppDbContext _context;
+    private readonly ConstellationDbContext _context;
     private readonly ISMSService _smsService;
     private readonly IEmailService _emailService;
     private readonly ILogger _logger;
 
     public ProcessQueuedMessagesJob(
-        AppDbContext context,
+        ConstellationDbContext context,
         ISMSService smsService,
         IEmailService emailService,
         ILogger logger)

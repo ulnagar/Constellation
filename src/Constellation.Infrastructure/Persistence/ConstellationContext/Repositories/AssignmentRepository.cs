@@ -9,11 +9,11 @@ using Microsoft.EntityFrameworkCore;
 
 internal class AssignmentRepository : IAssignmentRepository
 {
-    private readonly AppDbContext _context;
+    private readonly ConstellationDbContext _context;
     private readonly IDateTimeProvider _dateTime;
 
     public AssignmentRepository(
-        AppDbContext context,
+        ConstellationDbContext context,
         IDateTimeProvider dateTime)
     {
         _context = context;

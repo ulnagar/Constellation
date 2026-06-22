@@ -16,10 +16,10 @@ using System.Collections.Generic;
 
 internal sealed class AppSettingsService : IAppSettingsService
 {
-    private readonly IDbContextFactory<AppDbContext> _dbContextFactory;
+    private readonly IDbContextFactory<ConstellationDbContext> _dbContextFactory;
 
     public AppSettingsService(
-        IDbContextFactory<AppDbContext> dbContextFactory)
+        IDbContextFactory<ConstellationDbContext> dbContextFactory)
     {
         _dbContextFactory = dbContextFactory;
     }
@@ -27,7 +27,7 @@ internal sealed class AppSettingsService : IAppSettingsService
     public async Task<CoversConfiguration?> Covers(
         CancellationToken cancellationToken = default)
     {
-        await using AppDbContext _context = await _dbContextFactory.CreateDbContextAsync(cancellationToken);
+        await using ConstellationDbContext _context = await _dbContextFactory.CreateDbContextAsync(cancellationToken);
 
         List<CoversSettings> entry = await _context
             .Set<CoversSettings>()
@@ -72,7 +72,7 @@ internal sealed class AppSettingsService : IAppSettingsService
         CoversConfiguration configuration,
         CancellationToken cancellationToken = default)
     {
-        await using AppDbContext _context = await _dbContextFactory.CreateDbContextAsync(cancellationToken);
+        await using ConstellationDbContext _context = await _dbContextFactory.CreateDbContextAsync(cancellationToken);
 
         List<CoversSettings> existingEntries = await _context.Set<CoversSettings>().ToListAsync(cancellationToken);
 
@@ -97,7 +97,7 @@ internal sealed class AppSettingsService : IAppSettingsService
     public async Task<LessonsConfiguration?> Lessons(
     CancellationToken cancellationToken = default)
     {
-        await using AppDbContext _context = await _dbContextFactory.CreateDbContextAsync(cancellationToken);
+        await using ConstellationDbContext _context = await _dbContextFactory.CreateDbContextAsync(cancellationToken);
 
         List<LessonsSettings> entry = await _context
             .Set<LessonsSettings>()
@@ -142,7 +142,7 @@ internal sealed class AppSettingsService : IAppSettingsService
         LessonsConfiguration configuration,
         CancellationToken cancellationToken = default)
     {
-        await using AppDbContext _context = await _dbContextFactory.CreateDbContextAsync(cancellationToken);
+        await using ConstellationDbContext _context = await _dbContextFactory.CreateDbContextAsync(cancellationToken);
 
         List<LessonsSettings> existingEntries = await _context.Set<LessonsSettings>().ToListAsync(cancellationToken);
 
@@ -167,7 +167,7 @@ internal sealed class AppSettingsService : IAppSettingsService
     public async Task<List<ContactsConfiguration>> Contacts(
         CancellationToken cancellationToken = default)
     {
-        await using AppDbContext _context = await _dbContextFactory.CreateDbContextAsync(cancellationToken);
+        await using ConstellationDbContext _context = await _dbContextFactory.CreateDbContextAsync(cancellationToken);
 
         List<ContactsSettings> entries = await _context
             .Set<ContactsSettings>()
@@ -209,7 +209,7 @@ internal sealed class AppSettingsService : IAppSettingsService
         ContactPosition position, 
         CancellationToken cancellationToken = default)
     {
-        await using AppDbContext _context = await _dbContextFactory.CreateDbContextAsync(cancellationToken);
+        await using ConstellationDbContext _context = await _dbContextFactory.CreateDbContextAsync(cancellationToken);
 
         List<ContactsSettings> entry = await _context
             .Set<ContactsSettings>()
@@ -255,7 +255,7 @@ internal sealed class AppSettingsService : IAppSettingsService
         ContactsConfiguration configuration, 
         CancellationToken cancellationToken = default)
     {
-        await using AppDbContext _context = await _dbContextFactory.CreateDbContextAsync(cancellationToken);
+        await using ConstellationDbContext _context = await _dbContextFactory.CreateDbContextAsync(cancellationToken);
 
         List<ContactsSettings> existingEntries = await _context
             .Set<ContactsSettings>()
@@ -280,7 +280,7 @@ internal sealed class AppSettingsService : IAppSettingsService
     public async Task<MandatoryTrainingConfiguration?> MandatoryTraining(
         CancellationToken cancellationToken = default)
     {
-        await using AppDbContext _context = await _dbContextFactory.CreateDbContextAsync(cancellationToken);
+        await using ConstellationDbContext _context = await _dbContextFactory.CreateDbContextAsync(cancellationToken);
 
         List<MandatoryTrainingSettings> entry = await _context
             .Set<MandatoryTrainingSettings>()
@@ -323,7 +323,7 @@ internal sealed class AppSettingsService : IAppSettingsService
         MandatoryTrainingConfiguration configuration, 
         CancellationToken cancellationToken = default)
     {
-        await using AppDbContext _context = await _dbContextFactory.CreateDbContextAsync(cancellationToken);
+        await using ConstellationDbContext _context = await _dbContextFactory.CreateDbContextAsync(cancellationToken);
 
         List<MandatoryTrainingSettings> existingEntries = await _context
             .Set<MandatoryTrainingSettings>()
@@ -347,7 +347,7 @@ internal sealed class AppSettingsService : IAppSettingsService
     public async Task<List<WorkflowConfiguration>> Workflow(
         CancellationToken cancellationToken = default)
     {
-        await using AppDbContext _context = await _dbContextFactory.CreateDbContextAsync(cancellationToken);
+        await using ConstellationDbContext _context = await _dbContextFactory.CreateDbContextAsync(cancellationToken);
 
         List<WorkflowSettings> entries = await _context
             .Set<WorkflowSettings>()
@@ -389,7 +389,7 @@ internal sealed class AppSettingsService : IAppSettingsService
         WorkflowArea position, 
         CancellationToken cancellationToken = default)
     {
-        await using AppDbContext _context = await _dbContextFactory.CreateDbContextAsync(cancellationToken);
+        await using ConstellationDbContext _context = await _dbContextFactory.CreateDbContextAsync(cancellationToken);
 
         List<WorkflowSettings> entry = await _context
             .Set<WorkflowSettings>()
@@ -435,7 +435,7 @@ internal sealed class AppSettingsService : IAppSettingsService
         WorkflowConfiguration configuration, 
         CancellationToken cancellationToken = default)
     {
-        await using AppDbContext _context = await _dbContextFactory.CreateDbContextAsync(cancellationToken);
+        await using ConstellationDbContext _context = await _dbContextFactory.CreateDbContextAsync(cancellationToken);
 
         List<WorkflowSettings> existingEntries = await _context
             .Set<WorkflowSettings>()
@@ -460,7 +460,7 @@ internal sealed class AppSettingsService : IAppSettingsService
     public async Task<List<TutorialsConfiguration>> Tutorials(
         CancellationToken cancellationToken = default)
     {
-        await using AppDbContext _context = await _dbContextFactory.CreateDbContextAsync(cancellationToken);
+        await using ConstellationDbContext _context = await _dbContextFactory.CreateDbContextAsync(cancellationToken);
 
         List<TutorialsSettings> entries = await _context
             .Set<TutorialsSettings>()
@@ -502,7 +502,7 @@ internal sealed class AppSettingsService : IAppSettingsService
         TutorialPosition position, 
         CancellationToken cancellationToken = default)
     {
-        await using AppDbContext _context = await _dbContextFactory.CreateDbContextAsync(cancellationToken);
+        await using ConstellationDbContext _context = await _dbContextFactory.CreateDbContextAsync(cancellationToken);
 
         List<TutorialsSettings> entry = await _context
             .Set<TutorialsSettings>()
@@ -548,7 +548,7 @@ internal sealed class AppSettingsService : IAppSettingsService
         TutorialsConfiguration configuration, 
         CancellationToken cancellationToken = default)
     {
-        await using AppDbContext _context = await _dbContextFactory.CreateDbContextAsync(cancellationToken);
+        await using ConstellationDbContext _context = await _dbContextFactory.CreateDbContextAsync(cancellationToken);
 
         List<TutorialsSettings> existingEntries = await _context
             .Set<TutorialsSettings>()
@@ -573,7 +573,7 @@ internal sealed class AppSettingsService : IAppSettingsService
     public async Task<AbsencesConfiguration?> Absences(
         CancellationToken cancellationToken = default)
     {
-        await using AppDbContext _context = await _dbContextFactory.CreateDbContextAsync(cancellationToken);
+        await using ConstellationDbContext _context = await _dbContextFactory.CreateDbContextAsync(cancellationToken);
 
         List<AbsencesSettings> entry = await _context
             .Set<AbsencesSettings>()
@@ -618,7 +618,7 @@ internal sealed class AppSettingsService : IAppSettingsService
         AbsencesConfiguration configuration,
         CancellationToken cancellationToken = default)
     {
-        await using AppDbContext _context = await _dbContextFactory.CreateDbContextAsync(cancellationToken);
+        await using ConstellationDbContext _context = await _dbContextFactory.CreateDbContextAsync(cancellationToken);
 
         List<AbsencesSettings> existingEntries = await _context
             .Set<AbsencesSettings>()
@@ -650,7 +650,7 @@ internal sealed class AppSettingsService : IAppSettingsService
     public async Task<CanvasConfiguration?> Canvas(
         CancellationToken cancellationToken = default)
     {
-        await using AppDbContext _context = await _dbContextFactory.CreateDbContextAsync(cancellationToken);
+        await using ConstellationDbContext _context = await _dbContextFactory.CreateDbContextAsync(cancellationToken);
 
         List<CanvasSettings> entry = await _context
             .Set<CanvasSettings>()
@@ -695,7 +695,7 @@ internal sealed class AppSettingsService : IAppSettingsService
         CanvasConfiguration configuration,
         CancellationToken cancellationToken = default)
     {
-        await using AppDbContext _context = await _dbContextFactory.CreateDbContextAsync(cancellationToken);
+        await using ConstellationDbContext _context = await _dbContextFactory.CreateDbContextAsync(cancellationToken);
 
         List<CanvasSettings> existingEntries = await _context
             .Set<CanvasSettings>()
@@ -721,7 +721,7 @@ internal sealed class AppSettingsService : IAppSettingsService
     public async Task<List<SentralConfiguration>> Sentral(
         CancellationToken cancellationToken = default)
     {
-        await using AppDbContext _context = await _dbContextFactory.CreateDbContextAsync(cancellationToken);
+        await using ConstellationDbContext _context = await _dbContextFactory.CreateDbContextAsync(cancellationToken);
 
         List<SentralSettings> entries = await _context
             .Set<SentralSettings>()
@@ -741,7 +741,7 @@ internal sealed class AppSettingsService : IAppSettingsService
         SentralPath type,
         CancellationToken cancellationToken = default)
     {
-        await using AppDbContext _context = await _dbContextFactory.CreateDbContextAsync(cancellationToken);
+        await using ConstellationDbContext _context = await _dbContextFactory.CreateDbContextAsync(cancellationToken);
 
         List<SentralSettings> entry = await _context
             .Set<SentralSettings>()
@@ -765,7 +765,7 @@ internal sealed class AppSettingsService : IAppSettingsService
         SentralConfiguration configuration,
         CancellationToken cancellationToken = default)
     {
-        await using AppDbContext _context = await _dbContextFactory.CreateDbContextAsync(cancellationToken);
+        await using ConstellationDbContext _context = await _dbContextFactory.CreateDbContextAsync(cancellationToken);
 
         List<SentralSettings> existingEntries = await _context
             .Set<SentralSettings>()
@@ -787,7 +787,7 @@ internal sealed class AppSettingsService : IAppSettingsService
     public async Task<TeamsConfiguration?> Teams(
         CancellationToken cancellationToken = default)
     {
-        await using AppDbContext _context = await _dbContextFactory.CreateDbContextAsync(cancellationToken);
+        await using ConstellationDbContext _context = await _dbContextFactory.CreateDbContextAsync(cancellationToken);
 
         List<TeamsSettings> entry = await _context
             .Set<TeamsSettings>()
@@ -877,7 +877,7 @@ internal sealed class AppSettingsService : IAppSettingsService
         TeamsConfiguration configuration,
         CancellationToken cancellationToken = default)
     {
-        await using AppDbContext _context = await _dbContextFactory.CreateDbContextAsync(cancellationToken);
+        await using ConstellationDbContext _context = await _dbContextFactory.CreateDbContextAsync(cancellationToken);
 
         List<TeamsSettings> existingEntries = await _context
             .Set<TeamsSettings>()
@@ -905,7 +905,7 @@ internal sealed class AppSettingsService : IAppSettingsService
     public async Task<AuthenticationConfiguration?> Authentication(
         CancellationToken cancellationToken = default)
     {
-        await using AppDbContext _context = await _dbContextFactory.CreateDbContextAsync(cancellationToken);
+        await using ConstellationDbContext _context = await _dbContextFactory.CreateDbContextAsync(cancellationToken);
 
         List<AuthenticationSettings> entry = await _context
             .Set<AuthenticationSettings>()
@@ -928,7 +928,7 @@ internal sealed class AppSettingsService : IAppSettingsService
         AuthenticationConfiguration configuration,
         CancellationToken cancellationToken = default)
     {
-        await using AppDbContext _context = await _dbContextFactory.CreateDbContextAsync(cancellationToken);
+        await using ConstellationDbContext _context = await _dbContextFactory.CreateDbContextAsync(cancellationToken);
 
         List<AuthenticationSettings> existingEntries = await _context
             .Set<AuthenticationSettings>()

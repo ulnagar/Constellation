@@ -7,9 +7,9 @@ using Microsoft.EntityFrameworkCore;
 
 internal sealed class TeamRepository : ITeamRepository
 {
-    private readonly AppDbContext _dbContext;
+    private readonly ConstellationDbContext _dbContext;
 
-    public TeamRepository(AppDbContext dbContext)
+    public TeamRepository(ConstellationDbContext dbContext)
     {
         _dbContext = dbContext;
     }

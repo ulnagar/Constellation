@@ -11,11 +11,11 @@ using Microsoft.EntityFrameworkCore;
 
 internal sealed class AssessmentRepository : IAssessmentRepository
 {
-    private readonly AppDbContext _context;
+    private readonly ConstellationDbContext _context;
     private readonly IDateTimeProvider _dateTime;
 
     public AssessmentRepository(
-        AppDbContext context,
+        ConstellationDbContext context,
         IDateTimeProvider dateTime)
     {
         _context = context;

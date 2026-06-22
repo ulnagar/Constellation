@@ -14,16 +14,16 @@ using System;
 
 internal sealed class MessageDraftRepository : IMessageDraftRepository
 {
-    private readonly IDbContextFactory<AppDbContext> _dbContextFactory;
+    private readonly IDbContextFactory<ConstellationDbContext> _dbContextFactory;
 
     public MessageDraftRepository(
-        IDbContextFactory<AppDbContext> dbContextFactory)
+        IDbContextFactory<ConstellationDbContext> dbContextFactory)
     {
         _dbContextFactory = dbContextFactory;
     }
 
     private async Task<MessageDraft> GetOrCreateDraft(
-        AppDbContext context,
+        ConstellationDbContext context,
         Guid userId,
         CancellationToken cancellationToken = default)
     {
@@ -58,7 +58,7 @@ internal sealed class MessageDraftRepository : IMessageDraftRepository
         Guid userId,
         CancellationToken cancellationToken = default)
     {
-        await using AppDbContext context = await _dbContextFactory.CreateDbContextAsync(cancellationToken);
+        await using ConstellationDbContext context = await _dbContextFactory.CreateDbContextAsync(cancellationToken);
 
         return await GetOrCreateDraft(context, userId, cancellationToken);
     }
@@ -68,7 +68,7 @@ internal sealed class MessageDraftRepository : IMessageDraftRepository
         Guid userId,
         CancellationToken cancellationToken = default)
     {
-        await using AppDbContext context = await _dbContextFactory.CreateDbContextAsync(cancellationToken);
+        await using ConstellationDbContext context = await _dbContextFactory.CreateDbContextAsync(cancellationToken);
 
         MessageDraft draft = await GetOrCreateDraft(context, userId, cancellationToken);
 
@@ -90,7 +90,7 @@ internal sealed class MessageDraftRepository : IMessageDraftRepository
         Guid userId,
         CancellationToken cancellationToken = default)
     {
-        await using AppDbContext context = await _dbContextFactory.CreateDbContextAsync(cancellationToken);
+        await using ConstellationDbContext context = await _dbContextFactory.CreateDbContextAsync(cancellationToken);
 
         MessageDraft draft = await GetOrCreateDraft(context, userId, cancellationToken);
 
@@ -111,7 +111,7 @@ internal sealed class MessageDraftRepository : IMessageDraftRepository
         Action<MessageDraft> apply,
         CancellationToken cancellationToken = default)
     {
-        await using AppDbContext context = await _dbContextFactory.CreateDbContextAsync(cancellationToken);
+        await using ConstellationDbContext context = await _dbContextFactory.CreateDbContextAsync(cancellationToken);
 
         MessageDraft draft = await GetOrCreateDraft(context, userId, cancellationToken);
 
@@ -127,7 +127,7 @@ internal sealed class MessageDraftRepository : IMessageDraftRepository
         MessagePriority priority = MessagePriority.Normal,
         CancellationToken cancellationToken = default)
     {
-        await using AppDbContext context = await _dbContextFactory.CreateDbContextAsync(cancellationToken);
+        await using ConstellationDbContext context = await _dbContextFactory.CreateDbContextAsync(cancellationToken);
 
         MessageDraft? draft = await context
             .Set<MessageDraft>()
@@ -150,7 +150,7 @@ internal sealed class MessageDraftRepository : IMessageDraftRepository
         Guid userId,
         CancellationToken cancellationToken = default)
     {
-        await using AppDbContext context = await _dbContextFactory.CreateDbContextAsync(cancellationToken);
+        await using ConstellationDbContext context = await _dbContextFactory.CreateDbContextAsync(cancellationToken);
 
         await context
             .Set<MessageDraft>()

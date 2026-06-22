@@ -13,11 +13,11 @@ using System.Threading.Tasks;
 
 internal sealed class StocktakeRepository : IStocktakeRepository
 {
-    private readonly AppDbContext _context;
+    private readonly ConstellationDbContext _context;
     private readonly IDateTimeProvider _dateTime;
 
     public StocktakeRepository(
-        AppDbContext context,
+        ConstellationDbContext context,
         IDateTimeProvider dateTime)
     {
         _context = context;

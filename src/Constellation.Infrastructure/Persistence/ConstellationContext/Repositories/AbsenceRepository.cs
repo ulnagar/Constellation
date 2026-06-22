@@ -17,11 +17,11 @@ using System.Threading.Tasks;
 
 public class AbsenceRepository : IAbsenceRepository
 {
-    private readonly AppDbContext _context;
+    private readonly ConstellationDbContext _context;
     private readonly IDateTimeProvider _dateTime;
 
     public AbsenceRepository(
-        AppDbContext context,
+        ConstellationDbContext context,
         IDateTimeProvider dateTime)
     {
         _context = context;

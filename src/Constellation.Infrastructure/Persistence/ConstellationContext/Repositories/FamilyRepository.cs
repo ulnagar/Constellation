@@ -9,9 +9,9 @@ using Microsoft.EntityFrameworkCore;
 
 internal sealed class FamilyRepository : IFamilyRepository
 {
-    private readonly AppDbContext _context;
+    private readonly ConstellationDbContext _context;
 
-    public FamilyRepository(AppDbContext context)
+    public FamilyRepository(ConstellationDbContext context)
     {
         _context = context;
     }

@@ -8,10 +8,10 @@ using Microsoft.EntityFrameworkCore;
 
 internal sealed class SmsRepository : ISmsRepository
 {
-    private readonly AppDbContext _context;
+    private readonly ConstellationDbContext _context;
 
     public SmsRepository(
-        AppDbContext context)
+        ConstellationDbContext context)
     {
         _context = context;
     }

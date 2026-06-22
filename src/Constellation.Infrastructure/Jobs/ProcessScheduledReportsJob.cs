@@ -14,14 +14,14 @@ using System.Net.Mail;
 
 internal sealed class ProcessScheduledReportsJob : IProcessScheduledReportsJob
 {
-    private readonly AppDbContext _context;
+    private readonly ConstellationDbContext _context;
     private readonly ISender _publisher;
     private readonly IEmailService _emailService;
     private readonly IDateTimeProvider _dateTime;
     private readonly ILogger _logger;
 
     public ProcessScheduledReportsJob(
-        AppDbContext context,
+        ConstellationDbContext context,
         ISender publisher,
         IEmailService emailService,
         IDateTimeProvider dateTime,

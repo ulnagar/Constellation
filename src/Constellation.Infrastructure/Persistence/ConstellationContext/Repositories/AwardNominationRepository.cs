@@ -13,10 +13,10 @@ using System.Threading.Tasks;
 internal sealed class AwardNominationRepository
     : IAwardNominationRepository
 {
-    private readonly AppDbContext _context;
+    private readonly ConstellationDbContext _context;
 
     public AwardNominationRepository(
-        AppDbContext context)
+        ConstellationDbContext context)
     {
         _context = context;
     }

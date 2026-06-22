@@ -10,9 +10,9 @@ using System.Threading.Tasks;
 
 public sealed class EdvalRepository : IEdvalRepository
 {
-    private readonly AppDbContext _context;
+    private readonly ConstellationDbContext _context;
 
-    public EdvalRepository(AppDbContext context)
+    public EdvalRepository(ConstellationDbContext context)
     {
         _context = context;
     }

@@ -38,14 +38,14 @@ public static class ServicesRegistration
         services.AddSingleton<UpdateAuditableEntitiesInterceptor>();
         services.AddSingleton<CreateAuditLogEntitiesInterceptor>();
 
-        services.AddDbContextFactory<AppDbContext>(
+        services.AddDbContextFactory<ConstellationDbContext>(
             (sp, options) =>
             {
                 options.UseSqlServer(
-                    configuration.GetConnectionString("DefaultConnection"),
+                    configuration.GetConnectionString("ConstellationConnection"),
                     b =>
                     {
-                        b.MigrationsAssembly(typeof(AppDbContext).Assembly.FullName);
+                        b.MigrationsAssembly(typeof(ConstellationDbContext).Assembly.FullName);
                         b.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery);
                         b.CommandTimeout(120); // Increased command timeout to allow migrations to complete. May not be necessary after Term 1 2024.
                     });
@@ -60,8 +60,8 @@ public static class ServicesRegistration
 
             });
 
-        services.AddScoped<AppDbContext>(sp =>
-            sp.GetRequiredService<IDbContextFactory<AppDbContext>>().CreateDbContext());
+        services.AddScoped<ConstellationDbContext>(sp =>
+            sp.GetRequiredService<IDbContextFactory<ConstellationDbContext>>().CreateDbContext());
         services.AddScoped<IUnitOfWork, UnitOfWork>();
 
         // Add TrackIt Context

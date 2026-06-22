@@ -11,9 +11,9 @@ using System.Threading.Tasks;
 
 internal sealed class HostingRepository : IHostingRepository
 {
-    private readonly AppDbContext _context;
+    private readonly ConstellationDbContext _context;
 
-    public HostingRepository(AppDbContext context)
+    public HostingRepository(ConstellationDbContext context)
     {
         _context = context;
     }

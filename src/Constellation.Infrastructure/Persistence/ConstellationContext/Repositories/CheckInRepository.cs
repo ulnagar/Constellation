@@ -12,10 +12,10 @@ using System.Threading.Tasks;
 
 internal sealed class CheckInRepository : ICheckInRepository
 {
-    private readonly AppDbContext _context;
+    private readonly ConstellationDbContext _context;
 
     public CheckInRepository(
-        AppDbContext context)
+        ConstellationDbContext context)
     {
         _context = context;
     }

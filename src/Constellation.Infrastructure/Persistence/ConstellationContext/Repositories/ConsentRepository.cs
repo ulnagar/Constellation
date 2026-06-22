@@ -13,9 +13,9 @@ using ApplicationId = Core.Models.ThirdPartyConsent.Identifiers.ApplicationId;
 
 internal sealed class ConsentRepository : IConsentRepository
 {
-    private readonly AppDbContext _context;
+    private readonly ConstellationDbContext _context;
 
-    public ConsentRepository(AppDbContext context)
+    public ConsentRepository(ConstellationDbContext context)
     {
         _context = context;
     }

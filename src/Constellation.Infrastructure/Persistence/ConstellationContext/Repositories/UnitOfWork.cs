@@ -5,10 +5,10 @@ using Core.Primitives;
 
 public class UnitOfWork : IUnitOfWork
 {
-    private readonly AppDbContext _context;
+    private readonly ConstellationDbContext _context;
     
     public UnitOfWork(
-        AppDbContext context)
+        ConstellationDbContext context)
     {
         _context = context;
     }

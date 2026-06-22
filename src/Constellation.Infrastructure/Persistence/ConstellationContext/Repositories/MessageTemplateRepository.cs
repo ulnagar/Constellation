@@ -9,10 +9,10 @@ using System.Threading.Tasks;
 
 internal sealed class MessageTemplateRepository : IMessageTemplateRepository
 {
-    private readonly AppDbContext _context;
+    private readonly ConstellationDbContext _context;
 
     public MessageTemplateRepository(
-        AppDbContext context)
+        ConstellationDbContext context)
     {
         _context = context;
     }

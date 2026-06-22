@@ -8,9 +8,9 @@ using Microsoft.EntityFrameworkCore;
 
 internal sealed class StudentAwardRepository : IStudentAwardRepository
 {
-    private readonly AppDbContext _context;
+    private readonly ConstellationDbContext _context;
 
-    public StudentAwardRepository(AppDbContext context)
+    public StudentAwardRepository(ConstellationDbContext context)
     {
         _context = context;
     }

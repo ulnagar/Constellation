@@ -12,9 +12,9 @@ public sealed class IdempotentDomainEventHandler<TDomainEvent> : IDomainEventHan
 {
     private readonly INotificationHandler<TDomainEvent> _decorated;
     private readonly ILogger _logger;
-    private readonly AppDbContext _dbContext;
+    private readonly ConstellationDbContext _dbContext;
 
-    public IdempotentDomainEventHandler(AppDbContext dbContext, INotificationHandler<TDomainEvent> decorated, ILogger logger)
+    public IdempotentDomainEventHandler(ConstellationDbContext dbContext, INotificationHandler<TDomainEvent> decorated, ILogger logger)
     {
         _dbContext = dbContext;
         _decorated = decorated;

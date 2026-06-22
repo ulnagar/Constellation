@@ -12,9 +12,9 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Reposito
 
 public class JobActivationRepository : IJobActivationRepository
 {
-    private readonly AppDbContext _context;
+    private readonly ConstellationDbContext _context;
 
-    public JobActivationRepository(AppDbContext context)
+    public JobActivationRepository(ConstellationDbContext context)
     {
         _context = context;
     }

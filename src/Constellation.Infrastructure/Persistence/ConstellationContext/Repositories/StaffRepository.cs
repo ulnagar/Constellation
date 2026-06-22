@@ -22,10 +22,10 @@ using Microsoft.EntityFrameworkCore;
 
 public class StaffRepository : IStaffRepository
 {
-    private readonly AppDbContext _context;
+    private readonly ConstellationDbContext _context;
 
     public StaffRepository(
-        AppDbContext context)
+        ConstellationDbContext context)
     {
         _context = context;
     }

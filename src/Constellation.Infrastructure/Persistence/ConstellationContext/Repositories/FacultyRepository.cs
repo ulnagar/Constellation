@@ -12,9 +12,9 @@ using Microsoft.EntityFrameworkCore;
 
 internal sealed class FacultyRepository : IFacultyRepository
 {
-    private readonly AppDbContext _dbContext;
+    private readonly ConstellationDbContext _dbContext;
 
-    public FacultyRepository(AppDbContext dbContext)
+    public FacultyRepository(ConstellationDbContext dbContext)
     {
         _dbContext = dbContext;
     }

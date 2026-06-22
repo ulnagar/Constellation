@@ -14,12 +14,12 @@ using Serilog;
 
 internal sealed class ProcessOutboxMessagesJob : IProcessOutboxMessagesJob
 {
-    private readonly AppDbContext _context;
+    private readonly ConstellationDbContext _context;
     private readonly IPublisher _publisher;
     private readonly ILogger _logger;
 
     public ProcessOutboxMessagesJob(
-        AppDbContext context, 
+        ConstellationDbContext context, 
         IPublisher publisher, 
         ILogger logger)
     {

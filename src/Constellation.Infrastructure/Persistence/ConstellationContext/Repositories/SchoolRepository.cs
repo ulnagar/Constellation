@@ -12,11 +12,11 @@ using Microsoft.EntityFrameworkCore;
 
 public class SchoolRepository : ISchoolRepository
 {
-    private readonly AppDbContext _context;
+    private readonly ConstellationDbContext _context;
     private readonly IDateTimeProvider _dateTime;
 
     public SchoolRepository(
-        AppDbContext context,
+        ConstellationDbContext context,
         IDateTimeProvider dateTime)
     {
         _context = context;

@@ -8,9 +8,9 @@ using Microsoft.EntityFrameworkCore;
 
 public class CasualRepository : ICasualRepository
 {
-    private readonly AppDbContext _context;
+    private readonly ConstellationDbContext _context;
 
-    public CasualRepository(AppDbContext context)
+    public CasualRepository(ConstellationDbContext context)
     {
         _context = context;
     }

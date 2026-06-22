@@ -15,11 +15,11 @@ using System.Threading.Tasks;
 
 public sealed class AttendancePlanRepository : IAttendancePlanRepository
 {
-    private readonly AppDbContext _context;
+    private readonly ConstellationDbContext _context;
     private readonly IDateTimeProvider _dateTime;
 
     public AttendancePlanRepository(
-        AppDbContext context,
+        ConstellationDbContext context,
         IDateTimeProvider dateTime)
     {
         _context = context;

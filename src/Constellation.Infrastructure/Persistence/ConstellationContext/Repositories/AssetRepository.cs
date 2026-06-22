@@ -13,10 +13,10 @@ using System.Threading.Tasks;
 
 internal sealed class AssetRepository : IAssetRepository
 {
-    private readonly AppDbContext _context;
+    private readonly ConstellationDbContext _context;
 
     public AssetRepository(
-        AppDbContext context)
+        ConstellationDbContext context)
     {
         _context = context;
     }

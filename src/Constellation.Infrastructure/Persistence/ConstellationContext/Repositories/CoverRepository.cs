@@ -13,9 +13,9 @@ using Microsoft.EntityFrameworkCore;
 
 internal sealed class CoverRepository : ICoverRepository
 {
-    private readonly AppDbContext _context;
+    private readonly ConstellationDbContext _context;
 
-    public CoverRepository(AppDbContext context)
+    public CoverRepository(ConstellationDbContext context)
     {
         _context = context;
     }

@@ -8,10 +8,10 @@ using Microsoft.EntityFrameworkCore;
 
 internal sealed class EmailRepository : IEmailRepository
 {
-    private readonly AppDbContext _context;
+    private readonly ConstellationDbContext _context;
 
     public EmailRepository(
-        AppDbContext context)
+        ConstellationDbContext context)
     {
         _context = context;
     }
