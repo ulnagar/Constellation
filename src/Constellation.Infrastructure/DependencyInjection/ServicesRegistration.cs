@@ -77,7 +77,7 @@ public static class ServicesRegistration
 
         // Add EnrolmentDbContext
 
-        services.AddScoped<AuditInterceptor>();
+        services.AddSingleton<AuditInterceptor>();
 
         services.AddDbContextFactory<EnrolmentDbContext>((sp, options) =>
         {
