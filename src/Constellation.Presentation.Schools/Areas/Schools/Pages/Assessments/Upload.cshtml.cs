@@ -95,6 +95,8 @@ public class UploadModel : BasePageModel
                 new("FileEmpty", "You must select a file to upload"),
                 _linkGenerator.GetPathByPage("/Assessments/Upload", values: new { area = "Schools", AssessmentId }));
 
+            await PreparePage();
+
             return Page();
         }
 
@@ -103,6 +105,8 @@ public class UploadModel : BasePageModel
             ModalContent = ErrorDisplay.Create(
                 new("FileTypeMismatch", "You can only upload PDF files"),
                 _linkGenerator.GetPathByPage("/Assessments/Upload", values: new { area = "Schools", AssessmentId }));
+
+            await PreparePage();
 
             return Page();
         }
