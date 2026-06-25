@@ -5,6 +5,7 @@ using ConstellationContext.Converters;
 using Converters;
 using Core.Models.EnrolmentContext.Application;
 using Core.Models.EnrolmentContext.EnrolmentPeriod;
+using Core.Models.Identifiers;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -66,6 +67,16 @@ internal sealed class ApplicationConfiguration : IEntityTypeConfiguration<Applic
             .OwnsOne(
                 entry => entry.MailingAddress,
                 owned => owned.ConfigureMailingAddress());
+
+        builder
+            .Property(entry => entry.CurrentSchoolCode)
+            .IsRequired(false)
+            .HasConversion<StronglyTypedIdValueConverter<SchoolCode, string>>();
+
+        builder
+            .Property(entry => entry.DestinationSchoolCode)
+            .IsRequired(false)
+            .HasConversion<StronglyTypedIdValueConverter<SchoolCode, string>>();
 
         builder
             .Property(entry => entry.Program)
