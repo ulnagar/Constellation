@@ -1,8 +1,8 @@
 ﻿namespace Constellation.Core.Models.EnrolmentContext.Offer;
 
+using Application.Identifiers;
 using EnrolmentPeriod.Identifiers;
 using Identifiers;
-using System;
 using Status = Enums.Status;
 
 public sealed class Offer

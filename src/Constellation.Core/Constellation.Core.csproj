@@ -5,13 +5,18 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Models\EnrolmentContext\Application\Enums\**" />
+    <EmbeddedResource Remove="Models\EnrolmentContext\Application\Enums\**" />
+    <None Remove="Models\EnrolmentContext\Application\Enums\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="MediatR.Contracts" />
     <PackageReference Include="Microsoft.Extensions.Identity.Stores" />
     <PackageReference Include="Newtonsoft.Json" />
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Models\EnrolmentContext\Application\Enums\" />
     <Folder Include="Models\LinkedSystems\Errors\" />
     <Folder Include="Models\ThirdPartyConsent\Events\" />
     <Folder Include="Models\Timetables\Events\" />
