@@ -8,6 +8,7 @@ using Constellation.Infrastructure.Identity.ClaimsPrincipalFactories;
 using Constellation.Infrastructure.Identity.MagicLink;
 using Constellation.Infrastructure.Persistence.ConstellationContext;
 using Constellation.Presentation.Server.Areas.API.Endpoints;
+using Constellation.Presentation.Server.Helpers.ExceptionHandlers;
 using Constellation.Presentation.Server.Helpers.HtmlGenerator;
 using Constellation.Presentation.Server.Helpers.Identity;
 using Constellation.Presentation.Server.Infrastructure;
@@ -195,15 +196,22 @@ builder.Services.AddHttpClient("TileProxy", client =>
     client.Timeout = TimeSpan.FromSeconds(10);
 });
 
+builder.Services.AddExceptionHandler<ConstellationExceptionHandler>();
+builder.Services.AddProblemDetails();
+
 WebApplication app = builder.Build();
 
 if (!app.Environment.IsProduction())
 {
-    app.UseDeveloperExceptionPage();
+    //app.UseDeveloperExceptionPage();
+    app.UseExceptionHandler();
+    app.UseStatusCodePagesWithReExecute("/Error", "?statusCode={0}");
 }
 else
 {
-    app.UseExceptionHandler("/Error");
+    app.UseExceptionHandler();
+    app.UseStatusCodePagesWithReExecute("/Error", "?statusCode={0}");
+
     // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }

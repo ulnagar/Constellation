@@ -1,187 +1,401 @@
 ﻿@page
 @model ErrorModel
+@{
+    Layout = null;
+}
 
-<div class="error__container">
-    <div class="error__">
-        <div class="error__text">
-            <h1 class="error__title">An error occured <b>:(</b></h1>
-            <h2 class="error__title">@Model.ProblemDetails?.Title</h2>
-        </div>
-    </div>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@Model.Code — Constellation</title>
 
-    <div class="error__">
-        <div class="error__text">
-            <p>You can go back to our <a href="/">home page</a>.</p>
-        </div>
-    </div>
+    <style>
+            /* ================================================================
+                           Constellation — Error Page
+                           Supports: 403, 404 (default), 500, 503
+                           Toggle variants via:  body data-error="@Model.StatusCode "
+            ================================================================ */
 
-    <div class="gears">
-        <div class="gear one">
-            <div class="bar"></div>
-            <div class="bar"></div>
-            <div class="bar"></div>
-        </div>
-        <div class="gear two">
-            <div class="bar"></div>
-            <div class="bar"></div>
-            <div class="bar"></div>
-        </div>
-        <div class="gear three">
-            <div class="bar"></div>
-            <div class="bar"></div>
-            <div class="bar"></div>
-        </div>
-    </div>
+            :root {
+                --cns-dark: #080D1A;
+                --cns-border: rgba(255, 255, 255, 0.07);
+                --cns-border-subtle: rgba(255, 255, 255, 0.05);
+                --cns-text: #E8EDF7;
+                --cns-muted: #4B5675;
+                --cns-footer: #1E2D45;
+                --cns-accent: #3B5FC4;
+                --cns-accent-hover: #4F7FE8;
+                --cns-accent-light: #7BA3F0;
+                --cns-accent-glow: rgba(59, 95, 196, 0.10);
+                --cns-accent-border: rgba(59, 95, 196, 0.26);
+            }
+
+            /* ── Reset ── */
+            html, body {
+                margin: 0;
+                padding: 0;
+                height: 100%;
+            }
+
+            /* ── Page shell ── */
+            .cns-error {
+                background-color: var(--cns-dark);
+                min-height: 100vh;
+                display: flex;
+                flex-direction: column;
+                font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, system-ui, sans-serif;
+                color: var(--cns-text);
+                position: relative;
+                overflow: hidden;
+            }
+
+            /* ── Atmospheric glow ── */
+            .cns-error__bg {
+                overflow: hidden;
+                position: absolute;
+                inset: 0;
+                pointer-events: none;
+                background: radial-gradient(ellipse 58% 80% at 82% 50%, rgba(59, 95, 196, 0.10) 0%, transparent 68%), radial-gradient(ellipse 42% 60% at 10% 18%, rgba(99, 59, 212, 0.06) 0%, transparent 72%);
+            }
+
+            /* ── CSS-only star field ── */
+            .cns-error__stars {
+                position: absolute;
+                inset: 0;
+                pointer-events: none;
+                background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 900'%3E%3Ccircle cx='1319' cy='124' r='1.0' fill='rgba(255,255,255,0.24)'/%3E%3Ccircle cx='467' cy='152' r='1.0' fill='rgba(255,255,255,0.26)'/%3E%3Ccircle cx='1126' cy='99' r='1.0' fill='rgba(255,255,255,0.29)'/%3E%3Ccircle cx='201' cy='233' r='0.5' fill='rgba(255,255,255,0.35)'/%3E%3Ccircle cx='1159' cy='213' r='0.8' fill='rgba(255,255,255,0.31)'/%3E%3Ccircle cx='929' cy='613' r='0.8' fill='rgba(255,255,255,0.38)'/%3E%3Ccircle cx='336' cy='724' r='0.6' fill='rgba(255,255,255,0.4)'/%3E%3Ccircle cx='450' cy='791' r='0.6' fill='rgba(255,255,255,0.45)'/%3E%3Ccircle cx='208' cy='377' r='0.4' fill='rgba(255,255,255,0.52)'/%3E%3Ccircle cx='98' cy='757' r='0.7' fill='rgba(255,255,255,0.45)'/%3E%3Ccircle cx='785' cy='90' r='0.8' fill='rgba(255,255,255,0.43)'/%3E%3Ccircle cx='1276' cy='380' r='0.6' fill='rgba(255,255,255,0.22)'/%3E%3Ccircle cx='486' cy='113' r='0.8' fill='rgba(255,255,255,0.32)'/%3E%3Ccircle cx='757' cy='176' r='0.6' fill='rgba(255,255,255,0.5)'/%3E%3Ccircle cx='556' cy='728' r='0.8' fill='rgba(255,255,255,0.31)'/%3E%3Ccircle cx='360' cy='556' r='0.6' fill='rgba(255,255,255,0.34)'/%3E%3Ccircle cx='787' cy='286' r='0.6' fill='rgba(255,255,255,0.3)'/%3E%3Ccircle cx='1412' cy='342' r='0.5' fill='rgba(255,255,255,0.35)'/%3E%3Ccircle cx='479' cy='851' r='1.0' fill='rgba(255,255,255,0.44)'/%3E%3Ccircle cx='558' cy='77' r='0.9' fill='rgba(255,255,255,0.42)'/%3E%3Ccircle cx='654' cy='227' r='0.6' fill='rgba(255,255,255,0.39)'/%3E%3Ccircle cx='1326' cy='479' r='0.4' fill='rgba(255,255,255,0.3)'/%3E%3Ccircle cx='1159' cy='561' r='0.7' fill='rgba(255,255,255,0.4)'/%3E%3Ccircle cx='1205' cy='418' r='0.8' fill='rgba(255,255,255,0.36)'/%3E%3Ccircle cx='1020' cy='103' r='0.7' fill='rgba(255,255,255,0.27)'/%3E%3Ccircle cx='337' cy='821' r='0.7' fill='rgba(255,255,255,0.52)'/%3E%3Ccircle cx='798' cy='400' r='0.9' fill='rgba(255,255,255,0.26)'/%3E%3Ccircle cx='524' cy='576' r='0.5' fill='rgba(255,255,255,0.38)'/%3E%3Ccircle cx='244' cy='708' r='0.8' fill='rgba(255,255,255,0.32)'/%3E%3Ccircle cx='238' cy='310' r='0.9' fill='rgba(255,255,255,0.46)'/%3E%3Ccircle cx='549' cy='522' r='0.8' fill='rgba(255,255,255,0.28)'/%3E%3Ccircle cx='227' cy='650' r='0.5' fill='rgba(255,255,255,0.21)'/%3E%3Ccircle cx='1257' cy='213' r='0.5' fill='rgba(255,255,255,0.37)'/%3E%3Ccircle cx='1114' cy='807' r='0.9' fill='rgba(255,255,255,0.23)'/%3E%3Ccircle cx='1236' cy='341' r='0.6' fill='rgba(255,255,255,0.42)'/%3E%3Ccircle cx='753' cy='861' r='0.5' fill='rgba(255,255,255,0.44)'/%3E%3Ccircle cx='171' cy='97' r='0.7' fill='rgba(255,255,255,0.29)'/%3E%3Ccircle cx='1361' cy='496' r='0.8' fill='rgba(255,255,255,0.2)'/%3E%3Ccircle cx='1090' cy='631' r='0.9' fill='rgba(255,255,255,0.47)'/%3E%3Ccircle cx='1422' cy='215' r='0.5' fill='rgba(255,255,255,0.35)'/%3E%3Ccircle cx='1385' cy='675' r='0.5' fill='rgba(255,255,255,0.54)'/%3E%3Ccircle cx='934' cy='133' r='0.7' fill='rgba(255,255,255,0.22)'/%3E%3Ccircle cx='1215' cy='235' r='0.5' fill='rgba(255,255,255,0.5)'/%3E%3Ccircle cx='130' cy='244' r='0.7' fill='rgba(255,255,255,0.48)'/%3E%3Ccircle cx='1062' cy='253' r='0.8' fill='rgba(255,255,255,0.55)'/%3E%3Ccircle cx='1114' cy='145' r='0.8' fill='rgba(255,255,255,0.53)'/%3E%3Ccircle cx='1190' cy='494' r='0.9' fill='rgba(255,255,255,0.41)'/%3E%3Ccircle cx='843' cy='204' r='0.8' fill='rgba(255,255,255,0.38)'/%3E%3Ccircle cx='735' cy='443' r='0.9' fill='rgba(255,255,255,0.39)'/%3E%3Ccircle cx='834' cy='755' r='0.9' fill='rgba(255,255,255,0.46)'/%3E%3Ccircle cx='519' cy='206' r='0.7' fill='rgba(255,255,255,0.29)'/%3E%3Ccircle cx='521' cy='87' r='0.5' fill='rgba(255,255,255,0.42)'/%3E%3Ccircle cx='1117' cy='866' r='0.9' fill='rgba(255,255,255,0.38)'/%3E%3Ccircle cx='842' cy='507' r='0.8' fill='rgba(255,255,255,0.3)'/%3E%3Ccircle cx='130' cy='178' r='0.4' fill='rgba(255,255,255,0.3)'/%3E%3Ccircle cx='553' cy='812' r='0.6' fill='rgba(255,255,255,0.31)'/%3E%3Ccircle cx='1006' cy='168' r='0.7' fill='rgba(255,255,255,0.25)'/%3E%3Ccircle cx='129' cy='603' r='0.5' fill='rgba(255,255,255,0.44)'/%3E%3Ccircle cx='652' cy='68' r='0.8' fill='rgba(255,255,255,0.22)'/%3E%3Ccircle cx='126' cy='530' r='0.6' fill='rgba(255,255,255,0.39)'/%3E%3Ccircle cx='1392' cy='250' r='0.6' fill='rgba(255,255,255,0.27)'/%3E%3Ccircle cx='1176' cy='262' r='0.7' fill='rgba(255,255,255,0.52)'/%3E%3Ccircle cx='177' cy='439' r='0.8' fill='rgba(255,255,255,0.44)'/%3E%3Ccircle cx='657' cy='277' r='0.9' fill='rgba(255,255,255,0.47)'/%3E%3Ccircle cx='498' cy='281' r='0.6' fill='rgba(255,255,255,0.2)'/%3E%3Ccircle cx='624' cy='478' r='0.6' fill='rgba(255,255,255,0.46)'/%3E%3Ccircle cx='158' cy='19' r='0.9' fill='rgba(255,255,255,0.53)'/%3E%3Ccircle cx='214' cy='85' r='0.7' fill='rgba(255,255,255,0.46)'/%3E%3Ccircle cx='281' cy='367' r='0.7' fill='rgba(255,255,255,0.41)'/%3E%3Ccircle cx='333' cy='458' r='0.5' fill='rgba(255,255,255,0.28)'/%3E%3Ccircle cx='1262' cy='836' r='0.7' fill='rgba(255,255,255,0.21)'/%3E%3Ccircle cx='285' cy='280' r='0.6' fill='rgba(255,255,255,0.44)'/%3E%3Ccircle cx='567' cy='298' r='0.6' fill='rgba(255,255,255,0.26)'/%3E%3Ccircle cx='1308' cy='883' r='0.7' fill='rgba(255,255,255,0.24)'/%3E%3Ccircle cx='114' cy='104' r='0.8' fill='rgba(255,255,255,0.21)'/%3E%3Ccircle cx='100' cy='13' r='0.6' fill='rgba(255,255,255,0.4)'/%3E%3Ccircle cx='546' cy='175' r='0.4' fill='rgba(255,255,255,0.42)'/%3E%3Ccircle cx='885' cy='584' r='0.5' fill='rgba(255,255,255,0.36)'/%3E%3Ccircle cx='1425' cy='162' r='0.4' fill='rgba(255,255,255,0.33)'/%3E%3Ccircle cx='1202' cy='575' r='0.5' fill='rgba(255,255,255,0.31)'/%3E%3Ccircle cx='641' cy='383' r='0.9' fill='rgba(255,255,255,0.33)'/%3E%3Ccircle cx='91' cy='376' r='0.9' fill='rgba(255,255,255,0.49)'/%3E%3Ccircle cx='1156' cy='426' r='0.6' fill='rgba(255,255,255,0.23)'/%3E%3Ccircle cx='372' cy='432' r='0.4' fill='rgba(255,255,255,0.39)'/%3E%3Ccircle cx='690' cy='811' r='1.0' fill='rgba(255,255,255,0.32)'/%3E%3Ccircle cx='89' cy='889' r='0.8' fill='rgba(255,255,255,0.47)'/%3E%3Ccircle cx='952' cy='368' r='0.8' fill='rgba(255,255,255,0.46)'/%3E%3Ccircle cx='476' cy='238' r='1.0' fill='rgba(255,255,255,0.27)'/%3E%3Ccircle cx='152' cy='801' r='0.4' fill='rgba(255,255,255,0.25)'/%3E%3Ccircle cx='828' cy='705' r='0.5' fill='rgba(255,255,255,0.43)'/%3E%3Ccircle cx='72' cy='98' r='1.2' fill='rgba(255,255,255,0.65)'/%3E%3Ccircle cx='186' cy='52' r='1.0' fill='rgba(255,255,255,0.5)'/%3E%3Ccircle cx='258' cy='136' r='1.4' fill='rgba(255,255,255,0.7)'/%3E%3Ccircle cx='376' cy='66' r='1.1' fill='rgba(255,255,255,0.55)'/%3E%3Ccircle cx='477' cy='30' r='0.9' fill='rgba(255,255,255,0.45)'/%3E%3Ccircle cx='588' cy='110' r='1.2' fill='rgba(255,255,255,0.6)'/%3E%3Ccircle cx='691' cy='57' r='1.0' fill='rgba(255,255,255,0.5)'/%3E%3Ccircle cx='792' cy='136' r='1.1' fill='rgba(255,255,255,0.55)'/%3E%3Ccircle cx='897' cy='66' r='1.4' fill='rgba(255,255,255,0.65)'/%3E%3Ccircle cx='968' cy='182' r='0.9' fill='rgba(255,255,255,0.45)'/%3E%3Cline x1='72' y1='98' x2='186' y2='52' stroke='rgba(79,127,232,0.16)' stroke-width='0.75' fill='none'/%3E%3Cline x1='186' y1='52' x2='376' y2='66' stroke='rgba(79,127,232,0.13)' stroke-width='0.75' fill='none'/%3E%3Cline x1='376' y1='66' x2='588' y2='110' stroke='rgba(79,127,232,0.16)' stroke-width='0.75' fill='none'/%3E%3Cline x1='588' y1='110' x2='792' y2='136' stroke='rgba(79,127,232,0.11)' stroke-width='0.75' fill='none'/%3E%3Cline x1='792' y1='136' x2='968' y2='182' stroke='rgba(79,127,232,0.13)' stroke-width='0.75' fill='none'/%3E%3Cline x1='258' y1='136' x2='376' y2='66' stroke='rgba(79,127,232,0.10)' stroke-width='0.75' fill='none'/%3E%3Cline x1='477' y1='30' x2='588' y2='110' stroke='rgba(79,127,232,0.12)' stroke-width='0.75' fill='none'/%3E%3Cline x1='691' y1='57' x2='792' y2='136' stroke='rgba(79,127,232,0.10)' stroke-width='0.75' fill='none'/%3E%3Ccircle cx='1180' cy='155' r='1.2' fill='rgba(255,255,255,0.6)'/%3E%3Ccircle cx='1258' cy='98' r='1.4' fill='rgba(255,255,255,0.7)'/%3E%3Ccircle cx='1332' cy='178' r='1.0' fill='rgba(255,255,255,0.5)'/%3E%3Ccircle cx='1396' cy='122' r='1.1' fill='rgba(255,255,255,0.55)'/%3E%3Ccircle cx='1145' cy='342' r='1.0' fill='rgba(255,255,255,0.5)'/%3E%3Ccircle cx='1235' cy='388' r='1.2' fill='rgba(255,255,255,0.6)'/%3E%3Ccircle cx='1312' cy='332' r='0.9' fill='rgba(255,255,255,0.45)'/%3E%3Ccircle cx='1388' cy='378' r='1.1' fill='rgba(255,255,255,0.55)'/%3E%3Cline x1='1180' y1='155' x2='1258' y2='98' stroke='rgba(79,127,232,0.14)' stroke-width='0.75' fill='none'/%3E%3Cline x1='1258' y1='98' x2='1332' y2='178' stroke='rgba(79,127,232,0.12)' stroke-width='0.75' fill='none'/%3E%3Cline x1='1332' y1='178' x2='1396' y2='122' stroke='rgba(79,127,232,0.14)' stroke-width='0.75' fill='none'/%3E%3Cline x1='1145' y1='342' x2='1235' y2='388' stroke='rgba(79,127,232,0.11)' stroke-width='0.75' fill='none'/%3E%3Cline x1='1235' y1='388' x2='1312' y2='332' stroke='rgba(79,127,232,0.13)' stroke-width='0.75' fill='none'/%3E%3Cline x1='1312' y1='332' x2='1388' y2='378' stroke='rgba(79,127,232,0.11)' stroke-width='0.75' fill='none'/%3E%3Cline x1='1180' y1='155' x2='1145' y2='342' stroke='rgba(79,127,232,0.08)' stroke-width='0.75' fill='none'/%3E%3Ccircle cx='44' cy='636' r='1.1' fill='rgba(255,255,255,0.55)'/%3E%3Ccircle cx='132' cy='706' r='1.2' fill='rgba(255,255,255,0.6)'/%3E%3Ccircle cx='232' cy='748' r='1.0' fill='rgba(255,255,255,0.5)'/%3E%3Ccircle cx='336' cy='674' r='1.3' fill='rgba(255,255,255,0.65)'/%3E%3Ccircle cx='447' cy='728' r='1.0' fill='rgba(255,255,255,0.5)'/%3E%3Ccircle cx='548' cy='690' r='1.1' fill='rgba(255,255,255,0.55)'/%3E%3Ccircle cx='648' cy='748' r='1.2' fill='rgba(255,255,255,0.6)'/%3E%3Ccircle cx='753' cy='710' r='0.9' fill='rgba(255,255,255,0.45)'/%3E%3Cline x1='44' y1='636' x2='132' y2='706' stroke='rgba(79,127,232,0.09)' stroke-width='0.75' fill='none'/%3E%3Cline x1='132' y1='706' x2='232' y2='748' stroke='rgba(79,127,232,0.11)' stroke-width='0.75' fill='none'/%3E%3Cline x1='232' y1='748' x2='336' y2='674' stroke='rgba(79,127,232,0.13)' stroke-width='0.75' fill='none'/%3E%3Cline x1='336' y1='674' x2='447' y2='728' stroke='rgba(79,127,232,0.11)' stroke-width='0.75' fill='none'/%3E%3Cline x1='447' y1='728' x2='548' y2='690' stroke='rgba(79,127,232,0.13)' stroke-width='0.75' fill='none'/%3E%3Cline x1='548' y1='690' x2='648' y2='748' stroke='rgba(79,127,232,0.11)' stroke-width='0.75' fill='none'/%3E%3Cline x1='648' y1='748' x2='753' y2='710' stroke='rgba(79,127,232,0.13)' stroke-width='0.75' fill='none'/%3E%3Ccircle cx='1120' cy='682' r='1.1' fill='rgba(255,255,255,0.55)'/%3E%3Ccircle cx='1198' cy='726' r='1.3' fill='rgba(255,255,255,0.65)'/%3E%3Ccircle cx='1276' cy='688' r='1.0' fill='rgba(255,255,255,0.5)'/%3E%3Ccircle cx='1352' cy='728' r='1.2' fill='rgba(255,255,255,0.6)'/%3E%3Ccircle cx='1420' cy='694' r='0.9' fill='rgba(255,255,255,0.45)'/%3E%3Cline x1='1120' y1='682' x2='1198' y2='726' stroke='rgba(79,127,232,0.12)' stroke-width='0.75' fill='none'/%3E%3Cline x1='1198' y1='726' x2='1276' y2='688' stroke='rgba(79,127,232,0.14)' stroke-width='0.75' fill='none'/%3E%3Cline x1='1276' y1='688' x2='1352' y2='728' stroke='rgba(79,127,232,0.12)' stroke-width='0.75' fill='none'/%3E%3Cline x1='1352' y1='728' x2='1420' y2='694' stroke='rgba(79,127,232,0.14)' stroke-width='0.75' fill='none'/%3E%3C/svg%3E");
+                background-size: cover;
+                background-position: center;
+                background-repeat: no-repeat;
+            }
+
+
+            /* ── Ghost error code ── */
+            .cns-error__ghost {
+                position: absolute;
+                right: -0.04em;
+                top: 50%;
+                transform: translateY(-50%);
+                font-size: clamp(120px, 22vw, 240px);
+                font-weight: 700;
+                color: rgba(255, 255, 255, 0.026);
+                line-height: 1;
+                letter-spacing: -0.05em;
+                pointer-events: none;
+                user-select: none;
+            }
+
+                .cns-error__ghost > img {
+                    opacity: 0.26;
+                    filter: saturate(0.5);
+                }
+
+            /* ── Navigation ── */
+            .cns-error__nav {
+                position: relative;
+                z-index: 1;
+                padding: 0.875rem 1.5rem;
+                border-bottom: 0.5px solid var(--cns-border);
+                display: flex;
+                align-items: center;
+            }
+
+            .cns-error__brand {
+                display: inline-flex;
+                align-items: center;
+                gap: 0.5rem;
+                color: rgba(255, 255, 255, 0.9);
+                text-decoration: none;
+                font-size: 1.5rem;
+                font-weight: 500;
+                letter-spacing: -0.2px;
+            }
+
+                .cns-error__brand > img {
+                    height: 35px;
+                    width: 35px;
+                }
+
+                .cns-error__brand:hover {
+                    color: #fff;
+                }
+
+            /* ── Main content ── */
+            .cns-error__main {
+                position: relative;
+                z-index: 1;
+                flex: 1;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                padding: 2.5rem 1.5rem;
+            }
+
+            .cns-error__content {
+                text-align: center;
+                max-width: 440px;
+            }
+
+            /* ── Status badge ── */
+            .cns-error__badge {
+                display: inline-flex;
+                align-items: center;
+                gap: 0.375rem;
+                border-radius: 2rem;
+                padding: 0.25rem 0.75rem;
+                font-size: 1.2rem;
+                font-weight: 500;
+                letter-spacing: 0.05em;
+                text-transform: uppercase;
+                margin-bottom: 1.25rem;
+                background: var(--cns-accent-glow);
+                border: 0.5px solid var(--cns-accent-border);
+                color: var(--cns-accent-light);
+            }
+
+            /* Badge variants — driven by data-error on body */
+            [data-error="403"] .cns-error__badge {
+                background: rgba(202, 138, 4, 0.09);
+                border-color: rgba(202, 138, 4, 0.28);
+                color: #CA8A04;
+            }
+
+            [data-error="500"] .cns-error__badge {
+                background: rgba(239, 68, 68, 0.09);
+                border-color: rgba(239, 68, 68, 0.28);
+                color: #F87171;
+            }
+
+            [data-error="503"] .cns-error__badge {
+                background: rgba(139, 92, 246, 0.09);
+                border-color: rgba(139, 92, 246, 0.28);
+                color: #A78BFA;
+            }
+
+            /* ── Heading ── */
+            .cns-error__title {
+                font-size: 2.5rem;
+                font-weight: 500;
+                color: var(--cns-text);
+                margin: 0 0 0.75rem;
+                line-height: 1.5;
+            }
+
+            .cns-error__desc {
+                font-size: 1.25rem;
+                color: var(--cns-muted);
+                line-height: 1.75;
+                margin: 0 0 1.75rem;
+            }
+
+            /* ── Action buttons ── */
+            .cns-error__actions {
+                display: flex;
+                gap: 0.625rem;
+                justify-content: center;
+                flex-wrap: wrap;
+            }
+
+            .cns-error__btn-primary {
+                display: inline-flex;
+                align-items: center;
+                gap: 0.4rem;
+                background: var(--cns-accent);
+                color: #fff !important;
+                border: none;
+                padding: 0.5rem 1.125rem;
+                border-radius: 0.375rem;
+                font-size: 1rem;
+                font-weight: 500;
+                text-decoration: none;
+                letter-spacing: -0.1px;
+                transition: background 0.15s ease;
+            }
+
+                .cns-error__btn-primary:hover {
+                    background: var(--cns-accent-hover);
+                }
+
+            .cns-error__btn-ghost {
+                display: inline-flex;
+                align-items: center;
+                gap: 0.4rem;
+                background: transparent;
+                color: rgba(255, 255, 255, 0.45) !important;
+                border: 0.5px solid rgba(255, 255, 255, 0.11);
+                padding: 0.5rem 1.125rem;
+                border-radius: 0.375rem;
+                font-size: 1rem;
+                font-weight: 400;
+                text-decoration: none;
+                transition: border-color 0.15s ease, color 0.15s ease;
+            }
+
+                .cns-error__btn-ghost:hover {
+                    border-color: rgba(255, 255, 255, 0.22);
+                    color: rgba(255, 255, 255, 0.65) !important;
+                }
+
+            /* -- Support Details -- */
+            .cns-error__details{
+                margin-top: 0.75rem;
+            }
+
+            /* ── Support / request ID note ── */
+            /* Shown automatically for 500 and 503 via data-error selector */
+            .cns-error__ref {
+                display: none;
+            }
+
+            [data-error="500"] .cns-error__ref,
+            [data-error="503"] .cns-error__ref {
+                display: block;
+                font-size: 0.75rem;
+                color: var(--cns-muted);
+                margin-top: 0.75rem;
+            }
+
+            .cns-error__ref code {
+                background: rgba(255, 255, 255, 0.06);
+                color: #6B7FA8;
+                padding: 1px 6px;
+                border-radius: 3px;
+                font-size: 0.6875rem;
+            }
+
+            /* ── Failing URL ── */
+            /* Shown whenever Model.FailingUrl is non-null, for any error code */
+            .cns-error__failing-url {
+                display: none;
+            }
+
+            [data-has-url="True"] .cns-error__failing-url {
+                display: block;
+                font-size: 0.75rem;
+                color: var(--cns-muted);
+                margin-top: 0.75rem;
+            }
+
+            .cns-error__failing-url code {
+                background: rgba(255, 255, 255, 0.06);
+                color: #6B7FA8;
+                padding: 1px 6px;
+                border-radius: 3px;
+                font-size: 0.6875rem;
+                word-break: break-all;
+            }
+
+            /* ── Footer ── */
+            .cns-error__footer {
+                position: relative;
+                z-index: 1;
+                padding: 0.8rem 1.5rem;
+                border-top: 0.5px solid var(--cns-border-subtle);
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                flex-wrap: wrap;
+                gap: 0.5rem;
+            }
+
+            .cns-error__footer-copy {
+                font-size: 1rem;
+                /* color: var(--cns-footer); */
+                color: var(--cns-text);
+            }
+
+            .cns-error__footer a {
+                font-size: 1rem;
+                color: var(--cns-accent);
+                text-decoration: none;
+            }
+
+                .cns-error__footer a:hover {
+                    color: var(--cns-accent-light);
+                }
+    </style>
+</head>
+
+<body class="cns-error" data-error="@Model.StatusCode" data-has-url="@(Model.FailingUrl is not null)">
+
+    <!-- Atmospheric background layers (decorative, hidden from AT) -->
+    <div class="cns-error__bg" aria-hidden="true"></div>
+    <div class="cns-error__stars" aria-hidden="true"></div>
+
+    <!-- Ghost error code watermark (decorative) -->
+    <div class="cns-error__ghost" aria-hidden="true"><img src="~/logo.svg" /> @Model.StatusCode</div>
+
+    <!-- ── Navigation ── -->
+    <nav class="cns-error__nav" aria-label="Application">
+        <a href="/" class="cns-error__brand">
+            <img src="~/logo.svg" />
+            Constellation
+        </a>
+    </nav>
+
+    <!-- ── Main error content ── -->
+    <main class="cns-error__main" id="main-content">
+        <div class="cns-error__content">
+
+            <!-- Status badge -->
+            <div class="cns-error__badge" role="status" aria-live="polite">
+                <svg width="7" height="7" viewBox="0 0 10 10" fill="currentColor" aria-hidden="true">
+                    <circle cx="5" cy="5" r="5" />
+                </svg>
+                @Model.BadgeText
+            </div>
+
+            <!-- Title -->
+            <h1 class="cns-error__title">@Model.Title</h1>
+
+            <!-- Description -->
+            <p class="cns-error__desc">@Model.Description</p>
+
+            <!-- Actions -->
+            <div class="cns-error__actions">
+                <a href="/" class="cns-error__btn-primary">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                         stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z" />
+                        <polyline points="9 22 9 12 15 12 15 22" />
+                    </svg>
+                    Dashboard
+                </a>
+                <a href="javascript:history.back()" class="cns-error__btn-ghost">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                         stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <line x1="19" y1="12" x2="5" y2="12" />
+                        <polyline points="12 19 5 12 12 5" />
+                    </svg>
+                    Go back
+                </a>
+            </div>
+
+            <div class="cns-error__details">
+                <p class="cns-error__desc">Our team has been notified.</p>
     
-    <div class="error__">
-        <button class="btn btn-warning" type="button" data-toggle="collapse" data-target="#errorDetailCollapse">Show Error Details</button>
-        <div class="error__text collapse" id="errorDetailCollapse" style="text-align: left">
-            <p>Error eventDetails: @Model.ProblemDetails?.Detail</p>
+                <!-- Support reference (rendered for 500/503 via CSS data-error selector) -->
+                <p class="cns-error__ref">
+                    Reference: <code>@Model.RequestId</code>
+                </p>
+
+                <!-- Failing URL (rendered whenever FailingUrl is available) -->
+                <p class="cns-error__failing-url">
+                    Occurred on: <code>@Model.FailingUrl</code>
+                </p>
+            </div>
+            
+
         </div>
-    </div>
+    </main>
 
-</div>
+    <!-- ── Footer ── -->
+    <footer class="cns-error__footer">
+        <span class="cns-error__footer-copy">Aurora College - Constellation</span>
+        <a href="mailto:support@aurora.nsw.edu.au">Contact support</a>
+    </footer>
 
-<style>
-    .error__container {
-        margin-top: 100px;
-    }
-
-    h1.error__title {
-        color: #5d862e;
-        line-height: 4rem;
-        font-weight: bolder;
-    }
-
-    h2.error__title {
-        line-height: 3rem;
-    }
-
-    .error__ {
-        text-align: center;
-        overflow: hidden;
-    }
-
-    .error__text {
-        z-index: 1001;
-    }
-
-    .gears {
-      position: relative;
-      margin: 50px auto 200px auto;
-      width: auto; height: 0;
-    }
-
-    .gear {
-      position: relative;
-      z-index: 0;
-      width: 120px; height: 120px;
-      margin: 0 auto;
-      border-radius: 50%;
-      background: #5d862e;
-    }
-
-    .gear:before{
-      position: absolute; left: 5px; top: 5px; right: 5px; bottom: 5px;
-      z-index: 2;
-      content: "";
-      border-radius: 50%;
-      background: white;
-    }
-
-    .gear:after {
-      position: absolute; left: 25px; top: 25px;
-      z-index: 3;
-      content: "";
-      width: 70px; height: 70px;
-      border-radius: 50%;
-      border: 5px solid #5d862e;
-      box-sizing: border-box;
-      background: white;
-    }
-
-    .gear.one {
-      left: -130px;
-    }
-
-    .gear.two {
-      top: -75px;
-    }
-
-    .gear.three {
-      top: -235px;
-      left: 130px;
-    }
-
-    .gear .bar {
-      position: absolute; left: -15px; top: 50%;
-      z-index: 0;
-      width: 150px; height: 30px;
-      margin-top: -15px;
-      border-radius: 5px;
-      background: #5d862e;
-    }
-
-    .gear .bar:before {
-      position: absolute; left: 5px; top: 5px; right: 5px; bottom: 5px;
-      z-index: 1;
-      content: "";
-      border-radius: 2px;
-      background: white;
-    }
-
-    .gear .bar:nth-child(2) {
-      transform: rotate(60deg);
-      -webkit-transform: rotate(60deg);
-    }
-
-    .gear .bar:nth-child(3) {
-      transform: rotate(120deg);
-      -webkit-transform: rotate(120deg);
-    }
-
-    @@-webkit-keyframes clockwise {
-      0% { -webkit-transform: rotate(0deg);}
-      100% { -webkit-transform: rotate(360deg);}
-    }
-
-    @@-webkit-keyframes anticlockwise {
-      0% { -webkit-transform: rotate(360deg);}
-      100% { -webkit-transform: rotate(0deg);}
-    }
-
-    @@-webkit-keyframes clockwiseError {
-      0% { -webkit-transform: rotate(0deg);}
-      20% { -webkit-transform: rotate(30deg);}
-      40% { -webkit-transform: rotate(25deg);}
-      60% { -webkit-transform: rotate(30deg);}
-      100% { -webkit-transform: rotate(0deg);}
-    }
-
-    @@-webkit-keyframes anticlockwiseErrorStop {
-      0% { -webkit-transform: rotate(0deg);}
-      20% { -webkit-transform: rotate(-30deg);}
-      60% { -webkit-transform: rotate(-30deg);}
-      100% { -webkit-transform: rotate(0deg);}
-    }
-
-    @@-webkit-keyframes anticlockwiseError {
-      0% { -webkit-transform: rotate(0deg);}
-      20% { -webkit-transform: rotate(-30deg);}
-      40% { -webkit-transform: rotate(-25deg);}
-      60% { -webkit-transform: rotate(-30deg);}
-      100% { -webkit-transform: rotate(0deg);}
-    }
-
-    .gear.one {
-      -webkit-animation: anticlockwiseErrorStop 2s linear infinite;
-    }
-
-    .gear.two {
-      -webkit-animation: anticlockwiseError 2s linear infinite;
-    }
-
-    .gear.three {
-      -webkit-animation: clockwiseError 2s linear infinite;
-    }
-</style>
+</body>
+</html>
