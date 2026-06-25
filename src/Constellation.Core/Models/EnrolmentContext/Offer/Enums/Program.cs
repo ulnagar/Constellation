@@ -5,6 +5,8 @@ using System.Collections.Generic;
 
 public sealed class Program : StringEnumeration<Program>
 {
+    public static readonly Program Empty = new(string.Empty, string.Empty);
+
     public static readonly Program OpportunityClass = new("OC", "Opportunity Class");
     public static readonly Program SelectiveHighSchool = new("SHS", "Selective High School");
     public static readonly Program YoungAndDeadlyMob = new("YDM", "Young and Deadly Mob");

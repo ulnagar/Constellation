@@ -1,5 +1,4 @@
-﻿#nullable enable
-namespace Constellation.Infrastructure.Persistence.ConstellationContext.Converters;
+﻿namespace Constellation.Infrastructure.Persistence.ConstellationContext.Converters;
 
 using Core.ValueObjects;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;

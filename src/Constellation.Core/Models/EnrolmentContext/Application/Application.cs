@@ -29,7 +29,7 @@ public sealed class Application
     public EmailAddress? StudentEmailAddress { get; private set; }
     
     /* Parent Details */
-    public Name ParentName { get; private set; }
+    public Name? ParentName { get; private set; }
     public EmailAddress? ParentEmailAddress { get; private set; }
     public PhoneNumber? ParentPhoneNumber { get; private set; }
     public MailingAddress? MailingAddress { get; private set; }

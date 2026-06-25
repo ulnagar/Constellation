@@ -1,5 +1,6 @@
 ﻿namespace Constellation.Infrastructure.Persistence.EnrolmentContext;
 
+using Constellation.Infrastructure.Persistence.ConstellationContext.Converters;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -12,6 +13,11 @@ public sealed class EnrolmentDbContext : DbContext
         DbContextOptions<EnrolmentDbContext> options)
         : base(options)
     { }
+
+    protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
+    {
+        configurationBuilder.Conventions.Add(_ => new StronglyTypedIdConvention());
+    }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

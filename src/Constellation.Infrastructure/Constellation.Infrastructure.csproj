@@ -40,6 +40,8 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="Persistence\EnrolmentContext\EntityConfigurations\EnrolmentPeriod\" />
+    <Folder Include="Persistence\EnrolmentContext\EntityConfigurations\Offer\" />
     <Folder Include="Persistence\EnrolmentContext\Migrations\" />
     <Folder Include="Persistence\EnrolmentContext\Repositories\" />
   </ItemGroup>
