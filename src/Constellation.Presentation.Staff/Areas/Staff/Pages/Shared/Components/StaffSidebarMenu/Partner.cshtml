@@ -112,6 +112,36 @@
                 </div>
             </div>
         </div>
+        
+        <div class="card">
+            <div class="card-header" id="enrolmentsHeading">
+                <h4 class="sidebar-heading d-flex justify-content-between p-3 mb-1 text-muted" data-bs-toggle="collapse" data-bs-target="#enrolments" data-toggle="collapse" data-target="#enrolments" role="button">
+                    Enrolments
+                </h4>
+            </div>
+
+            <div id="enrolments" class="collapse @(module == "Enrolments" ? "show" : "")" data-parent="#accordion">
+                <div class="card-body">
+                    <ul class="nav flex-column">
+                        <li class="nav-item">
+                            <a class="nav-link show-loader @(Model == ActivePage.Partner_Enrolments_Applications ? "active" : "")" asp-page="/Partner/Enrolments/Applications/Index" asp-area="Staff">
+                                Applications
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link show-loader @(Model == ActivePage.Partner_Enrolments_Offers ? "active" : "")" asp-page="/Partner/Enrolments/Offers/Index" asp-area="Staff">
+                                Offers
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link show-loader @(Model == ActivePage.Partner_Enrolments_Reports ? "active" : "")" asp-page="/Partner/Enrolments/Reports/Index" asp-area="Staff">
+                                Reports
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
 
     </div>
 </nav>

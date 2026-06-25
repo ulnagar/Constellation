@@ -24,6 +24,11 @@ public sealed class AuthPermission : StringEnumeration<AuthPermission>
     public const string Partners_Students_Edit_Value = "Partners.Students.Edit";
     public const string Partners_Families_View_Value = "Partners.Families.View";
     public const string Partners_Families_Edit_Value = "Partners.Families.Edit";
+    public const string Partners_Enrolments_Applications_View_Value = "Partners.Enrolments.Applications.View";
+    public const string Partners_Enrolments_Applications_Edit_Value = "Partners.Enrolments.Applications.Edit";
+    public const string Partners_Enrolments_Offers_View_Value = "Partners.Enrolments.Offers.View";
+    public const string Partners_Enrolments_Offers_Edit_Value = "Partners.Enrolments.Offers.Edit";
+    public const string Partners_Enrolments_Reports_View_Value = "Partners.Enrolments.Reports.View";
 
     public const string Messaging_Contacts_View_Value = "Partners.Contacts.View";
     public const string Messaging_View_Value = "Messaging.View";
@@ -139,6 +144,11 @@ public sealed class AuthPermission : StringEnumeration<AuthPermission>
     public static readonly AuthPermission Partners_Students_Edit = new(Partners_Students_Edit_Value, "Partners: Students: Edit");
     public static readonly AuthPermission Partners_Families_View = new(Partners_Families_View_Value, "Partners: Families: View");
     public static readonly AuthPermission Partners_Families_Edit = new(Partners_Families_Edit_Value, "Partners: Families: Edit");
+    public static readonly AuthPermission Partners_Enrolments_Applications_View = new(Partners_Enrolments_Applications_View_Value, "Partners: Enrolments: Applications: View");
+    public static readonly AuthPermission Partners_Enrolments_Applications_Edit = new(Partners_Enrolments_Applications_Edit_Value, "Partners: Enrolments: Applications: Edit");
+    public static readonly AuthPermission Partners_Enrolments_Offers_View = new(Partners_Enrolments_Offers_View_Value, "Partners: Enrolments: Offers: View");
+    public static readonly AuthPermission Partners_Enrolments_Offers_Edit = new(Partners_Enrolments_Offers_Edit_Value, "Partners: Enrolments: Offers: Edit");
+    public static readonly AuthPermission Partners_Enrolments_Reports_View = new(Partners_Enrolments_Reports_View_Value, "Partners: Enrolments: Reports: View");
 
     public static readonly AuthPermission Messaging_Contacts_View = new(Messaging_Contacts_View_Value, "Messaging: Contacts: View");
     public static readonly AuthPermission Messaging_View = new(Messaging_View_Value, "Messaging: View");

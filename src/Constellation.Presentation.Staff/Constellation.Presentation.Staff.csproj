@@ -17,5 +17,10 @@
     <ProjectReference Include="..\Constellation.Presentation.Shared\Constellation.Presentation.Shared.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Areas\Staff\Pages\Partner\Enrolments\Reports\" />
+    <Folder Include="Areas\Staff\Pages\Partner\Enrolments\Offers\" />
+  </ItemGroup>
+
 
 </Project>
