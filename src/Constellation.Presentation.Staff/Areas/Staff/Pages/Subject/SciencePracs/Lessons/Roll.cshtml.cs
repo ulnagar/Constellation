@@ -58,7 +58,7 @@ public class RollModel : BasePageModel
     public async Task<IActionResult> OnPostCancel(
         CancelRollSelection viewModel)
     {
-        CancelLessonRollCommand command = new(LessonId, RollId, viewModel.Comment);
+        CancelLessonRollCommand command = new(LessonId, RollId, viewModel.Status, viewModel.Comment);
 
         _logger
             .ForContext(nameof(CancelLessonRollCommand), command, true)

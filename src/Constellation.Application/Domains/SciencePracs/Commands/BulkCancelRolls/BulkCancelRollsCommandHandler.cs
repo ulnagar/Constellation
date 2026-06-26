@@ -50,7 +50,7 @@ internal sealed class BulkCancelRollsCommandHandler
     {
         string comment = $"{request.Comment}{Environment.NewLine}Roll cancelled by {_currentUserService.UserName} at {_dateTime.Now}";
 
-        List<OfferingId> offeringIds = new();
+        List<OfferingId> offeringIds = [];
 
         foreach (Grade grade in request.Grades)
         {
@@ -81,7 +81,7 @@ internal sealed class BulkCancelRollsCommandHandler
 
                 _logger.Information("Cancelling Roll for lesson {Lesson} for school {School}", lesson.Name, code);
 
-                roll.CancelRoll(comment);
+                roll.CancelRoll(LessonStatus.Cancelled, comment);
             }
 
             await _unitOfWork.CompleteAsync(cancellationToken);

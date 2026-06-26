@@ -39,7 +39,7 @@ internal sealed class RemoveFromLessonRolls
 
     public async Task Handle(EnrolmentDeletedDomainEvent notification, CancellationToken cancellationToken)
     {
-        Enrolment enrolment = await _enrolmentRepository.GetById(notification.EnrolmentId, cancellationToken);
+        Enrolment? enrolment = await _enrolmentRepository.GetById(notification.EnrolmentId, cancellationToken);
 
         if (enrolment is null)
         {
@@ -56,7 +56,7 @@ internal sealed class RemoveFromLessonRolls
 
         List<SciencePracLesson> lessons = await _lessonRepository.GetAllForStudent(offeringEnrolment.StudentId, cancellationToken);
 
-        if (!lessons.Any())
+        if (lessons.Count == 0)
             return;
 
         lessons = lessons
@@ -65,7 +65,7 @@ internal sealed class RemoveFromLessonRolls
                     record.OfferingId == offeringEnrolment.OfferingId))
             .ToList();
 
-        if (!lessons.Any())
+        if (lessons.Count == 0)
             return;
 
         // Ensure student isn't also enrolled in another current class that is covered by these lessons
@@ -95,11 +95,11 @@ internal sealed class RemoveFromLessonRolls
             {
                 // This is the last student in the class from this school
                 // The roll is no longer needed and should be cancelled
-                roll.CancelRoll("Last student has withdrawn. Roll no longer required.");
+                roll.CancelRoll(LessonStatus.Cancelled, "Last student has withdrawn. Roll no longer required.");
             }
 
             // Remove the student from the roll
-            SciencePracAttendance attendance = roll.RemoveStudent(offeringEnrolment.StudentId);
+            SciencePracAttendance? attendance = roll.RemoveStudent(offeringEnrolment.StudentId);
 
             if (attendance is not null)
             {

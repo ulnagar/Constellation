@@ -73,12 +73,14 @@ public sealed class SciencePracRoll
         return Result.Success();
     }
 
-    public Result CancelRoll(string comment)
+    public Result CancelRoll(
+        LessonStatus status,
+        string comment)
     {
         if (Status == LessonStatus.Completed)
             return Result.Failure(SciencePracRollErrors.CannotCancelCompletedRoll);
 
-        Status = LessonStatus.Cancelled;
+        Status = status;
         SubmittedDate = DateTime.Now;
         Comment = comment;
 
@@ -87,12 +89,12 @@ public sealed class SciencePracRoll
 
     public Result ReinstateRoll()
     {
-        if (Status != LessonStatus.Cancelled)
+        if (Status != LessonStatus.Cancelled && Status != LessonStatus.Concern)
             return Result.Failure(SciencePracRollErrors.MustBeCancelled);
 
         Status = LessonStatus.Active;
         SubmittedDate = null;
-        Comment = null;
+        Comment = string.Empty;
 
         return Result.Success();
     }

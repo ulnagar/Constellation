@@ -38,7 +38,7 @@ internal sealed class CancelLessonRollCommandHandler
 
     public async Task<Result> Handle(CancelLessonRollCommand request, CancellationToken cancellationToken)
     {
-        SciencePracLesson lesson = await _lessonRepository.GetById(request.LessonId, cancellationToken);
+        SciencePracLesson? lesson = await _lessonRepository.GetById(request.LessonId, cancellationToken);
 
         if (lesson is null)
         {
@@ -47,7 +47,7 @@ internal sealed class CancelLessonRollCommandHandler
             return Result.Failure(SciencePracLessonErrors.NotFound(request.LessonId));
         }
 
-        SciencePracRoll roll = lesson.Rolls.SingleOrDefault(roll => roll.Id == request.RollId);
+        SciencePracRoll? roll = lesson.Rolls.SingleOrDefault(roll => roll.Id == request.RollId);
 
         if (roll is null)
         {
@@ -63,7 +63,7 @@ internal sealed class CancelLessonRollCommandHandler
             return Result.Failure(SciencePracRollErrors.CannotCancelCompletedRoll);
         }
 
-        Result cancelRequest = roll.CancelRoll($"{request.Comment} Roll cancelled by {_currentUserService.UserName} at {_dateTime.Now}");
+        Result cancelRequest = roll.CancelRoll(request.Status, $"{request.Comment} Roll cancelled by {_currentUserService.UserName} at {_dateTime.Now}");
 
         if (cancelRequest.IsFailure)
         {

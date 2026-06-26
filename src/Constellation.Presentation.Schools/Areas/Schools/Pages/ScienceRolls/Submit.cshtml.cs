@@ -98,8 +98,23 @@ public class SubmitModel : BasePageModel
             .Select(entry => entry.StudentId)
             .ToList();
 
+        /* Disable ability to submit roll without any students present */
+        if (presentStudents.Count == 0)
+        {
+            ModalContent = FeedbackDisplay.Create(
+                "Invalid Roll",
+                "A roll without any students present is invalid. If you have a valid reason to mark an empty roll, please contact the Science Practical Coordinator.",
+                "Ok",
+                "btn-secondary",
+                _linkGenerator.GetPathByPage("/ScienceRolls/Index", values: new { area = "Schools" }));
+
+            return Page();
+        }
+
+        /*
         if (presentStudents.Count == 0 && (string.IsNullOrWhiteSpace(Comment) || Comment.Length < 5))
             ModelState.AddModelError(nameof(Comment), "You must provide a comment if none of the students were present");
+        */
 
         if (LessonDate > DateTime.Today)
             ModelState.AddModelError(nameof(LessonDate), "You cannot mark a roll for the future");

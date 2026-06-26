@@ -7,7 +7,7 @@
     <button class="btn btn-warning" data-toggle="modal" data-target="#selectStudent">Search Student</button>
     <button class="btn btn-warning" data-toggle="modal" data-target="#selectSchool">Search School</button>
     
-    <button class="btn btn-danger" data-toggle="modal" data-target="#removeRolls">Cancel Roles</button>
+    <button class="btn btn-danger" data-toggle="modal" data-target="#removeRolls">Cancel Rolls</button>
 </div>
 
 <hr />
@@ -17,7 +17,7 @@
     <h3 class="mb-3">Science Prac Lesson Rolls for @Model.ReportFor</h3>
 }
 
-<table class="table table-striped table-hover data-table">
+<table class="table table-striped table-hover">
     <thead>
     <tr>
         <th></th>
@@ -41,7 +41,7 @@
             </td>
             <td>@item.LessonName</td>
             <td>@item.CourseName</td>
-            <td>@item.DueDate.ToShortDateString()</td>
+            <td data-order="@item.DueDate.ToString("yyyy-MM-dd")">@item.DueDate.ToShortDateString()</td>
             <td>@item.Status.ToString()</td>
             <td>@item.PresentStudents / @item.TotalStudents</td>
             <td>
@@ -61,3 +61,21 @@
 <vc:select-student-for-lesson-filter />
 <vc:select-school-for-lesson-filter />
 <vc:bulk-cancel-science-prac-rolls />
+
+@section scripts
+{
+    <script>
+        $(document).ready(function (){
+            $('table').DataTable({
+                order: [
+                    [1, 'asc'],
+                    [2, 'asc']
+                ],
+                columnDefs: [
+                    { target: 0, searchable: false, sortable: false },
+                    { target: 6, searchable: false, sortable: false }
+                ]
+            });
+        })
+    </script>
+}

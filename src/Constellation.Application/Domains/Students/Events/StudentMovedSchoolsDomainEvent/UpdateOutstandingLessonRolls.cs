@@ -97,7 +97,7 @@ internal sealed class UpdateOutstandingLessonRolls
 
                     // This is the last student in the class from this school
                     // The roll is no longer needed and should be cancelled
-                    roll.CancelRoll("Last student has withdrawn. Roll no longer required.");
+                    roll.CancelRoll(LessonStatus.Cancelled, "Last student has withdrawn. Roll no longer required.");
                 }
 
                 // Remove the student from the roll
