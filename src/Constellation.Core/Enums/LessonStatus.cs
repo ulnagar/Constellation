@@ -13,6 +13,8 @@ namespace Constellation.Core.Enums
         [Display(Name = "Cancelled")]
         Cancelled = 3,
         [Display(Name = "Not Applicable")]
-        NotApplicable = 4
+        NotApplicable = 4,
+        [Display(Name = "Concern")]
+        Concern = 5,
     }
 }

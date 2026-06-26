@@ -137,7 +137,7 @@ public sealed class SciencePracLesson : AggregateRoot
     public void Cancel()
     {
         foreach (SciencePracRoll roll in _rolls)
-            roll.CancelRoll("Lesson Cancelled");
+            roll.CancelRoll(LessonStatus.Cancelled, "Lesson Cancelled");
 
         DoNotGenerateRolls = true;
     }

@@ -22,21 +22,17 @@
                 
                     <div class="row">
                         <div class="form-group col">
-                            <label asp-for="SelectedGrades" class="col-md-3">Grades</label>
-                            <div class="col-md-9">
-                                <select asp-for="SelectedGrades" asp-items="@Html.GetEnumSelectList<Grade>()" class="combo" data-select2-id="RemoveRolls.Grade" multiple="multiple">
-                                    <option value=""> -- Select Grade -- </option>
-                                </select>
-                            </div>
+                            <label asp-for="SelectedGrades">Grades</label>
+                            <select asp-for="SelectedGrades" asp-items="@Html.GetEnumSelectList<Grade>()" class="combo" data-select2-id="RemoveRolls.Grade" multiple="multiple">
+                                <option value=""> -- Select Grade -- </option>
+                            </select>
                         </div>
                     </div>
                     
                     <div class="row">
                         <div class="form-group col">
-                            <label asp-for="Comment" class="col-md-3">Comment</label>
-                            <div class="col-md-9">
-                                <textarea asp-for="Comment" cols="50" rows="5" class="form-control"></textarea>
-                            </div>
+                            <label asp-for="Comment">Comment</label>
+                            <textarea asp-for="Comment" cols="50" rows="5" class="form-control"></textarea>
                         </div>
                     </div>
                 </div>
