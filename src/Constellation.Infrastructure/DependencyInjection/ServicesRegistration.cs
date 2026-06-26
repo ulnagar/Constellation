@@ -2,6 +2,7 @@
 namespace Microsoft.Extensions.DependencyInjection;
 
 using Constellation.Application.Clock;
+using Constellation.Application.Domains.EnrolmentContext.Applications.Queries.GetEnrolmentApplicationById;
 using Constellation.Application.Interfaces.Jobs;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Interfaces.Services;
@@ -15,6 +16,7 @@ using Constellation.Infrastructure.Persistence.ConstellationContext.Interceptors
 using Constellation.Infrastructure.Persistence.ConstellationContext.Repositories;
 using Constellation.Infrastructure.Persistence.EnrolmentContext;
 using Constellation.Infrastructure.Persistence.EnrolmentContext.Interceptors;
+using Constellation.Infrastructure.Persistence.EnrolmentContext.Repositories;
 using Constellation.Infrastructure.Persistence.TrackItContext;
 using Constellation.Infrastructure.Services;
 using Constellation.Infrastructure.Templates.Services;
@@ -144,7 +146,7 @@ public static class ServicesRegistration
 
         services.AddScoped<IRazorViewToStringRenderer, RazorViewToStringRenderer>();
 
-        // Add repositories
+        // Add Constellation repositories
 
         services.Scan(selector =>
             selector.FromAssemblies(
@@ -154,6 +156,14 @@ public static class ServicesRegistration
             .UsingRegistrationStrategy(RegistrationStrategy.Skip)
             .AsMatchingInterface()
             .WithScopedLifetime());
+
+        // Add Enrolment repositories
+        services.Scan(selector =>
+            selector.FromAssemblies(Constellation.Infrastructure.AssemblyReference.Assembly)
+                .AddClasses(classes => classes.InNamespaceOf<EnrolmentUnitOfWork>(), false)
+                .UsingRegistrationStrategy(RegistrationStrategy.Skip)
+                .AsMatchingInterface()
+                .WithScopedLifetime());
 
         // Add remaining services
 
