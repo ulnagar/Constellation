@@ -3,21 +3,23 @@ namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Partner.Enrolments.
 using Application.Common.PresentationModels;
 using Application.Domains.EnrolmentContext.Applications.Queries.GetEnrolmentApplicationById;
 using Application.Models.Auth;
+using Constellation.Application.Domains.Schools.Models;
+using Constellation.Application.Domains.Schools.Queries.GetSchoolsForSelectionList;
 using Constellation.Core.Abstractions.Services;
 using Constellation.Core.Enums;
 using Constellation.Core.Models.EnrolmentContext.Offer.Enums;
 using Constellation.Core.Models.Identifiers;
 using Constellation.Core.Models.Students.Enums;
-using Constellation.Core.Models.Students.ValueObjects;
-using Constellation.Core.ValueObjects;
 using Core.Shared;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.Routing;
 using Presentation.Shared.Helpers.Attributes;
 using Presentation.Shared.Helpers.Logging;
-using Presentation.Staff.Pages.Partner.Enrolments.Applications;
+using Presentation.Shared.Helpers.ModelBinders;
 using Serilog;
+using System.ComponentModel.DataAnnotations;
 using ApplicationId = Core.Models.EnrolmentContext.Application.Identifiers.ApplicationId;
 
 [HasPermission(AuthPermission.Partners_Enrolments_Applications_Edit_Value)]
@@ -48,33 +50,62 @@ public class UpsertModel : BasePageModel
     [BindProperty(SupportsGet = true)]
     public ApplicationId Id { get; set; } = ApplicationId.Empty;
 
-    public string? StudentReferenceNumber { get; private set; }
-    public string StudentFirstName { get; private set; }
-    public string? StudentPreferredName { get; private set; }
-    public string StudentLastName { get; private set; }
-    public Gender StudentGender { get; private set; }
-    public DateOnly? DateOfBirth { get; private set; }
-    public string? StudentEmailAddress { get; private set; }
-    public string? ParentFirstName { get; private set; }
-    public string? ParentLastName { get; private set; }
-    public string? ParentEmailAddress { get; private set; }
-    public string? ParentPhoneNumber { get; private set; }
-    public string? MailingAddressStreet { get; private set; }
-    public string? MailingAddressTown { get; private set; }
-    public string? MailingAddressState { get; private set; }
-    public string? MailingAddressPostCode { get; private set; }
-    public string? ApplicationReference { get; private set; }
-    public SchoolCode? CurrentSchoolCode { get; private set; }
-    public string? CurrentSchool { get; private set; }
-    public SchoolCode? DestinationSchoolCode { get; private set; }
-    public string? DestinationSchool { get; private set; }
-    public Program Program { get; private set; }
-    public Grade Grade { get; private set; }
-    
+    [BindProperty]
+    public string? StudentReferenceNumber { get; set; }
+    [BindProperty]
+    public string StudentFirstName { get; set; }
+    [BindProperty]
+    public string? StudentPreferredName { get; set; }
+    [BindProperty]
+    public string StudentLastName { get; set; }
+    [BindProperty]
+    public Gender StudentGender { get; set; }
+    [BindProperty]
+    [DisplayFormat(ApplyFormatInEditMode = true, DataFormatString = "{0:yyyy-MM-dd}")]
+    public DateOnly? DateOfBirth { get; set; }
+    [BindProperty]
+    public string? StudentEmailAddress { get; set; }
+    [BindProperty]
+    public string? ParentFirstName { get; set; }
+    [BindProperty]
+    public string? ParentLastName { get; set; }
+    [BindProperty]
+    public string? ParentEmailAddress { get; set; }
+    [BindProperty]
+    public string? ParentPhoneNumber { get; set; }
+    [BindProperty]
+    public string? MailingAddressStreet { get; set; }
+    [BindProperty]
+    public string? MailingAddressTown { get; set; }
+    [BindProperty]
+    public string? MailingAddressState { get; set; }
+    [BindProperty]
+    public string? MailingAddressPostCode { get; set; }
+    [BindProperty]
+    public string? ApplicationReference { get; set; }
+    [BindProperty]
+    public SchoolCode CurrentSchoolCode { get; set; } = SchoolCode.Empty;
+    [BindProperty]
+    public string? CurrentSchool { get; set; }
+    [BindProperty]
+    public SchoolCode DestinationSchoolCode { get; set; } = SchoolCode.Empty;
+    [BindProperty]
+    public string? DestinationSchool { get; set; }
+    [BindProperty]
+    [ModelBinder(typeof(BaseFromValueBinder))]
+    public Program Program { get; set; }
+    [BindProperty]
+    public Grade Grade { get; set; }
+
+    public IEnumerable<SelectListItem> SchoolList { get; set; }
+
     public async Task OnGet()
     {
         if (Id == ApplicationId.Empty)
+        {
+            await PreparePage();
             return;
+        }
 
         Result<EnrolmentApplicationResponse> application = await _mediator.Send(new GetEnrolmentApplicationByIdQuery(Id));
 
@@ -103,11 +134,44 @@ public class UpsertModel : BasePageModel
         MailingAddressState = application.Value.MailingAddress?.State;
         MailingAddressPostCode = application.Value.MailingAddress?.Postcode;
         ApplicationReference = application.Value.ApplicationReference;
-        CurrentSchoolCode = application.Value.CurrentSchoolCode;
+        CurrentSchoolCode = application.Value.CurrentSchoolCode ?? SchoolCode.Empty;
         CurrentSchool = application.Value.CurrentSchool;
-        DestinationSchoolCode = application.Value.DestinationSchoolCode;
+        DestinationSchoolCode = application.Value.DestinationSchoolCode ?? SchoolCode.Empty;
         DestinationSchool = application.Value.DestinationSchool;
         Program = application.Value.Program;
         Grade = application.Value.Grade;
+
+        await PreparePage();
+    }
+
+    private async Task PreparePage()
+    {
+        Result<List<SchoolSelectionListResponse>> schools = await _mediator.Send(new GetSchoolsForSelectionListQuery());
+
+        if (schools.IsFailure)
+        {
+            ModalContent = ErrorDisplay.Create(
+                schools.Error,
+                _linkGenerator.GetPathByPage("/Partner/Enrolments/Applications/Index", values: new { area = "Staff" }));
+
+            return;
+        }
+
+        SchoolList = schools.Value
+            .OrderBy(s => s.Name)
+            .Select(s => new SelectListItem { Value = s.Code, Text = s.Name })
+            .ToList();
+    }
+
+    public async Task<IActionResult> OnPostCreate()
+    {
+        await PreparePage();
+
+        return Page();
+    }
+
+    public async Task<IActionResult> OnPostUpdate()
+    {
+        return Page();
     }
 }

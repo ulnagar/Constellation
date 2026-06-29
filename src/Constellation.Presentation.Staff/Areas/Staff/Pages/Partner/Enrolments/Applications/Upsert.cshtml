@@ -1,4 +1,314 @@
-﻿@page "{id}"
+﻿@page "{id?}"
+@using Constellation.Core.Enums
+@using Constellation.Core.Models.EnrolmentContext.Offer.Enums
+@using Constellation.Core.Models.Identifiers
+@using Constellation.Core.Models.Students.Enums
+@using ApplicationId = Constellation.Core.Models.EnrolmentContext.Application.Identifiers.ApplicationId
 @model Constellation.Presentation.Staff.Areas.Staff.Pages.Partner.Enrolments.Applications.UpsertModel
 @{
+    bool newItem = Model.Id == ApplicationId.Empty;
+}
+
+<h2>@(newItem ? "New Application" : "Editing Application")</h2>
+
+<div class="page-menu">
+
+</div>
+
+<hr />
+
+<form method="post">
+    <div class="form-horizontal">
+        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+        
+        <h4>Student Details</h4>
+
+        <div class="mb-3 row">
+            <label asp-for="StudentReferenceNumber" class="col-md-2">SRN</label>
+            <div class="col-md-3">
+                <input asp-for="StudentReferenceNumber" class="form-control" />
+                <span asp-validation-for="StudentReferenceNumber" class="text-danger"></span>
+            </div>
+        </div>
+
+        <div class="mb-3 row">
+            <label asp-for="StudentFirstName" class="col-md-2">First Name</label>
+            <div class="col-md-3">
+                <input asp-for="StudentFirstName" class="form-control" />
+                <span asp-validation-for="StudentFirstName" class="text-danger"></span>
+            </div>
+        </div>
+
+        <div class="mb-3 row">
+            <label asp-for="StudentPreferredName" class="col-md-2">Preferred Name</label>
+            <div class="col-md-3">
+                <input asp-for="StudentPreferredName" class="form-control" />
+                <span asp-validation-for="StudentPreferredName" class="text-danger"></span>
+            </div>
+        </div>
+
+        <div class="mb-3 row">
+            <label asp-for="StudentLastName" class="col-md-2">Last Name</label>
+            <div class="col-md-3">
+                <input asp-for="StudentLastName" class="form-control" />
+                <span asp-validation-for="StudentLastName" class="text-danger"></span>
+            </div>
+        </div>
+        
+        <div class="mb-3 row">
+            <label asp-for="StudentGender" class="col-md-2">Gender</label>
+            <div class="col-md-3">
+                <select asp-for="StudentGender" class="form-control">
+                    <option value=""> -- Select -- </option>
+                    @foreach (var item in Gender.GetOptions.OrderBy(entry => entry.Order))
+                    {
+                        <option value="@item.Value">@item.Name</option>
+                    }
+                </select>
+                <span asp-validation-for="StudentGender" class="text-danger"></span>
+            </div>
+        </div>
+
+        <div class="mb-3 row">
+            <label asp-for="DateOfBirth" class="col-md-2">Date Of Birth</label>
+            <div class="col-md-3">
+                <input asp-for="DateOfBirth" type="date" class="form-control" />
+                <span asp-validation-for="DateOfBirth" class="text-danger"></span>
+            </div>
+        </div>
+
+        <div class="mb-3 row">
+            <label asp-for="StudentEmailAddress" class="col-md-2">Email Address</label>
+            <div class="col-md-3">
+                <input asp-for="StudentEmailAddress" class="form-control" />
+                <span asp-validation-for="StudentEmailAddress" class="text-danger"></span>
+            </div>
+        </div>
+        
+        <h4>Parent Details</h4>
+        
+        <div class="mb-3 row">
+            <label asp-for="ParentFirstName" class="col-md-2">First Name</label>
+            <div class="col-md-3">
+                <input asp-for="ParentFirstName" class="form-control" />
+                <span asp-validation-for="ParentFirstName" class="text-danger"></span>
+            </div>
+        </div>
+        
+        <div class="mb-3 row">
+            <label asp-for="ParentLastName" class="col-md-2">Last Name</label>
+            <div class="col-md-3">
+                <input asp-for="ParentLastName" class="form-control" />
+                <span asp-validation-for="ParentLastName" class="text-danger"></span>
+            </div>
+        </div>
+        
+        <div class="mb-3 row">
+            <label asp-for="ParentEmailAddress" class="col-md-2">Email Address</label>
+            <div class="col-md-3">
+                <input asp-for="ParentEmailAddress" class="form-control" />
+                <span asp-validation-for="ParentEmailAddress" class="text-danger"></span>
+            </div>
+        </div>
+        
+        <div class="mb-3 row">
+            <label asp-for="ParentPhoneNumber" class="col-md-2">Mobile Number</label>
+            <div class="col-md-3">
+                <input asp-for="ParentPhoneNumber" class="form-control" />
+                <span asp-validation-for="ParentPhoneNumber" class="text-danger"></span>
+            </div>
+        </div>
+        
+        <h4>Mailing Address</h4>
+
+        <div class="mb-3 row">
+            <label asp-for="MailingAddressStreet" class="col-md-2">Street</label>
+            <div class="col-md-3">
+                <input asp-for="MailingAddressStreet" class="form-control" />
+                <span asp-validation-for="MailingAddressStreet" class="text-danger"></span>
+            </div>
+        </div>
+        
+        <div class="mb-3 row">
+            <label asp-for="MailingAddressTown" class="col-md-2">Town</label>
+            <div class="col-md-3">
+                <input asp-for="MailingAddressTown" class="form-control" />
+                <span asp-validation-for="MailingAddressTown" class="text-danger"></span>
+            </div>
+        </div>
+        
+        <div class="mb-3 row">
+            <label asp-for="MailingAddressState" class="col-md-2">State</label>
+            <div class="col-md-3">
+                <input asp-for="MailingAddressState" class="form-control" />
+                <span asp-validation-for="MailingAddressState" class="text-danger"></span>
+            </div>
+        </div>
+        
+        <div class="mb-3 row">
+            <label asp-for="MailingAddressPostCode" class="col-md-2">Post Code</label>
+            <div class="col-md-3">
+                <input asp-for="MailingAddressPostCode" class="form-control" />
+                <span asp-validation-for="MailingAddressPostCode" class="text-danger"></span>
+            </div>
+        </div>
+        
+        <h4>Application Details</h4>
+        
+        <div class="mb-3 row">
+            <label asp-for="ApplicationReference" class="col-md-2">Application Reference</label>
+            <div class="col-md-3">
+                <input asp-for="ApplicationReference" class="form-control" />
+                <span asp-validation-for="ApplicationReference" class="text-danger"></span>
+            </div>
+        </div>
+        
+        <div class="mb-3 row">
+            <label class="col-md-2">Current School</label>
+            <div class="col-md-8">
+                <select id="CurrentSchoolSelect" class="form-control" asp-items="@Model.SchoolList" style="width:100%">
+                    <option> --- </option>
+                    @* Re-populate a custom entry on postback *@
+                    @if (Model.CurrentSchoolCode == SchoolCode.Empty && !string.IsNullOrEmpty(Model.CurrentSchool))
+                    {
+                        <option value="@Model.CurrentSchool" selected>@Model.CurrentSchool</option>
+                    }
+                </select>
+                <span asp-validation-for="CurrentSchoolCode" class="text-danger"></span>
+            </div>
+            <input asp-for="CurrentSchoolCode" type="hidden" />
+            <input asp-for="CurrentSchool" type="hidden" />
+        </div>
+        
+        <div class="mb-3 row">
+            <label class="col-md-2">Destination School</label>
+            <div class="col-md-8">
+                <select id="DestinationSchoolSelect" class="form-control" asp-items="@Model.SchoolList" style="width:100%">
+                    <option> --- </option>
+                </select>
+                <span asp-validation-for="DestinationSchoolCode" class="text-danger"></span>
+            </div>
+            <input asp-for="DestinationSchoolCode" type="hidden" />
+            <input asp-for="DestinationSchool" type="hidden" />
+        </div>
+        
+        <div class="mb-3 row">
+            <label asp-for="Program" class="col-md-2">Program</label>
+            <div class="col-md-3">
+                <select asp-for="Program" class="form-control">
+                    <option value=""> -- Select -- </option>
+                    @foreach (var item in Program.GetOptions)
+                    {
+                        <option value="@item.Value">@item.Name</option>
+                    }
+                </select>
+                <span asp-validation-for="Program" class="text-danger"></span>
+            </div>
+        </div>
+        
+        <div class="mb-3 row">
+            <label asp-for="Grade" class="col-md-2">Grade</label>
+            <div class="col-md-3">
+                <select asp-for="Grade" asp-items="Html.GetEnumSelectList<Grade>()" class="form-control">
+                    <option value=""> -- Select -- </option>
+                </select>
+                <span asp-validation-for="Grade" class="text-danger"></span>
+            </div>
+        </div>
+        
+        <div class="mb-3">
+            <div class="col-md-offset-2 col-md-3 d-grid">
+                @if (Model.Id == ApplicationId.Empty)
+                {
+                    <input asp-page-handler="Create" type="submit" value="Save" class="btn btn-primary btn-lg" />
+                }
+                else
+                {
+                    <input asp-page-handler="Update" type="submit" value="Save" class="btn btn-primary btn-lg"/>
+                }
+            </div>
+        </div>
+    </div>
+</form>
+
+@section scripts 
+{
+    <script>
+        (function () {
+            var $select = $('#CurrentSchoolSelect');
+            var $code   = $('#CurrentSchoolCode');
+            var $name   = $('#CurrentSchool');
+
+            $select.select2({
+                theme: 'bootstrap-5',
+                placeholder: 'Search for a school\u2026',
+                allowClear: true,
+                tags: true,
+                createTag: function (params) {
+                    var term = $.trim(params.term);
+                    if (!term) return null;
+                    // Mark new tags so the select handler can identify them.
+                    // Use the entered text as the id — it won't collide with
+                    // real school codes, which are always numeric.
+                    return { id: term, text: term, newTag: true };
+                }
+            });
+
+            // Restore on postback — hidden inputs are already populated by model binding.
+            // Custom entries use the name as the option value (see Razor block above).
+            var initialCode = $code.val();
+            if (initialCode === '0000') {
+                $select.val($name.val()).trigger('change.select2');
+            } else if (initialCode) {
+                $select.val(initialCode).trigger('change.select2');
+            }
+
+            $select.on('select2:select', function (e) {
+                var data = e.params.data;
+                if (data.newTag) {
+                    // Not in the official list — code is sentinel "0000"
+                    $code.val('0000');
+                    $name.val(data.text);
+                } else {
+                    $code.val(data.id);   // data.id is the <option value="...">
+                    $name.val(data.text);
+                }
+            });
+
+            $select.on('select2:clear', function () {
+                $code.val('');
+                $name.val('');
+            });
+        }());
+
+
+        (function () {
+            var $select = $('#DestinationSchoolSelect');
+            var $code   = $('#DestinationSchoolCode');
+            var $name   = $('#DestinationSchool');
+
+            $select.select2({
+                theme: 'bootstrap-5',
+                allowClear: true,
+                placeholder: 'Search for a school\u2026'
+            });
+
+            // Restore on postback
+            var initialCode = $code.val();
+            if (initialCode) {
+                $select.val(initialCode).trigger('change.select2');
+            }
+
+            $select.on('select2:select', function (e) {
+                var data = e.params.data;
+                $code.val(data.id);
+                $name.val(data.text);
+            });
+
+            $select.on('select2:clear', function () {
+                $code.val('');
+                $name.val('');
+            });
+        }());
+    </script>
 }
