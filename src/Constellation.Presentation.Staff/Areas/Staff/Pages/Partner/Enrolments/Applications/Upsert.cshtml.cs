@@ -229,8 +229,9 @@ public class UpsertModel : BasePageModel
 
     public async Task<IActionResult> OnPostCreate()
     {
-        await ValidateForm();
-
+        ValidateForm();
+        TryBuildFormValues(out ApplicationFormValues values);
+        
         if (!ModelState.IsValid)
         {
             _logger
@@ -240,48 +241,17 @@ public class UpsertModel : BasePageModel
             return Page();
         }
 
-        Result<StudentReferenceNumber> srnResult = Core.Models.Students.ValueObjects.StudentReferenceNumber.Create(StudentReferenceNumber);
-        StudentReferenceNumber? srn = srnResult.IsFailure ? null : srnResult.Value;
-
-        Result<Name> studentNameResult = Name.Create(StudentFirstName, StudentPreferredName, StudentLastName);
-        if (studentNameResult.IsFailure)
-        {
-            _logger
-                .ForContext(nameof(Error), studentNameResult.Error, true)
-                .Warning("Failed to validate new Enrolment Application form by user {User}", _currentUserService.UserName);
-
-            ModalContent = ErrorDisplay.Create(studentNameResult.Error);
-
-            await PreparePage();
-            return Page();
-        }
-
-        Result<EmailAddress> studentEmailResult = EmailAddress.Create(StudentEmailAddress);
-        EmailAddress? studentEmail = studentEmailResult.IsFailure ? null : studentEmailResult.Value;
-
-        Result<Name> parentNameResult = Name.Create(ParentFirstName, ParentFirstName, ParentLastName);
-        Name? parentName = parentNameResult.IsFailure ? null : parentNameResult.Value;
-
-        Result<EmailAddress> parentEmailResult = EmailAddress.Create(ParentEmailAddress);
-        EmailAddress? parentEmail = parentEmailResult.IsFailure ? null : parentEmailResult.Value;
-
-        Result<PhoneNumber> parentPhoneResult = PhoneNumber.Create(ParentPhoneNumber);
-        PhoneNumber? parentPhone = parentPhoneResult.IsFailure ? null : parentPhoneResult.Value;
-
-        Result<MailingAddress> mailingAddressResult = MailingAddress.Create(MailingAddressStreet, MailingAddressTown, MailingAddressState, MailingAddressPostCode);
-        MailingAddress? mailingAddress = mailingAddressResult.IsFailure ? null : mailingAddressResult.Value;
-
         CreateEnrolmentApplicationCommand command = new(
             PeriodId,
-            srn,
-            studentNameResult.Value,
+            values.StudentReferenceNumber,
+            values.StudentName,
             StudentGender,
             DateOfBirth,
-            studentEmail,
-            parentName,
-            parentEmail,
-            parentPhone,
-            mailingAddress,
+            values.StudentEmailAddress,
+            values.ParentName,
+            values.ParentEmailAddress,
+            values.ParentPhoneNumber,
+            values.MailingAddress,
             ApplicationReference ?? string.Empty,
             CurrentSchoolCode,
             CurrentSchool ?? string.Empty,
@@ -314,7 +284,8 @@ public class UpsertModel : BasePageModel
 
     public async Task<IActionResult> OnPostUpdate()
     {
-        await ValidateForm();
+        ValidateForm();
+        TryBuildFormValues(out ApplicationFormValues values);
 
         if (!ModelState.IsValid)
         {
@@ -325,48 +296,17 @@ public class UpsertModel : BasePageModel
             return Page();
         }
 
-        Result<StudentReferenceNumber> srnResult = Core.Models.Students.ValueObjects.StudentReferenceNumber.Create(StudentReferenceNumber);
-        StudentReferenceNumber? srn = srnResult.IsFailure ? null : srnResult.Value;
-
-        Result<Name> studentNameResult = Name.Create(StudentFirstName, StudentPreferredName, StudentLastName);
-        if (studentNameResult.IsFailure)
-        {
-            _logger
-                .ForContext(nameof(Error), studentNameResult.Error, true)
-                .Warning("Failed to validate Enrolment Application update form by user {User}", _currentUserService.UserName);
-
-            ModalContent = ErrorDisplay.Create(studentNameResult.Error);
-
-            await PreparePage();
-            return Page();
-        }
-
-        Result<EmailAddress> studentEmailResult = EmailAddress.Create(StudentEmailAddress);
-        EmailAddress? studentEmail = studentEmailResult.IsFailure ? null : studentEmailResult.Value;
-
-        Result<Name> parentNameResult = Name.Create(ParentFirstName, ParentFirstName, ParentLastName);
-        Name? parentName = parentNameResult.IsFailure ? null : parentNameResult.Value;
-
-        Result<EmailAddress> parentEmailResult = EmailAddress.Create(ParentEmailAddress);
-        EmailAddress? parentEmail = parentEmailResult.IsFailure ? null : parentEmailResult.Value;
-
-        Result<PhoneNumber> parentPhoneResult = PhoneNumber.Create(ParentPhoneNumber);
-        PhoneNumber? parentPhone = parentPhoneResult.IsFailure ? null : parentPhoneResult.Value;
-
-        Result<MailingAddress> mailingAddressResult = MailingAddress.Create(MailingAddressStreet, MailingAddressTown, MailingAddressState, MailingAddressPostCode);
-        MailingAddress? mailingAddress = mailingAddressResult.IsFailure ? null : mailingAddressResult.Value;
-
         UpdateEnrolmentApplicationCommand command = new(
             Id,
-            srn,
-            studentNameResult.Value,
+            values.StudentReferenceNumber,
+            values.StudentName,
             StudentGender,
             DateOfBirth,
-            studentEmail,
-            parentName,
-            parentEmail,
-            parentPhone,
-            mailingAddress,
+            values.StudentEmailAddress,
+            values.ParentName,
+            values.ParentEmailAddress,
+            values.ParentPhoneNumber,
+            values.MailingAddress,
             ApplicationReference ?? string.Empty,
             CurrentSchoolCode,
             CurrentSchool ?? string.Empty,
@@ -397,7 +337,7 @@ public class UpsertModel : BasePageModel
         return RedirectToPage("/Partner/Enrolments/Applications/Index", new { area = "Staff" });
     }
 
-    private async Task ValidateForm()
+    private void ValidateForm()
     {
         if (PeriodId == EnrolmentPeriodId.Empty)
         {
@@ -420,4 +360,135 @@ public class UpsertModel : BasePageModel
         if (!Application.IsValidProgramGradeCombination(Program, Grade))
             ModelState.AddModelError(nameof(Grade), "Grade is not valid for Program");
     }
+
+    private bool TryBuildFormValues(out ApplicationFormValues values)
+    {
+        bool isValid = true;
+
+        StudentReferenceNumber? srn = null;
+        if (!string.IsNullOrWhiteSpace(StudentReferenceNumber))
+        {
+            Result<StudentReferenceNumber> srnResult = Core.Models.Students.ValueObjects.StudentReferenceNumber.Create(StudentReferenceNumber);
+
+            if (srnResult.IsFailure)
+            {
+                ModelState.AddModelError(nameof(StudentReferenceNumber), srnResult.Error.Message);
+                isValid = false;
+            }
+            else
+            {
+                srn = srnResult.Value;
+            }
+        }
+
+        // Required — always validated regardless of blank/non-blank, since the form already
+        // enforces StudentFirstName/StudentLastName via [Required].
+        Result<Name> studentNameResult = Name.Create(StudentFirstName, StudentPreferredName, StudentLastName);
+        if (studentNameResult.IsFailure)
+        {
+            ModelState.AddModelError(nameof(StudentFirstName), studentNameResult.Error.Message);
+            isValid = false;
+        }
+
+        EmailAddress? studentEmail = null;
+        if (!string.IsNullOrWhiteSpace(StudentEmailAddress))
+        {
+            Result<EmailAddress> studentEmailResult = EmailAddress.Create(StudentEmailAddress);
+
+            if (studentEmailResult.IsFailure)
+            {
+                ModelState.AddModelError(nameof(StudentEmailAddress), studentEmailResult.Error.Message);
+                isValid = false;
+            }
+            else
+            {
+                studentEmail = studentEmailResult.Value;
+            }
+        }
+
+        Name? parentName = null;
+        if (!string.IsNullOrWhiteSpace(ParentFirstName) || !string.IsNullOrWhiteSpace(ParentLastName))
+        {
+            Result<Name> parentNameResult = Name.Create(ParentFirstName, ParentFirstName, ParentLastName);
+
+            if (parentNameResult.IsFailure)
+            {
+                ModelState.AddModelError(nameof(ParentFirstName), parentNameResult.Error.Message);
+                isValid = false;
+            }
+            else
+            {
+                parentName = parentNameResult.Value;
+            }
+        }
+
+        EmailAddress? parentEmail = null;
+        if (!string.IsNullOrWhiteSpace(ParentEmailAddress))
+        {
+            Result<EmailAddress> parentEmailResult = EmailAddress.Create(ParentEmailAddress);
+
+            if (parentEmailResult.IsFailure)
+            {
+                ModelState.AddModelError(nameof(ParentEmailAddress), parentEmailResult.Error.Message);
+                isValid = false;
+            }
+            else
+            {
+                parentEmail = parentEmailResult.Value;
+            }
+        }
+
+        PhoneNumber? parentPhone = null;
+        if (!string.IsNullOrWhiteSpace(ParentPhoneNumber))
+        {
+            Result<PhoneNumber> parentPhoneResult = PhoneNumber.Create(ParentPhoneNumber);
+
+            if (parentPhoneResult.IsFailure)
+            {
+                ModelState.AddModelError(nameof(ParentPhoneNumber), parentPhoneResult.Error.Message);
+                isValid = false;
+            }
+            else
+            {
+                parentPhone = parentPhoneResult.Value;
+            }
+        }
+
+        MailingAddress? mailingAddress = null;
+        bool mailingAddressProvided =
+            !string.IsNullOrWhiteSpace(MailingAddressStreet) ||
+            !string.IsNullOrWhiteSpace(MailingAddressTown) ||
+            !string.IsNullOrWhiteSpace(MailingAddressState) ||
+            !string.IsNullOrWhiteSpace(MailingAddressPostCode);
+
+        if (mailingAddressProvided)
+        {
+            Result<MailingAddress> mailingAddressResult = MailingAddress.Create(MailingAddressStreet, MailingAddressTown, MailingAddressState, MailingAddressPostCode);
+
+            if (mailingAddressResult.IsFailure)
+            {
+                ModelState.AddModelError(nameof(MailingAddressStreet), mailingAddressResult.Error.Message);
+                isValid = false;
+            }
+            else
+            {
+                mailingAddress = mailingAddressResult.Value;
+            }
+        }
+
+        values = isValid
+            ? new ApplicationFormValues(srn, studentNameResult.Value, studentEmail, parentName, parentEmail, parentPhone, mailingAddress)
+            : null!;
+
+        return isValid;
+    }
+
+    private sealed record ApplicationFormValues(
+        StudentReferenceNumber? StudentReferenceNumber,
+        Name StudentName,
+        EmailAddress? StudentEmailAddress,
+        Name? ParentName,
+        EmailAddress? ParentEmailAddress,
+        PhoneNumber? ParentPhoneNumber,
+        MailingAddress? MailingAddress);
 }
