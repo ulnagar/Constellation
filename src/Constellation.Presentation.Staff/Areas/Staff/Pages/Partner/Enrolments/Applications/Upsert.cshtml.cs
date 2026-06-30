@@ -1,9 +1,11 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Partner.Enrolments.Applications;
 
 using Application.Common.PresentationModels;
-using Application.Domains.EnrolmentContext.Applications.Queries.CreateEnrolmentApplication;
 using Application.Domains.EnrolmentContext.Applications.Queries.GetEnrolmentApplicationById;
+using Application.Domains.EnrolmentContext.EnrolmentPeriods.Queries.GetCurrentEnrolmentPeriods;
 using Application.Models.Auth;
+using Constellation.Application.Domains.EnrolmentContext.Applications.Commands.CreateEnrolmentApplication;
+using Constellation.Application.Domains.EnrolmentContext.Applications.Commands.UpdateEnrolmentApplication;
 using Constellation.Application.Domains.Schools.Models;
 using Constellation.Application.Domains.Schools.Queries.GetSchoolsForSelectionList;
 using Constellation.Core.Abstractions.Services;
@@ -11,6 +13,7 @@ using Constellation.Core.Enums;
 using Constellation.Core.Models.EnrolmentContext.Offer.Enums;
 using Constellation.Core.Models.Identifiers;
 using Constellation.Core.Models.Students.Enums;
+using Core.Models.EnrolmentContext.Application;
 using Core.Models.EnrolmentContext.EnrolmentPeriod.Identifiers;
 using Core.Models.Students.ValueObjects;
 using Core.Shared;
@@ -53,6 +56,10 @@ public class UpsertModel : BasePageModel
 
     [BindProperty(SupportsGet = true)]
     public ApplicationId Id { get; set; } = ApplicationId.Empty;
+
+    [BindProperty]
+    public EnrolmentPeriodId PeriodId { get; set; } = EnrolmentPeriodId.Empty;
+    public string PeriodName { get; set; }
 
     [BindProperty]
     public string? StudentReferenceNumber { get; set; }
@@ -104,6 +111,7 @@ public class UpsertModel : BasePageModel
     [BindProperty]
     public Grade Grade { get; set; }
 
+    public SelectList PeriodList { get; set; }
     public IEnumerable<SelectListItem> SchoolList { get; set; }
     public SelectList ProgramList { get; set; }
     public SelectList GenderList { get; set; }
@@ -112,14 +120,24 @@ public class UpsertModel : BasePageModel
     {
         if (Id == ApplicationId.Empty)
         {
+            _logger
+                .Information("Requested to load defaults for creation of new Enrolment Application by user {User}", _currentUserService.UserName);
+
             await PreparePage();
             return;
         }
+
+        _logger
+            .Information("Requested to load Enrolment Application for update by user {User}", _currentUserService.UserName);
 
         Result<EnrolmentApplicationResponse> application = await _mediator.Send(new GetEnrolmentApplicationByIdQuery(Id));
 
         if (application.IsFailure)
         {
+            _logger
+                .ForContext(nameof(Error), application.Error, true)
+                .Warning("Failed to load Enrolment Application for update by user {User}", _currentUserService.UserName);
+
             ModalContent = ErrorDisplay.Create(
                 application.Error,
                 _linkGenerator.GetPathByPage("/Partner/Enrolments/Applications/Index", values: new { area = "Staff" }));
@@ -127,6 +145,7 @@ public class UpsertModel : BasePageModel
             return;
         }
 
+        PeriodId = application.Value.PeriodId;
         StudentReferenceNumber = application.Value.StudentReferenceNumber?.Value;
         StudentFirstName = application.Value.StudentName.FirstName;
         StudentPreferredName = application.Value.StudentName.PreferredName;
@@ -175,13 +194,37 @@ public class UpsertModel : BasePageModel
             Program.GetOptions,
             nameof(Program.Value),
             nameof(Program.Name),
-            Program?.Value);
+            Program.Value);
 
         GenderList = new SelectList(
             Gender.GetOptions,
             nameof(Gender.Value),
             nameof(Gender.Name),
             StudentGender.Value);
+
+        Result<List<EnrolmentPeriodResponse>> periods = await _mediator.Send(new GetCurrentEnrolmentPeriodsQuery());
+
+        if (periods.IsFailure)
+        {
+            ModalContent = ErrorDisplay.Create(
+                periods.Error,
+                _linkGenerator.GetPathByPage("/Partner/Enrolments/Applications/Index", values: new { area = "Staff" }));
+
+            return;
+        }
+
+        if (PeriodId != EnrolmentPeriodId.Empty)
+        {
+            PeriodName = periods.Value
+                .FirstOrDefault(entry => entry.Id == PeriodId)?.Label
+                 ?? string.Empty;
+        }
+
+        PeriodList = new SelectList(
+            periods.Value,
+            nameof(EnrolmentPeriodResponse.Id),
+            nameof(EnrolmentPeriodResponse.Label),
+            PeriodId);
     }
 
     public async Task<IActionResult> OnPostCreate()
@@ -190,6 +233,9 @@ public class UpsertModel : BasePageModel
 
         if (!ModelState.IsValid)
         {
+            _logger
+                .Warning("Failed to validate new Enrolment Application form by user {User}", _currentUserService.UserName);
+
             await PreparePage();
             return Page();
         }
@@ -200,6 +246,10 @@ public class UpsertModel : BasePageModel
         Result<Name> studentNameResult = Name.Create(StudentFirstName, StudentPreferredName, StudentLastName);
         if (studentNameResult.IsFailure)
         {
+            _logger
+                .ForContext(nameof(Error), studentNameResult.Error, true)
+                .Warning("Failed to validate new Enrolment Application form by user {User}", _currentUserService.UserName);
+
             ModalContent = ErrorDisplay.Create(studentNameResult.Error);
 
             await PreparePage();
@@ -222,7 +272,7 @@ public class UpsertModel : BasePageModel
         MailingAddress? mailingAddress = mailingAddressResult.IsFailure ? null : mailingAddressResult.Value;
 
         CreateEnrolmentApplicationCommand command = new(
-            EnrolmentPeriodId.Empty,
+            PeriodId,
             srn,
             studentNameResult.Value,
             StudentGender,
@@ -240,10 +290,19 @@ public class UpsertModel : BasePageModel
             Program,
             Grade);
 
+        _logger
+            .ForContext(nameof(CreateEnrolmentApplicationCommand), command, true)
+            .Information("Requested to create new Enrolment Application by user {User}", _currentUserService.UserName);
+
         Result result = await _mediator.Send(command);
 
         if (result.IsFailure)
         {
+            _logger
+                .ForContext(nameof(CreateEnrolmentApplicationCommand), command, true)
+                .ForContext(nameof(Error), result.Error, true)
+                .Warning("Failed to create new Enrolment Application by user {User}", _currentUserService.UserName);
+
             ModalContent = ErrorDisplay.Create(result.Error);
 
             await PreparePage();
@@ -255,11 +314,97 @@ public class UpsertModel : BasePageModel
 
     public async Task<IActionResult> OnPostUpdate()
     {
-        return Page();
+        await ValidateForm();
+
+        if (!ModelState.IsValid)
+        {
+            _logger
+                .Warning("Failed to validate Enrolment Application update form by user {User}", _currentUserService.UserName);
+
+            await PreparePage();
+            return Page();
+        }
+
+        Result<StudentReferenceNumber> srnResult = Core.Models.Students.ValueObjects.StudentReferenceNumber.Create(StudentReferenceNumber);
+        StudentReferenceNumber? srn = srnResult.IsFailure ? null : srnResult.Value;
+
+        Result<Name> studentNameResult = Name.Create(StudentFirstName, StudentPreferredName, StudentLastName);
+        if (studentNameResult.IsFailure)
+        {
+            _logger
+                .ForContext(nameof(Error), studentNameResult.Error, true)
+                .Warning("Failed to validate Enrolment Application update form by user {User}", _currentUserService.UserName);
+
+            ModalContent = ErrorDisplay.Create(studentNameResult.Error);
+
+            await PreparePage();
+            return Page();
+        }
+
+        Result<EmailAddress> studentEmailResult = EmailAddress.Create(StudentEmailAddress);
+        EmailAddress? studentEmail = studentEmailResult.IsFailure ? null : studentEmailResult.Value;
+
+        Result<Name> parentNameResult = Name.Create(ParentFirstName, ParentFirstName, ParentLastName);
+        Name? parentName = parentNameResult.IsFailure ? null : parentNameResult.Value;
+
+        Result<EmailAddress> parentEmailResult = EmailAddress.Create(ParentEmailAddress);
+        EmailAddress? parentEmail = parentEmailResult.IsFailure ? null : parentEmailResult.Value;
+
+        Result<PhoneNumber> parentPhoneResult = PhoneNumber.Create(ParentPhoneNumber);
+        PhoneNumber? parentPhone = parentPhoneResult.IsFailure ? null : parentPhoneResult.Value;
+
+        Result<MailingAddress> mailingAddressResult = MailingAddress.Create(MailingAddressStreet, MailingAddressTown, MailingAddressState, MailingAddressPostCode);
+        MailingAddress? mailingAddress = mailingAddressResult.IsFailure ? null : mailingAddressResult.Value;
+
+        UpdateEnrolmentApplicationCommand command = new(
+            Id,
+            srn,
+            studentNameResult.Value,
+            StudentGender,
+            DateOfBirth,
+            studentEmail,
+            parentName,
+            parentEmail,
+            parentPhone,
+            mailingAddress,
+            ApplicationReference ?? string.Empty,
+            CurrentSchoolCode,
+            CurrentSchool ?? string.Empty,
+            DestinationSchoolCode,
+            DestinationSchool ?? string.Empty,
+            Program,
+            Grade);
+
+        _logger
+            .ForContext(nameof(UpdateEnrolmentApplicationCommand), command, true)
+            .Information("Requested to update Enrolment Application by user {User}", _currentUserService.UserName);
+
+        Result result = await _mediator.Send(command);
+
+        if (result.IsFailure)
+        {
+            _logger
+                .ForContext(nameof(UpdateEnrolmentApplicationCommand), command, true)
+                .ForContext(nameof(Error), result.Error, true)
+                .Warning("Failed to update Enrolment Application by user {User}", _currentUserService.UserName);
+
+            ModalContent = ErrorDisplay.Create(result.Error);
+
+            await PreparePage();
+            return Page();
+        }
+
+        return RedirectToPage("/Partner/Enrolments/Applications/Index", new { area = "Staff" });
     }
 
     private async Task ValidateForm()
     {
+        if (PeriodId == EnrolmentPeriodId.Empty)
+        {
+            ModelState.Remove(nameof(PeriodId));
+            ModelState.AddModelError(nameof(PeriodId), "You must select an Enrolment Period");
+        }
+
         if (StudentGender == Gender.Empty)
             ModelState.AddModelError(nameof(StudentGender), "Gender is required");
 
@@ -272,17 +417,7 @@ public class UpsertModel : BasePageModel
             ModelState.AddModelError(nameof(Grade), "Grade is required");
         }
 
-        bool isValidProgramGradeCombination = (Program, Grade) switch
-        {
-            ({ Value: "OC" }, Grade.Y05) => true,
-            ({ Value: "SHS" }, Grade.Y07 or Grade.Y08 or Grade.Y09 or Grade.Y10) => true,
-            ({ Value: "YDM" }, Grade.Y05 or Grade.Y06 or Grade.Y07 or Grade.Y08 or Grade.Y09 or Grade.Y10) => true,
-            ({ Value: "S6R" }, Grade.Y11 or Grade.Y12) => true,
-            ({ Value: "S6M" }, Grade.Y11 or Grade.Y12) => true,
-            _ => false
-        };
-
-        if (!isValidProgramGradeCombination)
+        if (!Application.IsValidProgramGradeCombination(Program, Grade))
             ModelState.AddModelError(nameof(Grade), "Grade is not valid for Program");
     }
 }

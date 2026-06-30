@@ -5,6 +5,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Domains\EnrolmentContext\Applications\NewFolder\**" />
+    <EmbeddedResource Remove="Domains\EnrolmentContext\Applications\NewFolder\**" />
+    <None Remove="Domains\EnrolmentContext\Applications\NewFolder\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\Constellation.Core\Constellation.Core.csproj" />
   </ItemGroup>
 
@@ -31,7 +37,6 @@
 	<ItemGroup>
 	  <Folder Include="Domains\Edval\Events\EdvalTimetablesUpdated\" />
 	  <Folder Include="Domains\Edval\Models\" />
-	  <Folder Include="Domains\EnrolmentContext\Applications\NewFolder\" />
 	  <Folder Include="Domains\Faculties\Events\FacultyMemberAddedDomainEvent\" />
 	  <Folder Include="Domains\Faculties\Events\FacultyMemberRemovedDomainEvent\" />
 	  <Folder Include="Domains\Messaging\Email\Queries\" />

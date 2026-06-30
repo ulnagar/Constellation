@@ -2,6 +2,7 @@
 
 using EnrolmentPeriod.Identifiers;
 using Enums;
+using Errors;
 using Identifiers;
 using Models.Identifiers;
 using Offer.Enums;
@@ -78,6 +79,16 @@ public sealed class Application
         Program program,
         Grade grade)
     {
+        if (periodId == EnrolmentPeriodId.Empty)
+        {
+            return Result.Failure<Application>(EnrolmentApplicationErrors.InvalidEnrolmentPeriod);
+        }
+
+        if (!IsValidProgramGradeCombination(program, grade))
+        {
+            return Result.Failure<Application>(EnrolmentApplicationErrors.InvalidProgramGradeCombination(program, grade));
+        }
+
         Application application = new(
             periodId,
             studentName, 
@@ -101,4 +112,58 @@ public sealed class Application
 
         return application;
     }
+
+    public Result Update(
+        StudentReferenceNumber? studentReferenceNumber,
+        Name studentName,
+        Gender studentGender,
+        DateOnly? dateOfBirth,
+        EmailAddress? studentEmailAddress,
+        Name? parentName,
+        EmailAddress? parentEmailAddress,
+        PhoneNumber? parentPhoneNumber,
+        MailingAddress? mailingAddress,
+        string applicationReference,
+        SchoolCode? currentSchoolCode,
+        string currentSchool,
+        SchoolCode? destinationSchoolCode,
+        string destinationSchool,
+        Program program,
+        Grade grade)
+    {
+        if (!IsValidProgramGradeCombination(program, grade))
+        {
+            return Result.Failure<Application>(EnrolmentApplicationErrors.InvalidProgramGradeCombination(program, grade));
+        }
+
+        StudentReferenceNumber = studentReferenceNumber;
+        StudentName = studentName;
+        StudentGender = studentGender;
+        StudentEmailAddress = studentEmailAddress;
+        DateOfBirth = dateOfBirth;
+        ParentName = parentName;
+        ParentEmailAddress = parentEmailAddress;
+        ParentPhoneNumber = parentPhoneNumber;
+        MailingAddress = mailingAddress;
+        ApplicationReference = applicationReference;
+        CurrentSchoolCode = currentSchoolCode;
+        CurrentSchool = currentSchool;
+        DestinationSchoolCode = destinationSchoolCode;
+        DestinationSchool = destinationSchool;
+        Program = program;
+        Grade = grade;
+
+        return Result.Success();
+    }
+
+    public static bool IsValidProgramGradeCombination(Program program, Grade grade) => 
+        (program, grade) switch
+        {
+            ({ Value: "OC" }, Grade.Y05) => true,
+            ({ Value: "SHS" }, Grade.Y07 or Grade.Y08 or Grade.Y09 or Grade.Y10) => true,
+            ({ Value: "YDM" }, Grade.Y05 or Grade.Y06 or Grade.Y07 or Grade.Y08 or Grade.Y09 or Grade.Y10) => true,
+            ({ Value: "S6R" }, Grade.Y11 or Grade.Y12) => true,
+            ({ Value: "S6M" }, Grade.Y11 or Grade.Y12) => true,
+            _ => false
+        };
 }

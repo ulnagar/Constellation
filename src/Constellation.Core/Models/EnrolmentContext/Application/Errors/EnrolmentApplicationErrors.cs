@@ -1,5 +1,8 @@
 ﻿namespace Constellation.Core.Models.EnrolmentContext.Application.Errors;
 
+using Enums;
+using Extensions;
+using Offer.Enums;
 using Shared;
 using System;
 using ApplicationId = Identifiers.ApplicationId;
@@ -10,4 +13,11 @@ public static class EnrolmentApplicationErrors
         "Enrolment.Application.NotFound",
         $"Could not find an Enrolment Application with the Id '{id}'");
 
+    public static readonly Error InvalidEnrolmentPeriod = new(
+        "Enrolment.Application.InvalidEnrolmentPeriod",
+        "The selected Enrolment Period is invalid");
+
+    public static readonly Func<Program, Grade, Error> InvalidProgramGradeCombination = (program, grade) => new(
+        "Enrolment.Application.InvalidProgramGradeCombination",
+        $"The combination of the '{program}' program and grade {grade.AsName()} is invalid");
 }

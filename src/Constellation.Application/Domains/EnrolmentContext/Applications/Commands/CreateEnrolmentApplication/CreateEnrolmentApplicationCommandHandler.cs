@@ -1,4 +1,4 @@
-﻿namespace Constellation.Application.Domains.EnrolmentContext.Applications.Queries.CreateEnrolmentApplication;
+﻿namespace Constellation.Application.Domains.EnrolmentContext.Applications.Commands.CreateEnrolmentApplication;
 
 using Abstractions.Messaging;
 using Core.Models.EnrolmentContext.Application;
