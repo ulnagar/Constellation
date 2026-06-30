@@ -1,9 +1,10 @@
 ﻿@page "{id?}"
+@model Constellation.Presentation.Staff.Areas.Staff.Pages.Partner.Enrolments.Applications.UpsertModel
+
 @using Constellation.Core.Enums
 @using Constellation.Core.Models.Identifiers
-@using Constellation.Core.Models.Students.Enums
 @using ApplicationId = Constellation.Core.Models.EnrolmentContext.Application.Identifiers.ApplicationId
-@model Constellation.Presentation.Staff.Areas.Staff.Pages.Partner.Enrolments.Applications.UpsertModel
+
 @{
     bool newItem = Model.Id == ApplicationId.Empty;
 }
@@ -160,8 +161,8 @@
         
         <div class="mb-3 row">
             <label class="col-md-2">Current School</label>
-            <div class="col-md-8">
-                <select id="CurrentSchoolSelect" class="form-control" asp-items="@Model.SchoolList" style="width:100%">
+            <div class="col-md-6">
+                <select id="CurrentSchoolSelect" class="form-control" asp-items="@Model.SchoolList">
                     <option> --- </option>
                     @* Re-populate a custom entry on postback *@
                     @if (Model.CurrentSchoolCode == SchoolCode.Empty && !string.IsNullOrEmpty(Model.CurrentSchool))
@@ -177,8 +178,8 @@
         
         <div class="mb-3 row">
             <label class="col-md-2">Destination School</label>
-            <div class="col-md-8">
-                <select id="DestinationSchoolSelect" class="form-control" asp-items="@Model.SchoolList" style="width:100%">
+            <div class="col-md-6">
+                <select id="DestinationSchoolSelect" class="form-control" asp-items="@Model.SchoolList">
                     <option> --- </option>
                 </select>
                 <span asp-validation-for="DestinationSchoolCode" class="text-danger"></span>
@@ -190,7 +191,7 @@
         <div class="mb-3 row">
             <label asp-for="Program" class="col-md-2">Program</label>
             <div class="col-md-3">
-                <select id="Program" name="Program" asp-items="@Model.ProgramList" class="form-control select2">
+                <select id="Program" name="Program" asp-items="@Model.ProgramList" class="form-control custom-select2">
                     <option value=""> -- Select -- </option>
                 </select>
                 <span asp-validation-for="Program" class="text-danger"></span>
@@ -200,7 +201,7 @@
         <div class="mb-3 row">
             <label asp-for="Grade" class="col-md-2">Grade</label>
             <div class="col-md-3">
-                <select asp-for="Grade" asp-items="Html.GetEnumSelectList<Grade>()" class="form-control">
+                <select asp-for="Grade" asp-items="Html.GetEnumSelectList<Grade>()" class="form-control custom-select2">
                     <option value=""> -- Select -- </option>
                 </select>
                 <span asp-validation-for="Grade" class="text-danger"></span>
@@ -232,7 +233,7 @@
 
             $select.select2({
                 theme: 'bootstrap-5',
-                placeholder: 'Search for a school\u2026',
+                placeholder: 'Search for a school, or enter private school name\u2026',
                 allowClear: true,
                 tags: true,
                 createTag: function (params) {
@@ -272,7 +273,6 @@
             });
         }());
 
-
         (function () {
             var $select = $('#DestinationSchoolSelect');
             var $code   = $('#DestinationSchoolCode');
@@ -303,7 +303,7 @@
         }());
 
         (function () {
-            $('.select2').select2({
+            $('.custom-select2').select2({
                 theme: 'bootstrap-5'
             });
         }());

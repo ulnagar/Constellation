@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Diagnostics;
+using Microsoft.EntityFrameworkCore.Metadata;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -64,7 +65,6 @@ public sealed class AuditInterceptor : SaveChangesInterceptor
     }
 
     // ── Capture (runs before the save) ───────────────────────────────────────
-
     private List<PendingAuditEntry> Capture(DbContext? context)
     {
         if (context is null) return [];
@@ -76,7 +76,7 @@ public sealed class AuditInterceptor : SaveChangesInterceptor
 
         foreach (EntityEntry entry in context.ChangeTracker.Entries())
         {
-            if (entry.Entity is AuditLog) continue; // never audit the audit log itself
+            if (entry.Entity is AuditLog) continue;
 
             if (entry.State is not (EntityState.Added or EntityState.Modified or EntityState.Deleted))
                 continue;
@@ -89,39 +89,97 @@ public sealed class AuditInterceptor : SaveChangesInterceptor
                 _ => throw new UnreachableException()
             };
 
-            PendingAuditEntry pending = new(entry, action, changedBy, timestamp, correlationId);
+            // Owned entities (OwnsOne/OwnsMany) get logged under the OWNER's entity name,
+            // with the navigation property name as a field prefix — otherwise every owned
+            // "Name" on every entity in the system shows up identically as EntityName="Name".
+            IForeignKey? ownership = entry.Metadata.FindOwnership();
+            string entityName = ownership is not null
+                ? ownership.PrincipalEntityType.ClrType.Name
+                : entry.Entity.GetType().Name;
+            string fieldPrefix = ownership?.PrincipalToDependent?.Name is { } navName
+                ? navName + "."
+                : string.Empty;
+
+            // Shadow FK properties that exist purely to link an owned entity back to its
+            // owner (shared PK) aren't meaningful field data — skip them entirely.
+            HashSet<string> ownershipKeyProps = ownership is not null
+                ? ownership.Properties.Select(p => p.Name).ToHashSet()
+                : [];
+
+            PendingAuditEntry pending = new(entry, entityName, action, changedBy, timestamp, correlationId);
 
             foreach (PropertyEntry prop in entry.Properties)
             {
+                if (ownershipKeyProps.Contains(prop.Metadata.Name))
+                    continue;
+
+                string fieldName = fieldPrefix + prop.Metadata.Name;
+
                 switch (entry.State)
                 {
                     case EntityState.Added:
-                        // Temporary key — db hasn't assigned a real value yet; resolve in SavedChanges
                         if (prop.Metadata.IsKey() && prop.IsTemporary)
                         {
                             pending.HasTemporaryKey = true;
                             continue;
                         }
-                        pending.Changes.Add((prop.Metadata.Name, null, Format(prop.CurrentValue)));
+                        pending.Changes.Add((fieldName, null, Format(prop.CurrentValue)));
                         break;
 
                     case EntityState.Modified:
                         if (!prop.IsModified) continue;
-                        pending.Changes.Add((prop.Metadata.Name,
-                            Format(prop.OriginalValue), Format(prop.CurrentValue)));
+                        pending.Changes.Add((fieldName, Format(prop.OriginalValue), Format(prop.CurrentValue)));
                         break;
 
                     case EntityState.Deleted:
-                        pending.Changes.Add((prop.Metadata.Name, Format(prop.OriginalValue), null));
+                        pending.Changes.Add((fieldName, Format(prop.OriginalValue), null));
                         break;
                 }
             }
+
+            CaptureComplexProperties(entry.ComplexProperties, entry.State, pending, fieldPrefix);
 
             if (pending.Changes.Count > 0)
                 entries.Add(pending);
         }
 
         return entries;
+    }
+
+    private static void CaptureComplexProperties(
+        IEnumerable<ComplexPropertyEntry> complexProperties,
+        EntityState state,
+        PendingAuditEntry pending,
+        string prefix = "")
+    {
+        foreach (ComplexPropertyEntry complexProp in complexProperties)
+        {
+            string qualifiedName = prefix + complexProp.Metadata.Name;
+
+            foreach (PropertyEntry prop in complexProp.Properties)
+            {
+                string fieldName = $"{qualifiedName}.{prop.Metadata.Name}";
+
+                switch (state)
+                {
+                    case EntityState.Added:
+                        pending.Changes.Add((fieldName, null, Format(prop.CurrentValue)));
+                        break;
+
+                    case EntityState.Modified:
+                        if (!prop.IsModified) continue;
+                        pending.Changes.Add((fieldName, Format(prop.OriginalValue), Format(prop.CurrentValue)));
+                        break;
+
+                    case EntityState.Deleted:
+                        pending.Changes.Add((fieldName, Format(prop.OriginalValue), null));
+                        break;
+                }
+            }
+
+            // Recurse for nested complex types
+            CaptureComplexProperties(complexProp.ComplexProperties, state, pending, qualifiedName + ".");
+        }
     }
 
     // ── Flush (runs after the save) ──────────────────────────────────────────
@@ -180,11 +238,11 @@ public sealed class AuditInterceptor : SaveChangesInterceptor
     // ── Private helper ───────────────────────────────────────────────────────
 
     private sealed class PendingAuditEntry(
-        EntityEntry entry, AuditAction action,
+        EntityEntry entry, string entityName, AuditAction action,
         string changedBy, DateTimeOffset timestamp, string? correlationId)
     {
         public EntityEntry Entry { get; } = entry;
-        public string EntityName { get; } = entry.Entity.GetType().Name;
+        public string EntityName { get; } = entityName;
         public AuditAction Action { get; } = action;
         public string ChangedBy { get; } = changedBy;
         public DateTimeOffset Timestamp { get; } = timestamp;

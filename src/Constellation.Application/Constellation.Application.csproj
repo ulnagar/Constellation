@@ -31,6 +31,7 @@
 	<ItemGroup>
 	  <Folder Include="Domains\Edval\Events\EdvalTimetablesUpdated\" />
 	  <Folder Include="Domains\Edval\Models\" />
+	  <Folder Include="Domains\EnrolmentContext\Applications\NewFolder\" />
 	  <Folder Include="Domains\Faculties\Events\FacultyMemberAddedDomainEvent\" />
 	  <Folder Include="Domains\Faculties\Events\FacultyMemberRemovedDomainEvent\" />
 	  <Folder Include="Domains\Messaging\Email\Queries\" />

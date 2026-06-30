@@ -1,6 +1,7 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Partner.Enrolments.Applications;
 
 using Application.Common.PresentationModels;
+using Application.Domains.EnrolmentContext.Applications.Queries.CreateEnrolmentApplication;
 using Application.Domains.EnrolmentContext.Applications.Queries.GetEnrolmentApplicationById;
 using Application.Models.Auth;
 using Constellation.Application.Domains.Schools.Models;
@@ -10,7 +11,10 @@ using Constellation.Core.Enums;
 using Constellation.Core.Models.EnrolmentContext.Offer.Enums;
 using Constellation.Core.Models.Identifiers;
 using Constellation.Core.Models.Students.Enums;
+using Core.Models.EnrolmentContext.EnrolmentPeriod.Identifiers;
+using Core.Models.Students.ValueObjects;
 using Core.Shared;
+using Core.ValueObjects;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
@@ -53,10 +57,12 @@ public class UpsertModel : BasePageModel
     [BindProperty]
     public string? StudentReferenceNumber { get; set; }
     [BindProperty]
+    [Required(ErrorMessage = "First Name is required")]
     public string StudentFirstName { get; set; }
     [BindProperty]
     public string? StudentPreferredName { get; set; }
     [BindProperty]
+    [Required(ErrorMessage = "Last Name is required")]
     public string StudentLastName { get; set; }
     [BindProperty]
     public Gender StudentGender { get; set; } = Gender.Empty;
@@ -165,28 +171,118 @@ public class UpsertModel : BasePageModel
             .Select(s => new SelectListItem { Value = s.Code, Text = s.Name })
             .ToList();
 
-    ProgramList = new SelectList(
-        Program.GetOptions,
-        nameof(Program.Value),
-        nameof(Program.Name),
-        Program?.Value);
+        ProgramList = new SelectList(
+            Program.GetOptions,
+            nameof(Program.Value),
+            nameof(Program.Name),
+            Program?.Value);
 
-    GenderList = new SelectList(
-        Gender.GetOptions,
-        nameof(Gender.Value),
-        nameof(Gender.Name),
-        StudentGender.Value);
+        GenderList = new SelectList(
+            Gender.GetOptions,
+            nameof(Gender.Value),
+            nameof(Gender.Name),
+            StudentGender.Value);
     }
 
     public async Task<IActionResult> OnPostCreate()
     {
-        await PreparePage();
+        await ValidateForm();
 
-        return Page();
+        if (!ModelState.IsValid)
+        {
+            await PreparePage();
+            return Page();
+        }
+
+        Result<StudentReferenceNumber> srnResult = Core.Models.Students.ValueObjects.StudentReferenceNumber.Create(StudentReferenceNumber);
+        StudentReferenceNumber? srn = srnResult.IsFailure ? null : srnResult.Value;
+
+        Result<Name> studentNameResult = Name.Create(StudentFirstName, StudentPreferredName, StudentLastName);
+        if (studentNameResult.IsFailure)
+        {
+            ModalContent = ErrorDisplay.Create(studentNameResult.Error);
+
+            await PreparePage();
+            return Page();
+        }
+
+        Result<EmailAddress> studentEmailResult = EmailAddress.Create(StudentEmailAddress);
+        EmailAddress? studentEmail = studentEmailResult.IsFailure ? null : studentEmailResult.Value;
+
+        Result<Name> parentNameResult = Name.Create(ParentFirstName, ParentFirstName, ParentLastName);
+        Name? parentName = parentNameResult.IsFailure ? null : parentNameResult.Value;
+
+        Result<EmailAddress> parentEmailResult = EmailAddress.Create(ParentEmailAddress);
+        EmailAddress? parentEmail = parentEmailResult.IsFailure ? null : parentEmailResult.Value;
+
+        Result<PhoneNumber> parentPhoneResult = PhoneNumber.Create(ParentPhoneNumber);
+        PhoneNumber? parentPhone = parentPhoneResult.IsFailure ? null : parentPhoneResult.Value;
+
+        Result<MailingAddress> mailingAddressResult = MailingAddress.Create(MailingAddressStreet, MailingAddressTown, MailingAddressState, MailingAddressPostCode);
+        MailingAddress? mailingAddress = mailingAddressResult.IsFailure ? null : mailingAddressResult.Value;
+
+        CreateEnrolmentApplicationCommand command = new(
+            EnrolmentPeriodId.Empty,
+            srn,
+            studentNameResult.Value,
+            StudentGender,
+            DateOfBirth,
+            studentEmail,
+            parentName,
+            parentEmail,
+            parentPhone,
+            mailingAddress,
+            ApplicationReference ?? string.Empty,
+            CurrentSchoolCode,
+            CurrentSchool ?? string.Empty,
+            DestinationSchoolCode,
+            DestinationSchool ?? string.Empty,
+            Program,
+            Grade);
+
+        Result result = await _mediator.Send(command);
+
+        if (result.IsFailure)
+        {
+            ModalContent = ErrorDisplay.Create(result.Error);
+
+            await PreparePage();
+            return Page();
+        }
+
+        return RedirectToPage("/Partner/Enrolments/Applications/Index", new { area = "Staff" });
     }
 
     public async Task<IActionResult> OnPostUpdate()
     {
         return Page();
+    }
+
+    private async Task ValidateForm()
+    {
+        if (StudentGender == Gender.Empty)
+            ModelState.AddModelError(nameof(StudentGender), "Gender is required");
+
+        if (Program == Program.Empty)
+            ModelState.AddModelError(nameof(Program), "Program is required");
+
+        if (Grade == 0)
+        {
+            ModelState.Remove(nameof(Grade));
+            ModelState.AddModelError(nameof(Grade), "Grade is required");
+        }
+
+        bool isValidProgramGradeCombination = (Program, Grade) switch
+        {
+            ({ Value: "OC" }, Grade.Y05) => true,
+            ({ Value: "SHS" }, Grade.Y07 or Grade.Y08 or Grade.Y09 or Grade.Y10) => true,
+            ({ Value: "YDM" }, Grade.Y05 or Grade.Y06 or Grade.Y07 or Grade.Y08 or Grade.Y09 or Grade.Y10) => true,
+            ({ Value: "S6R" }, Grade.Y11 or Grade.Y12) => true,
+            ({ Value: "S6M" }, Grade.Y11 or Grade.Y12) => true,
+            _ => false
+        };
+
+        if (!isValidProgramGradeCombination)
+            ModelState.AddModelError(nameof(Grade), "Grade is not valid for Program");
     }
 }
