@@ -59,7 +59,7 @@ public class UpsertModel : BasePageModel
     [BindProperty]
     public string StudentLastName { get; set; }
     [BindProperty]
-    public Gender StudentGender { get; set; }
+    public Gender StudentGender { get; set; } = Gender.Empty;
     [BindProperty]
     [DisplayFormat(ApplyFormatInEditMode = true, DataFormatString = "{0:yyyy-MM-dd}")]
     public DateOnly? DateOfBirth { get; set; }
@@ -100,6 +100,7 @@ public class UpsertModel : BasePageModel
 
     public IEnumerable<SelectListItem> SchoolList { get; set; }
     public SelectList ProgramList { get; set; }
+    public SelectList GenderList { get; set; }
 
     public async Task OnGet()
     {
@@ -169,6 +170,12 @@ public class UpsertModel : BasePageModel
         nameof(Program.Value),
         nameof(Program.Name),
         Program?.Value);
+
+    GenderList = new SelectList(
+        Gender.GetOptions,
+        nameof(Gender.Value),
+        nameof(Gender.Name),
+        StudentGender.Value);
     }
 
     public async Task<IActionResult> OnPostCreate()

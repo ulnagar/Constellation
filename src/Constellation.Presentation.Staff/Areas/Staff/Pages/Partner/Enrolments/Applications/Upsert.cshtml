@@ -1,6 +1,5 @@
 ﻿@page "{id?}"
 @using Constellation.Core.Enums
-@using Constellation.Core.Models.EnrolmentContext.Offer.Enums
 @using Constellation.Core.Models.Identifiers
 @using Constellation.Core.Models.Students.Enums
 @using ApplicationId = Constellation.Core.Models.EnrolmentContext.Application.Identifiers.ApplicationId
@@ -12,7 +11,7 @@
 <h2>@(newItem ? "New Application" : "Editing Application")</h2>
 
 <div class="page-menu">
-
+    <a href="javascript:history.go(-1)" class="btn btn-danger btn-pull-right">Go Back</a>
 </div>
 
 <hr />
@@ -58,12 +57,8 @@
         <div class="mb-3 row">
             <label asp-for="StudentGender" class="col-md-2">Gender</label>
             <div class="col-md-3">
-                <select asp-for="StudentGender" class="form-control">
+                <select id="StudentGender" name="StudentGender" asp-items="@Model.GenderList" class="form-control select2">
                     <option value=""> -- Select -- </option>
-                    @foreach (var item in Gender.GetOptions.OrderBy(entry => entry.Order))
-                    {
-                        <option value="@item.Value">@item.Name</option>
-                    }
                 </select>
                 <span asp-validation-for="StudentGender" class="text-danger"></span>
             </div>
