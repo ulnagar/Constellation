@@ -195,12 +195,8 @@
         <div class="mb-3 row">
             <label asp-for="Program" class="col-md-2">Program</label>
             <div class="col-md-3">
-                <select asp-for="Program" class="form-control">
+                <select id="Program" name="Program" asp-items="@Model.ProgramList" class="form-control select2">
                     <option value=""> -- Select -- </option>
-                    @foreach (var item in Program.GetOptions)
-                    {
-                        <option value="@item.Value">@item.Name</option>
-                    }
                 </select>
                 <span asp-validation-for="Program" class="text-danger"></span>
             </div>
@@ -308,6 +304,12 @@
             $select.on('select2:clear', function () {
                 $code.val('');
                 $name.val('');
+            });
+        }());
+
+        (function () {
+            $('.select2').select2({
+                theme: 'bootstrap-5'
             });
         }());
     </script>

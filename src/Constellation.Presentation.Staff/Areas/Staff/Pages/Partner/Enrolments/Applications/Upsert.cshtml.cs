@@ -91,13 +91,15 @@ public class UpsertModel : BasePageModel
     public SchoolCode DestinationSchoolCode { get; set; } = SchoolCode.Empty;
     [BindProperty]
     public string? DestinationSchool { get; set; }
+
     [BindProperty]
     [ModelBinder(typeof(BaseFromValueBinder))]
-    public Program Program { get; set; }
+    public Program Program { get; set; } = Program.Empty;
     [BindProperty]
     public Grade Grade { get; set; }
 
     public IEnumerable<SelectListItem> SchoolList { get; set; }
+    public SelectList ProgramList { get; set; }
 
     public async Task OnGet()
     {
@@ -161,6 +163,12 @@ public class UpsertModel : BasePageModel
             .OrderBy(s => s.Name)
             .Select(s => new SelectListItem { Value = s.Code, Text = s.Name })
             .ToList();
+
+    ProgramList = new SelectList(
+        Program.GetOptions,
+        nameof(Program.Value),
+        nameof(Program.Name),
+        Program?.Value);
     }
 
     public async Task<IActionResult> OnPostCreate()
