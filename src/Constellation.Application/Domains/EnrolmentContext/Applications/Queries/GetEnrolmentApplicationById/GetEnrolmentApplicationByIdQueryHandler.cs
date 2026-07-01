@@ -5,6 +5,7 @@ using Core.Models.EnrolmentContext.Application;
 using Core.Models.EnrolmentContext.Application.Errors;
 using Core.Models.EnrolmentContext.Application.Repositories;
 using Core.Shared;
+using Models;
 using Serilog;
 
 internal sealed class GetEnrolmentApplicationByIdQueryHandler

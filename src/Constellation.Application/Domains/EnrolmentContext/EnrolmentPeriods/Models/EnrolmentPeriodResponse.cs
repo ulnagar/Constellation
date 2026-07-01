@@ -1,8 +1,7 @@
-﻿namespace Constellation.Application.Domains.EnrolmentContext.EnrolmentPeriods.Queries.GetCurrentEnrolmentPeriods;
+﻿namespace Constellation.Application.Domains.EnrolmentContext.EnrolmentPeriods.Models;
 
 using Core.Models.EnrolmentContext.EnrolmentPeriod.Enums;
 using Core.Models.EnrolmentContext.EnrolmentPeriod.Identifiers;
-using System;
 
 public sealed record EnrolmentPeriodResponse(
     EnrolmentPeriodId Id,

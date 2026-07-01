@@ -1,31 +1,31 @@
-﻿namespace Constellation.Application.Domains.EnrolmentContext.EnrolmentPeriods.Queries.GetCurrentEnrolmentPeriods;
+﻿namespace Constellation.Application.Domains.EnrolmentContext.EnrolmentPeriods.Queries.GetAllEnrolmentPeriods;
 
 using Abstractions.Messaging;
+using Constellation.Core.Models.EnrolmentContext.EnrolmentPeriod;
 using Core.Models.EnrolmentContext.Application.Repositories;
-using Core.Models.EnrolmentContext.EnrolmentPeriod;
 using Core.Shared;
 using Models;
 using Serilog;
 using System.Collections.Generic;
 
-internal sealed class GetCurrentEnrolmentPeriodsQueryHandler
-: IQueryHandler<GetCurrentEnrolmentPeriodsQuery, List<EnrolmentPeriodResponse>>
+internal sealed class GetAllEnrolmentPeriodsQueryHandler
+: IQueryHandler<GetAllEnrolmentPeriodsQuery, List<EnrolmentPeriodResponse>>
 {
     private readonly IEnrolmentApplicationRepository _repository;
     private readonly ILogger _logger;
 
-    public GetCurrentEnrolmentPeriodsQueryHandler(
+    public GetAllEnrolmentPeriodsQueryHandler(
         IEnrolmentApplicationRepository repository,
         ILogger logger)
     {
         _repository = repository;
         _logger = logger
-            .ForContext<GetCurrentEnrolmentPeriodsQuery>();
+            .ForContext<GetAllEnrolmentPeriodsQuery>();
     }
 
-    public async Task<Result<List<EnrolmentPeriodResponse>>> Handle(GetCurrentEnrolmentPeriodsQuery request, CancellationToken cancellationToken)
+    public async Task<Result<List<EnrolmentPeriodResponse>>> Handle(GetAllEnrolmentPeriodsQuery request, CancellationToken cancellationToken)
     {
-        List<EnrolmentPeriod> periods = await _repository.GetCurrentEnrolmentPeriods(cancellationToken);
+        List<EnrolmentPeriod> periods = await _repository.GetAllEnrolmentPeriods(cancellationToken);
 
         List<EnrolmentPeriodResponse> response = [];
 

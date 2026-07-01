@@ -1,7 +1,9 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Partner.Enrolments.Applications;
 
 using Application.Common.PresentationModels;
+using Application.Domains.EnrolmentContext.Applications.Models;
 using Application.Domains.EnrolmentContext.Applications.Queries.GetEnrolmentApplicationById;
+using Application.Domains.EnrolmentContext.EnrolmentPeriods.Models;
 using Application.Domains.EnrolmentContext.EnrolmentPeriods.Queries.GetCurrentEnrolmentPeriods;
 using Application.Models.Auth;
 using Constellation.Application.Domains.EnrolmentContext.Applications.Commands.CreateEnrolmentApplication;

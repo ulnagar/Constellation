@@ -18,6 +18,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="Areas\Staff\Pages\Partner\Enrolments\Periods\" />
     <Folder Include="Areas\Staff\Pages\Partner\Enrolments\Reports\" />
     <Folder Include="Areas\Staff\Pages\Partner\Enrolments\Offers\" />
   </ItemGroup>

@@ -1,4 +1,4 @@
-﻿namespace Constellation.Application.Domains.EnrolmentContext.Applications.Queries.GetEnrolmentApplicationById;
+﻿namespace Constellation.Application.Domains.EnrolmentContext.Applications.Models;
 
 using Core.Enums;
 using Core.Models.EnrolmentContext.EnrolmentPeriod.Identifiers;
@@ -7,9 +7,6 @@ using Core.Models.Identifiers;
 using Core.Models.Students.Enums;
 using Core.Models.Students.ValueObjects;
 using Core.ValueObjects;
-using System;
-using System.Collections.Generic;
-using System.Text;
 using ApplicationId = Core.Models.EnrolmentContext.Application.Identifiers.ApplicationId;
 
 public sealed record EnrolmentApplicationResponse(

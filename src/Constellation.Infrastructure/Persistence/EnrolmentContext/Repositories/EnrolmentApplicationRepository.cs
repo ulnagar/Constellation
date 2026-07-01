@@ -5,6 +5,7 @@ using Core.Models.EnrolmentContext.Application;
 using Core.Models.EnrolmentContext.Application.Repositories;
 using Core.Models.EnrolmentContext.EnrolmentPeriod;
 using Core.Models.EnrolmentContext.EnrolmentPeriod.Enums;
+using Core.Models.EnrolmentContext.EnrolmentPeriod.Identifiers;
 using Microsoft.EntityFrameworkCore;
 using ApplicationId = Core.Models.EnrolmentContext.Application.Identifiers.ApplicationId;
 
@@ -30,6 +31,20 @@ internal sealed class EnrolmentApplicationRepository
             .FirstOrDefaultAsync(
                 application => application.Id == id,
                 cancellationToken);
+
+    public async Task<List<Application>> GetApplicationsByPeriod(
+        EnrolmentPeriodId id,
+        CancellationToken cancellationToken = default) =>
+        await _context
+            .Set<Application>()
+            .Where(entry => entry.PeriodId == id)
+            .ToListAsync(cancellationToken);
+
+    public async Task<List<EnrolmentPeriod>> GetAllEnrolmentPeriods(
+        CancellationToken cancellationToken = default) =>
+        await _context
+            .Set<EnrolmentPeriod>()
+            .ToListAsync(cancellationToken);
 
     public async Task<List<EnrolmentPeriod>> GetCurrentEnrolmentPeriods(
         CancellationToken cancellationToken = default) =>
