@@ -124,6 +124,11 @@
                 <div class="card-body">
                     <ul class="nav flex-column">
                         <li class="nav-item">
+                            <a class="nav-link show-loader @(Model == ActivePage.Partner_Enrolments_Periods ? "active" : "")" asp-page="/Partner/Enrolments/Periods/Index" asp-area="Staff">
+                                Periods
+                            </a>
+                        </li>
+                        <li class="nav-item">
                             <a class="nav-link show-loader @(Model == ActivePage.Partner_Enrolments_Applications ? "active" : "")" asp-page="/Partner/Enrolments/Applications/Index" asp-area="Staff">
                                 Applications
                             </a>
