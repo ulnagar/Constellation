@@ -14,7 +14,7 @@
     @if (canEditTest.Succeeded)
     {
         <a asp-page="/Partner/Enrolments/Applications/Upsert" asp-area="Staff" class="btn btn-success">Create</a>
-        <a class="btn btn-success">Import</a>
+        <button data-bs-toggle="modal" data-bs-target="#import-modal" class="btn btn-success">Import</button>
         <a class="btn btn-success">Export</a>
     }
 </div>
@@ -73,6 +73,8 @@
     }
     </tbody>
 </table>
+
+<vc:upload-file-for-import-staging />
 
 @section scripts
 {

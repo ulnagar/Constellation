@@ -53,7 +53,7 @@ public sealed class ErrorDisplay : ModalContent
         ErrorDisplay modal = new()
         {
             Title = "Error",
-            Content = $@"<div>{error.Code}</div><span>{error.Message}</span>"
+            Content = $"""<div>{error.Code}</div><span style="white-space: pre-line;">{error.Message}</span>"""
         };
 
         modal.AddButton("Ok", "btn-warning", link ?? string.Empty);

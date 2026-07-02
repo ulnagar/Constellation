@@ -21,5 +21,7 @@ public static class ImportErrors
         "Import.Staging.FailureToReadValue",
         $"Could not read the values in row {row}");
 
-
+    public static readonly Func<List<string>, Error> InvalidColumnMapping = errors => new(
+        "Import.Mapping.InvalidColumnMapping",
+        $"Errors found when validating column maps:{Environment.NewLine}{string.Join(Environment.NewLine, errors)}");
 }

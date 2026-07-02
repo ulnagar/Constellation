@@ -1,4 +1,67 @@
-﻿@page
+﻿@page "{key}"
 @model Constellation.Presentation.Staff.Areas.Staff.Pages.Partner.Enrolments.Applications.ImportModel
 @{
 }
+
+
+@{
+    var grouped = Model.FieldDefinitions
+        .GroupBy(f => f.GroupLabel) // null key = ungrouped, standalone fields
+        .ToList();
+}
+<form asp-page-handler="Map" method="post">
+
+    @foreach (var group in grouped)
+    {
+        if (group.Key is not null)
+        {
+            <fieldset>
+                <legend class="form-label fs-5 mb-3">@group.Key</legend>
+                @foreach (var field in group)
+                {
+                    <div class="mb-3 row">
+                        <label class="col-md-3">@field.Label</label>
+                        <div class="col-md-5">
+                            <select name="Mapping.Mappings[@field.Key]" class="form-control custom-select2">
+                                <option value="">-- not present --</option>
+                                @foreach (var header in Model.AvailableHeaders)
+                                {
+                                    <option value="@header" selected="@(Model.Mapping.Mappings.GetValueOrDefault(field.Key) == header)">
+                                        @header
+                                    </option>
+                                }
+                            </select>
+                        </div>
+                    </div>
+                }
+            </fieldset>
+        }
+        else
+        {
+            @foreach (var field in group)
+            {
+                <div class="mb-3 row">
+                    <label class="col-md-3">@field.Label</label>
+                    <div class="col-md-5">
+                        <select name="Mapping.Mappings[@field.Key]" class="form-control custom-select2">
+                            <option value="">-- not present --</option>
+                            @foreach (var header in Model.AvailableHeaders)
+                            {
+                                <option value="@header" selected="@(Model.Mapping.Mappings.GetValueOrDefault(field.Key) == header)">
+                                    @header
+                                </option>
+                            }
+                        </select>
+                    </div>
+                </div>
+            }
+        }
+    }
+    
+    <div class="mb-3">
+        <div class="col-md-offset-2 col-md-3 d-grid">
+            <input type="submit" value="Save" class="btn btn-primary btn-lg"/>
+        </div>
+    </div>
+
+</form>
