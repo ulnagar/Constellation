@@ -15,6 +15,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="CsvHelper" />
     <PackageReference Include="EPPlus" />
     <PackageReference Include="ExcelDataReader" />
     <PackageReference Include="ExcelDataReader.DataSet" />

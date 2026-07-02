@@ -38,6 +38,7 @@ public sealed class Application
     public ApplicationId Id { get; private set; }
     public EnrolmentPeriodId PeriodId { get; private set; }
 
+
     /* Student Details */
     public StudentReferenceNumber? StudentReferenceNumber { get; private set; }
     public Name StudentName { get; private set; }

@@ -73,4 +73,5 @@ public interface IExcelService
     Task<MemoryStream> CreateSefAttendanceDataExport(List<SefAttendanceData> attendanceData, CancellationToken cancellationToken = default);
     Task<MemoryStream> CreateStocktakeSightingsReport(List<StocktakeSightingWithDifferenceResponse> items, CancellationToken cancellationToken = default);
     Task<MemoryStream> CreateCheckInExportFile(List<CheckInResponse> items, CancellationToken cancellationToken = default);
+
 }

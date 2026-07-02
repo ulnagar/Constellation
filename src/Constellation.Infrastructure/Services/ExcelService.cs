@@ -48,12 +48,13 @@ using System.Data;
 using System.Drawing;
 using System.Globalization;
 using System.Reflection;
-using System.Text.RegularExpressions;
 using System.Threading;
 
 public class ExcelService : IExcelService
 {
     private readonly IDateTimeProvider _dateTime;
+    private readonly IImportStagingCache _stagingCache;
+
     private static readonly List<string[]> _ptoHeadings = new()
     {
         new[]
@@ -67,10 +68,13 @@ public class ExcelService : IExcelService
         new[] { "Student Id", "Student Name", "Grade", "Stellars", "Galaxies", "Universal Achievers" }
     };
 
+
     public ExcelService(
-        IDateTimeProvider dateTime)
+        IDateTimeProvider dateTime,
+        IImportStagingCache stagingCache)
     {
         _dateTime = dateTime;
+        _stagingCache = stagingCache;
     }
 
     public Task<List<ImportStudentDto>> ImportStudentsFromFile(

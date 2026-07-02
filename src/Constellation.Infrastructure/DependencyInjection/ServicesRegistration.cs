@@ -146,6 +146,13 @@ public static class ServicesRegistration
 
         services.AddScoped<IRazorViewToStringRenderer, RazorViewToStringRenderer>();
 
+        // Add Import Cache
+        services.AddMemoryCache(options =>
+        {
+            options.SizeLimit = 50_000;
+        });
+        services.AddSingleton<IImportStagingCache, ImportStagingCache>();
+
         // Add Constellation repositories
 
         services.Scan(selector =>

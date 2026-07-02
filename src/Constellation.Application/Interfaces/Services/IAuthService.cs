@@ -14,4 +14,3 @@ public interface IAuthService
 }
 
 public record ImpersonationResult(bool Succeeded, string? ErrorMessage = null);
-
