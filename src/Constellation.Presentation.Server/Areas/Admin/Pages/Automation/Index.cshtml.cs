@@ -1,14 +1,16 @@
 namespace Constellation.Presentation.Server.Areas.Admin.Pages.Automation;
 
 using Application.Interfaces.Services;
+using Application.Models.Auth;
 using Constellation.Application.Interfaces.Jobs;
 using Constellation.Presentation.Server.BaseModels;
 using Hangfire;
 using Hangfire.Common;
 using Hangfire.Storage;
 using Microsoft.AspNetCore.Mvc;
+using Shared.Helpers.Attributes;
 
-//[HasPermission(AuthPermission.Admin_Automation_Edit_Value)]
+[HasPermission(AuthPermission.Admin_Automation_Edit_Value)]
 public class IndexModel : BasePageModel
 {
     private readonly IRecurringJobManager _jobManager;
