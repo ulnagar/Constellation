@@ -1,3 +1,4 @@
+@using Constellation.Core.Enums
 @model Constellation.Presentation.Staff.Areas.Staff.Pages.Shared.Components.CancelRoll.CancelRollSelection
 
 <form method="post" asp-page-handler="Cancel">
@@ -14,6 +15,18 @@
                         </div>
                     </div>
                     
+                    <div class="row">
+                        <div class="form-group col">
+                            <label asp-for="Status" class="col-md-3"></label>
+                            <div class="col-md-9">
+                                <select asp-for="Status" class="form-control">
+                                    <option value="@LessonStatus.Cancelled">Cancelled</option>
+                                    <option value="@LessonStatus.Concern">Concern</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="row">
                         <div class="form-group col">
                             <label asp-for="Comment" class="col-md-3"></label>

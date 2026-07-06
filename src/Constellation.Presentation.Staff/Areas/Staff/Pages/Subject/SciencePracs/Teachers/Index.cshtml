@@ -99,9 +99,12 @@
     <script>
         $(document).ready(function () {
             $('.contact-table').DataTable({
-                "order": [
+                order: [
                     [2, 'asc'],
                     [1, 'asc']
+                ],
+                columnDefs: [
+                    { target: 5, searchable: false, sortable: false }
                 ]
             });
         })
