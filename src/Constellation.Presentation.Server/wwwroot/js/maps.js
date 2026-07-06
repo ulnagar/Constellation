@@ -1,11 +1,11 @@
 ﻿function DisplayMap(elementid, layerdata) {
     // OpenStreetView tiles
-    //var tileUrl = 'https://tile.openstreetmap.org/{z}/{x}/{y}.png';
-    //var tileAttribution = 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, <a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>';
+    var tileUrl = 'https://tile.openstreetmap.org/{z}/{x}/{y}.png';
+    var tileAttribution = 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, <a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>';
 
     // Local Proxy Tiles
-    var tileUrl = '/api/tiles/{z}/{x}/{y}.png';
-    var tileAttribution = '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors';
+    // var tileUrl = '/api/tiles/{z}/{x}/{y}.png';
+    // var tileAttribution = '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors';
 
     let layers = layerdata;
     let elementId = elementid;
