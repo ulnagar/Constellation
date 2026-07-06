@@ -63,7 +63,7 @@ builder.Services
 builder.Services.ConfigureApplicationCookie(options =>
 {
     options.Cookie.Name = "Constellation.Identity";
-    options.ExpireTimeSpan = TimeSpan.FromMinutes(30);
+    options.ExpireTimeSpan = TimeSpan.FromMinutes(90);
     options.SlidingExpiration = true;
     options.LoginPath = new PathString("/Auth/Login");
     options.LogoutPath = new PathString("/Auth/Logout");
@@ -78,7 +78,7 @@ builder.Services
     .AddCookie(options =>
     {
         options.Cookie.Name = "Constellation.Identity";
-        options.ExpireTimeSpan = TimeSpan.FromMinutes(30);
+        options.ExpireTimeSpan = TimeSpan.FromMinutes(90);
         options.SlidingExpiration = true;
         options.LoginPath = new PathString("/Auth/Login");
         options.LogoutPath = new PathString("/Auth/Logout");
@@ -143,7 +143,7 @@ builder.Services.AddRazorPages()
 builder.Services.AddSession(options =>
 {
     options.Cookie.Name = ".Constellation.Session";
-    options.IdleTimeout = TimeSpan.FromMinutes(30);
+    options.IdleTimeout = TimeSpan.FromMinutes(90);
     options.Cookie.IsEssential = true;
 });
 
