@@ -10,6 +10,7 @@ using Application.Domains.Assessments.Assessments.Commands.RemoveDownloadFromAss
 using Application.Domains.Assessments.Assessments.Commands.RemoveInstructionFromAssessment;
 using Application.Domains.Assessments.Assessments.Commands.RemoveStudentFromAssessment;
 using Application.Domains.Assessments.Assessments.Commands.SendAssessmentNotificationToSchools;
+using Application.Domains.Assessments.Assessments.Commands.UploadSubmissionToCanvas;
 using Application.Domains.Assessments.Assessments.Queries.GetAssessmentDetailsById;
 using Application.Domains.Assessments.Assessments.Queries.GetAssessmentDownload;
 using Application.Domains.Assessments.Assessments.Queries.GetAssessmentDownloadFile;
@@ -521,6 +522,34 @@ public class DetailsModel : BasePageModel
         }
 
         return File(downloadRequest.Value.FileData, downloadRequest.Value.FileType, downloadRequest.Value.FileName);
+    }
+
+    public async Task<IActionResult> OnGetUploadToCanvas(SubmissionId submissionId)
+    {
+        UploadSubmissionToCanvasCommand command = new(
+            Id,
+            submissionId);
+
+        _logger
+            .ForContext(nameof(UploadSubmissionToCanvasCommand), command, true)
+            .Information("Requested to upload submission to canvas from Assessment by user {User}", _currentUserService.UserName);
+
+        Result result = await _mediator.Send(command);
+
+        if (result.IsFailure)
+        {
+            _logger
+                .ForContext(nameof(UploadSubmissionToCanvasCommand), command, true)
+                .ForContext(nameof(Error), result.Error, true)
+                .Warning("Failed to upload submission to canvas from Assessment by user {User}", _currentUserService.UserName);
+
+            ModalContent = ErrorDisplay.Create(result.Error);
+
+            await PreparePage();
+            return Page();
+        }
+
+        return RedirectToPage();
     }
 
     public async Task<IActionResult> OnPostAjaxUpdateInstructions(AssessmentInstructionId instructionId, UserCategory category)

@@ -2,6 +2,7 @@
 
 using Application.Interfaces.Gateways;
 using Application.Interfaces.Jobs;
+using Application.Interfaces.Repositories;
 using Constellation.Core.Shared;
 using Core.Models.Assessments;
 using Core.Models.Assessments.Errors;
@@ -21,6 +22,7 @@ internal sealed class AssignmentSubmissionJob : IAssignmentSubmissionJob
     private readonly IStudentRepository _studentRepository;
     private readonly IAttachmentService _attachmentService;
     private readonly ICanvasGateway _canvasGateway;
+    private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger _logger;
 
     public AssignmentSubmissionJob(
@@ -28,12 +30,14 @@ internal sealed class AssignmentSubmissionJob : IAssignmentSubmissionJob
         IStudentRepository studentRepository,
         IAttachmentService attachmentService,
         ICanvasGateway canvasGateway,
+        IUnitOfWork unitOfWork,
         ILogger logger)
     {
         _assessmentRepository = assessmentRepository;
         _studentRepository = studentRepository;
         _attachmentService = attachmentService;
         _canvasGateway = canvasGateway;
+        _unitOfWork = unitOfWork;
         _logger = logger;
     }
 
@@ -64,7 +68,10 @@ internal sealed class AssignmentSubmissionJob : IAssignmentSubmissionJob
                     continue;
                 }
 
-                AssessmentSubmission? submission = assessmentStudent.Submissions.OrderByDescending(entry => entry.SubmittedAt).FirstOrDefault();
+                AssessmentSubmission? submission = assessmentStudent.Submissions
+                    .Where(entry => entry.ForwardedAt is null)
+                    .OrderByDescending(entry => entry.SubmittedAt)
+                    .FirstOrDefault();
 
                 if (submission is null)
                 {
@@ -104,8 +111,14 @@ internal sealed class AssignmentSubmissionJob : IAssignmentSubmissionJob
                         .ForContext(nameof(Student), student.Name.DisplayName)
                         .ForContext(nameof(Error), result.Error, true)
                         .Warning("Failed to upload Assessment Submission to Canvas");
+
+                    continue;
                 }
+                    
+                submission.MarkForwarded();
             }
+
+            await _unitOfWork.CompleteAsync(cancellationToken);
         }
     }
 }

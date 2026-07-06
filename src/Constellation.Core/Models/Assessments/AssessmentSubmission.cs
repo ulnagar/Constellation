@@ -36,4 +36,9 @@ public sealed class AssessmentSubmission
     public DateTimeOffset SubmittedAt { get; private set; }
     public string SubmittedBy { get; private set; }
     public EmailAddress SubmittedByEmail { get; private set; }
+
+    public DateTimeOffset? ForwardedAt { get; private set; }
+
+    public void MarkForwarded() =>
+        ForwardedAt = DateTimeOffset.UtcNow;
 }
