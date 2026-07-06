@@ -28,7 +28,7 @@ builder.Services.AddTransient<ICurrentUserService, CurrentUserService>();
 builder.Services.AddSession(options =>
 {
     options.Cookie.Name = ".Constellation.Session";
-    options.IdleTimeout = TimeSpan.FromMinutes(60);
+    options.IdleTimeout = TimeSpan.FromMinutes(90);
     options.Cookie.IsEssential = true;
 });
 builder.Services.AddMemoryCache();

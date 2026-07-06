@@ -42,7 +42,7 @@ public static class AuthServiceExtensions
         services.ConfigureApplicationCookie(options =>
         {
             options.Cookie.Name = "Constellation.Identity";
-            options.ExpireTimeSpan = TimeSpan.FromMinutes(60);
+            options.ExpireTimeSpan = TimeSpan.FromMinutes(90);
             options.SlidingExpiration = true;
             options.LoginPath = new PathString("/Auth/Login");
             options.LogoutPath = new PathString("/Auth/Logout");
@@ -57,7 +57,7 @@ public static class AuthServiceExtensions
             .AddCookie(options =>
             {
                 options.Cookie.Name = "Constellation.Identity";
-                options.ExpireTimeSpan = TimeSpan.FromMinutes(60);
+                options.ExpireTimeSpan = TimeSpan.FromMinutes(90);
                 options.SlidingExpiration = true;
                 options.LoginPath = new PathString("/Auth/Login");
                 options.LogoutPath = new PathString("/Auth/Logout");
