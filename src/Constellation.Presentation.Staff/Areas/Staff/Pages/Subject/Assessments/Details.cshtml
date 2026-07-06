@@ -345,10 +345,21 @@
                             <td data-order="@entry.SubmittedAt.LocalDateTime.ToString("yyyy-MM-dd HH:mm")">@entry.SubmittedAt.LocalDateTime.ToString("g")</td>
                             <td>@entry.SubmittedBy</td>
                             <td>
-                                @if (canSubmitTest.Succeeded || canEditTest.Succeeded)
-                                {
-                                    <a asp-page-handler="DownloadSubmission" asp-route-submissionId="@entry.SubmissionId" class="btn btn-warning btn-sm btn-show-hover">Download</a>
-                                }
+
+                                <div class="btn-group" role="group">
+                                    <button type="button" class="btn btn-warning dropdown-toggle btn-sm btn-show-hover" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> Actions</button>
+                                    <div class="dropdown-menu">
+                                        @if (canSubmitTest.Succeeded || canEditTest.Succeeded)
+                                        {
+                                            <a asp-page-handler="DownloadSubmission" asp-route-submissionId="@entry.SubmissionId" class="dropdown-item">Download</a>
+
+                                            if (Model.Assessment.CanvasDetails is not null)
+                                            {
+                                                <a asp-page-handler="UploadToCanvas" asp-route-submissionId="@entry.SubmissionId" class="dropdown-item">Send to Canvas</a>
+                                            }
+                                        }
+                                    </div>
+                                </div>
                             </td>
                         </tr>
                     }
