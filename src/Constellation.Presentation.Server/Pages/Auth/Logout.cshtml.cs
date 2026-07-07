@@ -1,6 +1,5 @@
 ﻿namespace Constellation.Presentation.Server.Pages.Auth;
 
-using Constellation.Application.Models.Identity;
 using Constellation.Presentation.Server.BaseModels;
 using Core.Models.Auth;
 using Microsoft.AspNetCore.Authorization;
@@ -21,6 +20,8 @@ public class LogoutModel : BasePageModel
     public async Task<IActionResult> OnGet()
     {
         await _signInManager.SignOutAsync();
+        Response.Cookies.Delete(".Constellation.KnownUser");
+        HttpContext.Session.Clear();
 
         return RedirectToPage("/Index", new { area = "" });
     }
@@ -28,7 +29,9 @@ public class LogoutModel : BasePageModel
     public async Task<IActionResult> OnPost()
     {
         await _signInManager.SignOutAsync();
-        
+        Response.Cookies.Delete(".Constellation.KnownUser");
+        HttpContext.Session.Clear();
+
         return RedirectToPage("/Index", new { area = "" });
     }
 }

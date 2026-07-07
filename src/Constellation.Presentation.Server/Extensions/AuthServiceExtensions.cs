@@ -79,7 +79,25 @@ public static class AuthServiceExtensions
                 options.Events = new OpenIdConnectEvents
                 {
                     OnTokenValidated = async context =>
-                        await IdentityHelpers.SyncUserWithIdentity(context)
+                    {
+                        await IdentityHelpers.SyncUserWithIdentity(context);
+                        IdentityHelpers.UpdateKnownUserSession(context);
+                    },
+                    OnRedirectToIdentityProvider = context =>
+                    {
+                        // Pull the hint from wherever it's available to you at
+                        // challenge time — query string, TempData, a known claim, etc.
+                        var loginHint = context.Properties.Items.TryGetValue("login_hint", out var hint)
+                            ? hint
+                            : null;
+
+                        if (!string.IsNullOrWhiteSpace(loginHint))
+                        {
+                            context.ProtocolMessage.LoginHint = loginHint;
+                        }
+
+                        return Task.CompletedTask;
+                    }
                 };
             });
 

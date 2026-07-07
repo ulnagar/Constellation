@@ -4,7 +4,6 @@ using Application.Domains.AppSettings.Models;
 using Application.Domains.Auth.Queries.GetParentUserFromMobileNumber;
 using Constellation.Application.DTOs.EmailRequests;
 using Constellation.Application.Interfaces.Services;
-using Constellation.Application.Models.Identity;
 using Constellation.Core.Shared;
 using Constellation.Core.ValueObjects;
 using Core.Models.Auth;
@@ -109,22 +108,38 @@ public class LoginModel : PageModel
             LoginEnabled = true;
     }
 
-    public async Task OnGet()
+    public async Task<IActionResult> OnGet()
     {
+        string? sessionUser = HttpContext.Session.GetString("KnownUser");
+        string? cookieUser = Request.Cookies[".Constellation.KnownUser"];
+
         // Clear the existing external cookie to ensure a clean login process
         await HttpContext.SignOutAsync();
 
         await PreparePage();
+
+        if (SSOEnabled && !Manual && !string.IsNullOrWhiteSpace(sessionUser))
+            // This browser session already had a successful SSO login - 
+            // treat this as a timeout, not a fresh attempt.
+            return ChallengeSingleSignOn(sessionUser);
         
+        if (!string.IsNullOrWhiteSpace(sessionUser))
+            Input.Email = sessionUser;
+        else if (!string.IsNullOrWhiteSpace(cookieUser))
+            Input.Email = cookieUser;
+
         Status = LoginStatus.WaitingUserInput;
+        return Page();
     }
 
-    private async Task StartSingleSignOnProcess()
+    private IActionResult ChallengeSingleSignOn(string? loginHint)
     {
-        await HttpContext.ChallengeAsync(OpenIdConnectDefaults.AuthenticationScheme);
-    }
+        AuthenticationProperties props = new();
+        if (!string.IsNullOrWhiteSpace(loginHint))
+            props.Items["login_hint"] = loginHint;
 
-    public Task OnGetSingleSignOn() => StartSingleSignOnProcess();
+        return Challenge(props, OpenIdConnectDefaults.AuthenticationScheme);
+    }
 
     public async Task<IActionResult> OnPostAsync()
     {
@@ -194,7 +209,7 @@ public class LoginModel : PageModel
         await _userManager.UpdateAsync(user);
 
         if (loginType == LoginType.SSO)
-            await StartSingleSignOnProcess();
+            return ChallengeSingleSignOn(Input.Email);
 
         if (loginType == LoginType.Domain)
         {

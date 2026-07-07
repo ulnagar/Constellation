@@ -1,7 +1,5 @@
 ﻿namespace Constellation.Presentation.Server.Helpers.Identity;
 
-using Application.Models.Identity;
-using Application.Models.Identity.Enums;
 using Core.Models.Auth;
 using Core.Models.Auth.Enums;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
@@ -35,7 +33,8 @@ internal static class IdentityHelpers
 
         foreach (var claim in context.Principal?.Claims ?? [])
         {
-            _logger.Information("Claim: {Type} = {Value}", claim.Type, claim.Value);
+            _logger
+                .Information("Claim: {Type} = {Value}", claim.Type, claim.Value);
         }
 
         // Get the external user's identifier (typically 'sub' claim)
@@ -111,5 +110,32 @@ internal static class IdentityHelpers
 
         context.HandleResponse();
         context.Response.Redirect("/");
+    }
+
+    internal static void UpdateKnownUserSession(TokenValidatedContext context)
+    {
+        if (context.Principal is null)
+            return;
+
+        string? upn = context.Principal.FindFirstValue("preferred_username")
+                      ?? context.Principal.FindFirstValue(ClaimTypes.Upn);
+
+        // only process for staff users (with @det.nsw.edu.au email/upn)
+        if (!string.IsNullOrWhiteSpace(upn) && upn.Contains("@det.nsw.edu.au", StringComparison.CurrentCultureIgnoreCase))
+        {
+            context.HttpContext.Session.SetString("KnownUser", upn);
+
+            context.HttpContext.Response.Cookies.Append(
+                ".Constellation.KnownUser",
+                upn,
+                new CookieOptions
+                {
+                    HttpOnly = true,
+                    Secure = true,
+                    SameSite = SameSiteMode.Lax,
+                    Expires = DateTimeOffset.UtcNow.AddDays(30),
+                    IsEssential = false
+                });
+        }
     }
 }
