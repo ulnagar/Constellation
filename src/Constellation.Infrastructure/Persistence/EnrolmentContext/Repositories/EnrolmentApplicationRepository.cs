@@ -56,5 +56,12 @@ internal sealed class EnrolmentApplicationRepository
                 && period.ClosedAt > _dateTime.Now)
             .ToListAsync(cancellationToken);
 
+    public async Task<EnrolmentPeriod?> GetEnrolmentPeriodById(
+        EnrolmentPeriodId id,
+        CancellationToken cancellationToken = default) =>
+        await _context
+            .Set<EnrolmentPeriod>()
+            .FirstOrDefaultAsync(period => period.Id == id, cancellationToken);
+
     public void Insert(Application application) => _context.Set<Application>().Add(application);
 }

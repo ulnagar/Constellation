@@ -7,6 +7,8 @@ using Core.Models.Auth;
 using Core.Primitives;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Design;
+using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
 using Outbox;
 using System.Reflection;
@@ -63,5 +65,22 @@ public class ConstellationDbContext : IdentityDbContext<AppUser, AppRole, Guid>
         Set<OutboxMessage>().Add(eventMessage);
 
         return Task.CompletedTask;
+    }
+}
+
+public class ConstellationDbContextFactory : IDesignTimeDbContextFactory<ConstellationDbContext>
+{
+    public ConstellationDbContext CreateDbContext(string[] args)
+    {
+        var configuration = new ConfigurationBuilder()
+            .SetBasePath(Directory.GetCurrentDirectory())
+            .AddJsonFile("appsettings.json")
+            .AddJsonFile("appsettings.Development.json", optional: true)
+            .Build();
+
+        var optionsBuilder = new DbContextOptionsBuilder<ConstellationDbContext>();
+        optionsBuilder.UseSqlServer(configuration.GetConnectionString("ConstellationConnection"));
+
+        return new ConstellationDbContext(optionsBuilder.Options);
     }
 }

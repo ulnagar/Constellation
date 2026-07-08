@@ -53,11 +53,11 @@ public sealed class Application
     public MailingAddress? MailingAddress { get; private set; }
 
     /* Application Details */
-    public string ApplicationReference { get; private set; }
+    public string? ApplicationReference { get; private set; }
     public SchoolCode? CurrentSchoolCode { get; private set; }
-    public string CurrentSchool { get; private set; }
+    public string? CurrentSchool { get; private set; }
     public SchoolCode? DestinationSchoolCode { get; private set; }
-    public string DestinationSchool { get; private set; }
+    public string? DestinationSchool { get; private set; }
     public Program Program { get; private set; }
     public Grade Grade { get; private set; }
 
@@ -72,11 +72,11 @@ public sealed class Application
         EmailAddress? parentEmailAddress,
         PhoneNumber? parentPhoneNumber,
         MailingAddress? mailingAddress,
-        string applicationReference,
+        string? applicationReference,
         SchoolCode? currentSchoolCode,
-        string currentSchool,
+        string? currentSchool,
         SchoolCode? destinationSchoolCode,
-        string destinationSchool,
+        string? destinationSchool,
         Program program,
         Grade grade)
     {

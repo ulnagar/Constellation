@@ -135,6 +135,13 @@ public class SchoolRepository : ISchoolRepository
             .Set<School>()
             .FirstOrDefaultAsync(school => school.Code == schoolCode, cancellationToken);
 
+    public async Task<School?> GetByName(
+        string schoolName,
+        CancellationToken cancellationToken = default) =>
+        await _context
+            .Set<School>()
+            .FirstOrDefaultAsync(school => school.Name == schoolName, cancellationToken);
+
     public async Task<List<School>> GetAll(
         CancellationToken cancellationToken = default) =>
         await _context

@@ -1,5 +1,6 @@
 ﻿namespace Constellation.Infrastructure.Persistence.EnrolmentContext.EntityConfigurations.Application;
 
+using Converters;
 using Core.Models.EnrolmentContext.EnrolmentPeriod;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
@@ -16,5 +17,9 @@ internal sealed class EnrolmentPeriodConfiguration : IEntityTypeConfiguration<En
         builder
             .Property(entry => entry.Status)
             .HasConversion<string>();
+
+        builder
+            .Property(entry => entry.Program)
+            .HasConversion<ProgramConverter>();
     }
 }

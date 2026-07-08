@@ -1,11 +1,18 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Partner.Enrolments.Applications;
 
+using Application.Domains.EnrolmentContext.Applications.Commands.ImportApplications;
 using Application.Domains.Import.Models;
 using Application.Interfaces.Services;
 using Application.Models.Auth;
 using Application.Models.ImportCache;
+using Constellation.Application.Common.PresentationModels;
+using Constellation.Application.Domains.EnrolmentContext.EnrolmentPeriods.Models;
+using Constellation.Application.Domains.EnrolmentContext.EnrolmentPeriods.Queries.GetAllEnrolmentPeriods;
 using Constellation.Application.Domains.Import.Interfaces;
 using Constellation.Core.Abstractions.Services;
+using Constellation.Core.Models.EnrolmentContext.EnrolmentPeriod.Identifiers;
+using Constellation.Core.Shared;
+using Core.Models.EnrolmentContext.Application;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
@@ -44,14 +51,29 @@ public class ImportModel : BasePageModel
     [BindProperty(SupportsGet = true)]
     public Guid Key { get; set; }
 
+    [BindProperty]
+    public EnrolmentPeriodId PeriodId { get; set; } = EnrolmentPeriodId.Empty;
+
+    public List<EnrolmentPeriodResponse> Periods { get; set; } = [];
+
     public IReadOnlyList<ImportFieldDefinition> FieldDefinitions => EnrolmentApplicationImportFields.Definitions;
 
     [BindProperty]
-    public ColumnMappingInput Mapping { get; set; }
+    public ColumnMapping Mapping { get; set; }
     
     public IReadOnlyList<string> AvailableHeaders { get; set; }
 
-    public void OnGet()
+    public bool ImportFinished { get; set; }
+    public ImportRunResult<Application> ImportResult { get; set; }
+
+    public async Task OnGet()
+    {
+        await PreparePage();
+
+        Mapping = new ColumnMapping();
+    }
+
+    private async Task PreparePage()
     {
         bool success = _stagingCache.TryGet(Key, out StagedImport import);
 
@@ -59,12 +81,37 @@ public class ImportModel : BasePageModel
             return;
 
         AvailableHeaders = import.Headers;
-        Mapping = new ColumnMappingInput();
+
+        Result<List<EnrolmentPeriodResponse>> periods = await _mediator.Send(new GetAllEnrolmentPeriodsQuery());
+
+        if (periods.IsFailure)
+        {
+            ModalContent = ErrorDisplay.Create(periods.Error);
+
+            return;
+        }
+
+        Periods = periods.Value
+            .OrderBy(entry => entry.OpenAt)
+            .ToList();
     }
 
     public async Task<IActionResult> OnPostMap()
     {
-        Mapping.Validate(FieldDefinitions, AvailableHeaders);
+        Result validation = Mapping.Validate(FieldDefinitions, AvailableHeaders);
+
+        if (validation.IsFailure)
+        {
+            ModalContent = ErrorDisplay.Create(validation.Error);
+
+            await PreparePage();
+            return Page();
+        }
+
+        Result<ImportRunResult<Application>> import = await _mediator.Send(new ImportApplicationsCommand(PeriodId, Mapping));
+
+        ImportFinished = true;
+        ImportResult = import.Value;
 
         return Page();
     }

@@ -2,9 +2,8 @@
 
 using Enums;
 using Identifiers;
+using Offer.Enums;
 using System;
-using System.Collections.Generic;
-using System.Text;
 
 public sealed class EnrolmentPeriod
 {
@@ -18,5 +17,5 @@ public sealed class EnrolmentPeriod
     public DateTimeOffset OpenAt { get; private set; }
     public DateTimeOffset ClosedAt { get; private set; }
     public PeriodStatus Status { get; private set; }
-
+    public Program Program { get; private set; }
 }

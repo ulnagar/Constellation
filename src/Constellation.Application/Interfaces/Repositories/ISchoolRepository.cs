@@ -13,6 +13,7 @@ public interface ISchoolRepository
     Task<List<School>> GetAllActive(CancellationToken cancellationToken = default);
     Task<List<School>> GetAllInactive(CancellationToken cancellationToken = default);
     Task<School?> GetById(SchoolCode schoolCode, CancellationToken cancellationToken = default);
+    Task<School?> GetByName(string schoolName, CancellationToken cancellationToken = default);
     Task<List<School>> GetAll(CancellationToken cancellationToken = default);
     Task<List<School>> GetWithCurrentStudents(CancellationToken cancellationToken = default);
     Task<List<School>> GetListFromIds(List<SchoolCode> schoolCodes, CancellationToken cancellationToken = default);

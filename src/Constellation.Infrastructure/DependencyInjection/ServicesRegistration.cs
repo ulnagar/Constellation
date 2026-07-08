@@ -2,7 +2,7 @@
 namespace Microsoft.Extensions.DependencyInjection;
 
 using Constellation.Application.Clock;
-using Constellation.Application.Domains.EnrolmentContext.Applications.Queries.GetEnrolmentApplicationById;
+using Constellation.Application.Domains.Import.Interfaces;
 using Constellation.Application.Interfaces.Jobs;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Interfaces.Services;
@@ -172,8 +172,14 @@ public static class ServicesRegistration
                 .AsMatchingInterface()
                 .WithScopedLifetime());
 
-        // Add remaining services
+        // Add ImportRowMapper services
+        services.Scan(selector =>
+            selector.FromAssemblies(Constellation.Infrastructure.AssemblyReference.Assembly)
+                .AddClasses(classes => classes.AssignableTo(typeof(IImportRowMapper<,>)), false)
+                .AsImplementedInterfaces()
+                .WithScopedLifetime());
 
+        // Add remaining services
         services.Scan(selector =>
             selector.FromAssemblies(
                 Constellation.Application.AssemblyReference.Assembly,
@@ -182,7 +188,7 @@ public static class ServicesRegistration
             .UsingRegistrationStrategy(RegistrationStrategy.Skip)
             .AsMatchingInterface()
             .WithScopedLifetime());
-
+        
         // Explicitly register transient IDateTimeProvider
 
         services.AddTransient<IDateTimeProvider, DateTimeProvider>();

@@ -20,4 +20,8 @@ public static class EnrolmentApplicationErrors
     public static readonly Func<Program, Grade, Error> InvalidProgramGradeCombination = (program, grade) => new(
         "Enrolment.Application.InvalidProgramGradeCombination",
         $"The combination of the '{program}' program and grade {grade.AsName()} is invalid");
+
+    public static readonly Error MultipleExistingApplications = new(
+        "Enrolment.Application.MultipleExistingApplications",
+        "There are multiple matching applications already recorded for this student");
 }

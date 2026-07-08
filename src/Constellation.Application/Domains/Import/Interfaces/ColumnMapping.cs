@@ -3,7 +3,7 @@
 using Constellation.Application.Common.Errors;
 using Constellation.Core.Shared;
 
-public sealed class ColumnMappingInput
+public sealed class ColumnMapping
 {
     public Guid Token { get; set; }
     public Dictionary<string, string?> Mappings { get; set; } = [];

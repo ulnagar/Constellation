@@ -24,4 +24,16 @@ public static class ImportErrors
     public static readonly Func<List<string>, Error> InvalidColumnMapping = errors => new(
         "Import.Mapping.InvalidColumnMapping",
         $"Errors found when validating column maps:{Environment.NewLine}{string.Join(Environment.NewLine, errors)}");
+
+    public static readonly Func<string, int, Error> RequiredFieldMissing = (column, row) => new(
+        "Import.Mapping.RequiredFieldMissing",
+        $"Error in row {row}: required field '{column}' does not contain a value");
+
+    public static readonly Func<Type, string, Error> ValueParseError = (type, column) => new(
+        "Import.Mapping.ValueParseError",
+        $"Value provided for {column} cannot be converted to type {type.Name}");
+
+    public static readonly Error StagedImportExpired = new(
+        "Import.Staging.StagedImportExpired",
+        "The provided import staging key has expired and the data is no longer available");
 }
