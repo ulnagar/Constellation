@@ -7,7 +7,11 @@
 
 @if (Model.ImportFinished)
 {
-    if (!Model.ImportResult.HasFailures)
+    if (Model.ImportResult is null)
+    {
+        // Just show import error message
+    }
+    else if (!Model.ImportResult.HasFailures)
     {
         <p>Import Successful! @Model.ImportResult.SucceededCount Applications created or updated.</p>
     }
@@ -60,20 +64,29 @@ else
                 <button type="submit" class="btn btn-primary">Filter</button>
             </div>
         </div>
-
+        
+        <input type="hidden" name="Mapping.Token" value="@Model.Key" />
     
         @foreach (var group in grouped)
         {
             if (group.Key is not null)
             {
-                <fieldset>
+                <fieldset class="mb-3">
                     <legend class="form-label fs-5 mb-3">@group.Key</legend>
                     @foreach (var field in group)
                     {
-                        <div class="mb-3 row">
-                            <label class="col-md-3">@field.Label</label>
+                        <div class="row mb-3 mapping-row @(field.Required ? "mapping-row--required" : "")">
+                            <label for="mapping-@field.Key" class="col-md-3">
+                                @field.Label
+                                @if (field.Required)
+                                {
+                                    <span class="required-marker" aria-hidden="true">*</span>
+                                    <span class="visually-hidden">(required)</span>
+                                }
+                            </label>
+
                             <div class="col-md-5">
-                                <select name="Mapping.Mappings[@field.Key]" class="form-control custom-select2">
+                                <select id="mapping-@field.Key" name="Mapping.Mappings[@field.Key]" class="form-control custom-select2">
                                     <option value="">-- not present --</option>
                                     @foreach (var header in Model.AvailableHeaders)
                                     {
@@ -91,10 +104,18 @@ else
             {
                 @foreach (var field in group)
                 {
-                    <div class="mb-3 row">
-                        <label class="col-md-3">@field.Label</label>
+                    <div class="row mb-3 mapping-row @(field.Required ? "mapping-row--required" : "")">
+                        <label for="mapping-@field.Key" class="col-md-3">
+                            @field.Label
+                            @if (field.Required)
+                            {
+                                <span class="required-marker" aria-hidden="true">*</span>
+                                <span class="visually-hidden">(required)</span>
+                            }
+                        </label>
+
                         <div class="col-md-5">
-                            <select name="Mapping.Mappings[@field.Key]" class="form-control custom-select2">
+                            <select id="mapping-@field.Key" name="Mapping.Mappings[@field.Key]" class="form-control custom-select2">
                                 <option value="">-- not present --</option>
                                 @foreach (var header in Model.AvailableHeaders)
                                 {

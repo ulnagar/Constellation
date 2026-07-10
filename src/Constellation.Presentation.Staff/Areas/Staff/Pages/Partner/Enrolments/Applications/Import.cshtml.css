@@ -1,0 +1,18 @@
+.required-marker {
+    color: var(--danger, #c00);
+    margin-left: 0.25rem;
+    font-weight: bold;
+}
+
+.mapping-row--required select {
+    border-left: 3px solid var(--danger, #c00);
+}
+
+.visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0,0,0,0);
+    white-space: nowrap;
+}

@@ -15,6 +15,7 @@ using Core.Models.Students.ValueObjects;
 using Core.Shared;
 using Core.ValueObjects;
 using System.Collections.Generic;
+using System.Globalization;
 
 internal sealed class ApplicationImportRowMapper : IImportRowMapper<Application, EnrolmentPeriod>
 {
@@ -27,7 +28,7 @@ internal sealed class ApplicationImportRowMapper : IImportRowMapper<Application,
     }
 
     public async Task<Result<Application>> Map(
-        StagedImportRow row, 
+        StagedImportRow row,
         IReadOnlyDictionary<string, string?> columnMapping,
         EnrolmentPeriod period,
         CancellationToken cancellationToken = default)
@@ -39,6 +40,7 @@ internal sealed class ApplicationImportRowMapper : IImportRowMapper<Application,
         string? studentNamePreferred = Get("StudentName.Preferred");
         string? studentNameLast = Get("StudentName.Last");
         string? dateOfBirth = Get("DateOfBirth");
+        string? genderString = Get("Gender");
         string? studentEmailAddress = Get("StudentEmailAddress");
         string? parentNameFirst = Get("ParentName.First");
         string? parentNameLast = Get("ParentName.Last");
@@ -99,16 +101,31 @@ internal sealed class ApplicationImportRowMapper : IImportRowMapper<Application,
 
             parentName = parentNameResult.Value;
         }
-        
+
         DateOnly? birthDate = null;
         if (!string.IsNullOrWhiteSpace(dateOfBirth))
         {
-            bool dateOfBirthResult = DateOnly.TryParse(dateOfBirth, out DateOnly birthDateTemp);
+            bool dateTimeOfBirth = DateTime.TryParse(
+                dateOfBirth,
+                CultureInfo.GetCultureInfo("en-AU"),
+                DateTimeStyles.None,
+                out DateTime parsed);
 
-            if (!dateOfBirthResult)
+            if (dateTimeOfBirth)
+                birthDate = DateOnly.FromDateTime(parsed);
+            else
                 return Result.Failure<Application>(ImportErrors.ValueParseError(typeof(DateOnly), "Date Of Birth"));
+        }
 
-            birthDate = birthDateTemp;
+        Gender gender = Gender.Empty;
+        if (!string.IsNullOrWhiteSpace(genderString))
+        {
+            Gender? genderValue = Gender.FromValue(genderString);
+
+            if (genderValue is null)
+                return Result.Failure<Application>(ImportErrors.ValueParseError(typeof(Gender), "Gender"));
+
+            gender = genderValue;
         }
 
         EmailAddress? studentEmail = null;
@@ -191,7 +208,7 @@ internal sealed class ApplicationImportRowMapper : IImportRowMapper<Application,
             period.Id,
             srn,
             studentNameResult.Value,
-            Gender.Empty,
+            gender,
             birthDate,
             studentEmail,
             parentName,

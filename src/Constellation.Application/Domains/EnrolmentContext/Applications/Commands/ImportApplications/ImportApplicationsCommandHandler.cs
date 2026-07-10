@@ -13,6 +13,7 @@ using Core.Models.EnrolmentContext.EnrolmentPeriod;
 using Core.Shared;
 using Import.Interfaces;
 using Import.Models;
+using Interfaces;
 using System.Collections.Generic;
 
 internal sealed class ImportApplicationsCommandHandler
@@ -21,13 +22,13 @@ internal sealed class ImportApplicationsCommandHandler
     private readonly IImportStagingCache _stagingCache;
     private readonly IImportRowMapper<Application, EnrolmentPeriod> _rowMapper;
     private readonly IEnrolmentApplicationRepository _applicationRepository;
-    private readonly IUnitOfWork _unitOfWork;
+    private readonly IEnrolmentUnitOfWork _unitOfWork;
 
     public ImportApplicationsCommandHandler(
         IImportStagingCache stagingCache,
         IImportRowMapper<Application, EnrolmentPeriod> rowMapper,
         IEnrolmentApplicationRepository applicationRepository,
-        IUnitOfWork unitOfWork)
+        IEnrolmentUnitOfWork unitOfWork)
     {
         _stagingCache = stagingCache;
         _rowMapper = rowMapper;

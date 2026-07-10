@@ -14,6 +14,7 @@ public static class EnrolmentApplicationImportFields
         new("StudentName.Preferred", "Preferred Name", Required: false, GroupLabel: "Student"),
         new("StudentName.Last", "Last Name", Required: true, GroupLabel: "Student"),
         new("DateOfBirth", "Date of Birth", Required: false, GroupLabel: "Student"),
+        new("Gender", "Gender", Required: false, GroupLabel: "Student"),
         new("StudentEmailAddress", "Email Address", Required: false, GroupLabel: "Student"),
         new("ParentName.First", "First Name", Required: false, GroupLabel: "Parent"),
         new("ParentName.Last", "Last Name", Required: false, GroupLabel: "Parent"),

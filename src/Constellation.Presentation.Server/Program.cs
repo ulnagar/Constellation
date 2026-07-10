@@ -52,9 +52,14 @@ builder.Services.Configure<FormOptions>(options =>
 WebApplication app = builder.Build();
 
 if (app.Environment.IsProduction())
+{
+    app.UseExceptionHandler();
     app.UseHsts();
-
-app.UseExceptionHandler();
+}
+else
+{
+    app.UseDeveloperExceptionPage();
+}
 app.UseStatusCodePagesWithReExecute("/Error", "?statusCode={0}");
 
 await app.SeedIdentityAsync();

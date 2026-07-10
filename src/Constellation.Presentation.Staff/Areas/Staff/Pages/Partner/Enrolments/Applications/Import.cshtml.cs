@@ -16,6 +16,7 @@ using Core.Models.EnrolmentContext.Application;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Presentation.Shared.Helpers.Attributes;
 using Presentation.Shared.Helpers.Logging;
 using Serilog;
@@ -64,7 +65,7 @@ public class ImportModel : BasePageModel
     public IReadOnlyList<string> AvailableHeaders { get; set; }
 
     public bool ImportFinished { get; set; }
-    public ImportRunResult<Application> ImportResult { get; set; }
+    public ImportRunResult<Application>? ImportResult { get; set; }
 
     public async Task OnGet()
     {
@@ -98,20 +99,25 @@ public class ImportModel : BasePageModel
 
     public async Task<IActionResult> OnPostMap()
     {
+        await PreparePage();
+
         Result validation = Mapping.Validate(FieldDefinitions, AvailableHeaders);
 
         if (validation.IsFailure)
         {
             ModalContent = ErrorDisplay.Create(validation.Error);
 
-            await PreparePage();
             return Page();
         }
 
         Result<ImportRunResult<Application>> import = await _mediator.Send(new ImportApplicationsCommand(PeriodId, Mapping));
 
         ImportFinished = true;
-        ImportResult = import.Value;
+
+        if (import.IsSuccess)
+            ImportResult = import.Value;
+        else
+            ModalContent = ErrorDisplay.Create(import.Error);
 
         return Page();
     }
