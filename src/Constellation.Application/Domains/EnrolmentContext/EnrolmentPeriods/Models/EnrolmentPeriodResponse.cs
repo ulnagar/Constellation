@@ -2,10 +2,12 @@
 
 using Core.Models.EnrolmentContext.EnrolmentPeriod.Enums;
 using Core.Models.EnrolmentContext.EnrolmentPeriod.Identifiers;
+using Core.Models.EnrolmentContext.Offer.Enums;
 
 public sealed record EnrolmentPeriodResponse(
     EnrolmentPeriodId Id,
     string Label,
     DateTimeOffset OpenAt,
     DateTimeOffset ClosedAt,
-    PeriodStatus Status);
+    PeriodStatus Status,
+    Program Program);

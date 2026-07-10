@@ -1,0 +1,66 @@
+﻿@page
+@model Constellation.Presentation.Staff.Areas.Staff.Pages.Partner.Enrolments.Periods.IndexModel
+@inject IAuthorizationService AuthorizationService
+@{
+    var canEditTest = await AuthorizationService.AuthorizeAsync(User, AuthPermission.Partners_Enrolments_Applications_Edit_Value);
+}
+
+<h2>Enrolment Periods</h2>
+
+<div class="page-menu">
+    @if (canEditTest.Succeeded)
+    {
+        <a asp-page="/Partner/Enrolments/Periods/Upsert" asp-area="Staff" class="btn btn-success">Create</a>
+    }
+</div>
+
+<hr />
+
+<table class="table-striped table-hover">
+    <thead>
+    <tr>
+        <th>Name</th>
+        <th>Open</th>
+        <th>Close</th>
+        <th>Status</th>
+        <th></th>
+    </tr>
+    </thead>
+    <tbody>
+    @foreach (var period in Model.Periods)
+    {
+        <tr>
+            <td>
+                @period.Label<br/>
+                @period.Program
+            </td>
+            <td>@period.OpenAt</td>
+            <td>@period.ClosedAt</td>
+            <td>@period.Status</td>
+            <td>
+                @if (canEditTest.Succeeded)
+                {
+                    <a asp-page="/Partner/Enrolments/Periods/Details" asp-route-Id="@period.Id" class="btn btn-sm btn-info btn-show-hover showLoader">More Info...</a>
+                    <a asp-page="/Partner/Enrolments/Periods/Upsert" asp-route-Id="@period.Id" class="btn btn-sm btn-info btn-show-hover showLoader">Edit</a>
+                }
+            </td>
+        </tr>
+    }
+    </tbody>
+</table>
+
+@section scripts
+{
+    <script>
+        $(document).ready(function (){
+            $('table').DataTable({
+                "order": [
+                    [1, 'desc']
+                ],
+                "columnDefs": [
+                    { "target": 4, "searchable": false, "sortable": false }
+                ]
+            });
+        })
+    </script>
+}

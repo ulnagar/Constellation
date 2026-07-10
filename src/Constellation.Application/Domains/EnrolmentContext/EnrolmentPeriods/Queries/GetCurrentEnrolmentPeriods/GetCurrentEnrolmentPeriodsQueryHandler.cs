@@ -36,7 +36,8 @@ internal sealed class GetCurrentEnrolmentPeriodsQueryHandler
                 period.Label,
                 period.OpenAt,
                 period.ClosedAt,
-                period.Status));
+                period.Status,
+                period.Program));
         }
 
         return response;
