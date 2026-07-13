@@ -23,6 +23,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.Routing;
+using Presentation.Shared.Extensions;
 using Presentation.Shared.Helpers.Logging;
 using Serilog;
 using Shared.PartialViews.AssignRoleModal;
@@ -50,7 +51,7 @@ public class ReportsModel : BasePageModel
         _currentUserService = currentUserService;
         _logger = logger
             .ForContext<ReportsModel>()
-            .ForContext(LogDefaults.Application, LogDefaults.StaffPortal);
+            .ForStaffPortal();
     }
 
     [ViewData] public string ActivePage => Shared.Components.StaffSidebarMenu.ActivePage.Partner_Schools_ContactReports;

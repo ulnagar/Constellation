@@ -15,6 +15,7 @@ using Core.Models.SciencePracs.Errors;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
+using Presentation.Shared.Extensions;
 using Presentation.Shared.Helpers.Attributes;
 using Presentation.Shared.Helpers.Logging;
 using Serilog;
@@ -38,7 +39,7 @@ public class UpsertModel : BasePageModel
         _currentUserService = currentUserService;
         _logger = logger
             .ForContext<UpsertModel>()
-            .ForContext(LogDefaults.Application, LogDefaults.StaffPortal);
+            .ForStaffPortal();
     }
 
     [ViewData] public string ActivePage => Shared.Components.StaffSidebarMenu.ActivePage.Subject_SciencePracs_Lessons;

@@ -16,6 +16,7 @@ using Core.Shared;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
+using Presentation.Shared.Extensions;
 using Presentation.Shared.Helpers.ModelBinders;
 using Serilog;
 using System.ComponentModel.DataAnnotations;
@@ -38,7 +39,8 @@ public class UpsertModel : BasePageModel
         _linkGenerator = linkGenerator;
         _currentUserService = currentUserService;
         _logger = logger
-            .ForContext<UpsertModel>();
+            .ForContext<UpsertModel>()
+            .ForStaffPortal();
     }
 
     [ViewData]

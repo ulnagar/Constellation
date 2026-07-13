@@ -11,6 +11,7 @@ using Constellation.Presentation.Staff.Areas;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
+using Presentation.Shared.Extensions;
 using Presentation.Shared.Helpers.Logging;
 using Serilog;
 
@@ -33,7 +34,7 @@ public class ConfigurationModel : BasePageModel
         _currentUserService = currentUserService;
         _logger = logger
             .ForContext<ConfigurationModel>()
-            .ForContext(LogDefaults.Application, LogDefaults.StaffPortal);
+            .ForStaffPortal();
     }
 
     [ViewData] public string ActivePage => Shared.Components.StaffSidebarMenu.ActivePage.StudentAdmin_Attendance_Configuration;

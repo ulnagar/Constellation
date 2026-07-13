@@ -47,7 +47,9 @@ public class IndexModel : BasePageModel
         _currentUserService = currentUserService;
         _draftRepository = draftRepository;
         _authorizationService = authorizationService;
-        _logger = logger;
+        _logger = logger
+            .ForContext<IndexModel>()
+            .ForStaffPortal();
     }
 
     [ViewData] public string ActivePage => Shared.Components.StaffSidebarMenu.ActivePage.Messaging_Drafts;

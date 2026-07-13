@@ -6,14 +6,14 @@ using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Identity;
 using Pages.Auth;
 using Serilog;
-using Shared.Helpers.Logging;
+using Shared.Extensions;
 using System.Security.Claims;
 
 internal static class IdentityHelpers
 {
     private static readonly Serilog.ILogger _logger = Log.Logger
         .ForContext<CompleteSSOModel>()
-        .ForContext(LogDefaults.Application, LogDefaults.StaffPortal);
+        .ForStaffPortal();
 
     internal static async Task SyncUserWithIdentity(TokenValidatedContext context)
     {

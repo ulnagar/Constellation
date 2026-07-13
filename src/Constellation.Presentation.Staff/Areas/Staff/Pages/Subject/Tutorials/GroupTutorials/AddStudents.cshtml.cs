@@ -18,6 +18,7 @@ using Constellation.Presentation.Staff.Areas;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
+using Presentation.Shared.Extensions;
 using Presentation.Shared.Helpers.Attributes;
 using Serilog;
 
@@ -40,7 +41,7 @@ public class AddStudentsModel : BasePageModel
         _currentUserService = currentUserService;
         _logger = logger
             .ForContext<AddStudentsModel>()
-            .ForContext(LogDefaults.Application, LogDefaults.StaffPortal);
+            .ForStaffPortal();
     }
 
     [ViewData] public string ActivePage => Shared.Components.StaffSidebarMenu.ActivePage.Subject_Tutorials_GroupTutorials;

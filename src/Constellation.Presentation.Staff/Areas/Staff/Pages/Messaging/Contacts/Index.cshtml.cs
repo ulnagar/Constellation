@@ -72,7 +72,7 @@ public class IndexModel : BasePageModel
         _authorizationService = authorizationService;
         _logger = logger
             .ForContext<IndexModel>()
-            .ForContext(LogDefaults.Application, LogDefaults.StaffPortal);
+            .ForStaffPortal();
     }
 
     [ViewData] public string ActivePage => Shared.Components.StaffSidebarMenu.ActivePage.Messaging_Contacts_List;

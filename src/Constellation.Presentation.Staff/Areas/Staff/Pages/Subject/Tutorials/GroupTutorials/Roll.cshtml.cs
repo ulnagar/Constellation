@@ -19,6 +19,7 @@ using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
+using Presentation.Shared.Extensions;
 using Serilog;
 
 [HasPermission(AuthPermission.Subjects_GroupTutorials_View_Value)]
@@ -43,7 +44,7 @@ public class RollModel : BasePageModel
         _authorizationService = authorizationService;
         _logger = logger
             .ForContext<RollModel>()
-            .ForContext(LogDefaults.Application, LogDefaults.StaffPortal);
+            .ForStaffPortal();
     }
 
     [ViewData] public string ActivePage => Shared.Components.StaffSidebarMenu.ActivePage.Subject_Tutorials_GroupTutorials;

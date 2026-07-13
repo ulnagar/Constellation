@@ -14,6 +14,7 @@ using Core.Models.Offerings.Identifiers;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Models;
+using Presentation.Shared.Extensions;
 using Presentation.Shared.Helpers.Logging;
 using Serilog;
 using System.Threading;
@@ -34,7 +35,7 @@ public class IndexModel : BasePageModel
         _currentUserService = currentUserService;
         _logger = logger
             .ForContext<IndexModel>()
-            .ForContext(LogDefaults.Application, LogDefaults.StaffPortal);
+            .ForStaffPortal();
     }
 
     [ViewData] public string ActivePage => Shared.Components.StaffSidebarMenu.ActivePage.StudentAdmin_Consent_Reports;

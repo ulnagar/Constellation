@@ -7,13 +7,13 @@ using Core.Models.Messaging.Tracking;
 using MediatR;
 using Models;
 using Serilog;
-using Shared.Helpers.Logging;
+using Shared.Extensions;
 using System.Text;
 using System.Text.Json;
 
 public static class SmsEndpoints
 {
-    private static readonly Serilog.ILogger _logger = Log.Logger.ForContext(typeof(SmsEndpoints)).ForContext(LogDefaults.Application, LogDefaults.StaffPortal);
+    private static readonly Serilog.ILogger _logger = Log.Logger.ForContext(typeof(SmsEndpoints)).ForStaffPortal();
 
     public static void MapSmsEndpoints(this IEndpointRouteBuilder app)
     {

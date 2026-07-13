@@ -12,6 +12,7 @@ using Core.Abstractions.Services;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Presentation.Shared.Extensions;
 using Presentation.Shared.Helpers.Logging;
 using Serilog;
 using System.Reflection;
@@ -32,7 +33,7 @@ public class DashboardModel : BasePageModel
         _currentUserService = currentUserService;
         _logger = logger
             .ForContext<DashboardModel>()
-            .ForContext(LogDefaults.Application, LogDefaults.StaffPortal);
+            .ForStaffPortal();
     }
 
     [ViewData] public string ActivePage => Shared.Components.StaffSidebarMenu.ActivePage.Staff_Dashboard;

@@ -9,6 +9,7 @@ using Constellation.Presentation.Shared.Helpers.Attributes;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Presentation.Shared.Extensions;
 using Presentation.Shared.Helpers.Logging;
 using Serilog;
 
@@ -28,7 +29,7 @@ public class ViewEmailModel : PageModel
         _currentUserService = currentUserService;
         _logger = logger
             .ForContext<ViewEmailModel>()
-            .ForContext(LogDefaults.Application, LogDefaults.StaffPortal);
+            .ForStaffPortal();
     }
 
     [BindProperty(SupportsGet = true)]

@@ -16,6 +16,7 @@ using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.Routing;
+using Presentation.Shared.Extensions;
 using Presentation.Shared.Helpers.Logging;
 using Serilog;
 using System.ComponentModel.DataAnnotations;
@@ -39,7 +40,7 @@ public class AddMemberModel : BasePageModel
         _linkGenerator = linkGenerator;
         _logger = logger
             .ForContext<AddMemberModel>()
-            .ForContext(LogDefaults.Application, LogDefaults.StaffPortal);
+            .ForStaffPortal();
     }
 
     public class AddMemberDto

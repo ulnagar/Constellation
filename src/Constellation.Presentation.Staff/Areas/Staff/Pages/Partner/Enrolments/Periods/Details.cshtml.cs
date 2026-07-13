@@ -16,7 +16,7 @@ using Microsoft.AspNetCore.Routing;
 using Presentation.Shared.Helpers.Attributes;
 using Serilog;
 
-[HasPermission(AuthPermission.Partners_Enrolments_Applications_Edit_Value)]
+[HasPermission(AuthPermission.Partners_Enrolments_Applications_View_Value)]
 public class DetailsModel : BasePageModel
 {
     private readonly ISender _mediator;

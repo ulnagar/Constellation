@@ -17,6 +17,7 @@ using Core.Models.ThirdPartyConsent.Identifiers;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
+using Presentation.Shared.Extensions;
 using Presentation.Shared.Helpers.Logging;
 using Serilog;
 using System.Threading;
@@ -39,8 +40,8 @@ public class RequirementModel : BasePageModel
         _linkGenerator = linkGenerator;
         _currentUserService = currentUserService;
         _logger = logger
-            .ForContext(LogDefaults.Application, LogDefaults.StaffPortal)
-            .ForContext<RequirementModel>();
+            .ForContext<RequirementModel>()
+            .ForStaffPortal();
     }
 
     [ViewData] public string ActivePage => Shared.Components.StaffSidebarMenu.ActivePage.StudentAdmin_Consent_Applications;

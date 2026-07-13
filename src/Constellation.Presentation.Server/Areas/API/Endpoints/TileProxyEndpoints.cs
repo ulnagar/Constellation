@@ -1,13 +1,13 @@
 ﻿namespace Constellation.Presentation.Server.Areas.API.Endpoints;
 
 using Application.Interfaces.Configuration;
-using Constellation.Presentation.Shared.Helpers.Logging;
 using Microsoft.Extensions.Options;
 using Serilog;
+using Shared.Extensions;
 
 public static class TileProxyEndpoints
 {
-    private static readonly ILogger _logger = Log.Logger.ForContext(typeof(TileProxyEndpoints)).ForContext(LogDefaults.Application, LogDefaults.StaffPortal);
+    private static readonly ILogger _logger = Log.Logger.ForContext(typeof(TileProxyEndpoints)).ForStaffPortal();
     private const string _tileBaseUrl = "https://tile.openstreetmap.org";
     private static readonly TimeSpan _maxCacheAge = TimeSpan.FromHours(24);
     

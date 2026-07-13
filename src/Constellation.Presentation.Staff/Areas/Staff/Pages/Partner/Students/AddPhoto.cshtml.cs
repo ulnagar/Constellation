@@ -12,6 +12,7 @@ using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Presentation.Shared.Extensions;
 using Serilog;
 
 [HasPermission(AuthPermission.Partners_Students_Edit_Value)]
@@ -29,7 +30,8 @@ public class AddPhotoModel : BasePageModel
         _mediator = mediator;
         _currentUserService = currentUserService;
         _logger = logger
-            .ForContext<AddPhotoModel>();
+            .ForContext<AddPhotoModel>()
+            .ForStaffPortal();
     }
 
     [ViewData] public string ActivePage => Shared.Components.StaffSidebarMenu.ActivePage.Partner_Students_Students;

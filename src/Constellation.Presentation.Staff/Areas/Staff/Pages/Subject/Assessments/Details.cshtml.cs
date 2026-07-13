@@ -38,6 +38,7 @@ using Core.Models.Students.Identifiers;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
+using Presentation.Shared.Extensions;
 using Presentation.Shared.Helpers.Attributes;
 using Serilog;
 using Shared.Components.AddDownloadToAssessment;
@@ -66,7 +67,9 @@ public class DetailsModel : BasePageModel
         _mediator = mediator;
         _linkGenerator = linkGenerator;
         _currentUserService = currentUserService;
-        _logger = logger;
+        _logger = logger
+            .ForContext<DetailsModel>()
+            .ForStaffPortal();
     }
 
     [ViewData] public string ActivePage => Shared.Components.StaffSidebarMenu.ActivePage.Subject_Assessments_Assessments;

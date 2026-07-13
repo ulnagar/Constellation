@@ -22,6 +22,7 @@ using Core.Shared;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
+using Presentation.Shared.Extensions;
 using Presentation.Shared.Helpers.Attributes;
 using Serilog;
 using System.Threading;
@@ -44,7 +45,8 @@ public class IndexModel : BasePageModel
         _currentUserService = currentUserService;
         _linkGenerator = linkGenerator;
         _logger = logger
-            .ForContext<IndexModel>();
+            .ForContext<IndexModel>()
+            .ForStaffPortal();
     }
 
     [ViewData] public string ActivePage => Shared.Components.StaffSidebarMenu.ActivePage.StudentAdmin_Attendance_CheckIn;

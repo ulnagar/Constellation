@@ -11,6 +11,7 @@ using Core.Shared;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
+using Presentation.Shared.Extensions;
 using Serilog;
 
 [HasPermission(AuthPermission.Messaging_EmergencyConsole_Edit_Value)]
@@ -31,7 +32,8 @@ public sealed class IndexModel : BasePageModel
         _linkGenerator = linkGenerator;
         _currentUserService = currentUserService;
         _logger = logger
-            .ForContext<IndexModel>();
+            .ForContext<IndexModel>()
+            .ForStaffPortal();
     }
 
     [ViewData]

@@ -9,6 +9,7 @@ using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
+using Presentation.Shared.Extensions;
 using Presentation.Shared.Helpers.Attributes;
 using Serilog;
 
@@ -32,7 +33,9 @@ public class RecentModel : BasePageModel
         _linkGenerator = linkGenerator;
         _currentUserService = currentUserService;
         _authorizationService = authorizationService;
-        _logger = logger;
+        _logger = logger
+            .ForContext<RecentModel>()
+            .ForStaffPortal();
     }
 
     [ViewData] public string ActivePage => Shared.Components.StaffSidebarMenu.ActivePage.Messaging_History_List;

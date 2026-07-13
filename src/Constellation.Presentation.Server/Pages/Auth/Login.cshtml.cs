@@ -14,6 +14,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Presentation.Shared.Extensions;
 using Presentation.Shared.Helpers.Logging;
 using Serilog;
 using System.ComponentModel.DataAnnotations;
@@ -48,7 +49,7 @@ public class LoginModel : PageModel
         _smsService = smsService;
         _logger = logger
             .ForContext<LoginModel>()
-            .ForContext(LogDefaults.Application, LogDefaults.StaffPortal); ;
+            .ForStaffPortal();
     }
 
     [BindProperty]
