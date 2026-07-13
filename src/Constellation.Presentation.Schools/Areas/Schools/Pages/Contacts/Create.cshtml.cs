@@ -14,6 +14,7 @@ using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.Routing;
+using Presentation.Shared.Extensions;
 using Presentation.Shared.Helpers.Logging;
 using Presentation.Shared.Helpers.ModelBinders;
 using Serilog;
@@ -35,7 +36,7 @@ public class CreateModel : BasePageModel
         _currentUserService = currentUserService;
         _logger = logger
             .ForContext<CreateModel>()
-            .ForContext(LogDefaults.Application, LogDefaults.SchoolsPortal);
+            .ForSchoolPortal();
     }
 
     [ViewData] public string ActivePage => Models.ActivePage.Contacts;

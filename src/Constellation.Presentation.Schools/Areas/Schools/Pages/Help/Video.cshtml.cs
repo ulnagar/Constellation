@@ -4,6 +4,7 @@ using Application.Models.Auth;
 using Core.Abstractions.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Presentation.Shared.Extensions;
 using Presentation.Shared.Helpers.Logging;
 using Serilog;
 
@@ -20,7 +21,7 @@ public class VideoModel : BasePageModel
         _currentUserService = currentUserService;
         _logger = logger
             .ForContext<VideoModel>()
-            .ForContext(LogDefaults.Application, LogDefaults.SchoolsPortal);
+            .ForSchoolPortal();
     }
 
     [ViewData] public string ActivePage => Models.ActivePage.Help;

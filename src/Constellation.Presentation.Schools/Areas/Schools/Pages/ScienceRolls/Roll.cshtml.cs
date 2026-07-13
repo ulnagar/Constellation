@@ -10,6 +10,7 @@ using Core.Shared;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
+using Presentation.Shared.Extensions;
 using Presentation.Shared.Helpers.Attributes;
 using Serilog;
 
@@ -30,7 +31,7 @@ public class RollModel : BasePageModel
         _currentUserService = currentUserService;
         _logger = logger
             .ForContext<RollModel>()
-            .ForContext(LogDefaults.Application, LogDefaults.SchoolsPortal);
+            .ForSchoolPortal();
     }
 
     [ViewData] public string ActivePage => Models.ActivePage.ScienceRolls;

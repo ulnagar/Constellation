@@ -18,6 +18,7 @@ using Constellation.Presentation.Shared.Helpers.ModelBinders;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
+using Presentation.Shared.Extensions;
 using Serilog;
 
 [HasPermission(AuthPermission.SchoolsPortal_Stocktake_Edit_Value)]
@@ -37,7 +38,7 @@ public class ManualModel : BasePageModel
         _linkGenerator = linkGenerator;
         _logger = logger
             .ForContext<ManualModel>()
-            .ForContext(LogDefaults.Application, LogDefaults.SchoolsPortal);
+            .ForSchoolPortal();
     }
 
     [ViewData] public string ActivePage => Models.ActivePage.Stocktake;

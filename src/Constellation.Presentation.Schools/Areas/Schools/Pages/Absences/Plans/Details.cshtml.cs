@@ -18,6 +18,7 @@ using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.Routing;
+using Presentation.Shared.Extensions;
 using Presentation.Shared.Helpers.ModelBinders;
 using Serilog;
 
@@ -38,7 +39,7 @@ public class DetailsModel : BasePageModel
         _currentUserService = currentUserService;
         _logger = logger
             .ForContext<DetailsModel>()
-            .ForContext(LogDefaults.Application, LogDefaults.SchoolsPortal);
+            .ForSchoolPortal();
     }
 
     [ViewData] public string ActivePage => Models.ActivePage.Absences;

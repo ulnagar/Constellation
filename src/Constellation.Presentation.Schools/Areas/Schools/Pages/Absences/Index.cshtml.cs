@@ -10,6 +10,7 @@ using Core.Models.Absences.Identifiers;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
+using Presentation.Shared.Extensions;
 using Presentation.Shared.Helpers.Attributes;
 using Serilog;
 
@@ -30,7 +31,7 @@ public class IndexModel : BasePageModel
         _currentUserService = currentUserService;
         _logger = logger
             .ForContext<IndexModel>()
-            .ForContext(LogDefaults.Application, LogDefaults.SchoolsPortal);
+            .ForSchoolPortal();
     }
     [ViewData] public string ActivePage => Models.ActivePage.Absences;
 

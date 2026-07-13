@@ -12,6 +12,7 @@ using Core.Abstractions.Services;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
+using Presentation.Shared.Extensions;
 using Serilog;
 
 [HasPermission(AuthPermission.SchoolsPortal_Absences_Edit_Value)]
@@ -31,7 +32,7 @@ public class ExplainModel : BasePageModel
         _currentUserService = currentUserService;
         _logger = logger
             .ForContext<ExplainModel>()
-            .ForContext(LogDefaults.Application, LogDefaults.SchoolsPortal);
+            .ForSchoolPortal();
     }
 
     [ViewData] public string ActivePage => Models.ActivePage.Absences;

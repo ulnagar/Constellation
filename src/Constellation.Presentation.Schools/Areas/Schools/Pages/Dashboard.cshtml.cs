@@ -17,6 +17,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
+using Presentation.Shared.Extensions;
 using Serilog;
 
 [HasPermission(AuthPermission.SchoolsPortal_View_Value)]
@@ -36,7 +37,7 @@ public class DashboardModel : BasePageModel
         _currentUserService = currentUserService;
         _logger = logger
             .ForContext<DashboardModel>()
-            .ForContext(LogDefaults.Application, LogDefaults.SchoolsPortal);
+            .ForSchoolPortal();
     }
 
     [ViewData] public string ActivePage => Models.ActivePage.Dashboard;

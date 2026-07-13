@@ -19,6 +19,7 @@ using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using Models;
+using Presentation.Shared.Extensions;
 using Serilog;
 using System.Threading.Tasks;
 
@@ -41,7 +42,7 @@ public class IndexModel : BasePageModel
         _currentUserService = currentUserService;
         _logger = logger
             .ForContext<IndexModel>()
-            .ForContext(LogDefaults.Application, LogDefaults.StudentPortal);
+            .ForStudentPortal();
     }
 
     [ViewData] public string ActivePage => Models.ActivePage.Awards;

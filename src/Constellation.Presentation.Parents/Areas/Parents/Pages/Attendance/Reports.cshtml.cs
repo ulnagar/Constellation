@@ -19,6 +19,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using Models;
+using Presentation.Shared.Extensions;
 using Serilog;
 
 [HasPermission(AuthPermission.ParentPortal_View_Value)]
@@ -43,7 +44,7 @@ public class ReportsModel : BasePageModel
         _currentUserService = currentUserService;
         _logger = logger
             .ForContext<ReportsModel>()
-            .ForContext(LogDefaults.Application, LogDefaults.ParentPortal);
+            .ForParentPortal();
     }
 
     [ViewData] public string ActivePage => Models.ActivePage.Attendance;

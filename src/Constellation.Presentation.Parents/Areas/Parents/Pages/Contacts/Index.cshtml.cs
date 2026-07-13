@@ -12,6 +12,7 @@ using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using Models;
+using Presentation.Shared.Extensions;
 using Presentation.Shared.Helpers.Attributes;
 using Serilog;
 
@@ -34,7 +35,7 @@ public class IndexModel : BasePageModel
         _currentUserService = currentUserService;
         _logger = logger
             .ForContext<IndexModel>()
-            .ForContext(LogDefaults.Application, LogDefaults.ParentPortal);
+            .ForParentPortal();
     }
 
     [ViewData] public string ActivePage => Models.ActivePage.Contacts;

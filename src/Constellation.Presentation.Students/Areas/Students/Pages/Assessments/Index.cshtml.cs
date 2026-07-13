@@ -14,12 +14,12 @@ using Constellation.Core.Models.Attachments.DTOs;
 using Constellation.Core.Models.Students.Errors;
 using Constellation.Core.Models.Students.Identifiers;
 using Constellation.Core.Shared;
-using Constellation.Presentation.Shared.Helpers.Logging;
 using Core.Abstractions.Clock;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using Models;
+using Presentation.Shared.Extensions;
 using Presentation.Shared.Helpers.Attributes;
 using Serilog;
 
@@ -45,7 +45,7 @@ public class IndexModel : BasePageModel
         _dateTime = dateTime;
         _logger = logger
             .ForContext<IndexModel>()
-            .ForContext(LogDefaults.Application, LogDefaults.StudentPortal);
+            .ForStudentPortal();
     }
 
     public Dictionary<SchoolCalendarWeek, List<AssessmentDetailsResponse>> Assessments { get; set; } = new();

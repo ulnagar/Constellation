@@ -22,6 +22,7 @@ using Core.Models.Stocktake.Identifiers;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
+using Presentation.Shared.Extensions;
 using Serilog;
 
 [HasPermission(AuthPermission.SchoolsPortal_Stocktake_Edit_Value)]
@@ -41,7 +42,7 @@ public class UpdateModel : BasePageModel
         _linkGenerator = linkGenerator;
         _logger = logger
             .ForContext<UpdateModel>()
-            .ForContext(LogDefaults.Application, LogDefaults.SchoolsPortal);
+            .ForSchoolPortal();
     }
 
     [ViewData] public string ActivePage => Models.ActivePage.Stocktake;

@@ -13,6 +13,7 @@ using Core.Abstractions.Services;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
+using Presentation.Shared.Extensions;
 using Serilog;
 
 [HasPermission(AuthPermission.SchoolsPortal_Timetables_View_Value)]
@@ -32,7 +33,7 @@ public class ViewModel : BasePageModel
         _currentUserService = currentUserService;
         _logger = logger
             .ForContext<ViewModel>()
-            .ForContext(LogDefaults.Application, LogDefaults.SchoolsPortal);
+            .ForSchoolPortal();
     }
 
     [ViewData] public string ActivePage => Models.ActivePage.Timetables;

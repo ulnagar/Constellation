@@ -5,6 +5,7 @@ using Constellation.Presentation.Shared.Helpers.Logging;
 using Core.Abstractions.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Presentation.Shared.Extensions;
 using Serilog;
 
 [Authorize(Policy = AuthPolicies.IsSchoolContact)]
@@ -20,7 +21,7 @@ public class AbsencesModel : BasePageModel
         _currentUserService = currentUserService;
         _logger = logger
             .ForContext<AbsencesModel>()
-            .ForContext(LogDefaults.Application, LogDefaults.SchoolsPortal);
+            .ForSchoolPortal();
     }
 
     [ViewData] public string ActivePage => Models.ActivePage.Help;
