@@ -1,22 +1,30 @@
 ﻿namespace Constellation.Presentation.Shared.Extensions;
 
-using Constellation.Presentation.Shared.Helpers.Logging;
 using Serilog;
 
 public static class LoggerExtensions
 {
-    private static ILogger ForApplication(this ILogger logger, string application) =>
-        logger.ForContext(LogDefaults.Application, application);
+    private static string Application => "APPLICATION";
+    private static string StaffPortal => "Staff Portal";
+    private static string StudentPortal => "Student Portal";
+    private static string ParentPortal => "Parent Portal";
+    private static string SchoolsPortal => "Schools Portal";
 
-    public static ILogger ForStaffPortal(this ILogger logger) =>
-        logger.ForApplication(LogDefaults.StaffPortal);
+    extension(ILogger logger)
+    {
+        private ILogger ForApplication(string application) =>
+            logger.ForContext(Application, application);
 
-    public static ILogger ForParentPortal(this ILogger logger) =>
-        logger.ForApplication(LogDefaults.ParentPortal);
+        public ILogger ForStaffPortal() =>
+            logger.ForApplication(StaffPortal);
 
-    public static ILogger ForSchoolPortal(this ILogger logger) =>
-        logger.ForApplication(LogDefaults.SchoolsPortal);
+        public ILogger ForParentPortal() =>
+            logger.ForApplication(ParentPortal);
 
-    public static ILogger ForStudentPortal(this ILogger logger) =>
-        logger.ForApplication(LogDefaults.StudentPortal);
+        public ILogger ForSchoolPortal() =>
+            logger.ForApplication(SchoolsPortal);
+
+        public ILogger ForStudentPortal() =>
+            logger.ForApplication(StudentPortal);
+    }
 }
