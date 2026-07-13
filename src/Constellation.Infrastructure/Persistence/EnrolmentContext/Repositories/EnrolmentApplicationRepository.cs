@@ -51,9 +51,8 @@ internal sealed class EnrolmentApplicationRepository
         await _context
             .Set<EnrolmentPeriod>()
             .Where(period =>
-                period.Status == PeriodStatus.Open
-                && period.OpenAt < _dateTime.Now
-                && period.ClosedAt > _dateTime.Now)
+                _dateTime.Now >= period.OpenAt
+                && _dateTime.Now < period.ClosedAt)
             .ToListAsync(cancellationToken);
 
     public async Task<EnrolmentPeriod?> GetEnrolmentPeriodById(
@@ -64,4 +63,5 @@ internal sealed class EnrolmentApplicationRepository
             .FirstOrDefaultAsync(period => period.Id == id, cancellationToken);
 
     public void Insert(Application application) => _context.Set<Application>().Add(application);
+    public void Insert(EnrolmentPeriod period) => _context.Set<EnrolmentPeriod>().Add(period);
 }

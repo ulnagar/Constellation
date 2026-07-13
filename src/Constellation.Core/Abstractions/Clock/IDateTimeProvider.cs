@@ -15,4 +15,6 @@ public interface IDateTimeProvider
 
     DateOnly GetFirstDayOfYear(int year);
     DateOnly GetLastDayOfYear(int year);
+
+    TimeZoneInfo SydneyTZ { get; }
 }

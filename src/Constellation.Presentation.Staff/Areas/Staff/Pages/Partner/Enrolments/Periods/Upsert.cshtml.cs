@@ -1,5 +1,7 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Partner.Enrolments.Periods;
 
+using Application.Domains.EnrolmentContext.EnrolmentPeriods.Commands.CreateEnrolmentPeriod;
+using Application.Domains.EnrolmentContext.EnrolmentPeriods.Commands.UpdateEnrolmentPeriod;
 using Application.Domains.EnrolmentContext.EnrolmentPeriods.Models;
 using Application.Domains.EnrolmentContext.EnrolmentPeriods.Queries.GetEnrolmentPeriodById;
 using Application.Models.Auth;
@@ -8,7 +10,8 @@ using Constellation.Core.Abstractions.Services;
 using Constellation.Core.Models.EnrolmentContext.EnrolmentPeriod.Identifiers;
 using Constellation.Core.Models.EnrolmentContext.Offer.Enums;
 using Constellation.Core.Shared;
-using Core.Models.EnrolmentContext.EnrolmentPeriod.Enums;
+using Core.Abstractions.Clock;
+using Core.Models.EnrolmentContext.EnrolmentPeriod;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
@@ -22,17 +25,20 @@ public class UpsertModel : BasePageModel
 {
     private readonly ISender _mediator;
     private readonly LinkGenerator _linkGenerator;
+    private readonly IDateTimeProvider _dateTime;
     private readonly ICurrentUserService _currentUserService;
     private readonly ILogger _logger;
 
     public UpsertModel(
         ISender mediator,
         LinkGenerator linkGenerator,
+        IDateTimeProvider dateTime,
         ICurrentUserService currentUserService,
         ILogger logger)
     {
         _mediator = mediator;
         _linkGenerator = linkGenerator;
+        _dateTime = dateTime;
         _currentUserService = currentUserService;
         _logger = logger
             .ForContext<UpsertModel>()
@@ -49,17 +55,14 @@ public class UpsertModel : BasePageModel
     public string Label { get; set; }
 
     [BindProperty]
-    public DateTimeOffset OpenAt { get; set; }
+    public DateTime OpenAt { get; set; }
 
     [BindProperty]
-    public DateTimeOffset ClosedAt { get; set; }
+    public DateTime ClosedAt { get; set; }
 
     [BindProperty]
     public Program Program { get; set; } = Program.Empty;
-
-    [BindProperty]
-    public PeriodStatus Status { get; set; }
-
+    
     public SelectList ProgramList { get; set; }
 
     public async Task OnGet()
@@ -92,14 +95,108 @@ public class UpsertModel : BasePageModel
         }
 
         Label = period.Value.Label;
-        OpenAt = period.Value.OpenAt;
-        ClosedAt = period.Value.ClosedAt;
+        OpenAt = TimeZoneInfo.ConvertTime(period.Value.OpenAt, _dateTime.SydneyTZ).DateTime;
+        ClosedAt = TimeZoneInfo.ConvertTime(period.Value.ClosedAt, _dateTime.SydneyTZ).DateTime;
         Program = period.Value.Program;
-        Status = period.Value.Status;
 
         await PreparePage();
     }
 
+    public async Task<IActionResult> OnPostCreate()
+    {
+        ValidateForm();
+
+        if (!ModelState.IsValid)
+        {
+            _logger
+                .Warning("Failed to validate Enrolment Period create form by user {User}", _currentUserService.UserName);
+
+            await PreparePage();
+            return Page();
+        }
+
+        DateTime openAtUnspecified = DateTime.SpecifyKind(OpenAt, DateTimeKind.Unspecified);
+        DateTimeOffset openAtOffset = new(openAtUnspecified, _dateTime.SydneyTZ.GetUtcOffset(openAtUnspecified));
+
+        DateTime closedAtUnspecified = DateTime.SpecifyKind(ClosedAt, DateTimeKind.Unspecified);
+        DateTimeOffset closedAtOffset = new(closedAtUnspecified, _dateTime.SydneyTZ.GetUtcOffset(closedAtUnspecified));
+
+        CreateEnrolmentPeriodCommand command = new(
+            Label,
+            openAtOffset,
+            closedAtOffset,
+            Program);
+
+        _logger
+            .ForContext(nameof(CreateEnrolmentPeriodCommand), command, true)
+            .Information("Requested to create Enrolment Period by user {User}", _currentUserService.UserName);
+
+        Result result = await _mediator.Send(command);
+
+        if (result.IsFailure)
+        {
+            _logger
+                .ForContext(nameof(CreateEnrolmentPeriodCommand), command, true)
+                .ForContext(nameof(Error), result.Error, true)
+                .Warning("Failed to create Enrolment Period by user {User}", _currentUserService.UserName);
+
+            ModalContent = ErrorDisplay.Create(result.Error);
+
+            await PreparePage();
+            return Page();
+        }
+
+        return RedirectToPage("/Partner/Enrolments/Periods/Index", new { area = "Staff" });
+    }
+
+    public async Task<IActionResult> OnPostUpdate()
+    {
+        ValidateForm();
+
+        if (!ModelState.IsValid)
+        {
+            _logger
+                .Warning("Failed to validate Enrolment Period update form by user {User}", _currentUserService.UserName);
+
+            await PreparePage();
+            return Page();
+        }
+
+        DateTime openAtUnspecified = DateTime.SpecifyKind(OpenAt, DateTimeKind.Unspecified);
+        DateTimeOffset openAtOffset = new(openAtUnspecified, _dateTime.SydneyTZ.GetUtcOffset(openAtUnspecified));
+
+        DateTime closedAtUnspecified = DateTime.SpecifyKind(ClosedAt, DateTimeKind.Unspecified);
+        DateTimeOffset closedAtOffset = new(closedAtUnspecified, _dateTime.SydneyTZ.GetUtcOffset(closedAtUnspecified));
+
+        UpdateEnrolmentPeriodCommand command = new(
+            Id,
+            Label,
+            openAtOffset,
+            closedAtOffset,
+            Program);
+
+        _logger
+            .ForContext(nameof(UpdateEnrolmentPeriodCommand), command, true)
+            .Information("Requested to update Enrolment Period by user {User}", _currentUserService.UserName);
+
+        Result result = await _mediator.Send(command);
+
+        if (result.IsFailure)
+        {
+            _logger
+                .ForContext(nameof(UpdateEnrolmentPeriodCommand), command, true)
+                .ForContext(nameof(Error), result.Error, true)
+                .Warning("Failed to update Enrolment Period by user {User}", _currentUserService.UserName);
+
+            ModalContent = ErrorDisplay.Create(result.Error);
+
+            await PreparePage();
+            return Page();
+        }
+
+        return RedirectToPage("/Partner/Enrolments/Periods/Index", new { area = "Staff" });
+    }
+    
     private async Task PreparePage()
     {
         ProgramList = new SelectList(
@@ -107,5 +204,28 @@ public class UpsertModel : BasePageModel
             nameof(Program.Value),
             nameof(Program.Name),
             Program.Value);
+    }
+
+    private void ValidateForm()
+    {
+        if (string.IsNullOrWhiteSpace(Label))
+            ModelState.AddModelError(nameof(Label), "Label is required");
+
+        if (Program == Program.Empty)
+            ModelState.AddModelError(nameof(Program), "Program is required");
+
+        DateTime openAtUnspecified = DateTime.SpecifyKind(OpenAt, DateTimeKind.Unspecified);
+        DateTimeOffset openAtOffset = new(openAtUnspecified, _dateTime.SydneyTZ.GetUtcOffset(openAtUnspecified));
+
+        DateTime closedAtUnspecified = DateTime.SpecifyKind(ClosedAt, DateTimeKind.Unspecified);
+        DateTimeOffset closedAtOffset = new(closedAtUnspecified, _dateTime.SydneyTZ.GetUtcOffset(closedAtUnspecified));
+
+        Result isValidDates = EnrolmentPeriod.ValidatePeriod(openAtOffset, closedAtOffset, _dateTime.Now);
+
+        if (isValidDates.IsFailure)
+        {
+            ModelState.AddModelError(nameof(OpenAt), isValidDates.Error.Message);
+            ModelState.AddModelError(nameof(ClosedAt), isValidDates.Error.Message);
+        }
     }
 }

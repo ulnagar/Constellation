@@ -26,15 +26,57 @@ public sealed class EnrolmentPeriod
         OpenAt = openAt;
         ClosedAt = closeAt;
         Program = program;
-        Status = PeriodStatus.Scheduled;
+
+        IsSuspended = false;
+        SuspensionReason = null;
     }
 
     public EnrolmentPeriodId Id { get; private set; }
     public string Label { get; private set; }
     public DateTimeOffset OpenAt { get; private set; }
     public DateTimeOffset ClosedAt { get; private set; }
-    public PeriodStatus Status { get; private set; }
     public Program Program { get; private set; }
+
+    public bool IsSuspended { get; private set; }
+    public string? SuspensionReason { get; private set; }
+
+    private bool IsArchived { get; set; }
+
+    public bool IsWithinWindow(DateTimeOffset now) =>
+        now >= OpenAt && now < ClosedAt;
+
+    public bool CanAcceptApplications(DateTimeOffset now) =>
+        IsWithinWindow(now) && !IsSuspended && !IsArchived;
+
+    // Computed, not stored - no background job required
+    public PeriodStatus GetStatus(DateTimeOffset now)
+    {
+        if (IsArchived) return PeriodStatus.Archived;
+        if (now < OpenAt) return PeriodStatus.Scheduled;
+        if (now < ClosedAt) return IsSuspended
+            ? PeriodStatus.Suspended
+            : PeriodStatus.Open;
+        return PeriodStatus.Closed;
+    }
+
+    public Result Suspend(string reason)
+    {
+        if (IsArchived)
+            return Result.Failure(EnrolmentPeriodErrors.CannotSuspendArchivedPeriod);
+
+        IsSuspended = true;
+        SuspensionReason = reason;
+
+        return Result.Success();
+    }
+
+    public Result Resume()
+    {
+        IsSuspended = false;
+        SuspensionReason = null;
+
+        return Result.Success();
+    }
 
     public static Result<EnrolmentPeriod> Create(
         string label,
@@ -73,18 +115,7 @@ public sealed class EnrolmentPeriod
         return Result.Success();
     }
 
-    public Result UpdateStatus(
-        PeriodStatus newStatus)
-    {
-        if (Status == PeriodStatus.Archived)
-            return Result.Failure(EnrolmentPeriodErrors.CannotUpdateStatusOfArchivedPeriod);
-
-        Status = newStatus;
-
-        return Result.Success();
-    }
-
-    private static Result ValidatePeriod(DateTimeOffset openAt, DateTimeOffset closedAt, DateTimeOffset now)
+    public static Result ValidatePeriod(DateTimeOffset openAt, DateTimeOffset closedAt, DateTimeOffset now)
     {
         TimeSpan minimumDuration = TimeSpan.FromHours(24);
         TimeSpan maximumDuration = TimeSpan.FromDays(365);

@@ -10,4 +10,6 @@ public sealed record EnrolmentPeriodResponse(
     DateTimeOffset OpenAt,
     DateTimeOffset ClosedAt,
     PeriodStatus Status,
-    Program Program);
+    Program Program,
+    bool IsSuspended,
+    string? SuspendedReason);

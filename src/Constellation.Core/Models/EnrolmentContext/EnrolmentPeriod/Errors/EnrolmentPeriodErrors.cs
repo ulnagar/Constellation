@@ -5,9 +5,13 @@ using Shared;
 
 public static class EnrolmentPeriodErrors
 {
-    public static Func<EnrolmentPeriodId, Error> NotFound = id => new(
+    public static readonly Func<EnrolmentPeriodId, Error> NotFound = id => new(
         "Enrolment.Period.NotFound",
         $"Could not find an Enrolment Period with the id '{id}'");
+
+    public static readonly Error InvalidId = new(
+        "Enrolment.Period.InvalidId",
+        "The provided Id is invalid");
 
     public static readonly Error OpenAtRequired = new(
         "Enrolment.Period.OpenAtRequired",
@@ -37,7 +41,7 @@ public static class EnrolmentPeriodErrors
         "Enrolment.Period.DurationTooLong",
         "The provided OpenAt and ClosedAt values are too far apart");
 
-    public static readonly Error CannotUpdateStatusOfArchivedPeriod = new(
-        "Enrolment.Period.CannotUpdateStatusOfArchivedPeriod",
-        "The current status is Archived, so you cannot change status");
+    public static readonly Error CannotSuspendArchivedPeriod = new(
+        "Enrolment.Period.CannotSuspendArchivedPeriod",
+        "The current status is Archived, so you cannot suspend it");
 }

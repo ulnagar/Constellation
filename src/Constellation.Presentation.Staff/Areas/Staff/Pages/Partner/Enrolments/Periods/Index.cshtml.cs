@@ -5,6 +5,7 @@ using Application.Domains.EnrolmentContext.EnrolmentPeriods.Models;
 using Application.Domains.EnrolmentContext.EnrolmentPeriods.Queries.GetAllEnrolmentPeriods;
 using Application.Models.Auth;
 using Constellation.Core.Abstractions.Services;
+using Core.Models.EnrolmentContext.EnrolmentPeriod.Enums;
 using Core.Shared;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
@@ -38,6 +39,9 @@ public class IndexModel : BasePageModel
     [ViewData] public string ActivePage => Shared.Components.StaffSidebarMenu.ActivePage.Partner_Enrolments_Periods;
     [ViewData] public string PageTitle => "Enrolment Periods";
 
+    [BindProperty(SupportsGet = true)] 
+    public EnrolmentPeriodFilter Filter { get; set; } = EnrolmentPeriodFilter.Current;
+
     public List<EnrolmentPeriodResponse> Periods { get; set; } = [];
 
     public async Task OnGet()
@@ -51,6 +55,36 @@ public class IndexModel : BasePageModel
             return;
         }
 
-        Periods = periods.Value;
+        Periods = FilterPeriods(periods.Value, Filter);
+    }
+
+    public enum EnrolmentPeriodFilter
+    {
+        All,
+        Current,
+        Archived
+    }
+
+    private static List<EnrolmentPeriodResponse> FilterPeriods(
+        IEnumerable<EnrolmentPeriodResponse> periods,
+        EnrolmentPeriodFilter filter)
+    {
+        return filter switch
+        {
+            EnrolmentPeriodFilter.All => periods.ToList(),
+
+            EnrolmentPeriodFilter.Current => periods
+                .Where(period => period.Status is
+                    PeriodStatus.Open or
+                    PeriodStatus.Suspended or
+                    PeriodStatus.Scheduled)
+                .ToList(),
+
+            EnrolmentPeriodFilter.Archived => periods
+                .Where(period => period.Status == PeriodStatus.Archived)
+                .ToList(),
+
+            _ => throw new ArgumentOutOfRangeException(nameof(filter), filter, null)
+        };
     }
 }

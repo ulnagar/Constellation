@@ -1,4 +1,4 @@
-﻿namespace Constellation.Infrastructure.Persistence.EnrolmentContext.EntityConfigurations.Application;
+﻿namespace Constellation.Infrastructure.Persistence.EnrolmentContext.EntityConfigurations.Offer;
 
 using Core.Models.EnrolmentContext.Application;
 using Core.Models.EnrolmentContext.EnrolmentPeriod;

@@ -14,4 +14,5 @@ public interface IEnrolmentApplicationRepository
     Task<EnrolmentPeriod?> GetEnrolmentPeriodById(EnrolmentPeriodId id, CancellationToken cancellationToken = default);
 
     void Insert(Application application);
+    void Insert(EnrolmentPeriod period);
 }

@@ -5,5 +5,6 @@ public enum PeriodStatus
     Scheduled,
     Open,
     Closed,
+    Suspended,
     Archived
 }

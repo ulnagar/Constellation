@@ -14,4 +14,6 @@ internal class DateTimeProvider : IDateTimeProvider
     public DateOnly GetFirstDayOfYear(int year) => new(year, 01, 01);
 
     public DateOnly GetLastDayOfYear(int year) => new(year, 12, 31);
+
+    public TimeZoneInfo SydneyTZ => TimeZoneInfo.FindSystemTimeZoneById("Australia/Sydney");
 }

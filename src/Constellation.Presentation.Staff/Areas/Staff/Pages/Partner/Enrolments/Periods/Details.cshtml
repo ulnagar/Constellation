@@ -1,4 +1,130 @@
-﻿@page
+﻿@page "{id}"
 @model Constellation.Presentation.Staff.Areas.Staff.Pages.Partner.Enrolments.Periods.DetailsModel
+
+@using Constellation.Core.Models.EnrolmentContext.EnrolmentPeriod.Enums
+@inject IAuthorizationService AuthorizationService
+
 @{
+    var canEditTest = await AuthorizationService.AuthorizeAsync(User, AuthPermission.Partners_Enrolments_Applications_Edit_Value);
 }
+
+<h2>Enrolment Period Details</h2>
+
+<div class="page-menu">
+    @if (canEditTest.Succeeded)
+    {
+        if (Model.Period.IsSuspended)
+        {
+            <button data-bs-toggle="modal" data-bs-target="#reinstate-period-modal" class="btn btn-secondary">Reinstate</button>
+        }
+        else
+        {
+            <button data-bs-toggle="modal" data-bs-target="#suspend-period-modal" class="btn btn-secondary">Suspend</button>
+        }
+
+        if (Model.Period.Status != PeriodStatus.Archived)
+        {
+            <a asp-page="/Partner/Enrolments/Periods/Upsert" asp-area="Staff" asp-route-id="@Model.Id" class="btn btn-success">Edit</a>
+        }
+    }
+    
+    <a href="javascript:history.go(-1)" class="btn btn-danger btn-pull-right">Go Back</a>
+</div>
+
+<hr />
+
+@if (Model.Period.IsSuspended)
+{
+    <div class="alert alert-warning">
+        This enrolment period has been suspended.<br />
+        @Model.Period.SuspendedReason
+    </div>
+}
+
+<div>
+    <dl class="row">
+        <dt class="col-md-2">
+            <label asp-for="Period.Label">Label</label>
+        </dt>
+        <dd class="col-md-10">
+            <span>@Model.Period.Label</span>
+        </dd>
+
+        <dt class="col-md-2">
+            <label asp-for="Period.OpenAt">Available From</label>
+        </dt>
+        <dd class="col-md-10">
+            <span>@Model.Period.OpenAt.ToString("f")</span>
+        </dd>
+        
+        <dt class="col-md-2">
+            <label asp-for="Period.ClosedAt">Available Until</label>
+        </dt>
+        <dd class="col-md-10">
+            <span>@Model.Period.ClosedAt.ToString("f")</span>
+        </dd>
+        
+        <dt class="col-md-2">
+            <label asp-for="Period.Program">Program</label>
+        </dt>
+        <dd class="col-md-10">
+            <span>@Model.Period.Program</span>
+        </dd>
+        
+        <dt class="col-md-2">
+            <label asp-for="Period.Status">Status</label>
+        </dt>
+        <dd class="col-md-10">
+            <span>@Model.Period.Status</span>
+        </dd>
+    </dl>
+</div>
+
+<form method="post" asp-page-handler="Suspend">
+    <div class="modal fade" tabindex="-1" id="suspend-period-modal">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Suspend Period</h5>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="form-group col-12">
+                            <span class="control-label">Suspending the period will prevent any new applications from being submitted. Please provide a reason for the suspension.</span>
+                        </div>
+                        <div class="form-group col-12 mt-2">
+                            <textarea name="Reason" class="form-control" rows="5" required></textarea>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-success">Suspend</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal" data-bs-dismiss="modal">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+
+<form method="post" asp-page-handler="Reinstate">
+    <div class="modal fade" tabindex="-1" id="reinstate-period-modal">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Reinstate Period</h5>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="form-group col-12">
+                            <span class="control-label">Reinstating the period will remove the suspension and allow new applications to be submitted.</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-success show-loader">Reinstate</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal" data-bs-dismiss="modal">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>

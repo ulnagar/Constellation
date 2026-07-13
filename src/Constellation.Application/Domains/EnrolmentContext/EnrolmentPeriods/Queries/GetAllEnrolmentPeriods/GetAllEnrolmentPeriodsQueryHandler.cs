@@ -2,6 +2,7 @@
 
 using Abstractions.Messaging;
 using Constellation.Core.Models.EnrolmentContext.EnrolmentPeriod;
+using Core.Abstractions.Clock;
 using Core.Models.EnrolmentContext.Application.Repositories;
 using Core.Shared;
 using Models;
@@ -12,13 +13,16 @@ internal sealed class GetAllEnrolmentPeriodsQueryHandler
 : IQueryHandler<GetAllEnrolmentPeriodsQuery, List<EnrolmentPeriodResponse>>
 {
     private readonly IEnrolmentApplicationRepository _repository;
+    private readonly IDateTimeProvider _dateTime;
     private readonly ILogger _logger;
 
     public GetAllEnrolmentPeriodsQueryHandler(
         IEnrolmentApplicationRepository repository,
+        IDateTimeProvider dateTime,
         ILogger logger)
     {
         _repository = repository;
+        _dateTime = dateTime;
         _logger = logger
             .ForContext<GetAllEnrolmentPeriodsQuery>();
     }
@@ -36,8 +40,10 @@ internal sealed class GetAllEnrolmentPeriodsQueryHandler
                 period.Label,
                 period.OpenAt,
                 period.ClosedAt,
-                period.Status,
-                period.Program));
+                period.GetStatus(_dateTime.Now),
+                period.Program,
+                period.IsSuspended,
+                period.SuspensionReason));
         }
 
         return response;
