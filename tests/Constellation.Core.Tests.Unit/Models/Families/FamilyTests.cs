@@ -5,7 +5,7 @@ using Constellation.Core.Models.Families.Events;
 using Constellation.Core.Models.Identifiers;
 using Core.Models.Families.Errors;
 using Core.Models.Students.Identifiers;
-using ValueObjects;
+using Core.ValueObjects;
 
 public class FamilyTests
 {

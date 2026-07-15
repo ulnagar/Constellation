@@ -80,11 +80,11 @@ internal sealed class SendEmailActionConfiguration : IEntityTypeConfiguration<Se
                         .HasColumnName("SenderName");
 
                     config
-                        .Property(sender => sender.Email)
+                        .Property(sender => sender.Value)
                         .HasColumnName("SenderEmail");
 
                     config
-                        .Ignore(sender => sender.Value);
+                        .Ignore(sender => sender.Email);
                 });
 
         builder
@@ -105,7 +105,7 @@ internal sealed class SendEmailActionConfiguration : IEntityTypeConfiguration<Se
                         .HasKey("Id");
 
                     config
-                        .Property(recipient => recipient.Email)
+                        .Property(recipient => recipient.Value)
                         .IsRequired()
                         .HasColumnName(nameof(EmailRecipient.Email));
 
@@ -114,7 +114,7 @@ internal sealed class SendEmailActionConfiguration : IEntityTypeConfiguration<Se
                         .HasColumnName(nameof(EmailRecipient.Name));
 
                     config
-                        .Ignore(recipient => recipient.Value);
+                        .Ignore(recipient => recipient.Email);
                 });
     }
 }
