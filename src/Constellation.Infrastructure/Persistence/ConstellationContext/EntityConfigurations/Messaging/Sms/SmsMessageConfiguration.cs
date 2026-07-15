@@ -32,13 +32,13 @@ internal class SmsMessageConfiguration : IEntityTypeConfiguration<SmsMessage>
                     .HasMaxLength(200);
 
                 propertyBuilder
-                    .Property(r => r.Number)
+                    .Property(r => r.Value)
                     .HasColumnName($"{nameof(SmsMessage.Sender)}_{nameof(SmsRecipient.Number)}")
                     .IsRequired()
                     .HasMaxLength(320);
 
                 propertyBuilder
-                    .Ignore(r => r.Value);
+                    .Ignore(r => r.Number);
             }); 
 
         builder
@@ -51,13 +51,13 @@ internal class SmsMessageConfiguration : IEntityTypeConfiguration<SmsMessage>
                     .HasMaxLength(200);
 
                 propertyBuilder
-                    .Property(r => r.Number)
+                    .Property(r => r.Value)
                     .HasColumnName($"{nameof(SmsMessage.Recipient)}_{nameof(SmsRecipient.Number)}")
                     .IsRequired()
                     .HasMaxLength(320);
 
                 propertyBuilder
-                    .Ignore(r => r.Value);
+                    .Ignore(r => r.Number);
             });
 
         builder

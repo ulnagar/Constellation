@@ -25,7 +25,7 @@ internal sealed class ScheduledReportConfiguration : IEntityTypeConfiguration<Sc
 
         builder
             .ComplexProperty(report => report.ForwardTo)
-            .Property(recipient => recipient.Email)
+            .Property(recipient => recipient.Value)
             .HasColumnName(nameof(EmailRecipient.Email));
 
         builder
@@ -35,7 +35,7 @@ internal sealed class ScheduledReportConfiguration : IEntityTypeConfiguration<Sc
 
         builder
             .ComplexProperty(report => report.ForwardTo)
-            .Ignore(recipient => recipient.Value);
+            .Ignore(recipient => recipient.Email);
 
         builder
             .Property(report => report.LastResult)

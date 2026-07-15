@@ -21,7 +21,7 @@ public sealed class EmailRecipient : ValueObject<EmailRecipient, string>, IValue
     private EmailRecipient(string name, string email)
     {
         Name = name;
-        Email = email;
+        Value = email;
     }
 
     public static Result<EmailRecipient> Create(string name, string email)
@@ -41,7 +41,7 @@ public sealed class EmailRecipient : ValueObject<EmailRecipient, string>, IValue
         new EmailRecipient(name.DisplayName, email.Email);
 
     public string Name { get; private set; }
-    public string Email { get; private set; }
+    public string Email => Value;
 
     public static EmailRecipient FromValue(string value) =>
         _enumerations.GetValueOrDefault(value);

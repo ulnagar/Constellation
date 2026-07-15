@@ -11,8 +11,8 @@ using Core.Models.StaffMembers.ValueObjects;
 using Core.Models.Students;
 using Core.Models.Students.Enums;
 using Core.Models.Students.ValueObjects;
+using Core.ValueObjects;
 using Enums;
-using ValueObjects;
 
 public class GroupTutorialTests
 {

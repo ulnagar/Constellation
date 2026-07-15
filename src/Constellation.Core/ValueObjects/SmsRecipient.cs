@@ -18,7 +18,7 @@ public sealed class SmsRecipient : ValueObject<SmsRecipient, string>, IValueObje
     private SmsRecipient(string name, string phoneNumber)
     {
         Name = name;
-        Number = phoneNumber;
+        Value = phoneNumber;
     }
 
     public static Result<SmsRecipient> Create(string name, string phoneNumber)
@@ -38,7 +38,7 @@ public sealed class SmsRecipient : ValueObject<SmsRecipient, string>, IValueObje
         new SmsRecipient(name.DisplayName, phoneNumber.ToString(PhoneNumber.Format.None));
 
     public string Name { get; private set; }
-    public string Number { get; private set; }
+    public string Number => Value;
 
     public static SmsRecipient FromValue(string value) =>
         _enumerations.GetValueOrDefault(value);

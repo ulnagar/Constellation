@@ -13,7 +13,7 @@ public sealed class EmailAddress : ValueObject<EmailAddress, string>, IValueObje
 
     private EmailAddress(string email)
     {
-        Email = email;
+        Value = email;
     }
 
     public static Result<EmailAddress> Create(string email)
@@ -27,7 +27,7 @@ public sealed class EmailAddress : ValueObject<EmailAddress, string>, IValueObje
         return new EmailAddress(email);
     }
 
-    public string Email { get; }
+    public string Email => Value;
     
     public static implicit operator string(EmailAddress address) =>
         address.ToString();
