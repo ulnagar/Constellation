@@ -16,6 +16,7 @@ using Constellation.Core.Models.EnrolmentContext.Offer.Enums;
 using Constellation.Core.Models.Identifiers;
 using Constellation.Core.Models.Students.Enums;
 using Core.Models.EnrolmentContext.Application;
+using Core.Models.EnrolmentContext.EnrolmentPeriod.Enums;
 using Core.Models.EnrolmentContext.EnrolmentPeriod.Identifiers;
 using Core.Models.Students.ValueObjects;
 using Core.Shared;

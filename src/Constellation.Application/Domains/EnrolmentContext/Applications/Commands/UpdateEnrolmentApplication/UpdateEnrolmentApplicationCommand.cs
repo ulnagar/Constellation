@@ -7,6 +7,7 @@ using Constellation.Core.Models.Identifiers;
 using Constellation.Core.Models.Students.Enums;
 using Constellation.Core.Models.Students.ValueObjects;
 using Constellation.Core.ValueObjects;
+using Core.Models.EnrolmentContext.EnrolmentPeriod.Enums;
 using System;
 using ApplicationId = Core.Models.EnrolmentContext.Application.Identifiers.ApplicationId;
 

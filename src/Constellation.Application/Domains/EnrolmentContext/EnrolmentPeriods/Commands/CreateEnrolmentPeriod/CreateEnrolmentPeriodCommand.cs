@@ -1,6 +1,7 @@
 ﻿namespace Constellation.Application.Domains.EnrolmentContext.EnrolmentPeriods.Commands.CreateEnrolmentPeriod;
 
 using Abstractions.Messaging;
+using Core.Models.EnrolmentContext.EnrolmentPeriod.Enums;
 using Core.Models.EnrolmentContext.Offer.Enums;
 
 public sealed record CreateEnrolmentPeriodCommand(

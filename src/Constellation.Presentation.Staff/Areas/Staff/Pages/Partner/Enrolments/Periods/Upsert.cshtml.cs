@@ -12,6 +12,7 @@ using Constellation.Core.Models.EnrolmentContext.Offer.Enums;
 using Constellation.Core.Shared;
 using Core.Abstractions.Clock;
 using Core.Models.EnrolmentContext.EnrolmentPeriod;
+using Core.Models.EnrolmentContext.EnrolmentPeriod.Enums;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;

@@ -1,6 +1,7 @@
 ﻿namespace Constellation.Application.Domains.EnrolmentContext.Applications.Models;
 
 using Core.Enums;
+using Core.Models.EnrolmentContext.EnrolmentPeriod.Enums;
 using Core.Models.EnrolmentContext.EnrolmentPeriod.Identifiers;
 using Core.Models.EnrolmentContext.Offer.Enums;
 using Core.Models.Identifiers;

@@ -1,5 +1,6 @@
 ﻿namespace Constellation.Core.Models.EnrolmentContext.Application;
 
+using EnrolmentPeriod.Enums;
 using EnrolmentPeriod.Identifiers;
 using Enums;
 using Errors;

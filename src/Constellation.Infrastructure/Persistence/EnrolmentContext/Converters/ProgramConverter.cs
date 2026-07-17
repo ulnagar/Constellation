@@ -1,5 +1,6 @@
 ﻿namespace Constellation.Infrastructure.Persistence.EnrolmentContext.Converters;
 
+using Core.Models.EnrolmentContext.EnrolmentPeriod.Enums;
 using Core.Models.EnrolmentContext.Offer.Enums;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 

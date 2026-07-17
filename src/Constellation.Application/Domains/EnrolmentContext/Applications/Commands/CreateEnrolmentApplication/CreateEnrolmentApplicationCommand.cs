@@ -2,6 +2,7 @@
 
 using Abstractions.Messaging;
 using Core.Enums;
+using Core.Models.EnrolmentContext.EnrolmentPeriod.Enums;
 using Core.Models.EnrolmentContext.EnrolmentPeriod.Identifiers;
 using Core.Models.EnrolmentContext.Offer.Enums;
 using Core.Models.Identifiers;

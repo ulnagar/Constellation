@@ -1,7 +1,6 @@
-﻿namespace Constellation.Core.Models.EnrolmentContext.Offer.Enums;
+﻿namespace Constellation.Core.Models.EnrolmentContext.EnrolmentPeriod.Enums;
 
-using Constellation.Core.Common;
-using System.Collections.Generic;
+using Common;
 
 public sealed class Program : StringEnumeration<Program>
 {
