@@ -10,7 +10,6 @@ using Constellation.Core.Abstractions.Services;
 using Constellation.Core.Models.Students.Errors;
 using Constellation.Core.Models.Students.Identifiers;
 using Constellation.Presentation.Shared.Helpers.Attributes;
-using Constellation.Presentation.Shared.Helpers.Logging;
 using Core.Models.Subjects.Identifiers;
 using Core.Models.Timetables.Identifiers;
 using Core.Models.Tutorials.Enums;

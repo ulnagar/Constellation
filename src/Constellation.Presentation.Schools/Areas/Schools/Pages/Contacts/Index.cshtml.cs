@@ -8,7 +8,6 @@ using Application.Models.Auth;
 using Constellation.Core.Models.SchoolContacts.Identifiers;
 using Constellation.Core.Shared;
 using Constellation.Presentation.Schools.Areas.Schools.Pages.Shared.RemoveContactConfirmation;
-using Constellation.Presentation.Shared.Helpers.Logging;
 using Core.Abstractions.Services;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;

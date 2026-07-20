@@ -8,7 +8,6 @@ using Constellation.Application.Domains.Students.Queries.GetStudentsByParentEmai
 using Constellation.Application.DTOs;
 using Constellation.Core.Shared;
 using Constellation.Presentation.Shared.Helpers.Attributes;
-using Constellation.Presentation.Shared.Helpers.Logging;
 using Core.Abstractions.Services;
 using Core.Models.Students.Identifiers;
 using Core.Models.Timetables.Enums;

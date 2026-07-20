@@ -12,7 +12,6 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using Presentation.Shared.Extensions;
-using Presentation.Shared.Helpers.Logging;
 using Serilog;
 
 [HasPermission(AuthPermission.SchoolAdmin_MasterFile_View_Value)]

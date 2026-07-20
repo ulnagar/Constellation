@@ -9,7 +9,6 @@ using Constellation.Application.Domains.Attendance.Plans.Commands.SubmitAttendan
 using Constellation.Application.Domains.Attendance.Plans.Queries.GetAttendancePlanForSubmit;
 using Constellation.Application.Domains.Attendance.Plans.Queries.GetRecentlyCompletedPlans;
 using Constellation.Presentation.Shared.Helpers.Attributes;
-using Constellation.Presentation.Shared.Helpers.Logging;
 using Core.Abstractions.Services;
 using Core.Models.Attendance.Identifiers;
 using Core.Models.Timetables.Enums;

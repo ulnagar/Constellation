@@ -23,7 +23,6 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using Presentation.Shared.Extensions;
-using Presentation.Shared.Helpers.Logging;
 using Serilog;
 using Shared.Components.ActionUpdateForm;
 

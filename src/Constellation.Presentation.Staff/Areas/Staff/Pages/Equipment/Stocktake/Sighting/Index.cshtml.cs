@@ -7,7 +7,6 @@ using Application.Models.Auth;
 using Constellation.Application.Domains.AssetManagement.Stocktake.Queries.GetStocktakeSightingForAsset;
 using Constellation.Core.Models.Stocktake.Identifiers;
 using Constellation.Presentation.Shared.Helpers.Attributes;
-using Constellation.Presentation.Shared.Helpers.Logging;
 using Core.Abstractions.Services;
 using Core.Models.Assets.Errors;
 using Core.Models.Assets.Identifiers;

@@ -11,12 +11,10 @@ using Constellation.Core.Shared;
 using Core.Abstractions.Services;
 using Core.Models.StaffMembers.Identifiers;
 using MediatR;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using Presentation.Shared.Extensions;
 using Presentation.Shared.Helpers.Attributes;
-using Presentation.Shared.Helpers.Logging;
 using Serilog;
 
 [HasPermission(AuthPermission.SchoolAdmin_Training_Edit_Value)]

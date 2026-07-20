@@ -6,7 +6,6 @@ using Application.Domains.SciencePracs.Queries.GetLessonRollSubmitContextForScho
 using Application.Models.Auth;
 using Constellation.Core.Models.Identifiers;
 using Constellation.Core.Models.Students.Identifiers;
-using Constellation.Presentation.Shared.Helpers.Logging;
 using Core.Abstractions.Services;
 using Core.Shared;
 using MediatR;

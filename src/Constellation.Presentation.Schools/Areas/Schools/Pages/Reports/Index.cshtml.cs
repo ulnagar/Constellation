@@ -7,7 +7,6 @@ using Application.Models.Auth;
 using Constellation.Core.Models.Attachments.DTOs;
 using Constellation.Core.Models.Reports.Identifiers;
 using Constellation.Presentation.Shared.Helpers.Attributes;
-using Constellation.Presentation.Shared.Helpers.Logging;
 using Core.Abstractions.Services;
 using Core.Models.Attachments.Enums;
 using Core.Shared;

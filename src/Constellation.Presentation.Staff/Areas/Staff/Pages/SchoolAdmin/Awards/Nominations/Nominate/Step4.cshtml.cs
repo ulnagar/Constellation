@@ -17,13 +17,11 @@ using Core.Models.Offerings.Identifiers;
 using Core.Models.Students.Identifiers;
 using Core.Models.Subjects.Identifiers;
 using Core.Shared;
-using Core.ValueObjects;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.Routing;
 using Presentation.Shared.Extensions;
-using Presentation.Shared.Helpers.Logging;
 using Presentation.Shared.Helpers.ModelBinders;
 using Serilog;
 

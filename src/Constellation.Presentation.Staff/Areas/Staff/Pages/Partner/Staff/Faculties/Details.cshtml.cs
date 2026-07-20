@@ -12,7 +12,6 @@ using Core.Models.StaffMembers.Identifiers;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Presentation.Shared.Extensions;
-using Presentation.Shared.Helpers.Logging;
 using Serilog;
 
 [HasPermission(AuthPermission.Partners_Faculties_View_Value)]

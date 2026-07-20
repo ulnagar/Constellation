@@ -1,17 +1,14 @@
 ﻿namespace Constellation.Presentation.Parents.Areas.Parents.Pages;
 
 using Application.Domains.ThirdPartyConsent.Queries.DoesStudentHaveRequiredApplicationWithoutConsent;
-using Application.Interfaces.Configuration;
 using Application.Models.Auth;
 using Constellation.Application.Common.PresentationModels;
 using Constellation.Application.Domains.Students.Queries.GetStudentsByParentEmail;
 using Constellation.Core.Shared;
 using Constellation.Presentation.Shared.Helpers.Attributes;
-using Constellation.Presentation.Shared.Helpers.Logging;
 using Core.Abstractions.Services;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Options;
 using Models;
 using Presentation.Shared.Extensions;
 using Serilog;

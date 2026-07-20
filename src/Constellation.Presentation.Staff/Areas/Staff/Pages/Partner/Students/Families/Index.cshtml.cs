@@ -18,7 +18,6 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using Presentation.Shared.Extensions;
-using Presentation.Shared.Helpers.Logging;
 using Serilog;
 using Shared.PartialViews.DeleteFamilyMemberConfirmationModal;
 using Shared.PartialViews.DeleteFamilySelectionModal;

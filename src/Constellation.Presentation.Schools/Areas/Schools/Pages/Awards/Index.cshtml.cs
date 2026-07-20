@@ -8,7 +8,6 @@ using Constellation.Application.Domains.Students.Queries.GetStudentsFromSchoolFo
 using Constellation.Core.Errors;
 using Constellation.Core.Models.Identifiers;
 using Constellation.Core.Shared;
-using Constellation.Presentation.Shared.Helpers.Logging;
 using Core.Abstractions.Services;
 using Core.Models.Attachments.DTOs;
 using Core.Models.Attachments.Enums;

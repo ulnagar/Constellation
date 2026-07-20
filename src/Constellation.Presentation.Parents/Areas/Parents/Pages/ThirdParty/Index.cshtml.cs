@@ -6,7 +6,6 @@ using Constellation.Application.Domains.ThirdPartyConsent.Queries.GetApplication
 using Constellation.Application.Models.Auth;
 using Constellation.Core.Abstractions.Services;
 using Constellation.Presentation.Shared.Helpers.Attributes;
-using Constellation.Presentation.Shared.Helpers.Logging;
 using Core.Shared;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;

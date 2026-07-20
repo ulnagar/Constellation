@@ -19,7 +19,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.Routing;
 using Presentation.Shared.Extensions;
-using Presentation.Shared.Helpers.Logging;
 using Serilog;
 
 [HasPermission(AuthPermission.StudentAdmin_AttendancePlans_Edit_Value)]

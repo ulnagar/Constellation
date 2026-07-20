@@ -9,7 +9,6 @@ using Constellation.Application.Domains.AssetManagement.Stocktake.Models;
 using Constellation.Core.Shared;
 using Constellation.Presentation.Schools.Areas.Schools.Pages.Shared.PartialViews.RemoveSightingConfirmation;
 using Constellation.Presentation.Shared.Helpers.Attributes;
-using Constellation.Presentation.Shared.Helpers.Logging;
 using Core.Abstractions.Clock;
 using Core.Abstractions.Services;
 using Core.Models.Stocktake.Identifiers;

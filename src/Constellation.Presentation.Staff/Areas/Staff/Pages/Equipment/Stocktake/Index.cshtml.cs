@@ -11,7 +11,6 @@ using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Presentation.Shared.Extensions;
-using Presentation.Shared.Helpers.Logging;
 using Serilog;
 
 [HasPermission(AuthPermission.Equipment_Stocktake_View_Value)]

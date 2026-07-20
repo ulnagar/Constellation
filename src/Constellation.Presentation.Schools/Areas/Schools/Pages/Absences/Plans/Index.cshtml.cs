@@ -3,7 +3,6 @@
 using Application.Domains.Attendance.Plans.Queries.GetAttendancePlansSummaryForSchool;
 using Constellation.Application.Domains.Attendance.Plans.Queries.GetAttendancePlansSummary;
 using Constellation.Application.Models.Auth;
-using Constellation.Presentation.Shared.Helpers.Logging;
 using Core.Abstractions.Services;
 using Core.Shared;
 using MediatR;

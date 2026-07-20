@@ -4,7 +4,6 @@ using Application.Common.PresentationModels;
 using Application.Domains.SciencePracs.Queries.GetLessonRollsForSchoolsPortal;
 using Application.Models.Auth;
 using Constellation.Presentation.Shared.Helpers.Attributes;
-using Constellation.Presentation.Shared.Helpers.Logging;
 using Core.Abstractions.Services;
 using Core.Shared;
 using MediatR;

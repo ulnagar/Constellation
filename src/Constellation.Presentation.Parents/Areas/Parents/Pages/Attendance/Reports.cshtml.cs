@@ -9,7 +9,6 @@ using Constellation.Application.Domains.Attendance.Reports.Queries.GenerateAtten
 using Constellation.Application.Domains.Students.Queries.GetStudentsByParentEmail;
 using Constellation.Core.Shared;
 using Constellation.Presentation.Shared.Helpers.Attributes;
-using Constellation.Presentation.Shared.Helpers.Logging;
 using Core.Abstractions.Services;
 using Core.Errors;
 using Core.Models.Auth;

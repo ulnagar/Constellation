@@ -11,7 +11,6 @@ using Constellation.Core.Models.Assets.Identifiers;
 using Constellation.Core.Models.Assets.ValueObjects;
 using Constellation.Core.Models.Stocktake.Identifiers;
 using Constellation.Core.Shared;
-using Constellation.Presentation.Shared.Helpers.Logging;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;

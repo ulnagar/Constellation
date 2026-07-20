@@ -20,7 +20,6 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.Routing;
 using Presentation.Shared.Extensions;
 using Presentation.Shared.Helpers.Attributes;
-using Presentation.Shared.Helpers.Logging;
 using Serilog;
 
 [HasPermission(AuthPermission.Partners_Staff_Edit_Value)]

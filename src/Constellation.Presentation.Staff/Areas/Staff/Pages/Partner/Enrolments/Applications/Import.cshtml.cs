@@ -16,10 +16,8 @@ using Core.Models.EnrolmentContext.Application;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Presentation.Shared.Extensions;
 using Presentation.Shared.Helpers.Attributes;
-using Presentation.Shared.Helpers.Logging;
 using Serilog;
 
 [HasPermission(AuthPermission.Partners_Enrolments_Applications_Edit_Value)]

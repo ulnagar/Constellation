@@ -7,7 +7,6 @@ using Application.Domains.LinkedSystems.Sentral.Queries.GetTermsAndWeeksForCurre
 using Application.Models.Auth;
 using Constellation.Application.Common.PresentationModels;
 using Constellation.Core.Models.Attachments.DTOs;
-using Constellation.Presentation.Shared.Helpers.Logging;
 using Core.Abstractions.Clock;
 using Core.Abstractions.Services;
 using Core.Models.Assessments.Identifiers;

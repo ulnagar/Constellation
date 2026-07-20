@@ -9,7 +9,6 @@ using Application.Domains.Students.Queries.GetStudentsByParentEmail;
 using Application.Models.Auth;
 using Constellation.Core.Models.Attachments.DTOs;
 using Constellation.Core.Models.Students.Identifiers;
-using Constellation.Presentation.Shared.Helpers.Logging;
 using Core.Abstractions.Clock;
 using Core.Abstractions.Services;
 using Core.Models.Assessments.Identifiers;

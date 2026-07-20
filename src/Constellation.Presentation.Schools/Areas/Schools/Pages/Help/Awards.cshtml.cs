@@ -1,7 +1,6 @@
 namespace Constellation.Presentation.Schools.Areas.Schools.Pages.Help;
 
 using Application.Models.Auth;
-using Constellation.Presentation.Shared.Helpers.Logging;
 using Core.Abstractions.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;

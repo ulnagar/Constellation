@@ -6,7 +6,6 @@ using Application.Models.Auth;
 using Constellation.Application.Domains.Students.Models;
 using Constellation.Core.Shared;
 using Constellation.Presentation.Shared.Helpers.Attributes;
-using Constellation.Presentation.Shared.Helpers.Logging;
 using Core.Abstractions.Services;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;

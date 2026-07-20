@@ -6,17 +6,13 @@ using Application.Domains.Students.Queries.GetCurrentStudentsFromSchool;
 using Constellation.Application.Domains.Students.Models;
 using Constellation.Application.Models.Auth;
 using Constellation.Presentation.Shared.Helpers.Attributes;
-using Constellation.Presentation.Shared.Helpers.Logging;
 using Core.Abstractions.Services;
 using Core.Errors;
 using Core.Models.Identifiers;
 using Core.Shared;
 using MediatR;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
-using Microsoft.Extensions.DependencyInjection;
 using Presentation.Shared.Extensions;
 using Serilog;
 

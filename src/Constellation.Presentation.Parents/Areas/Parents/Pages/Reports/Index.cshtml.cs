@@ -7,7 +7,6 @@ using Constellation.Application.Common.PresentationModels;
 using Constellation.Application.Domains.Students.Queries.GetStudentsByParentEmail;
 using Constellation.Core.Models.Reports.Identifiers;
 using Constellation.Core.Shared;
-using Constellation.Presentation.Shared.Helpers.Logging;
 using Core.Abstractions.Services;
 using Core.Models.Attachments.DTOs;
 using Core.Models.Attachments.Enums;

@@ -6,7 +6,6 @@ using MediatR;
 using Microsoft.AspNetCore.Routing;
 using Presentation.Shared.Extensions;
 using Presentation.Shared.Helpers.Attributes;
-using Presentation.Shared.Helpers.Logging;
 using Serilog;
 
 [HasPermission(AuthPermission.Partners_Enrolments_Applications_View_Value)]

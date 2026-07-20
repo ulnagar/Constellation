@@ -8,7 +8,6 @@ using Core.Shared;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Presentation.Shared.Extensions;
-using Presentation.Shared.Helpers.Logging;
 using Serilog;
 
 public class LocationsModel : BasePageModel

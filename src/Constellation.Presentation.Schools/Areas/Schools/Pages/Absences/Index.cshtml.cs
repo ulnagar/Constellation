@@ -4,7 +4,6 @@ using Application.Common.PresentationModels;
 using Application.Models.Auth;
 using Constellation.Application.Domains.Attendance.Absences.Queries.GetOutstandingAbsencesForSchool;
 using Constellation.Core.Shared;
-using Constellation.Presentation.Shared.Helpers.Logging;
 using Core.Abstractions.Services;
 using Core.Models.Absences.Identifiers;
 using MediatR;

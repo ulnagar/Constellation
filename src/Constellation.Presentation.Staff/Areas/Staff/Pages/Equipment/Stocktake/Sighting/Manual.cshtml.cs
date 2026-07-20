@@ -17,7 +17,6 @@ using Constellation.Core.Models.StaffMembers.Identifiers;
 using Constellation.Core.Models.Stocktake.Enums;
 using Constellation.Core.Models.Stocktake.Identifiers;
 using Constellation.Core.Shared;
-using Constellation.Presentation.Shared.Helpers.Logging;
 using Constellation.Presentation.Shared.Helpers.ModelBinders;
 using Core.Models.Identifiers;
 using MediatR;

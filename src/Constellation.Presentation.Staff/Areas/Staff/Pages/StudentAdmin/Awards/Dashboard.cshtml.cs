@@ -9,7 +9,6 @@ using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Presentation.Shared.Extensions;
 using Presentation.Shared.Helpers.Attributes;
-using Presentation.Shared.Helpers.Logging;
 using Serilog;
 
 [HasPermission(AuthPermission.StudentAdmin_Awards_View_Value)]

@@ -4,7 +4,6 @@ using Application.Common.PresentationModels;
 using Application.Domains.Contacts.Queries.GetContactListForParentPortal;
 using Application.Models.Auth;
 using Constellation.Application.Domains.Students.Queries.GetStudentsByParentEmail;
-using Constellation.Presentation.Shared.Helpers.Logging;
 using Core.Abstractions.Services;
 using Core.Models.Students.Identifiers;
 using Core.Shared;

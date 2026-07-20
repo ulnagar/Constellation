@@ -18,7 +18,6 @@ using Core.Models.StaffMembers.Identifiers;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Presentation.Shared.Extensions;
-using Presentation.Shared.Helpers.Logging;
 using Serilog;
 using Shared.PartialViews.SelectStaffMemberForReportModal;
 using Shared.PartialViews.SelectTrainingModuleForReportModal;

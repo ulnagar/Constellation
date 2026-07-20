@@ -10,7 +10,6 @@ using Constellation.Core.Abstractions.Services;
 using Constellation.Core.Models.Assessments.Archive.Identifiers;
 using Constellation.Core.Shared;
 using Constellation.Presentation.Shared.Helpers.Attributes;
-using Constellation.Presentation.Shared.Helpers.Logging;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;

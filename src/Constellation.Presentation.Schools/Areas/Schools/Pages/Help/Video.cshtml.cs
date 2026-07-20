@@ -5,7 +5,6 @@ using Core.Abstractions.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Presentation.Shared.Extensions;
-using Presentation.Shared.Helpers.Logging;
 using Serilog;
 
 [Authorize(Policy = AuthPolicies.IsSchoolContact)]

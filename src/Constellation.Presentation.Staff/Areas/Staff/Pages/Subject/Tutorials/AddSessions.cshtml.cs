@@ -15,12 +15,10 @@ using Core.Models.StaffMembers.Identifiers;
 using Core.Models.Timetables.Identifiers;
 using Core.Models.Tutorials.Identifiers;
 using MediatR;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using Presentation.Shared.Extensions;
 using Presentation.Shared.Helpers.Attributes;
-using Presentation.Shared.Helpers.Logging;
 using Serilog;
 
 [HasPermission(AuthPermission.Subjects_Tutorials_Edit_Value)]

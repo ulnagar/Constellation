@@ -17,7 +17,6 @@ using Constellation.Core.Models.Offerings.Identifiers;
 using Constellation.Core.Models.Students.Identifiers;
 using Constellation.Core.Shared;
 using Constellation.Presentation.Shared.Helpers.Attributes;
-using Constellation.Presentation.Shared.Helpers.Logging;
 using Constellation.Presentation.Staff.Areas.Staff.Models;
 using Core.Models.Identifiers;
 using MediatR;

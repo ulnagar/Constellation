@@ -20,7 +20,6 @@ using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Models;
 using Presentation.Shared.Extensions;
-using Presentation.Shared.Helpers.Logging;
 using Serilog;
 
 [HasPermission(AuthPermission.StudentAdmin_Consent_View_Value)]

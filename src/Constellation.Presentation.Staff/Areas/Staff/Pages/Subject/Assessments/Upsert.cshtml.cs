@@ -5,7 +5,6 @@ using Application.Domains.Assessments.Assessments.Commands.CreateAssessment;
 using Application.Domains.Assessments.Assessments.Commands.UpdateAssessment;
 using Application.Domains.Assessments.Assessments.Models;
 using Application.Domains.Assessments.Assessments.Queries.GetAssessmentById;
-using Application.Domains.Assessments.Assessments.Queries.GetCurrentAssessments;
 using Application.Domains.Courses.Models;
 using Application.Domains.Courses.Queries.GetCoursesForSelectionList;
 using Constellation.Application.Models.Auth;
@@ -19,7 +18,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.Routing;
 using Presentation.Shared.Extensions;
-using Presentation.Shared.Helpers.Logging;
 using Serilog;
 using System.ComponentModel.DataAnnotations;
 

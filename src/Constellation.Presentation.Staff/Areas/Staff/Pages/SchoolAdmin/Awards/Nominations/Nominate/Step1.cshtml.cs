@@ -5,7 +5,6 @@ using Constellation.Application.Common.PresentationModels;
 using Constellation.Application.Domains.MeritAwards.Nominations.Queries.GetNominationPeriod;
 using Constellation.Core.Models.Awards.Identifiers;
 using Constellation.Core.Shared;
-using Constellation.Core.ValueObjects;
 using Constellation.Presentation.Shared.Helpers.Attributes;
 using Core.Abstractions.Services;
 using Core.Models.Awards.Enums;
@@ -14,7 +13,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.Routing;
 using Presentation.Shared.Extensions;
-using Presentation.Shared.Helpers.Logging;
 using Serilog;
 
 [HasPermission(AuthPermission.SchoolAdmin_AwardNominations_Submit_Value)]

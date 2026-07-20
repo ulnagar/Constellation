@@ -5,7 +5,6 @@ using Application.Models.Auth;
 using Constellation.Application.Common.PresentationModels;
 using Constellation.Core.Models.Students.Errors;
 using Constellation.Core.Models.Students.Identifiers;
-using Constellation.Presentation.Shared.Helpers.Logging;
 using Core.Abstractions.Services;
 using Core.Shared;
 using MediatR;

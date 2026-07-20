@@ -17,7 +17,6 @@ using Core.Models.Students.Identifiers;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Presentation.Shared.Extensions;
-using Presentation.Shared.Helpers.Logging;
 using Serilog;
 using Shared.Components.BulkCancelSciencePracRolls;
 

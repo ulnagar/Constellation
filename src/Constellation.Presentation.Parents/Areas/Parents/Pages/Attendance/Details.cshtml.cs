@@ -7,7 +7,6 @@ using Constellation.Application.Domains.Attendance.Absences.Queries.GetAbsenceDe
 using Constellation.Core.Models.Absences.Identifiers;
 using Constellation.Core.Shared;
 using Constellation.Presentation.Shared.Helpers.Attributes;
-using Constellation.Presentation.Shared.Helpers.Logging;
 using Core.Abstractions.Services;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;

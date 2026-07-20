@@ -10,7 +10,6 @@ using Constellation.Application.Helpers;
 using Constellation.Core.Abstractions.Services;
 using Constellation.Core.Models.Students.Identifiers;
 using Constellation.Core.Shared;
-using Constellation.Presentation.Shared.Helpers.Logging;
 using Core.Models.Assessments.Identifiers;
 using MediatR;
 using Microsoft.AspNetCore.Http;

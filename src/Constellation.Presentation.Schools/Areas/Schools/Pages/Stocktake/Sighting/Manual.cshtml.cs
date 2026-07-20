@@ -13,7 +13,6 @@ using Constellation.Core.Models.Stocktake.Enums;
 using Constellation.Core.Models.Stocktake.Identifiers;
 using Constellation.Core.Shared;
 using Constellation.Presentation.Shared.Helpers.Attributes;
-using Constellation.Presentation.Shared.Helpers.Logging;
 using Constellation.Presentation.Shared.Helpers.ModelBinders;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;

@@ -8,7 +8,6 @@ using Application.Models.Auth;
 using Constellation.Application.Common.PresentationModels;
 using Constellation.Core.Abstractions.Services;
 using Constellation.Core.Models.EnrolmentContext.EnrolmentPeriod.Identifiers;
-using Constellation.Core.Models.EnrolmentContext.Offer.Enums;
 using Constellation.Core.Shared;
 using Core.Abstractions.Clock;
 using Core.Models.EnrolmentContext.EnrolmentPeriod;
@@ -19,7 +18,6 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.Routing;
 using Presentation.Shared.Extensions;
 using Presentation.Shared.Helpers.Attributes;
-using Presentation.Shared.Helpers.Logging;
 using Serilog;
 
 [HasPermission(AuthPermission.Partners_Enrolments_Applications_Edit_Value)]
