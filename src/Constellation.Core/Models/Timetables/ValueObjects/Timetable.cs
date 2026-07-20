@@ -19,12 +19,12 @@ public class Timetable : ValueObject<Timetable, string>, IValueObject<Timetable,
 
     private Timetable(string code, string name, char prefix)
     {
-        Code = code;
+        Value = code;
         Name = name;
         Prefix = prefix;
     }
 
-    public string Code { get; }
+    public string Code => Value;
     public string Name { get; }
     public char Prefix { get; }
     public string DisplayName => $"{Code} {Name}";
