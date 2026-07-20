@@ -1,6 +1,6 @@
-﻿using Constellation.Application.Extensions;
+﻿namespace Constellation.Application.Tests.Unit.Extensions;
 
-namespace Constellation.Application.Tests.Unit.Extensions;
+using Constellation.Application.Extensions;
 
 public class DateTimeExtensionsTests
 {

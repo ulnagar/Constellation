@@ -1,8 +1,8 @@
-﻿using Constellation.Core.Enums;
+﻿namespace Constellation.Core.Tests.Unit.Models;
+
+using Constellation.Core.Enums;
 using Constellation.Core.Models;
 using FluentAssertions;
-
-namespace Constellation.Core.Tests.Unit.Models;
 
 public class DeviceTests
 {
