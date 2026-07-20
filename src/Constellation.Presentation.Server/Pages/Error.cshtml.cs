@@ -1,6 +1,7 @@
 namespace Constellation.Presentation.Server.Pages;
 
 using Core.Abstractions.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
@@ -10,6 +11,7 @@ using System.Diagnostics;
 
 [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
 [IgnoreAntiforgeryToken]
+[AllowAnonymous]
 public class ErrorModel : PageModel
 {
     private readonly ICurrentUserService _currentUserService;

@@ -24,6 +24,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\build\Constellation.Analyzers\Constellation.Analyzers.csproj"
+		OutputItemType="Analyzer"
+	    ReferenceOutputAssembly="false" />
     <ProjectReference Include="..\Constellation.Application\Constellation.Application.csproj" />
     <ProjectReference Include="..\Constellation.Core\Constellation.Core.csproj" />
     <ProjectReference Include="..\Constellation.Infrastructure.Templates\Constellation.Infrastructure.Templates.csproj" />

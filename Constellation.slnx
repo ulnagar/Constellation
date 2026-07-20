@@ -1,4 +1,7 @@
 <Solution>
+  <Folder Name="/build/">
+    <Project Path="build/Constellation.Analyzers/Constellation.Analyzers.csproj" />
+  </Folder>
   <Folder Name="/docs/">
     <File Path="docs/Application Deployment.txt" />
     <File Path="docs/Job Timings.txt" />
@@ -32,6 +35,7 @@
     <Project Path="src/Constellation.Presentation.Students/Constellation.Presentation.Students.csproj" />
   </Folder>
   <Folder Name="/tests/">
+    <Project Path="tests/Constellation.Analyzers.Tests/Constellation.Analyzers.Tests.csproj" />
     <Project Path="tests/Constellation.Application.Tests.Unit/Constellation.Application.Tests.Unit.csproj" />
     <Project Path="tests/Constellation.Core.Tests.Unit/Constellation.Core.Tests.Unit.csproj" />
     <Project Path="tests/Constellation.Infrastructure.Tests.Unit/Constellation.Infrastructure.Tests.Unit.csproj" />

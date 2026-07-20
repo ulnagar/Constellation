@@ -246,6 +246,7 @@ dotnet_naming_style.begins_with_underscore.capitalization = camel_case
 dotnet_code_quality.CA2007.exclude_async_void_methods = true
 dotnet_code_quality.CA2007.severity = none
 dotnet_analyzer_diagnostic.severity = none
+dotnet_diagnostic.CONST001.severity = error
 csharp_style_prefer_primary_constructors = true:suggestion
 csharp_prefer_static_anonymous_function = true:suggestion
 
