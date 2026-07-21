@@ -1,12 +1,12 @@
 ﻿namespace Constellation.Core.Models.EnrolmentContext.Application;
 
+using Core.Enums;
 using EnrolmentPeriod.Enums;
 using EnrolmentPeriod.Identifiers;
 using Enums;
 using Errors;
 using Identifiers;
 using Models.Identifiers;
-using Offer.Enums;
 using Shared;
 using Students.Enums;
 using Students.ValueObjects;
@@ -33,6 +33,8 @@ public sealed class Application
         StudentGender = studentGender;
         Program = program;
         Grade = grade;
+
+        Status = ApplicationStatus.Pending;
     }
 
     /* Application Status and Tracking */
@@ -61,6 +63,7 @@ public sealed class Application
     public string? DestinationSchool { get; private set; }
     public Program Program { get; private set; }
     public Grade Grade { get; private set; }
+    public ApplicationStatus Status { get; private set; }
 
     public static Result<Application> Create(
         EnrolmentPeriodId periodId,
@@ -133,6 +136,9 @@ public sealed class Application
         Program program,
         Grade grade)
     {
+        if (Status == ApplicationStatus.Archived)
+            return Result.Failure(EnrolmentApplicationErrors.CannotUpdateArchivedApplication);
+
         if (!IsValidProgramGradeCombination(program, grade))
         {
             return Result.Failure<Application>(EnrolmentApplicationErrors.InvalidProgramGradeCombination(program, grade));
@@ -168,4 +174,14 @@ public sealed class Application
             ({ Value: "S6M" }, Grade.Y11 or Grade.Y12) => true,
             _ => false
         };
+
+    public Result UpdateStatus(ApplicationStatus newStatus)
+    {
+        if (Status == ApplicationStatus.Archived)
+            return Result.Failure(EnrolmentApplicationErrors.CannotUpdateArchivedApplication);
+
+        Status = newStatus;
+
+        return Result.Success();
+    }
 }
