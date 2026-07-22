@@ -85,5 +85,9 @@ internal sealed class ApplicationConfiguration : IEntityTypeConfiguration<Applic
         builder
             .Property(entry => entry.Grade)
             .HasConversion<string>();
+
+        builder
+            .Property(entry => entry.Status)
+            .HasConversion<string>();
     }
 }

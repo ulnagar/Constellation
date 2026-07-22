@@ -1,8 +1,8 @@
-﻿namespace Constellation.Infrastructure.Persistence.ConstellationContext.EntityConfigurations.Outbox;
+﻿namespace Constellation.Infrastructure.Persistence.Shared.EntityConfigurations.Outbox;
 
-using Constellation.Infrastructure.Persistence.ConstellationContext.Outbox;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using Shared.Outbox;
 
 internal sealed class OutboxMessageConsumerConfiguration : IEntityTypeConfiguration<OutboxMessageConsumer>
 {

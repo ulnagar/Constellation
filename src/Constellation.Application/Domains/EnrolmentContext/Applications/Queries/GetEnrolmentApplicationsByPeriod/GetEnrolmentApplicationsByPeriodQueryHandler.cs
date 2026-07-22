@@ -49,7 +49,8 @@ internal sealed class GetEnrolmentApplicationsByPeriodQueryHandler
                 application.DestinationSchoolCode,
                 application.DestinationSchool,
                 application.Program,
-                application.Grade));
+                application.Grade,
+                application.Status));
         }
 
         return response;

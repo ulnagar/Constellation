@@ -2,6 +2,7 @@
 @model Constellation.Presentation.Staff.Areas.Staff.Pages.Partner.Enrolments.Applications.IndexModel
 
 @using Constellation.Core.Extensions
+@using Constellation.Presentation.Staff.Areas.Staff.Pages.Partner.Enrolments.Applications;
 
 @inject IAuthorizationService AuthorizationService
 @{
@@ -11,6 +12,36 @@
 <h2>Enrolment Applications</h2>
 
 <div class="page-menu">
+    @{
+        var allStyle = "btn-outline-secondary";
+        var pendingStyle = allStyle;
+        var approvedStyle = allStyle;
+        var rejectedStyle = allStyle;
+
+        switch (Model.Status)
+        {
+            case IndexModel.StatusFilter.All:
+                allStyle = "btn-primary";
+                break;
+            case IndexModel.StatusFilter.Pending:
+                pendingStyle = "btn-primary";
+                break;
+            case IndexModel.StatusFilter.Approved:
+                approvedStyle = "btn-primary";
+                break;
+            case IndexModel.StatusFilter.Rejected:
+                rejectedStyle = "btn-primary";
+                break;
+        }
+    }
+
+    <div class="btn-group">
+        <a asp-route-status="@IndexModel.StatusFilter.All" asp-route-periodId="@Model.PeriodId" class="btn @allStyle">All</a>
+        <a asp-route-status="@IndexModel.StatusFilter.Pending" asp-route-periodId="@Model.PeriodId" class="btn @pendingStyle">Pending</a>
+        <a asp-route-status="@IndexModel.StatusFilter.Approved" asp-route-periodId="@Model.PeriodId" class="btn @approvedStyle">Approved</a>
+        <a asp-route-status="@IndexModel.StatusFilter.Rejected" asp-route-periodId="@Model.PeriodId" class="btn @rejectedStyle">Rejected</a>
+    </div>
+
     @if (canEditTest.Succeeded)
     {
         <a asp-page="/Partner/Enrolments/Applications/Upsert" asp-area="Staff" class="btn btn-success">Create</a>
@@ -25,6 +56,7 @@
     <div class="mb-3 row">
         <label for="PeriodId" class="col-md-2">Enrolment Period</label>
         <div class="col-md-3">
+            <input type="hidden" name="Status" value="@Model.Status" />
             <select name="PeriodId" id="PeriodId" class="form-control">
                 <option value=""> -- Select -- </option>
                 @foreach (var period in Model.Periods)
@@ -50,6 +82,7 @@
         <th>Gender</th>
         <th>School</th>
         <th>Grade</th>
+        <th>Status</th>
         <th></th>
     </tr>
     </thead>
@@ -60,8 +93,9 @@
             <td>@application.ApplicationReference</td>
             <td data-order="@application.StudentName.SortOrder" data-search="@application.StudentName.DisplayName @application.StudentName.FirstName">@application.StudentName.DisplayName</td>
             <td>@application.StudentGender</td>
-            <td data-search="@application.DestinationSchoolCode">@application.DestinationSchool</td>
+            <td data-search="@application.DestinationSchoolCode @application.DestinationSchool">@application.DestinationSchool</td>
             <td data-search="@application.Grade.AsNumber()">@application.Grade.AsName()</td>
+            <td>@application.Status</td>
             <td>
                 @if (canEditTest.Succeeded)
                 {
@@ -85,7 +119,7 @@
                     [1, 'asc']
                 ],
                 "columnDefs": [
-                    { "target": 5, "searchable": false, "sortable": false }
+                    { "target": 6, "searchable": false, "sortable": false }
                 ]
             });
         })

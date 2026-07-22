@@ -2,25 +2,25 @@
 
 using Abstractions.Messaging;
 using Constellation.Application.Domains.EnrolmentContext.Interfaces;
-using Constellation.Core.Models.EnrolmentContext.Application.Repositories;
 using Constellation.Core.Models.EnrolmentContext.EnrolmentPeriod;
 using Constellation.Core.Models.EnrolmentContext.EnrolmentPeriod.Errors;
+using Core.Models.EnrolmentContext.EnrolmentPeriod.Repositories;
 using Core.Shared;
 using Serilog;
 
 internal sealed class ReinstateEnrolmentPeriodCommandHandler
 : ICommandHandler<ReinstateEnrolmentPeriodCommand>
 {
-    private readonly IEnrolmentApplicationRepository _repository;
+    private readonly IEnrolmentPeriodRepository _periodRepository;
     private readonly IEnrolmentUnitOfWork _unitOfWork;
     private readonly ILogger _logger;
 
     public ReinstateEnrolmentPeriodCommandHandler(
-        IEnrolmentApplicationRepository repository,
+        IEnrolmentPeriodRepository periodRepository,
         IEnrolmentUnitOfWork unitOfWork,
         ILogger logger)
     {
-        _repository = repository;
+        _periodRepository = periodRepository;
         _unitOfWork = unitOfWork;
         _logger = logger
             .ForContext<ReinstateEnrolmentPeriodCommand>();
@@ -28,7 +28,7 @@ internal sealed class ReinstateEnrolmentPeriodCommandHandler
 
     public async Task<Result> Handle(ReinstateEnrolmentPeriodCommand request, CancellationToken cancellationToken)
     {
-        EnrolmentPeriod? period = await _repository.GetEnrolmentPeriodById(request.PeriodId, cancellationToken);
+        EnrolmentPeriod? period = await _periodRepository.GetEnrolmentPeriodById(request.PeriodId, cancellationToken);
 
         if (period is null)
         {

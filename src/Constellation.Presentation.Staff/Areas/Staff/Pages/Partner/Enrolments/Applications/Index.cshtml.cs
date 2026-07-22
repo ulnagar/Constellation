@@ -9,6 +9,7 @@ using Application.Models.Auth;
 using Constellation.Application.Common.PresentationModels;
 using Constellation.Core.Abstractions.Services;
 using Constellation.Core.Shared;
+using Core.Models.EnrolmentContext.Application.Enums;
 using Core.Models.EnrolmentContext.EnrolmentPeriod.Identifiers;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
@@ -49,34 +50,15 @@ public class IndexModel : BasePageModel
     [BindProperty(SupportsGet = true)]
     public EnrolmentPeriodId PeriodId { get; set; } = EnrolmentPeriodId.Empty;
 
+    [BindProperty(SupportsGet = true)]
+    public StatusFilter Status { get; set; } = StatusFilter.All;
+
     public List<EnrolmentPeriodResponse> Periods { get; set; } = [];
     public List<EnrolmentApplicationResponse> Applications { get; set; } = [];
 
-    public async Task OnGet()
-    {
-        await PreparePage();
+    public async Task<IActionResult> OnGet() => await PreparePage();
 
-        if (PeriodId == EnrolmentPeriodId.Empty)
-        {
-            if (Periods.Count is 0 or > 1)
-                return;
-
-            PeriodId = Periods.First().Id;
-        }
-
-        Result<List<EnrolmentApplicationResponse>> applications = await _mediator.Send(new GetEnrolmentApplicationsByPeriodQuery(PeriodId));
-        
-        if (applications.IsFailure)
-        {
-            ModalContent = ErrorDisplay.Create(applications.Error);
-
-            return;
-        }
-
-        Applications = applications.Value;
-    }
-
-    private async Task PreparePage()
+    private async Task<IActionResult> PreparePage()
     {
         Result<List<EnrolmentPeriodResponse>> periods = await _mediator.Send(new GetAllEnrolmentPeriodsQuery());
 
@@ -84,12 +66,33 @@ public class IndexModel : BasePageModel
         {
             ModalContent = ErrorDisplay.Create(periods.Error);
 
-            return;
+            return Page();
         }
 
         Periods = periods.Value
             .OrderBy(entry => entry.OpenAt)
             .ToList();
+
+        if (PeriodId == EnrolmentPeriodId.Empty)
+        {
+            if (Periods.Count is 0 or > 1)
+                return Page();
+
+            return RedirectToPage(new { PeriodId = Periods.First().Id });
+        }
+
+        Result<List<EnrolmentApplicationResponse>> applications = await _mediator.Send(new GetEnrolmentApplicationsByPeriodQuery(PeriodId));
+
+        if (applications.IsFailure)
+        {
+            ModalContent = ErrorDisplay.Create(applications.Error);
+
+            return Page();
+        }
+
+        Applications = FilterApplications(applications.Value, Status);
+
+        return Page();
     }
 
     public async Task<IActionResult> OnPostImportFile(UploadFileForImportStagingSelection viewModel)
@@ -100,8 +103,7 @@ public class IndexModel : BasePageModel
 
             ModalContent = ErrorDisplay.Create(error, null);
 
-            await PreparePage();
-            return Page();
+            return await PreparePage();
         }
 
         try
@@ -119,8 +121,7 @@ public class IndexModel : BasePageModel
 
                 ModalContent = ErrorDisplay.Create(key.Error);
 
-                await PreparePage();
-                return Page();
+                return await PreparePage();
             }
 
             return RedirectToPage("/Partner/Enrolments/Applications/Import", new { area = "Staff", Key = key.Value });
@@ -133,8 +134,39 @@ public class IndexModel : BasePageModel
 
             ModalContent = ExceptionDisplay.Create(ex);
 
-            await PreparePage();
-            return Page();
+            return await PreparePage();
         }
+    }
+
+    public enum StatusFilter
+    {
+        All,
+        Pending,
+        Approved,
+        Rejected
+    }
+
+    private static List<EnrolmentApplicationResponse> FilterApplications(
+        IEnumerable<EnrolmentApplicationResponse> applications,
+        StatusFilter filter)
+    {
+        return filter switch
+        {
+            StatusFilter.All => applications.ToList(),
+
+            StatusFilter.Pending => applications
+                .Where(application => application.Status == ApplicationStatus.Pending)
+                .ToList(),
+
+            StatusFilter.Approved => applications
+                .Where(application => application.Status == ApplicationStatus.Approved)
+                .ToList(),
+
+            StatusFilter.Rejected => applications
+                .Where(application => application.Status == ApplicationStatus.Rejected)
+                .ToList(),
+
+            _ => throw new ArgumentOutOfRangeException(nameof(filter), filter, null)
+        };
     }
 }

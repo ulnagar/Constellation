@@ -1,5 +1,5 @@
 ﻿#nullable enable
-namespace Constellation.Infrastructure.Persistence.ConstellationContext.Outbox;
+namespace Constellation.Infrastructure.Persistence.Shared.Outbox;
 
 public sealed class OutboxMessage
 {

@@ -1,10 +1,13 @@
 ﻿namespace Constellation.Core.Models.EnrolmentContext.Offer;
 
 using Application;
+using Application.Enums;
 using Application.Identifiers;
 using EnrolmentPeriod.Identifiers;
 using Enums;
+using Errors;
 using Identifiers;
+using Shared;
 
 public sealed class Offer
 {
@@ -27,8 +30,11 @@ public sealed class Offer
     public bool HasCourtOrders { get; private set; }
     public bool HasHealthConcerns { get; private set; }
 
-    public static Offer Create(Application application)
+    public static Result<Offer> Create(Application application)
     {
+        if (application.Status != ApplicationStatus.Approved)
+            return Result.Failure<Offer>(OfferErrors.ApplicationNotApproved);
+
         Offer offer = new()
         {
             PeriodId = application.PeriodId,

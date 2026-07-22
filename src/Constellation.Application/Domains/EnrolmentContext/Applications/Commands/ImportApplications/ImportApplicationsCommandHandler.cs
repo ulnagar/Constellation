@@ -2,14 +2,13 @@
 
 using Abstractions.Messaging;
 using Constellation.Application.Common.Errors;
-using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Interfaces.Services;
 using Constellation.Application.Models.ImportCache;
-using Core.Errors;
 using Core.Models.EnrolmentContext.Application;
 using Core.Models.EnrolmentContext.Application.Errors;
 using Core.Models.EnrolmentContext.Application.Repositories;
 using Core.Models.EnrolmentContext.EnrolmentPeriod;
+using Core.Models.EnrolmentContext.EnrolmentPeriod.Repositories;
 using Core.Shared;
 using Import.Interfaces;
 using Import.Models;
@@ -22,17 +21,20 @@ internal sealed class ImportApplicationsCommandHandler
     private readonly IImportStagingCache _stagingCache;
     private readonly IImportRowMapper<Application, EnrolmentPeriod> _rowMapper;
     private readonly IEnrolmentApplicationRepository _applicationRepository;
+    private readonly IEnrolmentPeriodRepository _periodRepository;
     private readonly IEnrolmentUnitOfWork _unitOfWork;
 
     public ImportApplicationsCommandHandler(
         IImportStagingCache stagingCache,
         IImportRowMapper<Application, EnrolmentPeriod> rowMapper,
         IEnrolmentApplicationRepository applicationRepository,
+        IEnrolmentPeriodRepository periodRepository,
         IEnrolmentUnitOfWork unitOfWork)
     {
         _stagingCache = stagingCache;
         _rowMapper = rowMapper;
         _applicationRepository = applicationRepository;
+        _periodRepository = periodRepository;
         _unitOfWork = unitOfWork;
     }
 
@@ -42,7 +44,7 @@ internal sealed class ImportApplicationsCommandHandler
         if (!_stagingCache.TryGet(request.Mapping.Token, out StagedImport staged))
             return Result.Failure<ImportRunResult<Application>>(ImportErrors.StagedImportExpired);
 
-        EnrolmentPeriod? period = await _applicationRepository.GetEnrolmentPeriodById(request.PeriodId, cancellationToken);
+        EnrolmentPeriod? period = await _periodRepository.GetEnrolmentPeriodById(request.PeriodId, cancellationToken);
 
         if (period is null)
             return Result.Failure<ImportRunResult<Application>>(EnrolmentApplicationErrors.InvalidEnrolmentPeriod);

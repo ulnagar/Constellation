@@ -1,8 +1,8 @@
 ﻿namespace Constellation.Application.Domains.EnrolmentContext.EnrolmentPeriods.Commands.CreateEnrolmentPeriod;
 
 using Abstractions.Messaging;
-using Core.Models.EnrolmentContext.Application.Repositories;
 using Core.Models.EnrolmentContext.EnrolmentPeriod;
+using Core.Models.EnrolmentContext.EnrolmentPeriod.Repositories;
 using Core.Shared;
 using Interfaces;
 using Serilog;
@@ -10,16 +10,16 @@ using Serilog;
 internal sealed class CreateEnrolmentPeriodCommandHandler
 : ICommandHandler<CreateEnrolmentPeriodCommand>
 {
-    private readonly IEnrolmentApplicationRepository _repository;
+    private readonly IEnrolmentPeriodRepository _periodRepository;
     private readonly IEnrolmentUnitOfWork _unitOfWork;
     private readonly ILogger _logger;
 
     public CreateEnrolmentPeriodCommandHandler(
-        IEnrolmentApplicationRepository repository,
+        IEnrolmentPeriodRepository periodRepository,
         IEnrolmentUnitOfWork unitOfWork,
         ILogger logger)
     {
-        _repository = repository;
+        _periodRepository = periodRepository;
         _unitOfWork = unitOfWork;
         _logger = logger
             .ForContext<CreateEnrolmentPeriodCommand>();
@@ -43,7 +43,7 @@ internal sealed class CreateEnrolmentPeriodCommandHandler
             return period;
         }
 
-        _repository.Insert(period.Value);
+        _periodRepository.Insert(period.Value);
         await _unitOfWork.CompleteAsync(cancellationToken);
 
         return Result.Success();

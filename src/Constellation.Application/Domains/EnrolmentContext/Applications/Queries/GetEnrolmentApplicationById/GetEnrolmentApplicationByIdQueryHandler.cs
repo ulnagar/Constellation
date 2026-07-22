@@ -55,6 +55,7 @@ internal sealed class GetEnrolmentApplicationByIdQueryHandler
             application.DestinationSchoolCode,
             application.DestinationSchool,
             application.Program,
-            application.Grade);
+            application.Grade,
+            application.Status);
     }
 }

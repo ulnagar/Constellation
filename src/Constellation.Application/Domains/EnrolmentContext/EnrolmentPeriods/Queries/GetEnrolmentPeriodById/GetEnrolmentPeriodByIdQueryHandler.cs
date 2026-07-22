@@ -5,6 +5,7 @@ using Constellation.Core.Models.EnrolmentContext.Application.Repositories;
 using Constellation.Core.Models.EnrolmentContext.EnrolmentPeriod;
 using Core.Abstractions.Clock;
 using Core.Models.EnrolmentContext.EnrolmentPeriod.Errors;
+using Core.Models.EnrolmentContext.EnrolmentPeriod.Repositories;
 using Core.Shared;
 using Models;
 using Serilog;
@@ -12,16 +13,17 @@ using Serilog;
 internal sealed class GetEnrolmentPeriodByIdQueryHandler
 : IQueryHandler<GetEnrolmentPeriodByIdQuery, EnrolmentPeriodResponse>
 {
-    private readonly IEnrolmentApplicationRepository _repository;
+    private readonly IEnrolmentPeriodRepository _periodRepository;
     private readonly IDateTimeProvider _dateTime;
     private readonly ILogger _logger;
 
     public GetEnrolmentPeriodByIdQueryHandler(
         IEnrolmentApplicationRepository repository,
+        IEnrolmentPeriodRepository periodRepository,
         IDateTimeProvider dateTime,
         ILogger logger)
     {
-        _repository = repository;
+        _periodRepository = periodRepository;
         _dateTime = dateTime;
         _logger = logger
             .ForContext<GetEnrolmentPeriodByIdQuery>();
@@ -29,7 +31,7 @@ internal sealed class GetEnrolmentPeriodByIdQueryHandler
 
     public async Task<Result<EnrolmentPeriodResponse>> Handle(GetEnrolmentPeriodByIdQuery request, CancellationToken cancellationToken)
     {
-        EnrolmentPeriod? period = await _repository.GetEnrolmentPeriodById(request.Id, cancellationToken);
+        EnrolmentPeriod? period = await _periodRepository.GetEnrolmentPeriodById(request.Id, cancellationToken);
 
         if (period is null)
         {

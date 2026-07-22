@@ -2,10 +2,9 @@
 
 using Constellation.Infrastructure.Persistence.ConstellationContext.Converters;
 using Microsoft.EntityFrameworkCore;
+using Shared.EntityConfigurations.Outbox;
 using System;
-using System.Collections.Generic;
 using System.Reflection;
-using System.Text;
 
 public sealed class EnrolmentDbContext : DbContext
 {
@@ -24,6 +23,10 @@ public sealed class EnrolmentDbContext : DbContext
         modelBuilder
             .ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly(),
             t => t.GetTypeInfo().Namespace?.Contains("EnrolmentContext", StringComparison.InvariantCultureIgnoreCase) ?? false);
+
+
+        modelBuilder.ApplyConfiguration(new OutboxMessageConfiguration());
+        //modelBuilder.ApplyConfiguration(new OutboxMessageConsumerConfiguration());
 
         base.OnModelCreating(modelBuilder);
     }

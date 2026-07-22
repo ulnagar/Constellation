@@ -1,10 +1,9 @@
 ﻿namespace Constellation.Application.Domains.EnrolmentContext.EnrolmentPeriods.Commands.SuspendEnrolmentPeriod;
 
 using Abstractions.Messaging;
-using Constellation.Application.Domains.EnrolmentContext.EnrolmentPeriods.Commands.UpdateEnrolmentPeriod;
 using Constellation.Core.Models.EnrolmentContext.EnrolmentPeriod;
 using Constellation.Core.Models.EnrolmentContext.EnrolmentPeriod.Errors;
-using Core.Models.EnrolmentContext.Application.Repositories;
+using Core.Models.EnrolmentContext.EnrolmentPeriod.Repositories;
 using Core.Shared;
 using Interfaces;
 using Serilog;
@@ -12,16 +11,16 @@ using Serilog;
 internal sealed class SuspendEnrolmentPeriodCommandHandler
     : ICommandHandler<SuspendEnrolmentPeriodCommand>
 {
-    private readonly IEnrolmentApplicationRepository _repository;
+    private readonly IEnrolmentPeriodRepository _periodRepository;
     private readonly IEnrolmentUnitOfWork _unitOfWork;
     private readonly ILogger _logger;
 
     public SuspendEnrolmentPeriodCommandHandler(
-        IEnrolmentApplicationRepository repository,
+        IEnrolmentPeriodRepository periodRepository,
         IEnrolmentUnitOfWork unitOfWork,
         ILogger logger)
     {
-        _repository = repository;
+        _periodRepository = periodRepository;
         _unitOfWork = unitOfWork;
         _logger = logger
             .ForContext<SuspendEnrolmentPeriodCommand>();
@@ -29,7 +28,7 @@ internal sealed class SuspendEnrolmentPeriodCommandHandler
 
     public async Task<Result> Handle(SuspendEnrolmentPeriodCommand request, CancellationToken cancellationToken)
     {
-        EnrolmentPeriod? period = await _repository.GetEnrolmentPeriodById(request.PeriodId, cancellationToken);
+        EnrolmentPeriod? period = await _periodRepository.GetEnrolmentPeriodById(request.PeriodId, cancellationToken);
 
         if (period is null)
         {

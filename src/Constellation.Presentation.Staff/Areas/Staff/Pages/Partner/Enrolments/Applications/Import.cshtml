@@ -45,11 +45,16 @@ else
         .ToList();
 
     <form asp-page-handler="Map" method="post">
+        
+        <div class="row mb-3 mapping-row mapping-row--required">
+            <label for="PeriodId" class="col-md-3">
+                Enrolment Period
+                <span class="required-marker" aria-hidden="true">*</span>
+                <span class="visually-hidden">(required)</span>
+            </label>
 
-        <div class="mb-3 row">
-            <label for="PeriodId" class="col-md-2">Enrolment Period</label>
-            <div class="col-md-3">
-                <select name="PeriodId" id="PeriodId" class="form-control">
+            <div class="col-md-5">
+                <select name="PeriodId" id="PeriodId" class="form-control custom-select2">
                     <option value=""> -- Select -- </option>
                     @foreach (var period in Model.Periods)
                     {
@@ -60,11 +65,8 @@ else
                     }
                 </select>
             </div>
-            <div class="col-md-2">
-                <button type="submit" class="btn btn-primary">Filter</button>
-            </div>
         </div>
-        
+       
         <input type="hidden" name="Mapping.Token" value="@Model.Key" />
     
         @foreach (var group in grouped)

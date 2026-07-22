@@ -10,7 +10,8 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
 using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
-using Outbox;
+using Shared.EntityConfigurations.Outbox;
+using Shared.Outbox;
 using System.Reflection;
 
 public class ConstellationDbContext : IdentityDbContext<AppUser, AppRole, Guid>
@@ -43,6 +44,9 @@ public class ConstellationDbContext : IdentityDbContext<AppUser, AppRole, Guid>
 
         builder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly(),
             t => t.GetTypeInfo().Namespace.Contains("ConstellationContext")); // Only include the local EntityConfigurations
+
+        builder.ApplyConfiguration(new OutboxMessageConfiguration());
+        //builder.ApplyConfiguration(new OutboxMessageConsumerConfiguration());
 
         base.OnModelCreating(builder);
     }

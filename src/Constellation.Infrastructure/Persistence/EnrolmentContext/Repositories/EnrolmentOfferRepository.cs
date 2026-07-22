@@ -1,0 +1,41 @@
+﻿namespace Constellation.Infrastructure.Persistence.EnrolmentContext.Repositories;
+
+using Constellation.Core.Models.EnrolmentContext.EnrolmentPeriod.Identifiers;
+using Constellation.Core.Models.EnrolmentContext.Offer.Identifiers;
+using Core.Models.EnrolmentContext.Offer;
+using Core.Models.EnrolmentContext.Offer.Repositories;
+using Microsoft.EntityFrameworkCore;
+
+internal sealed class EnrolmentOfferRepository
+    : IEnrolmentOfferRepository
+{
+    private readonly EnrolmentDbContext _context;
+
+    public EnrolmentOfferRepository(
+        EnrolmentDbContext context)
+    {
+        _context = context;
+    }
+
+    public async Task<List<Offer>> GetAll(
+        CancellationToken cancellationToken = default) =>
+        await _context.Set<Offer>()
+            .ToListAsync(cancellationToken);
+
+    public async Task<List<Offer>> GetForPeriod(
+        EnrolmentPeriodId periodId,
+        CancellationToken cancellationToken = default) =>
+        await _context.Set<Offer>()
+            .Where(offer => offer.PeriodId == periodId)
+            .ToListAsync(cancellationToken);
+
+    public async Task<Offer?> GetById(
+        OfferId offerId,
+        CancellationToken cancellationToken = default) =>
+        await _context.Set<Offer>()
+            .FirstOrDefaultAsync(
+                offer => offer.Id == offerId,
+                cancellationToken);
+
+    public void Insert(Offer offer) => _context.Set<Offer>().Add(offer);
+}

@@ -2,8 +2,8 @@
 
 using Abstractions.Messaging;
 using Core.Abstractions.Clock;
-using Core.Models.EnrolmentContext.Application.Repositories;
 using Core.Models.EnrolmentContext.EnrolmentPeriod;
+using Core.Models.EnrolmentContext.EnrolmentPeriod.Repositories;
 using Core.Shared;
 using Models;
 using Serilog;
@@ -12,16 +12,16 @@ using System.Collections.Generic;
 internal sealed class GetCurrentEnrolmentPeriodsQueryHandler
 : IQueryHandler<GetCurrentEnrolmentPeriodsQuery, List<EnrolmentPeriodResponse>>
 {
-    private readonly IEnrolmentApplicationRepository _repository;
+    private readonly IEnrolmentPeriodRepository _periodRepository;
     private readonly IDateTimeProvider _dateTime;
     private readonly ILogger _logger;
 
     public GetCurrentEnrolmentPeriodsQueryHandler(
-        IEnrolmentApplicationRepository repository,
+        IEnrolmentPeriodRepository periodRepository,
         IDateTimeProvider dateTime,
         ILogger logger)
     {
-        _repository = repository;
+        _periodRepository = periodRepository;
         _dateTime = dateTime;
         _logger = logger
             .ForContext<GetCurrentEnrolmentPeriodsQuery>();
@@ -29,7 +29,7 @@ internal sealed class GetCurrentEnrolmentPeriodsQueryHandler
 
     public async Task<Result<List<EnrolmentPeriodResponse>>> Handle(GetCurrentEnrolmentPeriodsQuery request, CancellationToken cancellationToken)
     {
-        List<EnrolmentPeriod> periods = await _repository.GetCurrentEnrolmentPeriods(cancellationToken);
+        List<EnrolmentPeriod> periods = await _periodRepository.GetCurrentEnrolmentPeriods(cancellationToken);
 
         List<EnrolmentPeriodResponse> response = [];
 

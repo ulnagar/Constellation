@@ -3,8 +3,8 @@
 using Constellation.Application.Abstractions.Messaging;
 using Constellation.Core.Primitives;
 using Constellation.Infrastructure.Persistence.ConstellationContext;
-using Constellation.Infrastructure.Persistence.ConstellationContext.Outbox;
 using Microsoft.EntityFrameworkCore;
+using Persistence.Shared.Outbox;
 using Serilog;
 
 public sealed class IdempotentDomainEventHandler<TDomainEvent> : IDomainEventHandler<TDomainEvent>

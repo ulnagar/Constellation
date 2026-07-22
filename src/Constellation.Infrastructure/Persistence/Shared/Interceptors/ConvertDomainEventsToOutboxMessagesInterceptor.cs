@@ -1,10 +1,10 @@
-﻿namespace Constellation.Infrastructure.Persistence.ConstellationContext.Interceptors;
+﻿namespace Constellation.Infrastructure.Persistence.Shared.Interceptors;
 
-using Constellation.Core.Primitives;
-using Constellation.Infrastructure.Persistence.ConstellationContext.Outbox;
+using Core.Primitives;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Newtonsoft.Json;
+using Outbox;
 
 public sealed class ConvertDomainEventsToOutboxMessagesInterceptor
     : SaveChangesInterceptor
@@ -21,12 +21,12 @@ public sealed class ConvertDomainEventsToOutboxMessagesInterceptor
             return base.SavingChangesAsync(eventData, result, cancellationToken);
         }
 
-        var outboxMessages = dbContext.ChangeTracker
+        List<OutboxMessage> outboxMessages = dbContext.ChangeTracker
             .Entries<AggregateRoot>()
             .Select(x => x.Entity)
             .SelectMany(aggregateRoot =>
             {
-                var domainEvents = aggregateRoot.GetDomainEvents();
+                IReadOnlyCollection<IDomainEvent> domainEvents = aggregateRoot.GetDomainEvents();
 
                 aggregateRoot.ClearDomainEvents();
 

@@ -140,9 +140,7 @@ public sealed class Application
             return Result.Failure(EnrolmentApplicationErrors.CannotUpdateArchivedApplication);
 
         if (!IsValidProgramGradeCombination(program, grade))
-        {
             return Result.Failure<Application>(EnrolmentApplicationErrors.InvalidProgramGradeCombination(program, grade));
-        }
 
         StudentReferenceNumber = studentReferenceNumber;
         StudentName = studentName;

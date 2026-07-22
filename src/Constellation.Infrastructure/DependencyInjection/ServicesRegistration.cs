@@ -17,6 +17,7 @@ using Constellation.Infrastructure.Persistence.ConstellationContext.Repositories
 using Constellation.Infrastructure.Persistence.EnrolmentContext;
 using Constellation.Infrastructure.Persistence.EnrolmentContext.Interceptors;
 using Constellation.Infrastructure.Persistence.EnrolmentContext.Repositories;
+using Constellation.Infrastructure.Persistence.Shared.Interceptors;
 using Constellation.Infrastructure.Persistence.TrackItContext;
 using Constellation.Infrastructure.Services;
 using Constellation.Infrastructure.Templates.Services;
@@ -93,8 +94,12 @@ public static class ServicesRegistration
                 });
 
             options.EnableSensitiveDataLogging();
-            
-            options.AddInterceptors(sp.GetRequiredService<AuditInterceptor>());
+
+            options.AddInterceptors(new List<IInterceptor>
+            {
+                sp.GetRequiredService<AuditInterceptor>(),
+                sp.GetRequiredService<ConvertDomainEventsToOutboxMessagesInterceptor>()
+            });
         });
 
         services.Decorate(typeof(INotificationHandler<>), typeof(IdempotentDomainEventHandler<>));
