@@ -138,6 +138,11 @@ public class IndexModel : BasePageModel
         }
     }
 
+    public async Task<IActionResult> OnGetExport()
+    {
+
+    }
+
     public enum StatusFilter
     {
         All,

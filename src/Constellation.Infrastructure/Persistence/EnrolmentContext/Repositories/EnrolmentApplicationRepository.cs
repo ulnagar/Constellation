@@ -33,6 +33,14 @@ internal sealed class EnrolmentApplicationRepository
             .Set<Application>()
             .Where(entry => entry.PeriodId == id)
             .ToListAsync(cancellationToken);
-    
+
+    public async Task<List<Application>> GetListFromIds(
+        List<ApplicationId> ids,
+        CancellationToken cancellationToken = default) =>
+        await _context
+            .Set<Application>()
+            .Where(application => ids.Contains(application.Id))
+            .ToListAsync(cancellationToken);
+
     public void Insert(Application application) => _context.Set<Application>().Add(application);
 }

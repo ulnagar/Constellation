@@ -2990,29 +2990,6 @@ public class ExcelService : IExcelService
         return dateDisplay;
     }
 
-    private sealed record StudentRecord(
-        string StudentId,
-        string StudentName,
-        string Grade,
-        decimal StellarsEarned,
-        decimal GalaxiesEarned,
-        decimal UniversalsEarned);
-
-    private class AwardRow
-    {
-        public string StudentId { get; init; }
-        public string Surname { get; init; }
-        public string FirstName { get; init; }
-        public string RollClass { get; set; }
-        public string Year { get; init; }
-        public DateTime DateAwarded { get; set; }
-        public string Category { get; set; }
-        public string Award { get; set; }
-        public int Level { get; set; }
-        public int Value { get; init; }
-        public int Total { get; init; }
-    }
-
     private class IncidentRow
     {
         public int Age { get; set; }

@@ -90,7 +90,7 @@
     @foreach (var application in Model.Applications)
     {
         <tr>
-            <td>@application.ApplicationReference</td>
+            <td data-id="@application.Id">@application.ApplicationReference</td>
             <td data-order="@application.StudentName.SortOrder" data-search="@application.StudentName.DisplayName @application.StudentName.FirstName">@application.StudentName.DisplayName</td>
             <td>@application.StudentGender</td>
             <td data-search="@application.DestinationSchoolCode @application.DestinationSchool">@application.DestinationSchool</td>
@@ -100,7 +100,6 @@
                 @if (canEditTest.Succeeded)
                 {
                     <a asp-page="/Partner/Enrolments/Applications/Details" asp-route-Id="@application.Id" class="btn btn-sm btn-info btn-show-hover showLoader">More Info...</a>
-                    <a asp-page="/Partner/Enrolments/Applications/Upsert" asp-route-Id="@application.Id" class="btn btn-sm btn-info btn-show-hover showLoader">Edit</a>
                 }
             </td>
         </tr>
@@ -114,7 +113,7 @@
 {
     <script>
         $(document).ready(function (){
-            $('table').DataTable({ 
+            const table = $('table').DataTable({ 
                 "order": [
                     [1, 'asc']
                 ],
@@ -122,6 +121,39 @@
                     { "target": 6, "searchable": false, "sortable": false }
                 ]
             });
-        })
+
+            $('#export').on('click', async function () {
+                const applicationIds = getIdsFromTable();
+
+                if (applicationIds.length === 0) {
+                    alert('No recipients found.');
+                    return;
+                }
+
+                const response = await fetch('?handler=Export', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
+                    },
+                    body: JSON.stringify({ applicationIds })
+                });
+            });
+
+            function getIdsFromTable() {
+                const Ids = [];
+
+                // rows({ search: 'applied' }) respects the current DataTable filter/search state
+                table.rows({ search: 'applied' }).every(function () {
+                    const row = this.node();
+                    Ids.push({
+                        $('td:eq(0)', row).attr('id');
+                    });
+                });
+
+                return Ids;
+            }
+
+        });
     </script>
 }

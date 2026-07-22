@@ -7,6 +7,7 @@ public interface IEnrolmentApplicationRepository
 {
     Task<Application?> GetApplicationById(ApplicationId id, CancellationToken cancellationToken = default);
     Task<List<Application>> GetApplicationsByPeriod(EnrolmentPeriodId id, CancellationToken cancellationToken = default);
-    
+    Task<List<Application>> GetListFromIds(List<ApplicationId> ids, CancellationToken cancellationToken = default);
+
     void Insert(Application application);
 }

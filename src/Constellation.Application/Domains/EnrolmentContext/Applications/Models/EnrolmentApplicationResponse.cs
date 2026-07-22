@@ -13,6 +13,7 @@ using ApplicationId = Core.Models.EnrolmentContext.Application.Identifiers.Appli
 public sealed record EnrolmentApplicationResponse(
     ApplicationId Id,
     EnrolmentPeriodId PeriodId,
+    string PeriodName,
     StudentReferenceNumber? StudentReferenceNumber,
     Name StudentName,
     Gender StudentGender,

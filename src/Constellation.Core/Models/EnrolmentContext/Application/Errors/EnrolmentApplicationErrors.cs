@@ -9,6 +9,14 @@ using ApplicationId = Identifiers.ApplicationId;
 
 public static class EnrolmentApplicationErrors
 {
+    public static readonly Error InvalidId = new(
+        "Enrolment.Application.InvalidId",
+        "The provided Id is invalid");
+
+    public static readonly Error NoneFound = new(
+        "Enrolment.Application.NoneFound",
+        "No matching Enrolment Applications could be found");
+
     public static readonly Func<ApplicationId, Error> NotFound = id => new(
         "Enrolment.Application.NotFound",
         $"Could not find an Enrolment Application with the Id '{id}'");

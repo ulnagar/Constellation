@@ -4,6 +4,8 @@ using Abstractions.Messaging;
 using Core.Models.EnrolmentContext.Application;
 using Core.Models.EnrolmentContext.Application.Errors;
 using Core.Models.EnrolmentContext.Application.Repositories;
+using Core.Models.EnrolmentContext.EnrolmentPeriod;
+using Core.Models.EnrolmentContext.EnrolmentPeriod.Repositories;
 using Core.Shared;
 using Models;
 using Serilog;
@@ -12,13 +14,16 @@ internal sealed class GetEnrolmentApplicationByIdQueryHandler
 : IQueryHandler<GetEnrolmentApplicationByIdQuery, EnrolmentApplicationResponse>
 {
     private readonly IEnrolmentApplicationRepository _applicationRepository;
+    private readonly IEnrolmentPeriodRepository _periodRepository;
     private readonly ILogger _logger;
 
     public GetEnrolmentApplicationByIdQueryHandler(
         IEnrolmentApplicationRepository applicationRepository,
+        IEnrolmentPeriodRepository periodRepository,
         ILogger logger)
     {
         _applicationRepository = applicationRepository;
+        _periodRepository = periodRepository;
         _logger = logger
             .ForContext<GetEnrolmentApplicationByIdQuery>();
     }
@@ -37,9 +42,12 @@ internal sealed class GetEnrolmentApplicationByIdQueryHandler
             return Result.Failure<EnrolmentApplicationResponse>(EnrolmentApplicationErrors.NotFound(request.Id));
         }
 
+        EnrolmentPeriod? period = await _periodRepository.GetEnrolmentPeriodById(application.PeriodId, cancellationToken);
+
         return new EnrolmentApplicationResponse(
             application.Id,
             application.PeriodId,
+            period?.Label ?? string.Empty,
             application.StudentReferenceNumber,
             application.StudentName,
             application.StudentGender,

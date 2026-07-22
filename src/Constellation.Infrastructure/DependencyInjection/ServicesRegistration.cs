@@ -191,7 +191,8 @@ public static class ServicesRegistration
                 Constellation.Infrastructure.AssemblyReference.Assembly)
             .AddClasses(classes => classes.InNamespaceOf<AppSettingsService>(), false)
             .UsingRegistrationStrategy(RegistrationStrategy.Skip)
-            .AsMatchingInterface()
+            .AsImplementedInterfaces()
+            //.AsMatchingInterface()
             .WithScopedLifetime());
         
         // Explicitly register transient IDateTimeProvider

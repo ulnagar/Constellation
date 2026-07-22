@@ -1,4 +1,169 @@
-﻿@page
+﻿@page "{id}"
 @model Constellation.Presentation.Staff.Areas.Staff.Pages.Partner.Enrolments.Applications.DetailsModel
+
+@using Constellation.Core.Extensions
+@using Constellation.Core.Models.EnrolmentContext.Application.Enums
+
+@inject IAuthorizationService AuthorizationService
+
 @{
+    var canEditTest = await AuthorizationService.AuthorizeAsync(User, AuthPermission.Partners_Enrolments_Applications_Edit_Value);
 }
+
+<h2>Enrolment Application Details</h2>
+
+<div class="page-menu">
+    @if (canEditTest.Succeeded)
+    {
+        if (Model.Application.Status == ApplicationStatus.Pending)
+        {
+            <a asp-page="/Partner/Enrolments/Applications/Upsert" asp-area="Staff" asp-route-id="@Model.Id" class="btn btn-success">Edit</a>
+        }
+    }
+
+    <a href="javascript:history.go(-1)" class="btn btn-danger btn-pull-right">Go Back</a>
+</div>
+
+<hr />
+        
+<h4>Student Details</h4>
+
+<dl class="row">
+    <dt class="col-md-2">
+        <label asp-for="Application.StudentReferenceNumber">SRN</label>
+    </dt>
+    <dd class="col-md-10">
+        <span>@Model.Application.StudentReferenceNumber</span>
+    </dd>
+    
+    <dt class="col-md-2">
+        <label asp-for="Application.StudentName">Name</label>
+    </dt>
+    <dd class="col-md-10">
+        <span>@Model.Application.StudentName</span>
+    </dd>
+    
+    <dt class="col-md-2">
+        <label asp-for="Application.StudentGender">Gender</label>
+    </dt>
+    <dd class="col-md-10">
+        <span>@Model.Application.StudentGender</span>
+    </dd>
+    
+    <dt class="col-md-2">
+        <label asp-for="Application.DateOfBirth">Date Of Birth</label>
+    </dt>
+    <dd class="col-md-10">
+        <span>@Model.Application.DateOfBirth?.ToString("d")</span>
+    </dd>
+    
+    <dt class="col-md-2">
+        <label asp-for="Application.StudentEmailAddress">Email Address</label>
+    </dt>
+    <dd class="col-md-10">
+        <span>@Model.Application.StudentEmailAddress</span>
+    </dd>
+</dl>
+
+<h4>Parent Details</h4>
+
+<dl class="row">
+    <dt class="col-md-2">
+        <label asp-for="Application.ParentName">Name</label>
+    </dt>
+    <dd class="col-md-10">
+        <span>@Model.Application.ParentName</span>
+    </dd>
+
+    <dt class="col-md-2">
+        <label asp-for="Application.ParentEmailAddress">Email Address</label>
+    </dt>
+    <dd class="col-md-10">
+        <span>@Model.Application.ParentEmailAddress</span>
+    </dd>
+
+    <dt class="col-md-2">
+        <label asp-for="Application.ParentPhoneNumber">Phone Number</label>
+    </dt>
+    <dd class="col-md-10">
+        <span>@Model.Application.ParentPhoneNumber</span>
+    </dd>
+</dl>
+
+<h4>Mailing Address</h4>
+
+<dl class="row">
+    <dt class="col-md-2">
+        <label asp-for="Application.MailingAddress.Street">Street Address</label>
+    </dt>
+    <dd class="col-md-10">
+        <span>@Model.Application.MailingAddress?.Street</span>
+    </dd>
+
+    <dt class="col-md-2">
+        <label asp-for="Application.MailingAddress.Town">Town</label>
+    </dt>
+    <dd class="col-md-10">
+        <span>@Model.Application.MailingAddress?.Town</span>
+    </dd>
+
+    <dt class="col-md-2">
+        <label asp-for="Application.MailingAddress.State">State</label>
+    </dt>
+    <dd class="col-md-10">
+        <span>@Model.Application.MailingAddress?.State</span>
+    </dd>
+
+    <dt class="col-md-2">
+        <label asp-for="Application.MailingAddress.Postcode">Post Code</label>
+    </dt>
+    <dd class="col-md-10">
+        <span>@Model.Application.MailingAddress?.Postcode</span>
+    </dd>
+</dl>
+
+<h4>Application Details</h4>
+
+<dl class="row">
+    <dt class="col-md-2">
+        <label asp-for="Application.PeriodName">Enrolment Period</label>
+    </dt>
+    <dd class="col-md-10">
+        <span>@Model.Application.PeriodName</span>
+    </dd>
+
+    <dt class="col-md-2">
+        <label asp-for="Application.ApplicationReference">Reference</label>
+    </dt>
+    <dd class="col-md-10">
+        <span>@Model.Application.ApplicationReference</span>
+    </dd>
+
+    <dt class="col-md-2">
+        <label asp-for="Application.CurrentSchool">Current School</label>
+    </dt>
+    <dd class="col-md-10">
+        <span>@Model.Application.CurrentSchoolCode - @Model.Application.CurrentSchool</span>
+    </dd>
+
+    <dt class="col-md-2">
+        <label asp-for="Application.DestinationSchool">Destination School</label>
+    </dt>
+    <dd class="col-md-10">
+        <span>@Model.Application.DestinationSchoolCode - @Model.Application.DestinationSchool</span>
+    </dd>
+
+    <dt class="col-md-2">
+        <label asp-for="Application.Program">Program</label>
+    </dt>
+    <dd class="col-md-10">
+        <span>@Model.Application.Program</span>
+    </dd>
+
+    <dt class="col-md-2">
+        <label asp-for="Application.Grade">Grade</label>
+    </dt>
+    <dd class="col-md-10">
+        <span>@Model.Application.Grade.AsName()</span>
+    </dd>
+</dl>
