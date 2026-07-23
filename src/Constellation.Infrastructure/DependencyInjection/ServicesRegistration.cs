@@ -1,6 +1,7 @@
 ﻿#pragma warning disable CA1062
 namespace Microsoft.Extensions.DependencyInjection;
 
+using Caching.Memory;
 using Constellation.Application.Clock;
 using Constellation.Application.Domains.Import.Interfaces;
 using Constellation.Application.Interfaces.Jobs;
@@ -199,12 +200,16 @@ public static class ServicesRegistration
 
         services.AddTransient<IDateTimeProvider, DateTimeProvider>();
 
+        // Register the IMemoryCache for the Authorization functions
+        services.AddKeyedSingleton<IMemoryCache>("AuthPermissions", (sp, key) =>
+            new MemoryCache(new MemoryCacheOptions())); // no SizeLimit — small, self-limiting by role count
+
         return services;
     }
 
     public static IServiceCollection AddAuthorizationPolicies(this IServiceCollection services)
     {
-        services.AddSingleton<IAuthorizationHandler, PermissionAuthorizationHandler>();
+        services.AddScoped<IAuthorizationHandler, PermissionAuthorizationHandler>();
         services.AddSingleton<IAuthorizationPolicyProvider, PermissionAuthorizationPolicyProvider>();
 
         services.AddScoped<IAuthorizationHandler, OwnsTrainingCompletionRecordByRoute>();

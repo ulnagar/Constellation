@@ -53,6 +53,6 @@
     <PackageVersion Include="System.DirectoryServices" Version="10.0.6" />
     <PackageVersion Include="System.DirectoryServices.AccountManagement" Version="10.0.6" />
     <PackageVersion Include="System.Management.Automation" Version="7.6.0" />
-    <PackageVersion Include="System.Security.Cryptography.Xml" Version="10.0.6" />
+    <PackageVersion Include="System.Security.Cryptography.Xml" Version="10.0.10" />
   </ItemGroup>
 </Project>

@@ -11,6 +11,7 @@ public interface IAuthService
     bool IsImpersonating(ClaimsPrincipal principal);
 
     Task<bool> UserHasPermission(AppUser user, AuthPermission permission, CancellationToken cancellationToken = default);
+    void InvalidateRoleClaimsCache(string roleName);
 }
 
 public record ImpersonationResult(bool Succeeded, string? ErrorMessage = null);
