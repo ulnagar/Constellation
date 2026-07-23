@@ -8,6 +8,7 @@ using Constellation.Presentation.Shared.Helpers.Attributes;
 using Core.Abstractions.Services;
 using Core.Shared;
 using MediatR;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Presentation.Shared.Extensions;
@@ -62,9 +63,9 @@ public class IndexModel : BasePageModel
 
         if (!(await _authService.AuthorizeAsync(User, AuthPermission.Equipment_Stocktake_Edit_Value)).Succeeded)
         {
-            return currentEvent is not null 
-                ? RedirectToPage("/Equipment/Stocktake/Dashboard", new { area = "Staff", Id = currentEvent.Id }) 
-                : RedirectToPage("/AccessDenied", new { area = "Admin", returnUrl = "/Equipment/Stocktake" });
+            return currentEvent is not null
+                ? RedirectToPage("/Equipment/Stocktake/Dashboard", new { area = "Staff", Id = currentEvent.Id })
+                : Forbid();
         }
         
         Events = events.Value;
