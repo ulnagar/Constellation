@@ -57,7 +57,7 @@ public sealed class EpplusExcelWriter : IExcelWriter
         IExcelWorksheet sheet,
         int startRow,
         IEnumerable<T> items,
-        params (string Header, Func<T, object?> ValueSelector)[] columns)
+        params ExcelColumn<T>[] columns)
     {
         ExcelWorksheet epplusSheet = Unwrap(sheet).Worksheet;
 
@@ -72,7 +72,29 @@ public sealed class EpplusExcelWriter : IExcelWriter
         {
             for (int col = 0; col < columns.Length; col++)
             {
-                epplusSheet.Cells[row, col + 1].Value = columns[col].ValueSelector(item);
+                var column = columns[col];
+                var cell = epplusSheet.Cells[row, col + 1];
+                object? value = column.ValueSelector(item);
+
+                switch (column.Format)
+                {
+                    case ExcelColumnFormat.Text:
+                        cell.Style.Numberformat.Format = "@";
+                        cell.Value = value?.ToString();
+                        cell.Style.QuotePrefix = true;
+                        cell.Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+                        break;
+
+                    case ExcelColumnFormat.Date:
+                        cell.Style.Numberformat.Format = "dd/MM/yyyy";
+                        cell.Value = value;
+                        break;
+
+                    case ExcelColumnFormat.Default:
+                    default:
+                        cell.Value = value;
+                        break;
+                }
             }
             row++;
         }
@@ -142,10 +164,14 @@ public sealed class EpplusExcelWriter : IExcelWriter
         validation.Error = "Please select a value from the list";
     }
 
-    public void AddAutoFilter(IExcelWorksheet sheet, string range)
+    public void AddAutoFilter(IExcelWorksheet sheet)
     {
         ExcelWorksheet epplusSheet = Unwrap(sheet).Worksheet;
-        epplusSheet.Cells[range].AutoFilter = true;
+
+        if (epplusSheet.Dimension is null)
+            return;
+
+        epplusSheet.Cells[epplusSheet.Dimension.Address].AutoFilter = true;
     }
 
     public byte[] GetAsByteArray(IExcelWorkbook workbook)

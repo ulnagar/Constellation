@@ -43,27 +43,31 @@ internal sealed class ExportApplicationsListQueryHandler
         IExcelWorksheet sheet = _writer.AddWorksheet(workbook, "Sheet 1");
 
         _writer.WriteRange(sheet, 2, applications,
-            ("Application Reference", a => a.ApplicationReference),
-            ("Student Family Name", a => a.StudentName.LastName),
-            ("Student Given Names", a => a.StudentName.FirstName),
-            ("Student Preferred Name", a => a.StudentName.PreferredName),
-            ("Full Name", a => a.StudentName.DisplayName),
-            ("DoB", a => a.DateOfBirth?.ToString("d", CultureInfo.InvariantCulture) ?? string.Empty),
-            ("Gender", a => a.StudentGender.Name),
-            ("Cohort", a => a.Grade.AsNumber()),
-            ("Current School Code", a => a.CurrentSchoolCode),
-            ("Current School", a => a.CurrentSchool),
-            ("Destination School Code", a => a.DestinationSchoolCode),
-            ("Destination School", a => a.DestinationSchool),
-            ("Parent First Name", a => a.ParentName?.FirstName),
-            ("Parent Last Name", a => a.ParentName?.LastName),
-            ("Street Address", a => a.MailingAddress?.Street),
-            ("Town", a => a.MailingAddress?.Town),
-            ("State", a => a.MailingAddress?.State),
-            ("PostCode", a => a.MailingAddress?.Postcode),
-            ("Phone Number", a => a.ParentPhoneNumber),
-            ("Email", a => a.ParentEmailAddress),
-            ("Status", a => a.Status.ToString()));
+            new("Application Reference", a => a.ApplicationReference),
+            new("Student Family Name", a => a.StudentName.LastName),
+            new("Student Given Names", a => a.StudentName.FirstName),
+            new("Student Preferred Name", a => a.StudentName.PreferredName),
+            new("Full Name", a => a.StudentName.DisplayName),
+            new("DoB", a => a.DateOfBirth, ExcelColumnFormat.Date),
+            new("Gender", a => a.StudentGender.Name),
+            new("Cohort", a => a.Grade.AsNumber(), ExcelColumnFormat.Text),
+            new("Current School Code", a => a.CurrentSchoolCode, ExcelColumnFormat.Text),
+            new("Current School", a => a.CurrentSchool),
+            new("Destination School Code", a => a.DestinationSchoolCode, ExcelColumnFormat.Text),
+            new("Destination School", a => a.DestinationSchool),
+            new("Parent First Name", a => a.ParentName?.FirstName),
+            new("Parent Last Name", a => a.ParentName?.LastName),
+            new("Street Address", a => a.MailingAddress?.Street),
+            new("Town", a => a.MailingAddress?.Town),
+            new("State", a => a.MailingAddress?.State),
+            new("PostCode", a => a.MailingAddress?.Postcode, ExcelColumnFormat.Text),
+            new("Phone Number", a => a.ParentPhoneNumber),
+            new("Email", a => a.ParentEmailAddress),
+            new("Status", a => a.Status.ToString()));
+
+        _writer.ApplyHeaderStyle(sheet, 1);
+        _writer.AddAutoFilter(sheet);
+        _writer.AutoFitColumns(sheet);
 
         byte[] file = _writer.GetAsByteArray(workbook);
 

@@ -46,7 +46,7 @@
     {
         <a asp-page="/Partner/Enrolments/Applications/Upsert" asp-area="Staff" class="btn btn-success">Create</a>
         <button data-bs-toggle="modal" data-bs-target="#import-modal" class="btn btn-success">Import</button>
-        <a class="btn btn-success">Export</a>
+        <a class="btn btn-success" id="export-button">Export</a>
     }
 </div>
 
@@ -122,7 +122,19 @@
                 ]
             });
 
-            $('#export').on('click', async function () {
+            function getIdsFromTable() {
+                const Ids = [];
+
+                // rows({ search: 'applied' }) respects the current DataTable filter/search state
+                table.rows({ search: 'applied' }).every(function() {
+                    const row = this.node();
+                    Ids.push($('td:eq(0)', row).data('id'));
+                });
+
+                return Ids;
+            }
+
+            $('#export-button').on('click', async function() {
                 const applicationIds = getIdsFromTable();
 
                 if (applicationIds.length === 0) {
@@ -130,29 +142,47 @@
                     return;
                 }
 
+                const formData = new URLSearchParams();
+                applicationIds.forEach((id, index) => {
+                    formData.append(`applicationIds[${index}]`, id);
+                });
+
                 const response = await fetch('?handler=Export', {
                     method: 'POST',
                     headers: {
-                        'Content-Type': 'application/json',
+                        'Content-Type': 'application/x-www-form-urlencoded',
                         'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
                     },
-                    body: JSON.stringify({ applicationIds })
+                    body: formData.toString()
                 });
+
+                if (!response.ok) {
+                    alert('Export failed.');
+                    return;
+                }
+
+                // Try to pull the filename the server suggested
+                const disposition = response.headers.get('Content-Disposition');
+                let filename = 'export.xlsx'; // fallback
+                if (disposition) {
+                    const match = disposition.match(/filename\*?=(?:UTF-8'')?"?([^";]+)"?/i);
+                    if (match && match[1]) {
+                        filename = decodeURIComponent(match[1]);
+                    }
+                }
+
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = filename;
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+
+                window.URL.revokeObjectURL(url);
             });
-
-            function getIdsFromTable() {
-                const Ids = [];
-
-                // rows({ search: 'applied' }) respects the current DataTable filter/search state
-                table.rows({ search: 'applied' }).every(function () {
-                    const row = this.node();
-                    Ids.push({
-                        $('td:eq(0)', row).attr('id');
-                    });
-                });
-
-                return Ids;
-            }
 
         });
     </script>

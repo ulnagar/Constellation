@@ -12,14 +12,22 @@ public class StronglyTypedIdModelBinder<TSelf, TValue> : IModelBinder
         ValueProviderResult valueProviderResult = bindingContext.ValueProvider
             .GetValue(bindingContext.ModelName);
 
-        string? rawValue = valueProviderResult == ValueProviderResult.None
-            ? null
-            : valueProviderResult.FirstValue;
+        if (valueProviderResult == ValueProviderResult.None)
+        {
+            if (bindingContext.IsTopLevelObject)
+            {
+                bindingContext.Result = ModelBindingResult.Success(TSelf.Empty);
+            }
+
+            return Task.CompletedTask;
+        }
+
+        string? rawValue = valueProviderResult.FirstValue;
+        bindingContext.ModelState.SetModelValue(bindingContext.ModelName, valueProviderResult);
 
         if (string.IsNullOrEmpty(rawValue))
         {
             bindingContext.Result = ModelBindingResult.Success(TSelf.Empty);
-
             return Task.CompletedTask;
         }
 

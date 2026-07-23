@@ -1,15 +1,18 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Partner.Enrolments.Applications;
 
 using Application.Domains.EnrolmentContext.Applications.Models;
+using Application.Domains.EnrolmentContext.Applications.Queries.ExportApplicationsList;
 using Application.Domains.EnrolmentContext.Applications.Queries.GetEnrolmentApplicationsByPeriod;
 using Application.Domains.EnrolmentContext.EnrolmentPeriods.Models;
 using Application.Domains.EnrolmentContext.EnrolmentPeriods.Queries.GetAllEnrolmentPeriods;
+using Application.Helpers;
 using Application.Interfaces.Services;
 using Application.Models.Auth;
 using Constellation.Application.Common.PresentationModels;
 using Constellation.Core.Abstractions.Services;
 using Constellation.Core.Shared;
 using Core.Models.EnrolmentContext.Application.Enums;
+using Core.Models.EnrolmentContext.Application.Identifiers;
 using Core.Models.EnrolmentContext.EnrolmentPeriod.Identifiers;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
@@ -138,9 +141,14 @@ public class IndexModel : BasePageModel
         }
     }
 
-    public async Task<IActionResult> OnGetExport()
+    public async Task<IActionResult> OnPostExport(List<ApplicationId> applicationIds)
     {
+        Result<byte[]> file = await _mediator.Send(new ExportApplicationsListQuery(applicationIds));
 
+        if (file.IsFailure)
+            return BadRequest(file.Error.Message);
+        
+        return File(file.Value, FileContentTypes.ExcelModernFile, "Enrolment Application Export.xlsx");
     }
 
     public enum StatusFilter

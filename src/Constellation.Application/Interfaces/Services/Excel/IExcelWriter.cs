@@ -14,7 +14,7 @@ public interface IExcelWriter
     void WriteRow(IExcelWorksheet sheet, int row, IEnumerable<object?> values);
     void WriteCell(IExcelWorksheet sheet, int row, int column, object? value);
     void WriteRange<T>(IExcelWorksheet sheet, int startRow, IEnumerable<T> items,
-        params (string Header, Func<T, object?> ValueSelector)[] columns);
+        params ExcelColumn<T>[] columns);
 
     // Formatting (EPPlus-specific strengths worth exposing)
     void ApplyHeaderStyle(IExcelWorksheet sheet, int row);
@@ -23,7 +23,7 @@ public interface IExcelWriter
     void ApplyNumberFormat(IExcelWorksheet sheet, int column, string format); // e.g. dd/MM/yyyy
     void FreezePanes(IExcelWorksheet sheet, int row, int column);
     void AddDataValidationDropdown(IExcelWorksheet sheet, string cellRange, IEnumerable<string> options);
-    void AddAutoFilter(IExcelWorksheet sheet, string range);
+    void AddAutoFilter(IExcelWorksheet sheet);
 
     // Output
     byte[] GetAsByteArray(IExcelWorkbook workbook);
