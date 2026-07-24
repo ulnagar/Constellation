@@ -377,7 +377,7 @@
                                                         {
                                                             @:<span class="glyphicon glyph-color-orange glyphicon-time" /> Pending
                                                         }
-                                                        else if (student.Status == LessonStatus.Cancelled)
+                                                        else if (student.Status is LessonStatus.Cancelled or LessonStatus.Concern)
                                                         {
                                                             @:<span class="glyphicon glyph-color-red glyphicon-remove" /> Cancelled
                                                         }
