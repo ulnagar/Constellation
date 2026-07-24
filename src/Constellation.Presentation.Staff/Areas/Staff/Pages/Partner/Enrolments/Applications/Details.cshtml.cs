@@ -1,12 +1,12 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Partner.Enrolments.Applications;
 
+using Application.Domains.EnrolmentContext.Applications.Commands.UpdateEnrolmentApplicationStatus;
 using Application.Domains.EnrolmentContext.Applications.Models;
 using Application.Domains.EnrolmentContext.Applications.Queries.GetEnrolmentApplicationById;
 using Application.Models.Auth;
 using Constellation.Application.Common.PresentationModels;
 using Constellation.Core.Abstractions.Services;
-using Constellation.Core.Models.EnrolmentContext.EnrolmentPeriod.Errors;
-using Constellation.Core.Models.EnrolmentContext.EnrolmentPeriod.Identifiers;
+using Core.Models.EnrolmentContext.Application.Enums;
 using Core.Models.EnrolmentContext.Application.Errors;
 using Core.Models.EnrolmentContext.Application.Identifiers;
 using Core.Shared;
@@ -75,5 +75,20 @@ public class DetailsModel : BasePageModel
         }
 
         Application = application.Value;
+    }
+
+    public async Task<IActionResult> OnPostUpdateStatus(ApplicationStatus status)
+    {
+        Result result = await _mediator.Send(new UpdateEnrolmentApplicationStatusCommand(Id, status));
+
+        if (result.IsFailure)
+        {
+            ModalContent = ErrorDisplay.Create(result.Error);
+
+            await PreparePage();
+            return Page();
+        }
+        
+        return RedirectToPage("/Partner/Enrolments/Applications/Index", new { area = "Staff" });
     }
 }

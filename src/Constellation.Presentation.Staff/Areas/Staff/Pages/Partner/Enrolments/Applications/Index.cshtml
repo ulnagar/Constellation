@@ -2,6 +2,7 @@
 @model Constellation.Presentation.Staff.Areas.Staff.Pages.Partner.Enrolments.Applications.IndexModel
 
 @using Constellation.Core.Extensions
+@using Constellation.Core.Models.EnrolmentContext.Application.Enums
 @using Constellation.Presentation.Staff.Areas.Staff.Pages.Partner.Enrolments.Applications;
 
 @inject IAuthorizationService AuthorizationService
@@ -46,7 +47,8 @@
     {
         <a asp-page="/Partner/Enrolments/Applications/Upsert" asp-area="Staff" class="btn btn-success">Create</a>
         <button data-bs-toggle="modal" data-bs-target="#import-modal" class="btn btn-success">Import</button>
-        <a class="btn btn-success" id="export-button">Export</a>
+        <button class="btn btn-success" id="export-button">Export</button>
+        <button class="btn btn-warning" id="bulk-update-status-button">Update Status</button>
     }
 </div>
 
@@ -109,6 +111,39 @@
 
 <vc:upload-file-for-import-staging />
 
+<form method="post" asp-page-handler="BulkUpdateStatus">
+    <div class="modal fade" tabindex="-1" id="bulk-update-status-modal">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Update Status</h5>
+                </div>
+                <div class="modal-body">
+                    <div class="row mb-3">
+                        <div class="form-group col-12">
+                            <span class="control-label">Updating the status here will change <span class="affected-rows fw-bold"></span> rows.</span>
+                        </div>
+                        <div class="hidden row-ids"></div>
+                    </div>
+                    
+                    <div class="row mb-3">
+                        <label class="col-md-3">New Status</label>
+                        <div class="col-md-9">
+                            <select name="newstatus" asp-items="@Html.GetEnumSelectList<ApplicationStatus>()" class="combo">
+                                <option> -- Select Status -- </option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-success show-loader">Update</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+
 @section scripts
 {
     <script>
@@ -120,6 +155,33 @@
                 "columnDefs": [
                     { "target": 6, "searchable": false, "sortable": false }
                 ]
+            });
+
+            function getCountOfVisibleTableRows() {
+                return table.rows({ search: 'applied' }).count();
+            }
+
+            $('#bulk-update-status-button').on('click', function() {
+                // Update the span text
+                const rowCount = getCountOfVisibleTableRows();
+                $('.affected-rows').text(rowCount);
+
+                $('.row-ids').empty();
+
+                const applicationIds = getIdsFromTable();
+                applicationIds.forEach((id) => {
+                    $('.row-ids').append(
+                        $('<input>', {
+                            type: 'hidden',
+                            name: 'applicationIds',
+                            value: id
+                        })
+                    );
+                });
+
+                const modalEl = document.getElementById('bulk-update-status-modal');
+                const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+                modal.show();
             });
 
             function getIdsFromTable() {

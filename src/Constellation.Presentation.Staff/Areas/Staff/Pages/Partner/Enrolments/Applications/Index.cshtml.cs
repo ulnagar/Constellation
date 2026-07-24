@@ -9,10 +9,10 @@ using Application.Helpers;
 using Application.Interfaces.Services;
 using Application.Models.Auth;
 using Constellation.Application.Common.PresentationModels;
+using Constellation.Application.Domains.EnrolmentContext.Applications.Commands.UpdateEnrolmentApplicationStatus;
 using Constellation.Core.Abstractions.Services;
 using Constellation.Core.Shared;
 using Core.Models.EnrolmentContext.Application.Enums;
-using Core.Models.EnrolmentContext.Application.Identifiers;
 using Core.Models.EnrolmentContext.EnrolmentPeriod.Identifiers;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
@@ -21,6 +21,7 @@ using Presentation.Shared.Extensions;
 using Presentation.Shared.Helpers.Attributes;
 using Serilog;
 using Shared.Components.UploadFileForImportStaging;
+using ApplicationId = Core.Models.EnrolmentContext.Application.Identifiers.ApplicationId;
 
 [HasPermission(AuthPermission.Partners_Enrolments_Applications_View_Value)]
 public class IndexModel : BasePageModel
@@ -139,6 +140,38 @@ public class IndexModel : BasePageModel
 
             return await PreparePage();
         }
+    }
+
+    public async Task<IActionResult> OnPostBulkUpdateStatus(
+        ApplicationStatus newStatus,
+        List<ApplicationId> applicationIds)
+    {
+        int successful = 0;
+        int failed = 0;
+
+        foreach (ApplicationId applicationId in applicationIds)
+        {
+            Result result = await _mediator.Send(new UpdateEnrolmentApplicationStatusCommand(applicationId, newStatus));
+
+            if (result.IsFailure)
+                failed++;
+            else
+                successful++;
+        }
+
+        if (failed > 0)
+        {
+            ModalContent = FeedbackDisplay.Create(
+                "Bulk Update",
+                $"{failed} Applications failed to update",
+                "Ok",
+                "btn-secondary",
+                _linkGenerator.GetPathByPage("/Partner/Enrolments/Applications/Index", values: new { area = "Staff", PeriodId, Status }));
+
+            return await PreparePage();
+        }
+
+        return RedirectToPage();
     }
 
     public async Task<IActionResult> OnPostExport(List<ApplicationId> applicationIds)
