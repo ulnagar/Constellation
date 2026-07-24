@@ -108,7 +108,7 @@ internal sealed class FamilyRepository : IFamilyRepository
         await _context
             .Set<Family>()
             .AnyAsync(family => 
-                family.FamilyEmail == email ||
+                (family.FamilyEmail == email && !family.IsDeleted) ||
                 family.Parents.Any(parent => parent.EmailAddress == email)
             , cancellationToken);
 

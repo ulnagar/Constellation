@@ -45,7 +45,7 @@ internal sealed class GetLessonRollsForSchoolQueryHandler
             if (roll is null)
                 continue;
 
-            if (roll.Status == Core.Enums.LessonStatus.Cancelled)
+            if (roll.Status is Core.Enums.LessonStatus.Cancelled or Core.Enums.LessonStatus.Concern)
                 continue;
 
             OfferingId offeringId = lesson.Offerings[0].OfferingId;
