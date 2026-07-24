@@ -6,6 +6,7 @@ using Constellation.Application.Interfaces.Services;
 using Constellation.Core.Models.Auth;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Caching.Memory;
 using System.Security.Claims;
 
 internal class AuthService : IAuthService
@@ -13,17 +14,22 @@ internal class AuthService : IAuthService
     private readonly UserManager<AppUser> _userManager;
     private readonly RoleManager<AppRole> _roleManager;
     private readonly SignInManager<AppUser> _signInManager;
+    private readonly IMemoryCache _cache;
     private readonly ILogger _logger;
+
+    private static readonly TimeSpan RoleClaimsCacheDuration = TimeSpan.FromMinutes(15);
 
     public AuthService(
         UserManager<AppUser> userManager,
         RoleManager<AppRole> roleManager,
         SignInManager<AppUser> signInManager,
+        IMemoryCache cache,
         ILogger logger)
     {
         _userManager = userManager;
         _roleManager = roleManager;
         _signInManager = signInManager;
+        _cache = cache;
         _logger = logger
             .ForContext<IAuthService>();
     }
@@ -106,14 +112,34 @@ internal class AuthService : IAuthService
 
         foreach (string roleName in roleNames)
         {
-            AppRole? role = await _roleManager.FindByNameAsync(roleName);
-            if (role is null) continue;
-
-            IList<Claim> roleClaims = await _roleManager.GetClaimsAsync(role);
+            IReadOnlyList<Claim> roleClaims = await GetCachedRoleClaims(roleName);
+            
             if (roleClaims.Any(c => c.Type == AuthClaimType.Permission && c.Value == permission.Value))
                 return true;
         }
 
         return false;
     }
+
+    private async Task<IReadOnlyList<Claim>> GetCachedRoleClaims(string roleName)
+    {
+        string cacheKey = $"role-claims:{roleName}";
+
+        if (_cache.TryGetValue(cacheKey, out IReadOnlyList<Claim>? cached) && cached is not null)
+            return cached;
+
+        AppRole? role = await _roleManager.FindByNameAsync(roleName);
+
+        IReadOnlyList<Claim> claims = role is null
+            ? []
+            : (await _roleManager.GetClaimsAsync(role)).ToList();
+
+        _cache.Set(cacheKey, claims, RoleClaimsCacheDuration);
+
+        return claims;
+    }
+
+    public void InvalidateRoleClaimsCache(string roleName) =>
+        _cache.Remove($"role-claims:{roleName}");
+
 }

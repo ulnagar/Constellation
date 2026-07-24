@@ -7,6 +7,7 @@ using Constellation.Application.Models.Identity.Errors;
 using Constellation.Application.Models.Identity.Repositories;
 using Constellation.Core.Errors;
 using Core.Shared;
+using Interfaces.Services;
 using Microsoft.AspNetCore.Identity;
 using Serilog;
 using System.Threading.Tasks;
@@ -15,13 +16,16 @@ internal sealed class RemovePermissionFromRoleCommandHandler
 : ICommandHandler<RemovePermissionFromRoleCommand>
 {
     private readonly IIdentityRepository _identityRepository;
+    private readonly IAuthService _authService;
     private readonly ILogger _logger;
 
     public RemovePermissionFromRoleCommandHandler(
         IIdentityRepository identityRepository,
+        IAuthService authService,
         ILogger logger)
     {
         _identityRepository = identityRepository;
+        _authService = authService;
         _logger = logger
             .ForContext<RemovePermissionFromRoleCommand>();
     }
@@ -63,6 +67,8 @@ internal sealed class RemovePermissionFromRoleCommandHandler
 
             return Result.Failure(ApplicationErrors.UnknownError);
         }
+
+        _authService.InvalidateRoleClaimsCache(role.Name);
 
         return Result.Success();
     }

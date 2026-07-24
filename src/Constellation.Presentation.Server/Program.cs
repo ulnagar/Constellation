@@ -67,21 +67,19 @@ builder.Services.ConfigureApplicationCookie(options =>
     options.SlidingExpiration = true;
     options.LoginPath = new PathString("/Auth/Login");
     options.LogoutPath = new PathString("/Auth/Logout");
+
+    options.Events.OnRedirectToAccessDenied = context =>
+    {
+        context.Response.StatusCode = StatusCodes.Status403Forbidden;
+        return Task.CompletedTask;
+    };
 });
 
 builder.Services
     .AddAuthentication(options =>
     {
-        options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-        options.DefaultChallengeScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-    })
-    .AddCookie(options =>
-    {
-        options.Cookie.Name = "Constellation.Identity";
-        options.ExpireTimeSpan = TimeSpan.FromMinutes(90);
-        options.SlidingExpiration = true;
-        options.LoginPath = new PathString("/Auth/Login");
-        options.LogoutPath = new PathString("/Auth/Logout");
+        options.DefaultScheme = IdentityConstants.ApplicationScheme;
+        options.DefaultChallengeScheme = IdentityConstants.ApplicationScheme;
     })
     .AddOpenIdConnect(options =>
     {

@@ -3,6 +3,7 @@
 using Abstractions.Messaging;
 using Core.Errors;
 using Core.Shared;
+using Interfaces.Services;
 using Microsoft.AspNetCore.Identity;
 using Models.Auth;
 using Models.Identity;
@@ -15,13 +16,16 @@ internal sealed class AddPermissionToRoleCommandHandler
 : ICommandHandler<AddPermissionToRoleCommand>
 {
     private readonly IIdentityRepository _identityRepository;
+    private readonly IAuthService _authService;
     private readonly ILogger _logger;
 
     public AddPermissionToRoleCommandHandler(
         IIdentityRepository identityRepository,
+        IAuthService authService,
         ILogger logger)
     {
         _identityRepository = identityRepository;
+        _authService = authService;
         _logger = logger
             .ForContext<AddPermissionToRoleCommand>();
     }
@@ -63,6 +67,8 @@ internal sealed class AddPermissionToRoleCommandHandler
 
             return Result.Failure(ApplicationErrors.UnknownError);
         }
+
+        _authService.InvalidateRoleClaimsCache(role.Name);
 
         return Result.Success();
     }

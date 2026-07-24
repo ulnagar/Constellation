@@ -1,6 +1,5 @@
 ﻿namespace Constellation.Infrastructure.Identity.ClaimsPrincipalFactories;
 
-using Application.Models.Identity.Enums;
 using Constellation.Application.Models.Auth;
 using Constellation.Application.Models.Identity;
 using Core.Models.Auth;
@@ -31,6 +30,10 @@ public class CustomUserPropertiesClaimsFactory : UserClaimsPrincipalFactory<AppU
     {
         ClaimsIdentity identity = await base.GenerateClaimsAsync(user);
 
+        List<Claim> permissionClaims = identity.FindAll(AuthClaimType.Permission).ToList();
+        foreach (Claim claim in permissionClaims)
+            identity.RemoveClaim(claim);
+
         identity.AddClaims([
             new Claim(ClaimTypes.GivenName, user.Name.FirstName),
             new Claim(ClaimTypes.Surname, user.Name.LastName)
@@ -50,25 +53,6 @@ public class CustomUserPropertiesClaimsFactory : UserClaimsPrincipalFactory<AppU
 
             if (link is not null)
                 identity.AddClaim(new Claim(AuthClaimType.StudentId, link.LinkId.ToString()));
-        }
-        
-        // Add Role Claims to user
-        IEnumerable<Claim> roleClaims = identity.FindAll(ClaimTypes.Role);
-
-        foreach (Claim roleClaim in roleClaims)
-        {
-            AppRole? role = await _roleManager.FindByNameAsync(roleClaim.Value);
-            if (role == null) continue;
-
-            IList<Claim> claims = await _roleManager.GetClaimsAsync(role);
-
-            foreach (Claim claim in claims)
-            {
-                if (!identity.HasClaim(claim.Type, claim.Value))
-                {
-                    identity.AddClaim(claim);
-                }
-            }
         }
         
         return identity;
