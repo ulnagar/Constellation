@@ -5,5 +5,6 @@ public enum ApplicationStatus
     Pending,
     Approved,
     Rejected,
-    Archived
+    Archived,
+    Offered
 }

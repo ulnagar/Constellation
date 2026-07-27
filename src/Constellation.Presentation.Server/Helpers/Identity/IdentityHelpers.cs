@@ -31,11 +31,13 @@ internal static class IdentityHelpers
         _logger
             .Debug("Resolved required services");
 
-        foreach (var claim in context.Principal?.Claims ?? [])
-        {
-            _logger
-                .Information("Claim: {Type} = {Value}", claim.Type, claim.Value);
-        }
+        Dictionary<string, string[]> claims = (context.Principal?.Claims ?? [])
+            .GroupBy(c => c.Type)
+            .ToDictionary(g => g.Key, g => g.Select(c => c.Value).ToArray());
+
+        _logger
+            .ForContext("Claims", claims)
+            .Information("SSO Login: User authenticated");
 
         // Get the external user's identifier (typically 'sub' claim)
         string? externalUserId = context.Principal?

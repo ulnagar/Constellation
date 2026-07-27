@@ -18,7 +18,16 @@
         if (Model.Application.Status == ApplicationStatus.Pending)
         {
             <a asp-page="/Partner/Enrolments/Applications/Upsert" asp-area="Staff" asp-route-id="@Model.Id" class="btn btn-success">Edit</a>
+        }
+
+        if (Model.Application.Status != ApplicationStatus.Offered)
+        {
             <button data-bs-toggle="modal" data-bs-target="#update-status-modal" class="btn btn-warning">Update Status</button>
+        }
+
+        if (Model.Application.Status == ApplicationStatus.Approved)
+        {
+            <button data-bs-toggle="modal" data-bs-target="#create-offer-modal" class="btn btn-warning">Create Offer</button>
         }
     }
 
@@ -178,12 +187,6 @@
                 </div>
                 <div class="modal-body">
                     <div class="row mb-3">
-                        <div class="form-group col-12">
-                            <span class="control-label">Reinstating the period will remove the suspension and allow new applications to be submitted.</span>
-                        </div>
-                    </div>
-                    
-                    <div class="row mb-3">
                         <label class="col-md-3">New Status</label>
                         <div class="col-md-9">
                             <select name="status" asp-items="@Html.GetEnumSelectList<ApplicationStatus>()" class="combo">
@@ -194,6 +197,29 @@
                 </div>
                 <div class="modal-footer">
                     <button type="submit" class="btn btn-success show-loader">Update</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal" data-bs-dismiss="modal">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+
+<form method="post" asp-page-handler="CreateOffer">
+    <div class="modal fade" tabindex="-1" id="create-offer-modal">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Create Offer</h5>
+                </div>
+                <div class="modal-body">
+                    <div class="row mb-3">
+                        <div class="form-group col-12">
+                            <span class="control-label">Are you sure you want to generate an Offer from this Application?</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-success show-loader">Create</button>
                     <button type="button" class="btn btn-secondary" data-dismiss="modal" data-bs-dismiss="modal">Cancel</button>
                 </div>
             </div>

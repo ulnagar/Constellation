@@ -45,10 +45,23 @@
 
     @if (canEditTest.Succeeded)
     {
-        <a asp-page="/Partner/Enrolments/Applications/Upsert" asp-area="Staff" class="btn btn-success">Create</a>
-        <button data-bs-toggle="modal" data-bs-target="#import-modal" class="btn btn-success">Import</button>
-        <button class="btn btn-success" id="export-button">Export</button>
-        <button class="btn btn-warning" id="bulk-update-status-button">Update Status</button>
+        <div class="btn-group" role="group">
+            <button type="button" class="btn btn-success dropdown-toggle" data-bs-toggle="dropdown">Create <span class="caret"></span></button>
+            <div class="dropdown-menu">
+                <a asp-page="/Partner/Enrolments/Applications/Upsert" asp-area="Staff" class="dropdown-item">Manually</a>
+                <button data-bs-toggle="modal" data-bs-target="#import-modal" class="dropdown-item">Import</button>
+            </div>
+        </div>
+
+        <button class="btn btn-secondary" id="export-button">Export</button>
+
+        <div class="btn-group" role="group">
+            <button type="button" class="btn btn-warning dropdown-toggle" data-bs-toggle="dropdown">Bulk Actions <span class="caret"></span></button>
+            <div class="dropdown-menu">
+                <button class="dropdown-item" id="bulk-update-status-button">Update Status</button>
+                <button class="dropdown-item" id="bulk-create-offer-button">Create Offers</button>
+            </div>
+        </div>
     }
 </div>
 
@@ -117,13 +130,15 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title">Update Status</h5>
+                    <input asp-for="@Model.PeriodId" type="hidden" />
+                    <input asp-for="@Model.Status" type="hidden" />
                 </div>
                 <div class="modal-body">
                     <div class="row mb-3">
                         <div class="form-group col-12">
-                            <span class="control-label">Updating the status here will change <span class="affected-rows fw-bold"></span> rows.</span>
+                            <span class="control-label">Updating the status here will change <span class="update-status-affected-rows fw-bold"></span> rows.</span>
                         </div>
-                        <div class="hidden row-ids"></div>
+                        <div class="hidden update-status-row-ids"></div>
                     </div>
                     
                     <div class="row mb-3">
@@ -137,6 +152,32 @@
                 </div>
                 <div class="modal-footer">
                     <button type="submit" class="btn btn-success show-loader">Update</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+
+<form method="post" asp-page-handler="BulkCreateOffer">
+    <div class="modal fade" tabindex="-1" id="bulk-create-offer-modal">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Create Offer</h5>
+                    <input asp-for="@Model.PeriodId" type="hidden" />
+                    <input asp-for="@Model.Status" type="hidden" />
+                </div>
+                <div class="modal-body">
+                    <div class="row mb-3">
+                        <div class="form-group col-12">
+                            <span class="control-label">This will attempt to create <span class="create-offer-affected-rows fw-bold"></span> new offers.</span>
+                        </div>
+                        <div class="hidden create-offer-row-ids"></div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-success show-loader">Create</button>
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                 </div>
             </div>
@@ -161,16 +202,25 @@
                 return table.rows({ search: 'applied' }).count();
             }
 
+            function getCountOfVisibleApprovedTableRows() {
+                return table.rows(
+                    function(idx, data, node) {
+                        return data[5] === 'Approved';
+                    },
+                    { search: 'applied' })
+                    .count();
+            }
+
             $('#bulk-update-status-button').on('click', function() {
                 // Update the span text
                 const rowCount = getCountOfVisibleTableRows();
-                $('.affected-rows').text(rowCount);
+                $('.update-status-affected-rows').text(rowCount);
 
-                $('.row-ids').empty();
+                $('.update-status-row-ids').empty();
 
                 const applicationIds = getIdsFromTable();
                 applicationIds.forEach((id) => {
-                    $('.row-ids').append(
+                    $('.update-status-row-ids').append(
                         $('<input>', {
                             type: 'hidden',
                             name: 'applicationIds',
@@ -184,6 +234,34 @@
                 modal.show();
             });
 
+            $('#bulk-create-offer-button').on('click', function() {
+                // Update the span text
+                const rowCount = getCountOfVisibleApprovedTableRows();
+                $('.create-offer-affected-rows').text(rowCount);
+                
+                $('#bulk-create-offer-modal .btn-success').removeClass('d-none');
+                $('.create-offer-row-ids').empty();
+
+                const applicationIds = getApprovedIdsFromTable();
+                applicationIds.forEach((id) => {
+                    $('.create-offer-row-ids').append(
+                        $('<input>', {
+                            type: 'hidden',
+                            name: 'applicationIds',
+                            value: id
+                        })
+                    );
+                });
+
+                if (rowCount === 0) {
+                    $('#bulk-create-offer-modal .btn-success').addClass('d-none');
+                }
+
+                const modalEl = document.getElementById('bulk-create-offer-modal');
+                const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+                modal.show();
+            });
+
             function getIdsFromTable() {
                 const Ids = [];
 
@@ -192,6 +270,23 @@
                     const row = this.node();
                     Ids.push($('td:eq(0)', row).data('id'));
                 });
+
+                return Ids;
+            }
+
+            function getApprovedIdsFromTable() {
+                const Ids = [];
+
+                // rows({ search: 'applied' }) respects the current DataTable filter/search state
+                table.rows(
+                    function (idx, data, node) {
+                        return data[5] === 'Approved';
+                    },
+                    { search: 'applied'})
+                    .every(function() {
+                        const row = this.node();
+                        Ids.push($('td:eq(0)', row).data('id'));
+                    });
 
                 return Ids;
             }

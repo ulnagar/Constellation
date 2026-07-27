@@ -3,6 +3,7 @@ namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Partner.Enrolments.
 using Application.Domains.EnrolmentContext.Applications.Commands.UpdateEnrolmentApplicationStatus;
 using Application.Domains.EnrolmentContext.Applications.Models;
 using Application.Domains.EnrolmentContext.Applications.Queries.GetEnrolmentApplicationById;
+using Application.Domains.EnrolmentContext.Offers.Commands.CreateOfferFromApplication;
 using Application.Models.Auth;
 using Constellation.Application.Common.PresentationModels;
 using Constellation.Core.Abstractions.Services;
@@ -63,10 +64,16 @@ public class DetailsModel : BasePageModel
 
     private async Task PreparePage()
     {
+        _logger.Information("Requested to load Enrolment Application details by user {User}", _currentUserService.UserName);
+
         Result<EnrolmentApplicationResponse> application = await _mediator.Send(new GetEnrolmentApplicationByIdQuery(Id));
 
         if (application.IsFailure)
         {
+            _logger
+                .ForContext(nameof(Error), application.Error, true)
+                .Information("Failed to load Enrolment Application details by user {User}", _currentUserService.UserName);
+            
             ModalContent = ErrorDisplay.Create(
                 application.Error,
                 _linkGenerator.GetPathByPage("/Partner/Enrolments/Applications/Index", values: new { area = "Staff" }));
@@ -79,10 +86,23 @@ public class DetailsModel : BasePageModel
 
     public async Task<IActionResult> OnPostUpdateStatus(ApplicationStatus status)
     {
-        Result result = await _mediator.Send(new UpdateEnrolmentApplicationStatusCommand(Id, status));
+        UpdateEnrolmentApplicationStatusCommand command = new(Id, status);
+
+        _logger
+            .ForContext(nameof(UpdateEnrolmentApplicationStatusCommand), command, true)
+            .Information("Requested to update Enrolment Application status by user {User}",
+                _currentUserService.UserName);
+
+        Result result = await _mediator.Send(command);
 
         if (result.IsFailure)
         {
+            _logger
+                .ForContext(nameof(UpdateEnrolmentApplicationStatusCommand), command, true)
+                .ForContext(nameof(Error), result.Error, true)
+                .Information("Failed to update Enrolment Application status by user {User}",
+                    _currentUserService.UserName);
+
             ModalContent = ErrorDisplay.Create(result.Error);
 
             await PreparePage();
@@ -90,5 +110,27 @@ public class DetailsModel : BasePageModel
         }
         
         return RedirectToPage("/Partner/Enrolments/Applications/Index", new { area = "Staff" });
+    }
+
+    public async Task<IActionResult> OnPostCreateOffer()
+    {
+        _logger
+            .Information("Requested to create Offer from Enrolment Application by user {User}", _currentUserService.UserName);
+
+        Result result = await _mediator.Send(new CreateOfferFromApplicationCommand(Id));
+
+        if (result.IsFailure)
+        {
+            _logger
+                .ForContext(nameof(Error), result.Error, true)
+                .Information("Failed to create Offer from Enrolment Application by user {User}", _currentUserService.UserName);
+
+            ModalContent = ErrorDisplay.Create(result.Error);
+
+            await PreparePage();
+            return Page();
+        }
+
+        return RedirectToPage();
     }
 }

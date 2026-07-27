@@ -36,4 +36,8 @@ public static class EnrolmentApplicationErrors
     public static readonly Error CannotUpdateArchivedApplication = new(
         "Enrolment.Application.CannotUpdateArchivedApplication",
         "Cannot update an Application that has been marked as Archived");
+
+    public static readonly Error CannotUpdateOfferedApplication = new(
+        "Enrolment.Application.CannotUpdateOfferedApplication",
+        "Cannot update an Application that has been marked as Offered");
 }

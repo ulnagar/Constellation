@@ -11,24 +11,26 @@ using System.Collections.Generic;
 internal sealed class GetEnrolmentApplicationsByPeriodQueryHandler
 : IQueryHandler<GetEnrolmentApplicationsByPeriodQuery, List<EnrolmentApplicationResponse>>
 {
-    private readonly IEnrolmentApplicationRepository _repository;
+    private readonly IEnrolmentApplicationRepository _applicationRepository;
     private readonly ILogger _logger;
 
     public GetEnrolmentApplicationsByPeriodQueryHandler(
-        IEnrolmentApplicationRepository repository,
+        IEnrolmentApplicationRepository applicationRepository,
         ILogger logger)
     {
-        _repository = repository;
+        _applicationRepository = applicationRepository;
         _logger = logger
             .ForContext<GetEnrolmentApplicationsByPeriodQuery>();
     }
 
     public async Task<Result<List<EnrolmentApplicationResponse>>> Handle(GetEnrolmentApplicationsByPeriodQuery request, CancellationToken cancellationToken)
     {
-        List<Application> applications = await _repository.GetApplicationsByPeriod(request.PeriodId, cancellationToken);
-
         List<EnrolmentApplicationResponse> response = [];
+        List<Application> applications = await _applicationRepository.GetApplicationsByPeriod(request.PeriodId, cancellationToken);
 
+        if (applications.Count == 0)
+            return response;
+        
         foreach (Application application in applications)
         {
             response.Add(new(
@@ -44,11 +46,11 @@ internal sealed class GetEnrolmentApplicationsByPeriodQueryHandler
                 application.ParentEmailAddress,
                 application.ParentPhoneNumber,
                 application.MailingAddress,
-                application.ApplicationReference,
+                application.ApplicationReference ?? string.Empty,
                 application.CurrentSchoolCode,
-                application.CurrentSchool,
+                application.CurrentSchool ?? string.Empty,
                 application.DestinationSchoolCode,
-                application.DestinationSchool,
+                application.DestinationSchool ?? string.Empty,
                 application.Program,
                 application.Grade,
                 application.Status));

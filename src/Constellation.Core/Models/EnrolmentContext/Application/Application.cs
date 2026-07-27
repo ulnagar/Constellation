@@ -178,6 +178,9 @@ public sealed class Application
         if (Status == ApplicationStatus.Archived)
             return Result.Failure(EnrolmentApplicationErrors.CannotUpdateArchivedApplication);
 
+        if (Status == ApplicationStatus.Offered)
+            return Result.Failure(EnrolmentApplicationErrors.CannotUpdateOfferedApplication);
+
         Status = newStatus;
 
         return Result.Success();

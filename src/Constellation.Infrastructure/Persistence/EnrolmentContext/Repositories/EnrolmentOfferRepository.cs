@@ -2,6 +2,7 @@
 
 using Constellation.Core.Models.EnrolmentContext.EnrolmentPeriod.Identifiers;
 using Constellation.Core.Models.EnrolmentContext.Offer.Identifiers;
+using Core.Models.EnrolmentContext.Application.Identifiers;
 using Core.Models.EnrolmentContext.Offer;
 using Core.Models.EnrolmentContext.Offer.Repositories;
 using Microsoft.EntityFrameworkCore;
@@ -35,6 +36,14 @@ internal sealed class EnrolmentOfferRepository
         await _context.Set<Offer>()
             .FirstOrDefaultAsync(
                 offer => offer.Id == offerId,
+                cancellationToken);
+
+    public async Task<Offer?> GetByApplicationId(
+        ApplicationId applicationId,
+        CancellationToken cancellationToken = default) =>
+        await _context.Set<Offer>()
+            .FirstOrDefaultAsync(
+                offer => offer.ApplicationId == applicationId,
                 cancellationToken);
 
     public void Insert(Offer offer) => _context.Set<Offer>().Add(offer);

@@ -5,6 +5,7 @@ using Application.Domains.EnrolmentContext.Applications.Queries.ExportApplicatio
 using Application.Domains.EnrolmentContext.Applications.Queries.GetEnrolmentApplicationsByPeriod;
 using Application.Domains.EnrolmentContext.EnrolmentPeriods.Models;
 using Application.Domains.EnrolmentContext.EnrolmentPeriods.Queries.GetAllEnrolmentPeriods;
+using Application.Domains.EnrolmentContext.Offers.Commands.CreateOfferFromApplication;
 using Application.Helpers;
 using Application.Interfaces.Services;
 using Application.Models.Auth;
@@ -171,7 +172,38 @@ public class IndexModel : BasePageModel
             return await PreparePage();
         }
 
-        return RedirectToPage();
+        return RedirectToPage(new { PeriodId, Status });
+    }
+
+    public async Task<IActionResult> OnPostBulkCreateOffer(
+        List<ApplicationId> applicationIds)
+    {
+        int successful = 0;
+        int failed = 0;
+
+        foreach (ApplicationId applicationId in applicationIds)
+        {
+            Result result = await _mediator.Send(new CreateOfferFromApplicationCommand(applicationId));
+
+            if (result.IsFailure)
+                failed++;
+            else
+                successful++;
+        }
+
+        if (failed > 0)
+        {
+            ModalContent = FeedbackDisplay.Create(
+                "Bulk Update",
+                $"{failed} Offers could not be generated",
+                "Ok",
+                "btn-secondary",
+                _linkGenerator.GetPathByPage("/Partner/Enrolments/Applications/Index", values: new { area = "Staff", PeriodId, Status }));
+
+            return await PreparePage();
+        }
+
+        return RedirectToPage(new { PeriodId, Status });
     }
 
     public async Task<IActionResult> OnPostExport(List<ApplicationId> applicationIds)
@@ -205,7 +237,7 @@ public class IndexModel : BasePageModel
                 .ToList(),
 
             StatusFilter.Approved => applications
-                .Where(application => application.Status == ApplicationStatus.Approved)
+                .Where(application => application.Status == ApplicationStatus.Approved || application.Status == ApplicationStatus.Offered)
                 .ToList(),
 
             StatusFilter.Rejected => applications
