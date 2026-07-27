@@ -46,5 +46,12 @@ internal sealed class EnrolmentOfferRepository
                 offer => offer.ApplicationId == applicationId,
                 cancellationToken);
 
+    public async Task<List<Offer>> GetListFromIds(
+        List<OfferId> offerIds,
+        CancellationToken cancellationToken = default) =>
+        await _context.Set<Offer>()
+            .Where(offer => offerIds.Contains(offer.Id))
+            .ToListAsync(cancellationToken);
+
     public void Insert(Offer offer) => _context.Set<Offer>().Add(offer);
 }

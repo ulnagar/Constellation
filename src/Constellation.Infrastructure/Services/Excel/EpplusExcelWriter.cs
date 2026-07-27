@@ -87,7 +87,8 @@ public sealed class EpplusExcelWriter : IExcelWriter
 
                     case ExcelColumnFormat.Date:
                         cell.Style.Numberformat.Format = "dd/MM/yyyy";
-                        cell.Value = value;
+                        if (value is not null)
+                            cell.Value = value;
                         break;
 
                     case ExcelColumnFormat.Default:

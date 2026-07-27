@@ -144,7 +144,12 @@
                     <div class="row mb-3">
                         <label class="col-md-3">New Status</label>
                         <div class="col-md-9">
-                            <select name="newstatus" asp-items="@Html.GetEnumSelectList<ApplicationStatus>()" class="combo">
+                            @{
+                                var statusItems = Html.GetEnumSelectList<ApplicationStatus>()
+                                    .Where(item => item.Text != nameof(ApplicationStatus.Offered));
+                            }
+
+                            <select name="newstatus" asp-items="statusItems" class="combo">
                                 <option> -- Select Status -- </option>
                             </select>
                         </div>

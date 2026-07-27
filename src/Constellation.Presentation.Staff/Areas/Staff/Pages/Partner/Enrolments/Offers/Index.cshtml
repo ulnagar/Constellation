@@ -1,0 +1,187 @@
+﻿@page
+@model Constellation.Presentation.Staff.Areas.Staff.Pages.Partner.Enrolments.Offers.IndexModel
+
+@using Constellation.Core.Extensions
+@using Constellation.Presentation.Staff.Areas.Staff.Pages.Partner.Enrolments.Offers
+
+@inject IAuthorizationService AuthorizationService
+@{
+    var canEditTest = await AuthorizationService.AuthorizeAsync(User, AuthPermission.Partners_Enrolments_Offers_Edit_Value);
+}
+
+<h2>Offers</h2>
+
+<div class="page-menu">
+    @{
+        var allStyle = "btn-outline-secondary";
+        var processingStyle = allStyle;
+        var pendingStyle = allStyle;
+        var acceptedStyle = allStyle;
+        var declinedStyle = allStyle;
+
+        switch (Model.Status)
+        {
+            case IndexModel.StatusFilter.All:
+                allStyle = "btn-primary";
+                break;
+            case IndexModel.StatusFilter.Processing:
+                processingStyle = "btn-primary";
+                break;
+            case IndexModel.StatusFilter.Pending:
+                pendingStyle = "btn-primary";
+                break;
+            case IndexModel.StatusFilter.Accepted:
+                acceptedStyle = "btn-primary";
+                break;
+            case IndexModel.StatusFilter.Declined:
+                declinedStyle = "btn-primary";
+                break;
+        }
+    }
+
+    <div class="btn-group">
+        <a asp-route-status="@IndexModel.StatusFilter.All" asp-route-periodId="@Model.PeriodId" class="btn @allStyle">All</a>
+        <a asp-route-status="@IndexModel.StatusFilter.Processing" asp-route-periodId="@Model.PeriodId" class="btn @processingStyle">Processing</a>
+        <a asp-route-status="@IndexModel.StatusFilter.Pending" asp-route-periodId="@Model.PeriodId" class="btn @pendingStyle">Pending</a>
+        <a asp-route-status="@IndexModel.StatusFilter.Accepted" asp-route-periodId="@Model.PeriodId" class="btn @acceptedStyle">Accepted</a>
+        <a asp-route-status="@IndexModel.StatusFilter.Declined" asp-route-periodId="@Model.PeriodId" class="btn @declinedStyle">Declined</a>
+    </div>
+    
+    <button class="btn btn-secondary" id="export-button">Export</button>
+
+</div>
+
+<hr />
+
+<form method="get">
+    @Html.AntiForgeryToken()
+    <div class="mb-3 row">
+        <label for="PeriodId" class="col-md-2">Enrolment Period</label>
+        <div class="col-md-3">
+            <select name="PeriodId" id="PeriodId" class="form-control">
+                <option value=""> -- Select -- </option>
+                @foreach (var period in Model.Periods)
+                {
+                    <option value="@period.Id"
+                            selected="@(period.Id == Model.PeriodId ? "selected" : null)">
+                        @period.Label
+                    </option>
+                }
+            </select>
+        </div>
+        <div class="col-md-2">
+            <button type="submit" class="btn btn-primary">Filter</button>
+        </div>
+    </div>
+</form>
+
+<table class="table table-striped table-hover">
+    <thead>
+    <tr>
+        <th>Ref</th>
+        <th>Name</th>
+        <th>Gender</th>
+        <th>School</th>
+        <th>Grade</th>
+        <th>Status</th>
+        <th></th>
+    </tr>
+    </thead>
+    <tbody>
+    @foreach (var offer in Model.Offers)
+    {
+        <tr>
+            <td data-id="@offer.Id">@offer.ApplicationReference</td>
+            <td data-order="@offer.StudentName.SortOrder" data-search="@offer.StudentName.DisplayName @offer.StudentName.FirstName">@offer.StudentName.DisplayName</td>
+            <td>@offer.StudentGender</td>
+            <td data-search="@offer.DestinationSchoolCode @offer.DestinationSchool">@offer.DestinationSchool</td>
+            <td data-search="@offer.Grade.AsNumber()">@offer.Grade.AsName()</td>
+            <td>@offer.Status</td>
+            <td>
+                @if (canEditTest.Succeeded)
+                {
+                    <a asp-page="/Partner/Enrolments/Offers/Details" asp-route-Id="@offer.Id" class="btn btn-sm btn-info btn-show-hover showLoader">More Info...</a>
+                }
+            </td>
+        </tr>
+    }
+    </tbody>
+</table>
+
+@section scripts
+{
+    <script>
+        $(document).ready(function (){
+            const table = $('table').DataTable({ 
+                "order": [
+                    [1, 'asc']
+                ],
+                "columnDefs": [
+                    { "target": 6, "searchable": false, "sortable": false }
+                ]
+            });
+
+            function getIdsFromTable() {
+                const Ids = [];
+
+                // rows({ search: 'applied' }) respects the current DataTable filter/search state
+                table.rows({ search: 'applied' }).every(function() {
+                    const row = this.node();
+                    Ids.push($('td:eq(0)', row).data('id'));
+                });
+
+                return Ids;
+            }
+
+            $('#export-button').on('click', async function() {
+                const offerIds = getIdsFromTable();
+
+                if (offerIds.length === 0) {
+                    alert('No recipients found.');
+                    return;
+                }
+
+                const formData = new URLSearchParams();
+                offerIds.forEach((id, index) => {
+                    formData.append(`offerIds[${index}]`, id);
+                });
+
+                const response = await fetch('?handler=Export', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
+                    },
+                    body: formData.toString()
+                });
+
+                if (!response.ok) {
+                    alert('Export failed.');
+                    return;
+                }
+
+                // Try to pull the filename the server suggested
+                const disposition = response.headers.get('Content-Disposition');
+                let filename = 'export.xlsx'; // fallback
+                if (disposition) {
+                    const match = disposition.match(/filename\*?=(?:UTF-8'')?"?([^";]+)"?/i);
+                    if (match && match[1]) {
+                        filename = decodeURIComponent(match[1]);
+                    }
+                }
+
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = filename;
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+
+                window.URL.revokeObjectURL(url);
+            });
+        });
+    </script>
+}
