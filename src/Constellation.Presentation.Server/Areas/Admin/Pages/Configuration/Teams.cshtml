@@ -13,6 +13,7 @@
 
 <hr />
 
+@* ReSharper disable Mvc.PartialViewNotResolved *@
 <form method="post">
     <partial name="ConfigurationStaffCardList" model='("Mandatory Owners", "MandatoryOwners", "mandatory-owners", "StaffListModal--Mandatory-Owners", @Model.MandatoryOwners, @Model.StaffMembers)'/>
     
@@ -34,6 +35,7 @@
 <partial name="ConfigurationStaffModal" model='("StaffListModal--Mandatory-Owners", "MandatoryOwners", ".staff-member-card-container--mandatory-owners", @Model.StaffMembers)' />
 <partial name="ConfigurationStaffModal" model='("StaffListModal--Team-Owners", "StudentTeamOwners", ".staff-member-card-container--team-owners", @Model.StaffMembers)' />
 <partial name="ConfigurationStaffModal" model='("StaffListModal--Channel-Owners", "StudentChannelOwners", ".staff-member-card-container--channel-owners", @Model.StaffMembers)' />
+@* ReSharper restore Mvc.PartialViewNotResolved *@
 
 <template id="staff-member-card">
     <div class="col">

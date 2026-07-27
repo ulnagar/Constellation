@@ -7,6 +7,8 @@
     var isAdmin = (await AuthService.AuthorizeAsync(User, AuthPolicies.IsSiteAdmin)).Succeeded;
 }
 
+@* ReSharper disable Mvc.AreaNotResolved *@
+
 <nav class="navbar navbar-expand-xl navbar-toggleable-xl navbar-dark bg-dark box-shadow fixed-top">
     <div class="px-2">
         <a class="navbar-brand" asp-page="/Index" asp-area=""><img src="~/logo.svg" class="nav-bar-logo d-inline-block align-middle" />Constellation</a>
@@ -162,3 +164,4 @@
         </ul>
     </div>
 </nav>
+@* ReSharper restore Mvc.AreaNotResolved *@
