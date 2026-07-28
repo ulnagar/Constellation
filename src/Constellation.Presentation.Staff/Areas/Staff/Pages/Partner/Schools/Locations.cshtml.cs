@@ -6,10 +6,12 @@ using Constellation.Application.DTOs;
 using Core.Abstractions.Services;
 using Core.Shared;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Presentation.Shared.Extensions;
 using Serilog;
 
+[AllowAnonymous]
 public class LocationsModel : BasePageModel
 {
     private readonly ISender _mediator;

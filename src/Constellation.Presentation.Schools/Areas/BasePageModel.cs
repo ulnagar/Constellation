@@ -20,7 +20,7 @@ using Schools.Pages.Shared.Components.SchoolSelectorModal;
 using System.ComponentModel;
 using System.Security.Claims;
 
-public class BasePageModel : PageModel, IBaseModel
+public abstract class BasePageModel : PageModel, IBaseModel
 {
     protected ISender Mediator =>
         HttpContext.RequestServices.GetRequiredService<ISender>();

@@ -3,7 +3,7 @@
 using Constellation.Application.Common.PresentationModels;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
-public class BasePageModel : PageModel, IBaseModel
+public abstract class BasePageModel : PageModel, IBaseModel
 {
     public ModalContent? ModalContent { get; set; }
 }

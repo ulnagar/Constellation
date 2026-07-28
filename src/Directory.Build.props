@@ -10,4 +10,10 @@
 		<AnalysisLevel>latest</AnalysisLevel>
 	    <AnalysisMode>All</AnalysisMode>
 	</PropertyGroup>
+	
+	<ItemGroup Condition="'$(MSBuildProjectName)' != 'Constellation.Analyzers'">
+		<ProjectReference Include="$(MSBuildThisFileDirectory)..\build\Constellation.Analyzers\Constellation.Analyzers.csproj"
+		                  OutputItemType="Analyzer"
+		                  ReferenceOutputAssembly="false" />
+	</ItemGroup>
 </Project>

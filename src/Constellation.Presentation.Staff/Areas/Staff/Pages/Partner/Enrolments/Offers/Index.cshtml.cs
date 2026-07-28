@@ -3,6 +3,7 @@ namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Partner.Enrolments.
 using Application.Domains.EnrolmentContext.Offers.Models;
 using Application.Domains.EnrolmentContext.Offers.Queries.ExportOfferList;
 using Application.Domains.EnrolmentContext.Offers.Queries.GetOffersForPeriod;
+using Application.Models.Auth;
 using Constellation.Application.Common.PresentationModels;
 using Constellation.Application.Domains.EnrolmentContext.EnrolmentPeriods.Models;
 using Constellation.Application.Domains.EnrolmentContext.EnrolmentPeriods.Queries.GetAllEnrolmentPeriods;
@@ -17,8 +18,10 @@ using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using Presentation.Shared.Extensions;
+using Presentation.Shared.Helpers.Attributes;
 using Serilog;
 
+[HasPermission(AuthPermission.Partners_Enrolments_Offers_View_Value)]
 public class IndexModel : BasePageModel
 {
     private readonly ISender _mediator;
