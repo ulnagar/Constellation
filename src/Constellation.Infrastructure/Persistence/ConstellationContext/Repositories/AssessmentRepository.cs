@@ -49,9 +49,7 @@ internal sealed class AssessmentRepository : IAssessmentRepository
 
         return await _context
             .Set<Assessment>()
-            .Where(a =>
-                a.AvailableFrom <= now
-                && a.AvailableTo >= now)
+            .Where(a => a.AvailableTo >= now)
             .ToListAsync(cancellationToken);
     }
 
