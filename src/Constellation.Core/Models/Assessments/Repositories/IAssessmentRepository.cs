@@ -10,6 +10,7 @@ public interface IAssessmentRepository
     Task<Assessment?> GetAssessmentById(AssessmentId id, CancellationToken cancellationToken = default);
 
     Task<List<Assessment>> GetCurrentAssessments(CancellationToken cancellationToken = default);
+    Task<List<Assessment>> GetAssessmentsForStaff(CancellationToken cancellationToken = default);
     Task<List<Assessment>> GetAssessmentsForStudent(StudentId studentId, CancellationToken cancellationToken = default);
     Task<List<Assessment>> GetCurrentAssessmentsForStudent(StudentId studentId, CancellationToken cancellationToken = default);
     Task<List<Assessment>> GetCurrentAssessmentsForSchoolCode(SchoolCode schoolCode, CancellationToken cancellationToken = default);
