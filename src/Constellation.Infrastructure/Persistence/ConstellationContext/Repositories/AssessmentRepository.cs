@@ -42,6 +42,19 @@ internal sealed class AssessmentRepository : IAssessmentRepository
             .ToListAsync(cancellationToken);
     }
 
+    public async Task<List<Assessment>> GetAssessmentsForStaff(
+        CancellationToken cancellationToken = default)
+    {
+        var now = DateTimeOffset.UtcNow;
+
+        return await _context
+            .Set<Assessment>()
+            .Where(a =>
+                a.AvailableFrom <= now
+                && a.AvailableTo >= now)
+            .ToListAsync(cancellationToken);
+    }
+
     public async Task<List<Assessment>> GetAssessmentsForStudent(
         StudentId studentId,
         CancellationToken cancellationToken = default) =>

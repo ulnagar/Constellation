@@ -22,7 +22,7 @@ internal sealed class GetCurrentAssessmentsQueryHandler
     {
         List<AssessmentResponse> response = [];
 
-        List<Assessment> assessments = await _assessmentRepository.GetCurrentAssessments(cancellationToken);
+        List<Assessment> assessments = await _assessmentRepository.GetAssessmentsForStaff(cancellationToken);
 
         foreach (Assessment assessment in assessments)
         {
