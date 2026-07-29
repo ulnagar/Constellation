@@ -108,4 +108,23 @@ public sealed class Offer
         Status = newStatus;
         return Result.Success();
     }
+
+    public Result Respond(
+        OfferStatus status, 
+        bool courtOrders = false, 
+        bool healthConditions = false)
+    {
+        Result statusUpdate = UpdateStatus(status);
+
+        if (statusUpdate.IsFailure)
+            return statusUpdate;
+
+        if (status != OfferStatus.Accepted)
+            return Result.Success();
+
+        HasCourtOrders = courtOrders;
+        HasHealthConcerns = healthConditions;
+
+        return Result.Success();
+    }
 }

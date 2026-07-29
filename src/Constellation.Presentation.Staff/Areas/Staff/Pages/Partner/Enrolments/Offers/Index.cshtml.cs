@@ -8,7 +8,6 @@ using Constellation.Application.Common.PresentationModels;
 using Constellation.Application.Domains.EnrolmentContext.EnrolmentPeriods.Models;
 using Constellation.Application.Domains.EnrolmentContext.EnrolmentPeriods.Queries.GetAllEnrolmentPeriods;
 using Constellation.Application.Helpers;
-using Constellation.Application.Interfaces.Services;
 using Constellation.Core.Abstractions.Services;
 using Constellation.Core.Models.EnrolmentContext.EnrolmentPeriod.Identifiers;
 using Constellation.Core.Shared;
@@ -26,20 +25,17 @@ public class IndexModel : BasePageModel
 {
     private readonly ISender _mediator;
     private readonly LinkGenerator _linkGenerator;
-    private readonly IImportService _importService;
     private readonly ICurrentUserService _currentUserService;
     private readonly ILogger _logger;
 
     public IndexModel(
         ISender mediator,
         LinkGenerator linkGenerator,
-        IImportService importService,
         ICurrentUserService currentUserService,
         ILogger logger)
     {
         _mediator = mediator;
         _linkGenerator = linkGenerator;
-        _importService = importService;
         _currentUserService = currentUserService;
         _logger = logger
             .ForContext<IndexModel>()
