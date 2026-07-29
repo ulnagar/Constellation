@@ -1,10 +1,12 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Partner.Enrolments.Offers;
 
+using Application.Domains.EnrolmentContext.Offers.Commands.SendOfferEmailToParent;
 using Application.Domains.EnrolmentContext.Offers.Models;
 using Application.Domains.EnrolmentContext.Offers.Queries.ExportOfferList;
 using Application.Domains.EnrolmentContext.Offers.Queries.GetOffersForPeriod;
 using Application.Models.Auth;
 using Constellation.Application.Common.PresentationModels;
+using Constellation.Application.Domains.EnrolmentContext.Applications.Commands.UpdateEnrolmentApplicationStatus;
 using Constellation.Application.Domains.EnrolmentContext.EnrolmentPeriods.Models;
 using Constellation.Application.Domains.EnrolmentContext.EnrolmentPeriods.Queries.GetAllEnrolmentPeriods;
 using Constellation.Application.Helpers;
@@ -102,6 +104,36 @@ public class IndexModel : BasePageModel
             return BadRequest(file.Error.Message);
 
         return File(file.Value, FileContentTypes.ExcelModernFile, "Enrolment Offer Export.xlsx");
+    }
+
+    public async Task<IActionResult> OnPostBulkSendOffer(List<OfferId> offerIds)
+    {
+        int successful = 0;
+        int failed = 0;
+
+        foreach (OfferId offerId in offerIds)
+        {
+            Result result = await _mediator.Send(new SendOfferEmailToParentCommand(offerId));
+
+            if (result.IsFailure)
+                failed++;
+            else
+                successful++;
+        }
+
+        if (failed > 0)
+        {
+            ModalContent = FeedbackDisplay.Create(
+                "Bulk Send",
+                $"{failed} Offer emails failed to send",
+                "Ok",
+                "btn-secondary",
+                _linkGenerator.GetPathByPage("/Partner/Enrolments/Offers/Index", values: new { area = "Staff", PeriodId, Status }));
+
+            return await PreparePage();
+        }
+
+        return RedirectToPage(new { PeriodId, Status });
     }
 
     public enum StatusFilter

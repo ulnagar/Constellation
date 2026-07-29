@@ -1,14 +1,16 @@
 ﻿namespace Constellation.Core.Models.EnrolmentContext.EnrolmentPeriod;
 
+using Application.Enums;
 using Enums;
 using Errors;
 using Identifiers;
-using Offer.Enums;
 using Shared;
 using System;
 
 public sealed class EnrolmentPeriod
 {
+    private readonly List<EnrolmentCourse> _courses = [];
+
     /// <summary>
     /// DO NOT USE. EF Core only.
     /// </summary>
@@ -16,6 +18,7 @@ public sealed class EnrolmentPeriod
 
     private EnrolmentPeriod(
         string label,
+        string year,
         DateTimeOffset openAt,
         DateTimeOffset closeAt,
         Program program)
@@ -23,6 +26,7 @@ public sealed class EnrolmentPeriod
         Id = new();
 
         Label = label;
+        Year = year;
         OpenAt = openAt;
         ClosedAt = closeAt;
         Program = program;
@@ -33,6 +37,8 @@ public sealed class EnrolmentPeriod
 
     public EnrolmentPeriodId Id { get; private set; }
     public string Label { get; private set; }
+    public string Year { get; private set; }
+    public IReadOnlyList<EnrolmentCourse> AvailableCourses => _courses.AsReadOnly();
     public DateTimeOffset OpenAt { get; private set; }
     public DateTimeOffset ClosedAt { get; private set; }
     public Program Program { get; private set; }
@@ -80,6 +86,7 @@ public sealed class EnrolmentPeriod
 
     public static Result<EnrolmentPeriod> Create(
         string label,
+        string year,
         DateTimeOffset openAt,
         DateTimeOffset closeAt,
         Program program)
@@ -91,6 +98,7 @@ public sealed class EnrolmentPeriod
 
         return new EnrolmentPeriod(
             label,
+            year,
             openAt,
             closeAt,
             program);
@@ -98,6 +106,7 @@ public sealed class EnrolmentPeriod
 
     public Result Update(
         string label,
+        string year,
         DateTimeOffset openAt,
         DateTimeOffset closeAt,
         Program program)
@@ -108,6 +117,7 @@ public sealed class EnrolmentPeriod
             return validationResult;
 
         Label = label;
+        Year = year;
         OpenAt = openAt;
         ClosedAt = closeAt;
         Program = program;
@@ -144,5 +154,19 @@ public sealed class EnrolmentPeriod
             return Result.Failure(EnrolmentPeriodErrors.DurationTooLong);
 
         return Result.Success();
+    }
+
+    public void AddCourse(EnrolmentCourse course)
+    {
+        if (_courses.Contains(course))
+            return;
+
+        _courses.Add(course);
+    }
+
+    public void RemoveCourse(EnrolmentCourse course)
+    {
+        if (_courses.Contains(course))
+            _courses.Remove(course);
     }
 }

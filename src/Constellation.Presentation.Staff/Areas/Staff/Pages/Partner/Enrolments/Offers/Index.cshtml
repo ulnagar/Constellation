@@ -109,6 +109,32 @@
     </tbody>
 </table>
 
+<form method="post" asp-page-handler="BulkSendOffer">
+    <div class="modal fade" tabindex="-1" id="bulk-send-offer-modal">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Send Offer</h5>
+                    <input asp-for="@Model.PeriodId" type="hidden" />
+                    <input asp-for="@Model.Status" type="hidden" />
+                </div>
+                <div class="modal-body">
+                    <div class="row mb-3">
+                        <div class="form-group col-12">
+                            <span class="control-label">This will attempt to send <span class="send-offer-affected-rows fw-bold"></span> new offer emails to parents.</span>
+                        </div>
+                        <div class="hidden send-offer-row-ids"></div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-success show-loader">Send</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+
 @section scripts
 {
     <script>
@@ -133,6 +159,52 @@
 
                 return Ids;
             }
+
+            function getCountOfVisibleProcessingTableRows() {
+                return table.rows(
+                    function(idx, data, node) {
+                        return data[5] === 'Processing';
+                    },
+                    { search: 'applied' })
+                    .count();
+            }
+            
+            function getProcessingIdsFromTable() {
+                const Ids = [];
+
+                table.rows(
+                    function (idx, data, node) {
+                        return data[5] === 'Processing';
+                    },
+                    { search: 'applied'})
+                    .every(function() {
+                        const row = this.node();
+                        Ids.push($('td:eq(0)', row).data('id'));
+                    });
+
+                return Ids;
+            }
+
+            $('#bulk-send-offer-button').on('click', function () {
+                const rowCount = getCountOfVisibleProcessingTableRows();
+                $('.send-offer-affected-rows').text(rowCount);
+                $('.send-offer-row-ids').empty();
+
+                const offerIds = getProcessingIdsFromTable();
+                offerIds.forEach((id) => {
+                    $('.send-offer-row-ids').append(
+                        $('<input>', {
+                            type: 'hidden',
+                            name: 'offerIds',
+                            value: id
+                        })
+                    );
+                });
+
+                const modalEl = document.getElementById('bulk-send-offer-modal');
+                const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+                modal.show();
+            });
 
             $('#export-button').on('click', async function() {
                 const offerIds = getIdsFromTable();

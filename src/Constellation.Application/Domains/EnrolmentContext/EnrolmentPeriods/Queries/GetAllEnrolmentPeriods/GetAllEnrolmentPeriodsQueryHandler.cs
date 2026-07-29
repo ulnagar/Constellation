@@ -38,10 +38,12 @@ internal sealed class GetAllEnrolmentPeriodsQueryHandler
             response.Add(new(
                 period.Id,
                 period.Label,
+                period.Year,
                 period.OpenAt,
                 period.ClosedAt,
                 period.GetStatus(_dateTime.Now),
                 period.Program,
+                period.AvailableCourses,
                 period.IsSuspended,
                 period.SuspensionReason));
         }

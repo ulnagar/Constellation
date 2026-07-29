@@ -1,6 +1,7 @@
 ﻿namespace Constellation.Application.Domains.EnrolmentContext.EnrolmentPeriods.Commands.UpdateEnrolmentPeriod;
 
 using Abstractions.Messaging;
+using Core.Models.EnrolmentContext.Application.Enums;
 using Core.Models.EnrolmentContext.EnrolmentPeriod;
 using Core.Models.EnrolmentContext.EnrolmentPeriod.Errors;
 using Core.Models.EnrolmentContext.EnrolmentPeriod.Repositories;
@@ -42,6 +43,7 @@ internal sealed class UpdateEnrolmentPeriodCommandHandler
 
         Result update = period.Update(
             request.Label,
+            request.Year,
             request.OpenAt,
             request.ClosedAt,
             request.Program);
@@ -54,6 +56,22 @@ internal sealed class UpdateEnrolmentPeriodCommandHandler
                 .Warning("Failed to update Enrolment Period");
 
             return Result.Failure(update.Error);
+        }
+
+        foreach (EnrolmentCourse course in period.AvailableCourses)
+        {
+            if (request.AvailableCourses.Contains(course))
+                continue;
+
+            period.RemoveCourse(course);
+        }
+
+        foreach (EnrolmentCourse course in request.AvailableCourses)
+        {
+            if (period.AvailableCourses.Contains(course))
+                continue;
+
+            period.AddCourse(course);
         }
 
         await _unitOfWork.CompleteAsync(cancellationToken);

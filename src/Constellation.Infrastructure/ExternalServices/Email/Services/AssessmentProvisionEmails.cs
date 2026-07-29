@@ -7,6 +7,7 @@ using Core.Shared;
 using Core.ValueObjects;
 using System.Threading.Tasks;
 using Templates.Views.Emails.Assessments;
+using Templates.Views.Emails.Enrolments;
 
 public sealed partial class Service : IEmailService
 {

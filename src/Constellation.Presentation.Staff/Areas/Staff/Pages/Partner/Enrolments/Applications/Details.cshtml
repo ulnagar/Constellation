@@ -178,6 +178,32 @@
     </dd>
 </dl>
 
+@if (Model.Application.SelectedCourses.Any())
+{
+    <table class="table table-striped table-hover">
+        <thead>
+            <tr>
+                <th>Code</th>
+                <th>Name</th>
+                <th>Status</th>
+                <th></th>
+            </tr>
+        </thead>
+        @foreach (var entry in Model.Application.SelectedCourses)
+        {
+            <tr>
+                <td>@entry.Course.Value</td>
+                <td>@entry.Course.Name</td>
+                <td>@entry.Status</td>
+                <td>
+                    <button class="btn btn-danger">Reject</button>
+                    <button class="btn btn-success">Approve</button>
+                </td>
+            </tr>
+        }
+    </table>
+}
+
 <form method="post" asp-page-handler="UpdateStatus">
     <div class="modal fade" tabindex="-1" id="update-status-modal">
         <div class="modal-dialog">

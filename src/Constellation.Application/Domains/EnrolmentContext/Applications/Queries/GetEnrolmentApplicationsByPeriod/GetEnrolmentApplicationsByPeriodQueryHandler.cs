@@ -37,6 +37,7 @@ internal sealed class GetEnrolmentApplicationsByPeriodQueryHandler
                 application.Id,
                 application.PeriodId,
                 string.Empty,
+                string.Empty,
                 application.StudentReferenceNumber,
                 application.StudentName,
                 application.StudentGender,
@@ -53,7 +54,8 @@ internal sealed class GetEnrolmentApplicationsByPeriodQueryHandler
                 application.DestinationSchool ?? string.Empty,
                 application.Program,
                 application.Grade,
-                application.Status));
+                application.Status,
+                application.SelectedCourses));
         }
 
         return response;

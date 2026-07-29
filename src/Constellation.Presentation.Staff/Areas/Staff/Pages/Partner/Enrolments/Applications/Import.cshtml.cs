@@ -100,7 +100,7 @@ public class ImportModel : BasePageModel
     {
         await PreparePage();
 
-        Result validation = Mapping.Validate(FieldDefinitions, AvailableHeaders);
+        Result validation = Mapping.Validate(FieldDefinitions, AvailableHeaders, true);
 
         if (validation.IsFailure)
         {

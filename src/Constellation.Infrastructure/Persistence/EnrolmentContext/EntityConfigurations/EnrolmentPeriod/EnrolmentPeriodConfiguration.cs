@@ -1,6 +1,8 @@
 ﻿namespace Constellation.Infrastructure.Persistence.EnrolmentContext.EntityConfigurations.EnrolmentPeriod;
 
+using ConstellationContext.Converters;
 using Converters;
+using Core.Models.EnrolmentContext.Application.Enums;
 using Core.Models.EnrolmentContext.EnrolmentPeriod;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
@@ -17,5 +19,11 @@ internal sealed class EnrolmentPeriodConfiguration : IEntityTypeConfiguration<En
         builder
             .Property(entry => entry.Program)
             .HasConversion<ProgramConverter>();
+
+        builder
+            .Property(entry => entry.AvailableCourses)
+            .HasField("_courses")
+            .UsePropertyAccessMode(PropertyAccessMode.Field)
+            .HasConversion<JsonColumnConverter<IReadOnlyList<EnrolmentCourse>>>();
     }
 }

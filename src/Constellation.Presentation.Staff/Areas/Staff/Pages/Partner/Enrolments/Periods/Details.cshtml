@@ -49,6 +49,13 @@
         <dd class="col-md-10">
             <span>@Model.Period.Label</span>
         </dd>
+        
+        <dt class="col-md-2">
+            <label asp-for="Period.Year">Year</label>
+        </dt>
+        <dd class="col-md-10">
+            <span>@Model.Period.Year</span>
+        </dd>
 
         <dt class="col-md-2">
             <label asp-for="Period.OpenAt">Available From</label>
@@ -76,6 +83,16 @@
         </dt>
         <dd class="col-md-10">
             <span>@Model.Period.Status</span>
+        </dd>
+        
+        <dt class="col-md-2">
+            <label asp-for="Period.AvailableCourses">Courses</label>
+        </dt>
+        <dd class="col-md-10">
+            @foreach (var course in Model.Period.AvailableCourses.OrderBy(entry => entry.Value))
+            {
+                <div class="w-100">@course.Value - @course.Name</div>
+            }
         </dd>
     </dl>
 </div>

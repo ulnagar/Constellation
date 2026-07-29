@@ -113,6 +113,9 @@ internal sealed class ImportApplicationsCommandHandler
                 application.DestinationSchool ?? string.Empty,
                 application.Program,
                 application.Grade);
+
+            //TODO: Sync Courses between the matchingApplication and application here.
+            asdfasdf;
         }
 
         await _unitOfWork.CompleteAsync(cancellationToken);

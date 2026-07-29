@@ -1,10 +1,9 @@
 ﻿namespace Constellation.Core.Models.EnrolmentContext.Application.Enums;
 
-public enum ApplicationStatus
+public enum CourseSelectionStatus
 {
     Pending,
     Approved,
     Rejected,
-    Archived,
-    Offered
+    Withdrawn
 }

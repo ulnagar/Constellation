@@ -10,6 +10,7 @@ using Constellation.Core.Abstractions.Services;
 using Constellation.Core.Models.EnrolmentContext.EnrolmentPeriod.Identifiers;
 using Constellation.Core.Shared;
 using Core.Abstractions.Clock;
+using Core.Models.EnrolmentContext.Application.Enums;
 using Core.Models.EnrolmentContext.EnrolmentPeriod;
 using Core.Models.EnrolmentContext.EnrolmentPeriod.Enums;
 using MediatR;
@@ -55,6 +56,9 @@ public class UpsertModel : BasePageModel
     public string Label { get; set; }
 
     [BindProperty]
+    public string Year { get; set; }
+
+    [BindProperty]
     public DateTime OpenAt { get; set; }
 
     [BindProperty]
@@ -62,8 +66,12 @@ public class UpsertModel : BasePageModel
 
     [BindProperty]
     public Program Program { get; set; } = Program.Empty;
-    
+
+    [BindProperty] 
+    public List<EnrolmentCourse> SelectedCourses { get; set; } = [];
+
     public SelectList ProgramList { get; set; }
+    public SelectList CourseList { get; set; }
 
     public async Task OnGet()
     {
@@ -95,9 +103,11 @@ public class UpsertModel : BasePageModel
         }
 
         Label = period.Value.Label;
+        Year = period.Value.Year;
         OpenAt = TimeZoneInfo.ConvertTime(period.Value.OpenAt, _dateTime.SydneyTZ).DateTime;
         ClosedAt = TimeZoneInfo.ConvertTime(period.Value.ClosedAt, _dateTime.SydneyTZ).DateTime;
         Program = period.Value.Program;
+        SelectedCourses = [.. period.Value.AvailableCourses];
 
         await PreparePage();
     }
@@ -123,9 +133,11 @@ public class UpsertModel : BasePageModel
 
         CreateEnrolmentPeriodCommand command = new(
             Label,
+            Year,
             openAtOffset,
             closedAtOffset,
-            Program);
+            Program,
+            SelectedCourses);
 
         _logger
             .ForContext(nameof(CreateEnrolmentPeriodCommand), command, true)
@@ -171,9 +183,11 @@ public class UpsertModel : BasePageModel
         UpdateEnrolmentPeriodCommand command = new(
             Id,
             Label,
+            Year,
             openAtOffset,
             closedAtOffset,
-            Program);
+            Program,
+            SelectedCourses);
 
         _logger
             .ForContext(nameof(UpdateEnrolmentPeriodCommand), command, true)
@@ -204,6 +218,11 @@ public class UpsertModel : BasePageModel
             nameof(Program.Value),
             nameof(Program.Name),
             Program.Value);
+
+        CourseList = new SelectList(
+            EnrolmentCourse.GetOptions,
+            nameof(EnrolmentCourse.Value),
+            nameof(EnrolmentCourse.Name));
     }
 
     private void ValidateForm()

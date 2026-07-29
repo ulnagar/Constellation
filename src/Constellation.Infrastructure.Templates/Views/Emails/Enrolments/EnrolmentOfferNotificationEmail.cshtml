@@ -1,0 +1,35 @@
+@model Constellation.Infrastructure.Templates.Views.Emails.Enrolments.EnrolmentOfferNotificationEmailViewModel
+@using Constellation.Core.Extensions
+
+@{
+    Layout = "/Views/Shared/EmailLayout.cshtml";
+
+    ViewData["Preheader"] = Model.Preheader;
+    ViewData["Title"] = Model.Title;
+    ViewData["SenderName"] = Model.SenderName;
+    ViewData["SenderTitle"] = Model.SenderTitle;
+}
+
+<p>Dear @Model.ParentName</p>
+
+<p>I wish to confirm that a place has been reserved for your child, @Model.StudentName, in @Model.Grade.AsName() at Aurora College in @Model.Year. On behalf of the students and staff at Aurora, I extend a very warm welcome to you and @Model.StudentName.PreferredName.</p>
+
+@if (Model.Courses.Count > 0)
+{
+    <p>A place has been reserved for @Model.StudentName.PreferredName in the following @Model.Grade.AsName() course(s):</p>
+
+    <ul>
+        @foreach (var course in Model.Courses)
+        {
+            <li>@course</li>
+        }
+    </ul>
+}
+
+<p>To finalise enrolment with Aurora College, please complete the <a href="@Model.FormLink" target="_blank">Aurora College enrolment form</a> no later than <strong>@Model.RespondBy.TimeOfDay.ToString("hh:mm tt") on @Model.RespondBy.Date.ToString("D")</strong>.</p>
+
+<p>So that you are up-to-date with all that is happening at Aurora, I have added your email address to the mail-list for our school newsletter, <em>The Auracle</em>. This is published in Week 10 of each term. Previous editions of <em>The Auracle</em> can be found on the school website at <a href="https://aurora.schools.nsw.gov.au/school-life/newsletters" target="_blank">https://aurora.schools.nsw.gov.au/school-life/newsletters</a>, and I also urge you to follow us of Facebook at <a href="https://www.facebook.com/AuroraCollegeAU" target="_blank">https://www.facebook.com/AuroraCollegeAU</a> for regular updates.</p>
+
+<p>If you have any questions or need any further information, please don't hesitate to contact Aurora College on 1300 287 629.</p>
+
+<p>Congratulations on gaining entry to our school, @Model.StudentName.PreferredName. I look forward to working with you in the years ahead.</p>

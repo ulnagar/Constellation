@@ -1,6 +1,7 @@
 ﻿namespace Constellation.Application.Domains.EnrolmentContext.EnrolmentPeriods.Commands.CreateEnrolmentPeriod;
 
 using Abstractions.Messaging;
+using Core.Models.EnrolmentContext.Application.Enums;
 using Core.Models.EnrolmentContext.EnrolmentPeriod;
 using Core.Models.EnrolmentContext.EnrolmentPeriod.Repositories;
 using Core.Shared;
@@ -29,6 +30,7 @@ internal sealed class CreateEnrolmentPeriodCommandHandler
     {
         Result<EnrolmentPeriod> period = EnrolmentPeriod.Create(
             request.Label,
+            request.Year,
             request.OpenAt,
             request.ClosedAt,
             request.Program);
@@ -42,6 +44,9 @@ internal sealed class CreateEnrolmentPeriodCommandHandler
 
             return period;
         }
+
+        foreach (EnrolmentCourse course in request.AvailableCourses)
+            period.Value.AddCourse(course);
 
         _periodRepository.Insert(period.Value);
         await _unitOfWork.CompleteAsync(cancellationToken);

@@ -3,6 +3,7 @@
 using Common.Errors;
 using Core.Shared;
 using Interfaces;
+using Newtonsoft.Json;
 using System.Collections.Generic;
 
 public static class EnrolmentApplicationImportFields
@@ -27,6 +28,7 @@ public static class EnrolmentApplicationImportFields
         new("ApplicationReference", "Reference", Required: false, GroupLabel: "Application"),
         new("CurrentSchoolName", "Current School", Required: false, GroupLabel: "Application"),
         new("DestinationSchoolName", "Destination School", Required: false, GroupLabel: "Application"),
-        new("Grade", "Grade", Required: true, GroupLabel: "Application")
+        new("Grade", "Grade", Required: true, GroupLabel: "Application"),
+        new("Subjects", "Subjects", Required: false, GroupLabel: "Application")
     ];
 }

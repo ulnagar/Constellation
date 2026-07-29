@@ -1,0 +1,19 @@
+@model Constellation.Infrastructure.Templates.Views.Emails.Enrolments.EnrolmentOfferReminderEmailViewModel
+@using Constellation.Core.Extensions
+
+@{
+    Layout = "/Views/Shared/EmailLayout.cshtml";
+
+    ViewData["Preheader"] = Model.Preheader;
+    ViewData["Title"] = Model.Title;
+    ViewData["SenderName"] = Model.SenderName;
+    ViewData["SenderTitle"] = Model.SenderTitle;
+}
+
+<p>Dear @Model.ParentName</p>
+
+<p>We recently contact you to advise that a place has been reserved for your child, @Model.StudentName, in @Model.Grade.AsName() at Aurora College in @Model.Year.</p>
+
+<p>Before we can finalise enrolment, we required that you complete the <a href="@Model.FormLink" target="_blank">Aurora College enrolment form</a> no later than <strong>@Model.RespondBy.TimeOfDay.ToString("hh:mm tt") on @Model.RespondBy.Date.ToString("D")</strong>.</p>
+
+<p>If you have any questions or need any further information, please don't hesitate to contact Aurora College on 1300 287 629.</p>

@@ -1,6 +1,7 @@
 ﻿namespace Constellation.Application.Domains.EnrolmentContext.Applications.Models;
 
 using Core.Enums;
+using Core.Models.EnrolmentContext.Application;
 using Core.Models.EnrolmentContext.Application.Enums;
 using Core.Models.EnrolmentContext.EnrolmentPeriod.Enums;
 using Core.Models.EnrolmentContext.EnrolmentPeriod.Identifiers;
@@ -14,6 +15,7 @@ public sealed record EnrolmentApplicationResponse(
     ApplicationId Id,
     EnrolmentPeriodId PeriodId,
     string PeriodName,
+    string PeriodYear,
     StudentReferenceNumber? StudentReferenceNumber,
     Name StudentName,
     Gender StudentGender,
@@ -30,4 +32,5 @@ public sealed record EnrolmentApplicationResponse(
     string DestinationSchool,
     Program Program,
     Grade Grade,
-    ApplicationStatus Status);
+    ApplicationStatus Status,
+    IReadOnlyList<CourseSelection> SelectedCourses);

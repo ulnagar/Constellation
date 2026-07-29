@@ -1,9 +1,9 @@
 ﻿namespace Constellation.Core.Models.EnrolmentContext.Application;
 
+using Constellation.Core.Models.EnrolmentContext.Application.Enums;
 using Core.Enums;
 using EnrolmentPeriod.Enums;
 using EnrolmentPeriod.Identifiers;
-using Enums;
 using Errors;
 using Identifiers;
 using Models.Identifiers;
@@ -14,6 +14,8 @@ using ValueObjects;
 
 public sealed class Application
 {
+    private readonly List<CourseSelection> _courses = [];
+
     /// <summary>
     /// DO NOT USE. EF CORE ONLY
     /// </summary>
@@ -63,6 +65,7 @@ public sealed class Application
     public string? DestinationSchool { get; private set; }
     public Program Program { get; private set; }
     public Grade Grade { get; private set; }
+    public IReadOnlyList<CourseSelection> SelectedCourses => _courses.AsReadOnly();
     public ApplicationStatus Status { get; private set; }
 
     public static Result<Application> Create(
@@ -182,6 +185,39 @@ public sealed class Application
             return Result.Failure(EnrolmentApplicationErrors.CannotUpdateOfferedApplication);
 
         Status = newStatus;
+
+        if (newStatus == ApplicationStatus.Approved)
+        {
+            foreach (CourseSelection course in _courses.Where(course => course.Status == CourseSelectionStatus.Pending))
+            {
+                UpdateCourse(course.Course, CourseSelectionStatus.Approved);
+            }
+        }
+
+        return Result.Success();
+    }
+
+    public void AddCourse(EnrolmentCourse course)
+    {
+        if (_courses.Any(entry => entry.Course == course))
+            return;
+
+        _courses.Add(new(course));
+    }
+
+    public void RemoveCourse(EnrolmentCourse course) =>
+        _courses.RemoveAll(entry => entry.Course == course);
+
+    public Result UpdateCourse(EnrolmentCourse course, CourseSelectionStatus status)
+    {
+        int index = _courses.FindIndex(entry => entry.Course == course);
+
+        if (index < 0)
+            return Result.Failure(new Error(
+                "Application.CourseNotSelected",
+                $"{course.Name} is not currently selected on this application."));
+
+        _courses[index] = _courses[index] with { Status = status };
 
         return Result.Success();
     }

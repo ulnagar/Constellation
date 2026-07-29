@@ -89,5 +89,11 @@ internal sealed class ApplicationConfiguration : IEntityTypeConfiguration<Applic
         builder
             .Property(entry => entry.Status)
             .HasConversion<string>();
+
+        builder
+            .Property(entry => entry.SelectedCourses)
+            .HasField("_courses")
+            .UsePropertyAccessMode(PropertyAccessMode.Field)
+            .HasConversion<JsonColumnConverter<IReadOnlyList<CourseSelection>>>();
     }
 }

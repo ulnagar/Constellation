@@ -48,6 +48,7 @@ internal sealed class GetEnrolmentApplicationByIdQueryHandler
             application.Id,
             application.PeriodId,
             period?.Label ?? string.Empty,
+            period?.Year ?? string.Empty,
             application.StudentReferenceNumber,
             application.StudentName,
             application.StudentGender,
@@ -64,6 +65,7 @@ internal sealed class GetEnrolmentApplicationByIdQueryHandler
             application.DestinationSchool ?? string.Empty,
             application.Program,
             application.Grade,
-            application.Status);
+            application.Status,
+            application.SelectedCourses);
     }
 }

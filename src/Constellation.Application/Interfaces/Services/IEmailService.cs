@@ -5,6 +5,7 @@ using Constellation.Core.Models.Attachments.DTOs;
 using Constellation.Core.Models.Attendance;
 using Constellation.Core.Models.Awards;
 using Constellation.Core.Models.Covers;
+using Constellation.Core.Models.EnrolmentContext.Offer;
 using Constellation.Core.Models.Offerings;
 using Constellation.Core.Models.Students;
 using Constellation.Core.Models.WorkFlow.Identifiers;
@@ -33,6 +34,7 @@ using System.Net.Mail;
 using System.Threading;
 using System.Threading.Tasks;
 using Action = Core.Models.WorkFlow.Action;
+using Application = Core.Models.EnrolmentContext.Application.Application;
 
 public interface IEmailService
 {
@@ -84,6 +86,10 @@ public interface IEmailService
     Task SendCancelledCoverEmail(Cover cover, Offering offering, EmailRecipient coveringTeacher, List<EmailRecipient> primaryRecipients, List<EmailRecipient> secondaryRecipients, TimeOnly startTime, TimeOnly endTime, string teamLink, List<Attachment> attachments, CancellationToken cancellationToken = default);
     Task SendNewCoverEmail(Cover cover, Offering offering, EmailRecipient coveringTeacher, List<EmailRecipient> primaryRecipients, List<EmailRecipient> secondaryRecipients, TimeOnly startTime, TimeOnly endTime, string teamLink, List<Attachment> attachments, CancellationToken cancellationToken = default);
     Task SendUpdatedCoverEmail(Cover cover, Offering offering, EmailRecipient coveringTeacher, List<EmailRecipient> primaryRecipients, List<EmailRecipient> secondaryRecipients, DateOnly originalStartDate, TimeOnly startTime, TimeOnly endTime, string teamLink, List<Attachment> attachments, CancellationToken cancellationToken = default);
+
+    // Enrolment Emails
+    Task<Result> SendEnrolmentOfferNotification(Application application, Offer offer, string year, CancellationToken cancellationToken = default);
+    Task<Result> SendEnrolmentOfferReminder(Application application, Offer offer, string year, CancellationToken cancellationToken = default);
 
     // Messaging Emails
     Task<Result> SendQueuedMessage(MessageSender sender, EmailRecipient receiver, string subject, string messageBody, CancellationToken cancellationToken = default);

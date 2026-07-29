@@ -1,6 +1,7 @@
 ﻿@page "{id?}"
 @model Constellation.Presentation.Staff.Areas.Staff.Pages.Partner.Enrolments.Periods.UpsertModel
 
+@using Constellation.Core.Models.EnrolmentContext.Application.Enums
 @using Constellation.Core.Models.EnrolmentContext.EnrolmentPeriod.Identifiers
 
 @{
@@ -27,6 +28,14 @@
                 <span asp-validation-for="Label" class="text-danger"></span>
             </div>
         </div>
+        
+        <div class="mb-3 row">
+            <label asp-for="Year" class="col-md-2">Year</label>
+            <div class="col-md-3">
+                <input asp-for="Year" class="form-control" />
+                <span asp-validation-for="Year" class="text-danger"></span>
+            </div>
+        </div>
 
         <div class="mb-3 row">
             <label asp-for="OpenAt" class="col-md-2">Available From</label>
@@ -46,11 +55,32 @@
 
         <div class="mb-3 row">
             <label asp-for="Program" class="col-md-2">Program</label>
-            <div class="col-md-3">
+            <div class="col-md-5">
                 <select id="Program" name="Program" asp-items="@Model.ProgramList" class="form-control select2">
                     <option value=""> -- Select -- </option>
                 </select>
                 <span asp-validation-for="Program" class="text-danger"></span>
+            </div>
+        </div>
+
+        <div class="mb-3 row">
+            <label asp-for="SelectedCourses" class="col-md-2">Available Courses</label>
+            <div class="col-md-5">
+                <select asp-for="SelectedCourses" multiple="multiple" class="form-control select2">
+                    <option value=""> -- Select -- </option>
+                    @foreach (var entry in EnrolmentCourse.GetOptions)
+                    {
+                        if (Model.SelectedCourses.Contains(entry))
+                        {
+                            <option value="@entry.Value" selected="selected">@entry.Name</option>
+                        }
+                        else
+                        {
+                            <option value="@entry.Value">@entry.Name</option>
+                        }
+                    }
+                </select>
+                <span asp-validation-for="SelectedCourses" class="text-danger"></span>
             </div>
         </div>
 
@@ -68,3 +98,14 @@
         </div>
     </div>
 </form>
+
+@section Scripts
+{
+    <script>
+        (function() {
+            $('.select2').select2({
+                theme: 'bootstrap-5'
+            });
+        }());
+    </script>
+}

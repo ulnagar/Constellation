@@ -8,6 +8,7 @@ using Application.Models.ImportCache;
 using Core.Enums;
 using Core.Models;
 using Core.Models.EnrolmentContext.Application;
+using Core.Models.EnrolmentContext.Application.Enums;
 using Core.Models.EnrolmentContext.EnrolmentPeriod;
 using Core.Models.Identifiers;
 using Core.Models.Students.Enums;
@@ -54,6 +55,7 @@ internal sealed class ApplicationImportRowMapper : IImportRowMapper<Application,
         string? currentSchoolName = Get("CurrentSchoolName");
         string? destinationSchoolName = Get("DestinationSchoolName");
         string? grade = Get("Grade");
+        string? courseList = Get("Courses");
 
         if (string.IsNullOrWhiteSpace(studentNameFirst))
             return Result.Failure<Application>(ImportErrors.RequiredFieldMissing("Student First Name", row.RowNumber));
@@ -204,7 +206,7 @@ internal sealed class ApplicationImportRowMapper : IImportRowMapper<Application,
             destinationSchool = foundSchool.Name;
         }
 
-        return Application.Create(
+        Result<Application> application = Application.Create(
             period.Id,
             srn,
             studentNameResult.Value,
@@ -222,5 +224,32 @@ internal sealed class ApplicationImportRowMapper : IImportRowMapper<Application,
             destinationSchool,
             period.Program,
             gradeValue);
+
+        if (application.IsFailure || courseList is null)
+            return application;
+        
+        string[] courses = courseList.Split(';');
+        List<EnrolmentCourse> validCourses = EnrolmentCourse.GetOptions.ToList();
+        List<EnrolmentCourse> selectedCourses = [];
+
+        foreach (string course in courses)
+        {
+            EnrolmentCourse? foundCourse = validCourses.FirstOrDefault(entry =>
+                entry.Value == course.Trim()
+                || entry.Name == course.Trim());
+
+            if (foundCourse is null)
+                return Result.Failure<Application>(ImportErrors.ValueParseError(typeof(EnrolmentCourse), "Courses"));
+
+            selectedCourses.Add(foundCourse);
+        }
+
+        foreach (EnrolmentCourse course in selectedCourses)
+        {
+            application.Value.AddCourse(course);
+            application.Value.UpdateCourse(course, CourseSelectionStatus.Approved);
+        }
+
+        return application;
     }
 }
