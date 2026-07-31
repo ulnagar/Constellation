@@ -6,10 +6,12 @@ using Application.Identifiers;
 using EnrolmentPeriod.Identifiers;
 using Enums;
 using Errors;
+using Events;
 using Identifiers;
+using Primitives;
 using Shared;
 
-public sealed class Offer
+public sealed class Offer : AggregateRoot
 {
     public static TimeSpan ReminderPeriod => TimeSpan.FromDays(7);
     public static TimeSpan LapsedPeriod => TimeSpan.FromDays(14);
@@ -63,6 +65,8 @@ public sealed class Offer
 
         OfferedAt = asOf;
         Status = OfferStatus.Pending;
+
+        RaiseDomainEvent(new EnrolmentOfferGeneratedDomainEvent(new(), Id));
 
         return Result.Success();
     }

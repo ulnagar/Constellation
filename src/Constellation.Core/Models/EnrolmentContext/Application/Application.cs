@@ -188,7 +188,7 @@ public sealed class Application
 
         if (newStatus == ApplicationStatus.Approved)
         {
-            foreach (CourseSelection course in _courses.Where(course => course.Status == CourseSelectionStatus.Pending))
+            foreach (CourseSelection course in _courses.Where(course => course.Status == CourseSelectionStatus.Pending).ToList())
             {
                 UpdateCourse(course.Course, CourseSelectionStatus.Approved);
             }

@@ -1,12 +1,11 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Partner.Enrolments.Offers;
 
-using Application.Domains.EnrolmentContext.Offers.Commands.SendOfferEmailToParent;
+using Application.Domains.EnrolmentContext.Offers.Commands.MarkOfferPending;
 using Application.Domains.EnrolmentContext.Offers.Models;
 using Application.Domains.EnrolmentContext.Offers.Queries.ExportOfferList;
 using Application.Domains.EnrolmentContext.Offers.Queries.GetOffersForPeriod;
 using Application.Models.Auth;
 using Constellation.Application.Common.PresentationModels;
-using Constellation.Application.Domains.EnrolmentContext.Applications.Commands.UpdateEnrolmentApplicationStatus;
 using Constellation.Application.Domains.EnrolmentContext.EnrolmentPeriods.Models;
 using Constellation.Application.Domains.EnrolmentContext.EnrolmentPeriods.Queries.GetAllEnrolmentPeriods;
 using Constellation.Application.Helpers;
@@ -113,7 +112,7 @@ public class IndexModel : BasePageModel
 
         foreach (OfferId offerId in offerIds)
         {
-            Result result = await _mediator.Send(new SendOfferEmailToParentCommand(offerId));
+            Result result = await _mediator.Send(new MarkOfferPendingCommand(offerId));
 
             if (result.IsFailure)
                 failed++;
