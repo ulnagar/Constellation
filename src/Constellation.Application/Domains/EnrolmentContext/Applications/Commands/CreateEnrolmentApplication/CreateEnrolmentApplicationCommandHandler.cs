@@ -2,6 +2,7 @@
 
 using Abstractions.Messaging;
 using Core.Models.EnrolmentContext.Application;
+using Core.Models.EnrolmentContext.Application.Enums;
 using Core.Models.EnrolmentContext.Application.Repositories;
 using Core.Shared;
 using Interfaces;
@@ -55,6 +56,9 @@ internal sealed class CreateEnrolmentApplicationCommandHandler
 
             return application;
         }
+
+        foreach (EnrolmentCourse course in request.Courses)
+            application.Value.AddCourse(course);
 
         _repository.Insert(application.Value);
 

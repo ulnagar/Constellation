@@ -180,6 +180,9 @@
 
 @if (Model.Application.SelectedCourses.Any())
 {
+
+    <h4>Subjects</h4>
+
     <table class="table table-striped table-hover">
         <thead>
             <tr>
@@ -196,8 +199,14 @@
                 <td>@entry.Course.Name</td>
                 <td>@entry.Status</td>
                 <td>
-                    <button class="btn btn-danger">Reject</button>
-                    <button class="btn btn-success">Approve</button>
+                    @if (entry.Status != CourseSelectionStatus.Withdrawn)
+                    {
+                        <form method="post">
+                            <input type="hidden" name="course" value="@entry.Course.Value" />
+                            <button type="submit" asp-page-handler="RejectApplication" class="btn btn-danger">Reject</button>
+                            <button type="submit" asp-page-handler="ApproveApplication" class="btn btn-success">Approve</button>
+                        </form>
+                    }
                 </td>
             </tr>
         }
@@ -252,3 +261,19 @@
         </div>
     </div>
 </form>
+
+@section scripts
+{
+    <script>
+        $(document).ready(function (){
+            const table = $('table').DataTable({ 
+                "order": [
+                    [1, 'asc']
+                ],
+                "columnDefs": [
+                    { "target": 3, "searchable": false, "sortable": false }
+                ]
+            });
+        });
+    </script>
+}

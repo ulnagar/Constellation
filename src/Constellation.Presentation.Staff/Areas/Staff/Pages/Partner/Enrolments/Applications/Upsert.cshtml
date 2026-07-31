@@ -226,6 +226,19 @@
             </div>
         </div>
         
+        <script id="periodSubjectData" type="application/json">
+            @Html.Raw(System.Text.Json.JsonSerializer.Serialize(
+                Model.Periods.ToDictionary(
+                    p => p.Id.Value,
+                    p => p.AvailableCourses))) 
+        </script>
+
+        <script id="selectedSubjectsData" type="application/json">
+            @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.SelectedCourses))
+        </script>
+
+        <div id="subjectSelectionContainer"></div>
+        
         <div class="mb-3">
             <div class="col-md-offset-2 col-md-3 d-grid">
                 @if (Model.Id == ApplicationId.Empty)
@@ -323,6 +336,55 @@
         (function () {
             $('.custom-select2').select2({
                 theme: 'bootstrap-5'
+            });
+        }());
+                
+        (function () {
+            var periodSubjects = JSON.parse(document.getElementById('periodSubjectData').textContent || '{}');
+            var selectedIds = JSON.parse(document.getElementById('selectedSubjectsData').textContent || '[]');
+            var $container = $('#subjectSelectionContainer');
+
+            function renderSubjectSelect(offerings, preselected) {
+                var $existing = $container.find('.subject-select2');
+                if ($existing.hasClass('select2-hidden-accessible')) {
+                    $existing.select2('destroy');
+                }
+                $container.empty();
+
+                if (!offerings || !offerings.length) return;
+
+                var preselectedValues = (preselected || []).map(function (p) { return p.Value; });
+
+                var $select = $('<select>', {
+                    id: 'SelectedCourses',
+                    name: 'SelectedCourses',
+                    class: 'form-control subject-select2',
+                    multiple: 'multiple'
+                });
+
+                offerings.forEach(function (o) {
+                    $('<option>', { value: o.Value, text: o.Name, selected: preselectedValues.indexOf(o.Value) !== -1 })
+                        .appendTo($select);
+                });
+
+                $('<div>', { class: 'mb-3 row' })
+                    .append($('<label>', { class: 'col-md-2', text: 'Subjects' }))
+                    .append($('<div>', { class: 'col-md-6' }).append($select))
+                    .appendTo($container);
+
+                $select.select2({ theme: 'bootstrap-5', placeholder: 'Select subjects\u2026', width: '100%' });
+            }
+
+            // Works for both cases: hidden input (edit) and visible select (new item) both have id="PeriodId"
+            var currentPeriodId = $('#PeriodId').val();
+            if (currentPeriodId && periodSubjects[currentPeriodId]) {
+                renderSubjectSelect(periodSubjects[currentPeriodId], selectedIds);
+            }
+
+            // Only wires up for new-item mode — hidden input in edit mode has nothing to change
+            $('select#PeriodId').on('change', function () {
+                var periodId = $(this).val();
+                renderSubjectSelect(periodSubjects[periodId] || [], []);
             });
         }());
     </script>

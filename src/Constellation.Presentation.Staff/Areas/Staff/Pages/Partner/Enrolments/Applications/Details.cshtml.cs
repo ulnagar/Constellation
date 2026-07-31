@@ -1,5 +1,6 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Partner.Enrolments.Applications;
 
+using Application.Domains.EnrolmentContext.Applications.Commands.UpdateEnrolmentApplicationCourse;
 using Application.Domains.EnrolmentContext.Applications.Commands.UpdateEnrolmentApplicationStatus;
 using Application.Domains.EnrolmentContext.Applications.Models;
 using Application.Domains.EnrolmentContext.Applications.Queries.GetEnrolmentApplicationById;
@@ -126,6 +127,58 @@ public class DetailsModel : BasePageModel
                 .Information("Failed to create Offer from Enrolment Application by user {User}", _currentUserService.UserName);
 
             ModalContent = ErrorDisplay.Create(result.Error);
+
+            await PreparePage();
+            return Page();
+        }
+
+        return RedirectToPage();
+    }
+
+    public async Task<IActionResult> OnPostRejectApplication(EnrolmentCourse course)
+    {
+        UpdateEnrolmentApplicationCourseCommand command = new(Id, course, CourseSelectionStatus.Rejected);
+
+        _logger
+            .ForContext(nameof(UpdateEnrolmentApplicationCourseCommand), command, true)
+            .Information("Requested to reject Enrolment Application Course by user {User}", _currentUserService.UserName);
+
+        Result update = await _mediator.Send(command);
+
+        if (update.IsFailure)
+        {
+            _logger
+                .ForContext(nameof(UpdateEnrolmentApplicationCourseCommand), command, true)
+                .ForContext(nameof(Error), update.Error, true)
+                .Warning("Failed to reject Enrolment Application Course by user {User}", _currentUserService.UserName);
+
+            ModalContent = ErrorDisplay.Create(update.Error);
+
+            await PreparePage();
+            return Page();
+        }
+
+        return RedirectToPage();
+    }
+
+    public async Task<IActionResult> OnPostApproveApplication(EnrolmentCourse course)
+    {
+        UpdateEnrolmentApplicationCourseCommand command = new(Id, course, CourseSelectionStatus.Approved);
+
+        _logger
+            .ForContext(nameof(UpdateEnrolmentApplicationCourseCommand), command, true)
+            .Information("Requested to approve Enrolment Application Course by user {User}", _currentUserService.UserName);
+
+        Result update = await _mediator.Send(command);
+
+        if (update.IsFailure)
+        {
+            _logger
+                .ForContext(nameof(UpdateEnrolmentApplicationCourseCommand), command, true)
+                .ForContext(nameof(Error), update.Error, true)
+                .Warning("Failed to approve Enrolment Application Course by user {User}", _currentUserService.UserName);
+
+            ModalContent = ErrorDisplay.Create(update.Error);
 
             await PreparePage();
             return Page();

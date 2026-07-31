@@ -13,8 +13,10 @@ using Constellation.Application.Domains.Schools.Queries.GetSchoolsForSelectionLi
 using Constellation.Core.Abstractions.Services;
 using Constellation.Core.Enums;
 using Constellation.Core.Models.Identifiers;
+using Constellation.Core.Models.Offerings.Identifiers;
 using Constellation.Core.Models.Students.Enums;
 using Core.Models.EnrolmentContext.Application;
+using Core.Models.EnrolmentContext.Application.Enums;
 using Core.Models.EnrolmentContext.EnrolmentPeriod.Enums;
 using Core.Models.EnrolmentContext.EnrolmentPeriod.Identifiers;
 using Core.Models.Students.ValueObjects;
@@ -113,6 +115,10 @@ public class UpsertModel : BasePageModel
     [BindProperty]
     public Grade Grade { get; set; }
 
+    [BindProperty]
+    public List<EnrolmentCourse> SelectedCourses { get; set; } = [];
+
+    public List<EnrolmentPeriodResponse> Periods { get; set; } = [];
     public SelectList PeriodList { get; set; }
     public IEnumerable<SelectListItem> SchoolList { get; set; }
     public SelectList ProgramList { get; set; }
@@ -170,6 +176,7 @@ public class UpsertModel : BasePageModel
         DestinationSchool = application.Value.DestinationSchool;
         Program = application.Value.Program;
         Grade = application.Value.Grade;
+        SelectedCourses = application.Value.SelectedCourses.Select(entry => entry.Course).ToList();
 
         await PreparePage();
     }
@@ -202,7 +209,7 @@ public class UpsertModel : BasePageModel
             Gender.GetOptions,
             nameof(Gender.Value),
             nameof(Gender.Name),
-            StudentGender.Value);
+            StudentGender?.Value);
 
         Result<List<EnrolmentPeriodResponse>> periods = await _mediator.Send(new GetCurrentEnrolmentPeriodsQuery());
 
@@ -216,11 +223,9 @@ public class UpsertModel : BasePageModel
         }
 
         if (PeriodId != EnrolmentPeriodId.Empty)
-        {
-            PeriodName = periods.Value
-                .FirstOrDefault(entry => entry.Id == PeriodId)?.Label
-                 ?? string.Empty;
-        }
+            PeriodName = periods.Value.FirstOrDefault(entry => entry.Id == PeriodId)?.Label ?? string.Empty;
+
+        Periods = periods.Value;
 
         PeriodList = new SelectList(
             periods.Value,
@@ -228,7 +233,7 @@ public class UpsertModel : BasePageModel
             nameof(EnrolmentPeriodResponse.Label),
             PeriodId);
     }
-
+    
     public async Task<IActionResult> OnPostCreate()
     {
         ValidateForm();
@@ -260,7 +265,8 @@ public class UpsertModel : BasePageModel
             DestinationSchoolCode,
             DestinationSchool ?? string.Empty,
             Program,
-            Grade);
+            Grade,
+            SelectedCourses);
 
         _logger
             .ForContext(nameof(CreateEnrolmentApplicationCommand), command, true)
@@ -315,7 +321,8 @@ public class UpsertModel : BasePageModel
             DestinationSchoolCode,
             DestinationSchool ?? string.Empty,
             Program,
-            Grade);
+            Grade,
+            SelectedCourses);
 
         _logger
             .ForContext(nameof(UpdateEnrolmentApplicationCommand), command, true)

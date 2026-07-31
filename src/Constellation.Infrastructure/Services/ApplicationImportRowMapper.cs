@@ -55,7 +55,7 @@ internal sealed class ApplicationImportRowMapper : IImportRowMapper<Application,
         string? currentSchoolName = Get("CurrentSchoolName");
         string? destinationSchoolName = Get("DestinationSchoolName");
         string? grade = Get("Grade");
-        string? courseList = Get("Courses");
+        string? courseList = Get("Subjects");
 
         if (string.IsNullOrWhiteSpace(studentNameFirst))
             return Result.Failure<Application>(ImportErrors.RequiredFieldMissing("Student First Name", row.RowNumber));
@@ -247,7 +247,7 @@ internal sealed class ApplicationImportRowMapper : IImportRowMapper<Application,
         foreach (EnrolmentCourse course in selectedCourses)
         {
             application.Value.AddCourse(course);
-            application.Value.UpdateCourse(course, CourseSelectionStatus.Approved);
+            //application.Value.UpdateCourse(course, CourseSelectionStatus.Approved);
         }
 
         return application;

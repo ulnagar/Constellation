@@ -94,6 +94,7 @@ internal sealed class ApplicationConfiguration : IEntityTypeConfiguration<Applic
             .Property(entry => entry.SelectedCourses)
             .HasField("_courses")
             .UsePropertyAccessMode(PropertyAccessMode.Field)
-            .HasConversion<JsonColumnConverter<IReadOnlyList<CourseSelection>>>();
+            .HasConversion(new JsonListConverter<CourseSelection>())
+            .Metadata.SetValueComparer(new JsonListComparer<CourseSelection>());
     }
 }

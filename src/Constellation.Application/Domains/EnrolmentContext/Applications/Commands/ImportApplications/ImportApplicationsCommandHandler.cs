@@ -5,6 +5,7 @@ using Constellation.Application.Common.Errors;
 using Constellation.Application.Interfaces.Services;
 using Constellation.Application.Models.ImportCache;
 using Core.Models.EnrolmentContext.Application;
+using Core.Models.EnrolmentContext.Application.Enums;
 using Core.Models.EnrolmentContext.Application.Errors;
 using Core.Models.EnrolmentContext.Application.Repositories;
 using Core.Models.EnrolmentContext.EnrolmentPeriod;
@@ -114,8 +115,21 @@ internal sealed class ImportApplicationsCommandHandler
                 application.Program,
                 application.Grade);
 
-            //TODO: Sync Courses between the matchingApplication and application here.
-            asdfasdf;
+            foreach (CourseSelection course in matchingApplication.SelectedCourses)
+            {
+                if (application.SelectedCourses.Any(entry => entry.Course == course.Course))
+                    continue;
+
+                matchingApplication.UpdateCourse(course.Course, CourseSelectionStatus.Withdrawn);
+            }
+
+            foreach (CourseSelection course in application.SelectedCourses)
+            {
+                if (matchingApplication.SelectedCourses.Any(entry => entry.Course == course.Course))
+                    continue;
+
+                matchingApplication.AddCourse(course.Course);
+            }
         }
 
         await _unitOfWork.CompleteAsync(cancellationToken);

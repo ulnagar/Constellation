@@ -1,6 +1,7 @@
 ﻿namespace Constellation.Application.Domains.EnrolmentContext.Applications.Commands.UpdateEnrolmentApplication;
 
 using Abstractions.Messaging;
+using Constellation.Core.Models.EnrolmentContext.Application.Enums;
 using Core.Models.EnrolmentContext.Application;
 using Core.Models.EnrolmentContext.Application.Errors;
 using Core.Models.EnrolmentContext.Application.Repositories;
@@ -66,6 +67,22 @@ internal sealed class UpdateEnrolmentApplicationCommandHandler
                 .Warning("Failed to update Enrolment Application");
 
             return updateResult;
+        }
+
+        foreach (CourseSelection course in application.SelectedCourses)
+        {
+            if (request.Courses.Any(entry => entry == course.Course))
+                continue;
+
+            application.UpdateCourse(course.Course, CourseSelectionStatus.Withdrawn);
+        }
+
+        foreach (EnrolmentCourse course in request.Courses)
+        {
+            if (application.SelectedCourses.Any(entry => entry.Course == course))
+                continue;
+
+            application.AddCourse(course);
         }
 
         await _unitOfWork.CompleteAsync(cancellationToken);
