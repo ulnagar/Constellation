@@ -1,6 +1,7 @@
 ﻿namespace Constellation.Application.Domains.Assessments.Assessments.Queries.GetCurrentAssessmentsByStudentId;
 
 using Abstractions.Messaging;
+using Core.Abstractions.Clock;
 using Core.Models.Assessments;
 using Core.Models.Assessments.Repositories;
 using Core.Shared;
@@ -12,13 +13,16 @@ internal sealed class GetCurrentAssessmentsByStudentIdQueryHandler
 : IQueryHandler<GetCurrentAssessmentsByStudentIdQuery, List<AssessmentDetailsResponse>>
 {
     private readonly IAssessmentRepository _assessmentRepository;
+    private readonly IDateTimeProvider _dateTime;
     private readonly ILogger _logger;
 
     public GetCurrentAssessmentsByStudentIdQueryHandler(
         IAssessmentRepository assessmentRepository,
+        IDateTimeProvider dateTime,
         ILogger logger)
     {
         _assessmentRepository = assessmentRepository;
+        _dateTime = dateTime;
         _logger = logger
             .ForContext<GetCurrentAssessmentsByStudentIdQuery>();
     }
@@ -52,7 +56,7 @@ internal sealed class GetCurrentAssessmentsByStudentIdQueryHandler
             {
                 List<AssessmentDetailsResponse.DownloadEvent> downloadEvents = [];
 
-                if (download.IsRestricted)
+                if (!download.IsAvailable(_dateTime.Today))
                     continue;
 
                 downloads.Add(new(
@@ -61,6 +65,7 @@ internal sealed class GetCurrentAssessmentsByStudentIdQueryHandler
                     download.AvailableFrom,
                     download.AvailableTo,
                     download.IsRestricted,
+                    download.IsDeleted,
                     downloadEvents));
             }
 

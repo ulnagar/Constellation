@@ -81,6 +81,7 @@ internal sealed class GetAssessmentDetailsByIdQueryHandler
                 download.AvailableFrom,
                 download.AvailableTo,
                 download.IsRestricted,
+                download.IsDeleted,
                 downloadEvents));
         }
 

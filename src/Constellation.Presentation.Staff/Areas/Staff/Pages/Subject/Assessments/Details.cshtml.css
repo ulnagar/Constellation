@@ -1,0 +1,9 @@
+tr.deleted {
+    background-color:  slategrey !important;
+    font-style: italic;
+}
+
+tr.deleted td{
+    background-color: transparent;
+    color: white;
+}

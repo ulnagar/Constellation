@@ -110,8 +110,8 @@ public sealed class Assessment : AggregateRoot
     public void AddDownload(AssessmentDownload download) => 
         _downloads.Add(download);
 
-    public void RemoveDownload(AssessmentDownload download) => 
-        _downloads.Remove(download);
+    public void RemoveDownload(AssessmentDownload download) =>
+        download.Delete();
 
     public Result AddStudent(Student student, List<Provision> provisions)
     {
@@ -140,8 +140,7 @@ public sealed class Assessment : AggregateRoot
     {
         AssessmentStudent? entry = _students.FirstOrDefault(entry => entry.StudentId == studentId);
 
-        if (entry is not null)
-            entry.Delete();
+        entry?.Delete();
     }
 
     public Result AddStudentProvision(StudentId studentId, Provision provision)
