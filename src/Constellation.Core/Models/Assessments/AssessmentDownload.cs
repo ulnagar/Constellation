@@ -34,9 +34,26 @@ public sealed class AssessmentDownload
     public DateOnly AvailableFrom { get; private set; }
     public DateOnly AvailableTo { get; private set; }
     public bool IsRestricted { get; private set; }
+    public bool IsDeleted { get; private set; }
 
     public IReadOnlyList<AssessmentDownloadEvent> DownloadEvents => _downloadEvents.AsReadOnly();
 
     public void AddDownloadEvent(AppUser user) => 
         _downloadEvents.Add(new(Id, user));
+
+    public void Delete() => IsDeleted = true;
+
+    public bool IsAvailable(DateOnly today)
+    {
+        if (IsDeleted)
+            return false;
+        
+        if (today < AvailableFrom)
+            return false;
+
+        if (today > AvailableTo)
+            return false;
+
+        return true;
+    }
 }

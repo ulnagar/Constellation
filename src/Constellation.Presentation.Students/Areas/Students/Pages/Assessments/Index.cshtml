@@ -96,6 +96,9 @@
                                 <div class="accordion-body">
                                     @foreach (var download in assessment.Downloads)
                                     {
+                                        @if (download.IsRestricted)
+                                            continue;
+
                                         <div class="p-2 ms-1 me-1 mb-2 position-relative border border-2 rounded-3">
                                             <span class="row d-flex align-items-center">
                                                 <div class="col">

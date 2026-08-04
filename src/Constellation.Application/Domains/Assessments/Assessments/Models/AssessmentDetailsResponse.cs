@@ -55,6 +55,7 @@ public sealed record AssessmentDetailsResponse(
         DateOnly AvailableFrom,
         DateOnly AvailableTo,
         bool IsRestricted,
+        bool IsDeleted,
         List<DownloadEvent> DownloadEvents);
 
     public sealed record DownloadEvent(

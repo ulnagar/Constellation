@@ -253,7 +253,8 @@
                 <tbody>
                 @foreach (var entry in Model.Assessment.Downloads)
                 {
-                    <tr data-id="@entry.DownloadId">
+                    var isDeleted = entry.IsDeleted ? "deleted" : "";
+                    <tr data-id="@entry.DownloadId" class="@isDeleted">
                         <td></td>
                         <td>@entry.Name</td>
                         <td data-order="@entry.AvailableFrom.ToString("yyyy-MM-dd")">@entry.AvailableFrom.ToString("d")</td>
@@ -276,7 +277,7 @@
                                     {
                                         <a asp-page-handler="DownloadFile" class="dropdown-item" asp-route-downloadId="@entry.DownloadId">Download</a>
                                     }
-                                    @if (canEditTest.Succeeded)
+                                    @if (canEditTest.Succeeded && !entry.IsDeleted)
                                     {
                                         <button class="dropdown-item remove-document-button" data-id="@entry.DownloadId">Remove Document</button>
                                     }

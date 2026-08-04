@@ -1,6 +1,7 @@
 ﻿namespace Constellation.Application.Domains.Assessments.Assessments.Queries.GetCurrentAssessmentsBySchoolCode;
 
 using Abstractions.Messaging;
+using Core.Abstractions.Clock;
 using Core.Models.Assessments;
 using Core.Models.Assessments.Repositories;
 using Core.Shared;
@@ -12,13 +13,16 @@ internal sealed class GetCurrentAssessmentsBySchoolCodeQueryHandler
 : IQueryHandler<GetCurrentAssessmentsBySchoolCodeQuery, List<AssessmentDetailsResponse>>
 {
     private readonly IAssessmentRepository _assessmentRepository;
+    private readonly IDateTimeProvider _dateTime;
     private readonly ILogger _logger;
 
     public GetCurrentAssessmentsBySchoolCodeQueryHandler(
         IAssessmentRepository assessmentRepository,
+        IDateTimeProvider dateTime,
         ILogger logger)
     {
         _assessmentRepository = assessmentRepository;
+        _dateTime = dateTime;
         _logger = logger
             .ForContext<GetCurrentAssessmentsBySchoolCodeQuery>();
     }
@@ -52,12 +56,16 @@ internal sealed class GetCurrentAssessmentsBySchoolCodeQueryHandler
             {
                 List<AssessmentDetailsResponse.DownloadEvent> downloadEvents = [];
 
+                if (!download.IsAvailable(_dateTime.Today))
+                    continue;
+
                 downloads.Add(new(
                     download.Id,
                     download.Name,
                     download.AvailableFrom,
                     download.AvailableTo,
                     download.IsRestricted,
+                    download.IsDeleted,
                     downloadEvents));
             }
 
