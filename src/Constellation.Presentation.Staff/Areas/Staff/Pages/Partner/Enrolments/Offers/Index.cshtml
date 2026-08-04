@@ -47,8 +47,14 @@
         <a asp-route-status="@IndexModel.StatusFilter.Declined" asp-route-periodId="@Model.PeriodId" class="btn @declinedStyle">Declined</a>
     </div>
     
-    <button class="btn btn-secondary" id="export-button">Export</button>
+    @if (canEditTest.Succeeded)
+    {
+        <button class="btn btn-secondary" id="export-button">Export</button>
 
+        <div class="btn-group" role="group">
+            <button class="btn btn-warning" id="bulk-send-offer-button">Create Offers</button>
+        </div>
+    }
 </div>
 
 <hr />
