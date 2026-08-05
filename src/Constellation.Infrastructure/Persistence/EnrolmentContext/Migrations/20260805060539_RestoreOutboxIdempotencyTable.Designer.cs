@@ -5,6 +5,7 @@ using Constellation.Infrastructure.Persistence.EnrolmentContext;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -12,9 +13,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Constellation.Infrastructure.Persistence.EnrolmentContext.Migrations
 {
     [DbContext(typeof(EnrolmentDbContext))]
-    partial class EnrolmentDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260805060539_RestoreOutboxIdempotencyTable")]
+    partial class RestoreOutboxIdempotencyTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

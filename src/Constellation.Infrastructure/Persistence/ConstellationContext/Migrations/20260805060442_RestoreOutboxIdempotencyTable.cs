@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migrations
 {
     /// <inheritdoc />
-    public partial class UpdateOutboxConfiguration : Migration
+    public partial class RestoreOutboxIdempotencyTable : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)

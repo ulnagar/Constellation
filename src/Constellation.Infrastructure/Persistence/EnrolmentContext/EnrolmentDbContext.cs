@@ -26,7 +26,7 @@ public sealed class EnrolmentDbContext : DbContext
 
 
         modelBuilder.ApplyConfiguration(new OutboxMessageConfiguration());
-        //modelBuilder.ApplyConfiguration(new OutboxMessageConsumerConfiguration());
+        modelBuilder.ApplyConfiguration(new OutboxMessageConsumerConfiguration());
 
         base.OnModelCreating(modelBuilder);
     }

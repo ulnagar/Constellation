@@ -46,7 +46,7 @@ public class ConstellationDbContext : IdentityDbContext<AppUser, AppRole, Guid>
             t => t.GetTypeInfo().Namespace.Contains("ConstellationContext")); // Only include the local EntityConfigurations
 
         builder.ApplyConfiguration(new OutboxMessageConfiguration());
-        //builder.ApplyConfiguration(new OutboxMessageConsumerConfiguration());
+        builder.ApplyConfiguration(new OutboxMessageConsumerConfiguration());
 
         base.OnModelCreating(builder);
     }
