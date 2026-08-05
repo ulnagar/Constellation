@@ -13,8 +13,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migrations
 {
     [DbContext(typeof(ConstellationDbContext))]
-    [Migration("20260804230647_AddSoftDeleteToAssessmentDownload")]
-    partial class AddSoftDeleteToAssessmentDownload
+    [Migration("20260804235122_FixMergeIssues")]
+    partial class FixMergeIssues
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -5144,7 +5144,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                     b.ToTable("WorkFlows_Actions_InterviewAttendees", (string)null);
                 });
 
-            modelBuilder.Entity("Constellation.Infrastructure.Persistence.ConstellationContext.Outbox.OutboxMessage", b =>
+            modelBuilder.Entity("Constellation.Infrastructure.Persistence.Shared.Outbox.OutboxMessage", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -5170,19 +5170,6 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                     b.HasKey("Id");
 
                     b.ToTable("OutboxMessages", (string)null);
-                });
-
-            modelBuilder.Entity("Constellation.Infrastructure.Persistence.ConstellationContext.Outbox.OutboxMessageConsumer", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("Name")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.HasKey("Id", "Name");
-
-                    b.ToTable("OutboxMessageConsumer", (string)null);
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<System.Guid>", b =>
