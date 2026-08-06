@@ -1,0 +1,49 @@
+﻿[data-unset] {
+    display: block;
+    cursor: not-allowed !important;
+    overflow: hidden;
+    white-space: nowrap;
+    max-width: 34%;
+    transition: max-width 0.25s ease, opacity 0.25s ease, padding-inline 0.25s ease, font-size 0.25s ease, display 0.25s ease allow-discrete;
+}
+
+.btn-check:checked + [data-unset] {
+    cursor: default !important;
+}
+
+.btn-check:not(:checked) + [data-unset] {
+    display: none;
+    max-width: 3rem;
+    padding-inline: 0.2rem;
+    font-size: 0.65rem;
+    opacity: 0.4;
+}
+
+/* Defines the "from" state when the element goes from display:none -> block,
+   so switching back to Unset also animates in (grows) rather than popping in */
+@starting-style {
+    .btn-check:checked + [data-unset] {
+        max-width: 3rem;
+        padding-inline: 0.2rem;
+        font-size: 0.65rem;
+        opacity: 0.4;
+    }
+}
+
+[data-show-when] {
+    overflow: hidden;
+    max-height: 0;
+    opacity: 0;
+    margin-top: 0 !important;
+    transition: max-height 0.3s ease, opacity 0.25s ease, margin-top 0.25s ease;
+}
+
+    [data-show-when].tri-show {
+        max-height: 500px;
+        opacity: 1;
+        margin-top: 0.75rem !important;
+    }
+
+.vw-25 {
+    width: 25vw !important;
+}

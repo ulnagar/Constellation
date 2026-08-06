@@ -17,7 +17,8 @@ public static class PresentationServiceExtensions
             .AddApplicationPart(Constellation.Presentation.Staff.AssemblyReference.Assembly)
             .AddApplicationPart(Constellation.Presentation.Schools.AssemblyReference.Assembly)
             .AddApplicationPart(Constellation.Presentation.Parents.AssemblyReference.Assembly)
-            .AddApplicationPart(Constellation.Presentation.Students.AssemblyReference.Assembly);
+            .AddApplicationPart(Constellation.Presentation.Students.AssemblyReference.Assembly)
+            .AddApplicationPart(Constellation.Presentation.Enrolments.AssemblyReference.Assembly);
 
         services.AddMvc(options =>
         {
