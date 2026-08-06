@@ -16,6 +16,10 @@ public sealed class Offer : AggregateRoot
     public static TimeSpan ReminderPeriod => TimeSpan.FromDays(7);
     public static TimeSpan LapsedPeriod => TimeSpan.FromDays(14);
 
+    private static readonly TimeZoneInfo LocalTimeZone =
+        TimeZoneInfo.FindSystemTimeZoneById(
+            OperatingSystem.IsWindows() ? "AUS Eastern Standard Time" : "Australia/Sydney");
+
     public Offer()
     {
         Id = new();
@@ -30,10 +34,33 @@ public sealed class Offer : AggregateRoot
     public DateTimeOffset? ReminderSentAt { get; private set; }
     public DateTimeOffset? RespondedAt { get; private set; }
 
-    public DateTimeOffset? RespondBy =>
-        Status == OfferStatus.Pending && RespondedAt is null
-            ? OfferedAt!.Value.Add(LapsedPeriod)
-            : null;
+    /// <summary>
+    /// The deadline for a parent/carer to respond to a <see cref="OfferStatus.Pending"/> offer.
+    /// Always resolves to 5:00pm local school time on the date <see cref="LapsedPeriod"/> days
+    /// after <see cref="OfferedAt"/>, rather than preserving the time-of-day component of
+    /// <see cref="OfferedAt"/> itself.
+    /// </summary>
+    public DateTimeOffset? RespondBy
+    {
+        get
+        {
+            if (Status != OfferStatus.Pending || RespondedAt is not null)
+                return null;
+
+            DateTime localOfferedDate = TimeZoneInfo
+                .ConvertTime(OfferedAt!.Value, LocalTimeZone)
+                .Date;
+
+            DateTime targetDate = localOfferedDate.Add(LapsedPeriod).Date;
+
+            DateTime unspecified5pm = new(
+                targetDate.Year, targetDate.Month, targetDate.Day,
+                17, 0, 0, DateTimeKind.Unspecified);
+
+            TimeSpan offset = LocalTimeZone.GetUtcOffset(unspecified5pm);
+            return new DateTimeOffset(unspecified5pm, offset);
+        }
+    }
 
     public bool HasCourtOrders { get; private set; }
     public bool HasHealthConcerns { get; private set; }

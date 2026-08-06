@@ -1,10 +1,13 @@
 ﻿namespace Constellation.Infrastructure.ExternalServices.Email.Services;
 
+using Application.Domains.AppSettings.Models;
 using Constellation.Application.Interfaces.Services;
 using Constellation.Core.Shared;
 using Constellation.Infrastructure.Templates.Views.Emails.Enrolments;
 using Core.Errors;
+using Core.Models.AppSettings.Enums;
 using Core.Models.EnrolmentContext.Application;
+using Core.Models.EnrolmentContext.Application.Enums;
 using Core.Models.EnrolmentContext.Offer;
 using Core.ValueObjects;
 
@@ -16,18 +19,28 @@ public sealed partial class Service : IEmailService
         string year,
         CancellationToken cancellationToken = default)
     {
+        List<ContactsConfiguration> contacts = await _appSettings.Contacts(cancellationToken);
+
+        ContactsConfiguration? principals = contacts.FirstOrDefault(entry => entry.Position == ContactPosition.Principal);
+
+        string? principal = principals?.Contacts.FirstOrDefault(entry => entry.Value.Contains(application.Grade)).Key.Name.DisplayName;
+
         EnrolmentOfferNotificationEmailViewModel viewModel = new()
         {
-            Title = $"Assessment Submission Received",
-            SenderName = "Aurora College",
-            SenderTitle = "",
+            Title = $"Enrolment Offer",
+            SenderName = principal ?? "",
+            SenderTitle = "Principal",
             Preheader = "",
             Id = offer.Id,
             Grade = application.Grade,
             ParentName = application.ParentName,
             StudentName = application.StudentName,
             RespondBy = offer.RespondBy.Value,
-            Year = year
+            Year = year,
+            Courses = application.SelectedCourses
+                .Where(entry => entry.Status == CourseSelectionStatus.Approved)
+                .Select(entry => entry.Course.Name)
+                .ToList()
         };
 
         if (application.ParentName is null)
@@ -56,11 +69,17 @@ public sealed partial class Service : IEmailService
         string year,
         CancellationToken cancellationToken = default)
     {
+        List<ContactsConfiguration> contacts = await _appSettings.Contacts(cancellationToken);
+
+        ContactsConfiguration? principals = contacts.FirstOrDefault(entry => entry.Position == ContactPosition.Principal);
+
+        string? principal = principals?.Contacts.FirstOrDefault(entry => entry.Value.Contains(application.Grade)).Key.Name.DisplayName;
+
         EnrolmentOfferReminderEmailViewModel viewModel = new()
         {
-            Title = $"Assessment Submission Received",
-            SenderName = "Aurora College",
-            SenderTitle = "",
+            Title = $"Enrolment Offer Reminder",
+            SenderName = principal ?? "",
+            SenderTitle = "Principal",
             Preheader = "",
             Id = offer.Id,
             Grade = application.Grade,
