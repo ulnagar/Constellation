@@ -286,9 +286,18 @@ public class StaffRepository : IStaffRepository
 
         string username = name.ToLowerInvariant().Trim().Replace(' ', '.');
 
+        var staffGuid = await _context.Database
+            .SqlQuery<Guid>($"SELECT Id AS Value FROM Staff.Members WHERE EmailAddress LIKE {"%" + username + "%"}")
+            .SingleOrDefaultAsync(cancellationToken);
+
+        if (staffGuid == default)
+            return null;
+
+        StaffId staffId = StaffId.FromValue(staffGuid); // plain C#, not part of any query
+
         return await _context
             .Set<StaffMember>()
-            .SingleOrDefaultAsync(member => member.EmailAddress.Email.Contains(username), cancellationToken);
+            .SingleOrDefaultAsync(member => member.Id == staffId, cancellationToken);
     }
 
     public async Task<StaffMember?> GetCurrentByPhoneNumber(

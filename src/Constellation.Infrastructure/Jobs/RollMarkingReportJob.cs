@@ -188,7 +188,7 @@ internal sealed class RollMarkingReportJob : IRollMarkingReportJob
                     if (recipient.IsFailure)
                         continue;
 
-                    if (emailDto.HeadTeachers.All(entry => entry.Email != recipient.Value.Email))
+                    if (emailDto.HeadTeachers.All(dtoHeadTeacher => dtoHeadTeacher.Email != recipient.Value.Email))
                         emailDto.HeadTeachers.Add(recipient.Value);
                 }
 
@@ -232,7 +232,7 @@ internal sealed class RollMarkingReportJob : IRollMarkingReportJob
                 return;
 
             // Email the relevant person (as outlined in the EmailSentTo field
-            if (recipients.Count > 0)
+            if (emails.Count > 0)
                 await _emailService.SendDailyRollMarkingReport(emails, date, [teacher]);
         }
 
@@ -249,7 +249,7 @@ internal sealed class RollMarkingReportJob : IRollMarkingReportJob
                 return;
 
             // Email the relevant person (as outlined in the EmailSentTo field
-            if (recipients.Count > 0)
+            if (emails.Count > 0)
                 await _emailService.SendDailyRollMarkingReport(emails, date, [ teacher ]);
         }
 

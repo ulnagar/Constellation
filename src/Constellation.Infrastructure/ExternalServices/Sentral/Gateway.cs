@@ -1668,12 +1668,20 @@ public class Gateway : ISentralGateway
 
         List<RollMarkReportDto> response = [];
 
-        for (int campus = 1; campus < 4; campus++)
+        int campus = 1;
+        int consecutiveFailures = 0;
+
+        while (consecutiveFailures < 2)
         {
             HtmlDocument? page = await GetPageByGet($"{_settings.ServerUrl}/attendancepxp/period/administration/roll_report?campus_id={campus}&range=single_day&date={sentralDate}&export=1", CancellationToken.None);
 
             if (page is null)
+            {
+                consecutiveFailures++;
                 continue;
+            }
+
+            consecutiveFailures = 0;
 
             List<string> list = [];
             if (!page.DocumentNode.InnerHtml.StartsWith('<'))
@@ -1686,17 +1694,23 @@ public class Gateway : ISentralGateway
                 if (splitString[0] == "\"Date\"" || splitString.Length != 7)
                     continue;
 
+                string teacherParts = splitString[3].TrimStart('"').TrimEnd('"');
+                int index = teacherParts.LastIndexOf(" (");
+                string teacher = index >= 0 ? teacherParts[..index] : teacherParts;
+
                 response.Add(new RollMarkReportDto
                 {
                     Date = DateTime.Parse(splitString[0].TrimStart('"').TrimEnd('"'), DateTimeFormatInfo.CurrentInfo),
                     Period = splitString[1].TrimStart('"').TrimEnd('"'),
                     ClassName = splitString[2].TrimStart('"').TrimEnd('"'),
-                    Teacher = splitString[3].TrimStart('"').TrimEnd('"'),
+                    Teacher = teacher,
                     Year = splitString[4].TrimStart('"').TrimEnd('"'),
                     Room = splitString[5].TrimStart('"').TrimEnd('"'),
                     Submitted = splitString[6].TrimStart('"').TrimEnd('"') == "Submitted"
                 });
             }
+
+            campus++;
         }
 
         return response;
