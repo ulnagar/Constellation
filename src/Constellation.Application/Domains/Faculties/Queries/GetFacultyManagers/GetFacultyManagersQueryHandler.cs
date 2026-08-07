@@ -34,7 +34,7 @@ internal sealed class GetFacultyManagersQueryHandler
 
     public async Task<Result<List<StaffMember>>> Handle(GetFacultyManagersQuery request, CancellationToken cancellationToken)
     {
-        Faculty faculty = await _facultyRepository.GetById(request.FacultyId, cancellationToken);
+        Faculty? faculty = await _facultyRepository.GetById(request.FacultyId, cancellationToken);
 
         if (faculty is null)
         {
