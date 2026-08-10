@@ -2,6 +2,7 @@
 
 using Abstractions.Messaging;
 using Core.Models.EnrolmentContext.Application;
+using Core.Models.EnrolmentContext.Application.Enums;
 using Core.Models.EnrolmentContext.Application.Errors;
 using Core.Models.EnrolmentContext.Application.Repositories;
 using Core.Models.EnrolmentContext.Offer;
@@ -61,6 +62,7 @@ internal sealed class GetOfferForResponseQueryHandler
             application.StudentName,
             application.Grade,
             application.Program,
+            application.SelectedCourses.Where(entry => entry.Status == CourseSelectionStatus.Approved).ToList(),
             offer.Status,
             offer.OfferedAt,
             offer.RespondBy,

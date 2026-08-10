@@ -3,6 +3,7 @@
 using Constellation.Core.Enums;
 using Constellation.Core.Models.EnrolmentContext.EnrolmentPeriod.Enums;
 using Constellation.Core.Models.EnrolmentContext.Offer.Identifiers;
+using Core.Models.EnrolmentContext.Application;
 using Core.Models.EnrolmentContext.EnrolmentPeriod.Identifiers;
 using Core.Models.EnrolmentContext.Offer.Enums;
 using Core.ValueObjects;
@@ -16,6 +17,7 @@ public sealed record OfferResponse(
     Name Student,
     Grade Grade,
     Program Program,
+    List<CourseSelection> Courses,
     OfferStatus Status,
     DateTimeOffset? OfferedAt,
     DateTimeOffset? RespondBy,

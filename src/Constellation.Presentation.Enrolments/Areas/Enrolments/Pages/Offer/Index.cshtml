@@ -1,19 +1,40 @@
-﻿@page "{id}"
+﻿@page "{token?}"
 @using Constellation.Core.Extensions
 @model Constellation.Presentation.Enrolments.Areas.Enrolments.Pages.Offer.IndexModel
 @{
+    var responded = Model.Offer.RespondedAt.HasValue;
 }
 
 <h2>Offer of Enrolment</h2>
 
-<form method="post">
-    <h5 class="mt-3 w-100">@Model.Offer.Student.DisplayName has been offered enrolment at Aurora College in @Model.Offer.Grade.AsName() of the @Model.Offer.Program.</h5>
+<h5 class="mt-3 w-100">@Model.Offer.Student.DisplayName has been offered enrolment at Aurora College in @Model.Offer.Grade.AsName() of the @Model.Offer.Program.</h5>
 
+@if (Model.Offer.Courses.Count > 0)
+{
+    <h5 class="mt-2">The following subjects are included in this offer:</h5>
+    <ul>
+        @foreach (var course in Model.Offer.Courses)
+        {
+            <li>@course.Course</li>
+        }
+    </ul>
+}
+
+@if (responded)
+{
+    <h6 class="mt-2">Below is the response we received for this Offer. If you need to change any details, please contact the school on 1300 287 629, or via email at <a href="mailto:auroracoll-h.school@det.nsw.edu.au">auroracoll-h.school@det.nsw.edu.au</a></h6>
+}
+
+<hr class="mb-3" />
+
+<form method="post" inert="@responded">
+    <input type="hidden" asp-for="Id" />
+    
     @{
         var offerResponseId = Html.IdFor(m => m.OfferResponse).ToString();
     }
 
-    <div class="w-100">
+    <div class="w-100 mt-3">
         <h5>Do you accept or decline this offer of enrolment?</h5>
     </div>
 
@@ -33,7 +54,7 @@
     </div>
 
     <div data-show-when="OfferResponse=Accept">
-        <hr />
+        <hr/>
 
         @{
             var courtOrderId = Html.IdFor(m => m.CourtOrders).ToString();
@@ -60,7 +81,7 @@
             <span class="text-muted" data-show-when="CourtOrders=Yes">A member of staff will be in contact to discuss specific details.</span>
         </div>
 
-        <hr />
+        <hr/>
 
         @{
             var healthConditionsId = Html.IdFor(m => m.HealthConditions).ToString();
@@ -88,7 +109,7 @@
         </div>
     </div>
 
-    <div class="mt-3">
-        <input type="submit" class="btn btn-success vw-25 p-2 fs-5" value="Save" />
+    <div class="mt-3 @(responded ? "d-none" : "")">
+        <input type="submit" class="btn btn-success vw-25 p-2 fs-5" value="Save"/>
     </div>
 </form>

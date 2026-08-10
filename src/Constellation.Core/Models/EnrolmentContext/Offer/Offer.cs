@@ -155,6 +155,7 @@ public sealed class Offer : AggregateRoot
 
         HasCourtOrders = courtOrders;
         HasHealthConcerns = healthConditions;
+        RespondedAt = DateTime.UtcNow;
 
         return Result.Success();
     }
