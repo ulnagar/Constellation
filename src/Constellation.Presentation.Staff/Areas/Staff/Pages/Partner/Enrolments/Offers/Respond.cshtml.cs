@@ -53,6 +53,8 @@ public class RespondModel : BasePageModel
     public string? CourtOrders { get; set; } = "Unset";
     [BindProperty] 
     public string? HealthConditions { get; set; } = "Unset";
+    [BindProperty]
+    public string? LoanLaptop { get; set; } = "Unset";
 
     public async Task OnGet() => await PreparePage();
     
@@ -113,6 +115,14 @@ public class RespondModel : BasePageModel
             OfferStatus.Declined when !Offer.HasHealthConcerns => "No",
             _ => "Unset"
         };
+        LoanLaptop = Offer.Status switch
+        {
+            OfferStatus.Accepted when Offer.RequestedLaptop => "Yes",
+            OfferStatus.Accepted when !Offer.RequestedLaptop => "No",
+            OfferStatus.Declined when Offer.RequestedLaptop=> "Yes",
+            OfferStatus.Declined when !Offer.RequestedLaptop => "No",
+            _ => "Unset"
+        };
     }
 
     public async Task<IActionResult> OnPost()
@@ -170,7 +180,7 @@ public class RespondModel : BasePageModel
             return Page();
         }
 
-        MarkOfferAcceptedByStaffCommand acceptedCommand = new(Id, CourtOrders == "Yes", HealthConditions == "Yes");
+        MarkOfferAcceptedByStaffCommand acceptedCommand = new(Id, CourtOrders == "Yes", HealthConditions == "Yes", LoanLaptop == "Yes");
 
         _logger
             .ForContext(nameof(MarkOfferAcceptedByStaffCommand), acceptedCommand, true)

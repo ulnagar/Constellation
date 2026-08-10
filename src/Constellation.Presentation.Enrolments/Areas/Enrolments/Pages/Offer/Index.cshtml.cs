@@ -1,6 +1,7 @@
 namespace Constellation.Presentation.Enrolments.Areas.Enrolments.Pages.Offer;
 
 using Application.Domains.EnrolmentContext.Offers.Commands.AcceptOffer;
+using Application.Domains.EnrolmentContext.Offers.Commands.DeclineOffer;
 using Application.Domains.EnrolmentContext.Offers.Queries.GetOfferForResponse;
 using Constellation.Core.Abstractions.Services;
 using Constellation.Core.Shared;
@@ -55,6 +56,9 @@ public class IndexModel : BasePageModel
     [BindProperty]
     public string? HealthConditions { get; set; } = "Unset";
 
+    [BindProperty]
+    public string? LoanLaptop { get; set; } = "Unset";
+
     public async Task<IActionResult> OnGet(CancellationToken cancellationToken = default)
     {
         IActionResult redirect = await PreparePage(cancellationToken);
@@ -74,10 +78,26 @@ public class IndexModel : BasePageModel
 
         if (OfferResponse == "Decline")
         {
-            // Process Decline response
+            DeclineOfferCommand declineCommand = new(Id);
 
-            IActionResult redirect = await PreparePage(cancellationToken);
-            return redirect;
+            _logger
+                .ForContext(nameof(DeclineOfferCommand), declineCommand, true)
+                .Information("Requested to decline Offer by user {User}", _currentUserService.UserName);
+
+            Result declineResult = await _mediator.Send(declineCommand, cancellationToken);
+
+            if (declineResult.IsFailure)
+            {
+                _logger
+                    .ForContext(nameof(DeclineOfferCommand), declineCommand, true)
+                    .ForContext(nameof(Error), declineResult.Error, true)
+                    .Warning("Failed to decline Offer by user {User}", _currentUserService.UserName);
+
+                IActionResult redirect = await PreparePage(cancellationToken);
+                return redirect;
+            }
+
+            return RedirectToPage();
         }
 
         if (CourtOrders == "Unset")
@@ -96,10 +116,19 @@ public class IndexModel : BasePageModel
             return redirect;
         }
 
+        if (LoanLaptop == "Unset")
+        {
+            ModelState.AddModelError(nameof(LoanLaptop), "You must select either Yes or No to the question about borrowing a laptop.");
+
+            IActionResult redirect = await PreparePage(cancellationToken);
+            return redirect;
+        }
+
         AcceptOfferCommand acceptCommand = new(
             Id,
             CourtOrders == "Yes",
-            HealthConditions == "Yes");
+            HealthConditions == "Yes",
+            LoanLaptop == "Yes");
 
         _logger
             .ForContext(nameof(AcceptOfferCommand), acceptCommand, true)
@@ -166,6 +195,12 @@ public class IndexModel : BasePageModel
             };
 
             HealthConditions = Offer.HasHealthConcerns switch
+            {
+                true => "Yes",
+                false => "No"
+            };
+
+            LoanLaptop = Offer.RequestedLaptop switch
             {
                 true => "Yes",
                 false => "No"

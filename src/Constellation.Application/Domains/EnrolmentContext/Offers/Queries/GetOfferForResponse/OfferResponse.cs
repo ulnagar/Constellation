@@ -23,4 +23,5 @@ public sealed record OfferResponse(
     DateTimeOffset? RespondBy,
     DateTimeOffset? RespondedAt,
     bool HasCourtOrders,
-    bool HasHealthConcerns);
+    bool HasHealthConcerns,
+    bool RequestedLaptop);

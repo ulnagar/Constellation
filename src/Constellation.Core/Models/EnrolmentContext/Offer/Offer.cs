@@ -64,6 +64,7 @@ public sealed class Offer : AggregateRoot
 
     public bool HasCourtOrders { get; private set; }
     public bool HasHealthConcerns { get; private set; }
+    public bool RequestedLaptop { get; private set; }
 
     public bool IsReminderDue(DateTimeOffset asOf) =>
         Status == OfferStatus.Pending
@@ -143,19 +144,22 @@ public sealed class Offer : AggregateRoot
     public Result Respond(
         OfferStatus status, 
         bool courtOrders = false, 
-        bool healthConditions = false)
+        bool healthConditions = false,
+        bool requestedLaptop = true)
     {
         Result statusUpdate = UpdateStatus(status);
 
         if (statusUpdate.IsFailure)
             return statusUpdate;
 
+        RespondedAt = DateTime.UtcNow;
+
         if (status != OfferStatus.Accepted)
             return Result.Success();
 
         HasCourtOrders = courtOrders;
         HasHealthConcerns = healthConditions;
-        RespondedAt = DateTime.UtcNow;
+        RequestedLaptop = requestedLaptop;
 
         return Result.Success();
     }

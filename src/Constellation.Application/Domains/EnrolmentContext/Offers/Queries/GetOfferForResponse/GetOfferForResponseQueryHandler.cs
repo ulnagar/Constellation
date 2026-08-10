@@ -68,6 +68,7 @@ internal sealed class GetOfferForResponseQueryHandler
             offer.RespondBy,
             offer.RespondedAt,
             offer.HasCourtOrders,
-            offer.HasHealthConcerns);
+            offer.HasHealthConcerns,
+            offer.RequestedLaptop);
     }
 }

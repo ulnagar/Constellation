@@ -6,5 +6,6 @@ using Core.Models.EnrolmentContext.Offer.Identifiers;
 public sealed record MarkOfferAcceptedByStaffCommand(
     OfferId OfferId,
     bool CourtOrder,
-    bool HealthConditions)
+    bool HealthConditions,
+    bool RequestLaptop)
     : ICommand;
