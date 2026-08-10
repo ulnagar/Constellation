@@ -22,6 +22,8 @@ public interface IAttendanceReportJob : IHangfireJob  { }
 
 public interface IClassMonitorJob : IHangfireJob { }
 
+public interface IEnrolmentTimingJob : IHangfireJob { }
+
 public interface IGroupTutorialExpiryScanJob : IHangfireJob { }
 
 public interface ILessonNotificationsJob : IHangfireJob { }

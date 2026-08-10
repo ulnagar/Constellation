@@ -17,6 +17,12 @@ internal sealed class EnrolmentApplicationRepository
         _context = context;
     }
 
+    public async Task<List<Application>> GetAll(
+        CancellationToken cancellationToken = default) =>
+        await _context
+            .Set<Application>()
+            .ToListAsync(cancellationToken);
+
     public async Task<Application?> GetApplicationById(
         ApplicationId id,
         CancellationToken cancellationToken = default) =>

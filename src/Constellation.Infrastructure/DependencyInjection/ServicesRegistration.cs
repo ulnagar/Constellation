@@ -113,6 +113,7 @@ public static class ServicesRegistration
         services.AddScoped<IAttachmentManagementJob, AttachmentManagementJob>();
         services.AddScoped<IAttendanceReportJob, AttendanceReportJob>();
         services.AddScoped<IClassMonitorJob, ClassMonitorJob>();
+        services.AddScoped<IEnrolmentTimingJob, EnrolmentTimingJob>();
         services.AddScoped<IGroupTutorialExpiryScanJob, GroupTutorialExpiryScanJob>();
         services.AddScoped<ILessonNotificationsJob, LessonNotificationsJob>();
         services.AddScoped<ILessonUpdateJob, LessonUpdateJob>();

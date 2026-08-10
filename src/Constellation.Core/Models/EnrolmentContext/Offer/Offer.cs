@@ -66,10 +66,22 @@ public sealed class Offer : AggregateRoot
     public bool HasHealthConcerns { get; private set; }
     public bool RequestedLaptop { get; private set; }
 
-    public bool IsReminderDue(DateTimeOffset asOf) =>
-        Status == OfferStatus.Pending
-        && ReminderSentAt is null
-        && asOf - OfferedAt!.Value >= ReminderPeriod;
+    public bool IsReminderDue(DateTimeOffset asOf)
+    {
+        if (Status != OfferStatus.Pending || ReminderSentAt is not null || RespondBy is null)
+            return false;
+
+        DateTime reminderDate = TimeZoneInfo
+            .ConvertTime(RespondBy.Value, LocalTimeZone)
+            .Date
+            .Subtract(ReminderPeriod);
+
+        DateTime asOfLocalDate = TimeZoneInfo
+            .ConvertTime(asOf, LocalTimeZone)
+            .Date;
+
+        return asOfLocalDate >= reminderDate;
+    }
 
     public static Result<Offer> Create(Application application)
     {
