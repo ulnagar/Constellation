@@ -24,6 +24,7 @@ using Errors;
 using ExcelDataReader;
 using HtmlAgilityPack;
 using Microsoft.Extensions.Options;
+using Org.BouncyCastle.Bcpg;
 using System.Collections.Generic;
 using System.Data;
 using System.Globalization;
@@ -1655,6 +1656,53 @@ public class Gateway : ISentralGateway
         return Result.Failure<(DateOnly, DateOnly)>(SentralGatewayErrors.IncorrectResponseFromServer);
     }
 
+    private async Task<List<int>> GetCampusIds()
+    {
+        List<int> campusIdList = [];
+
+        if (_logOnly)
+        {
+            _logger.Information("GetCampusIds");
+
+            return campusIdList;
+        }
+
+        HtmlDocument? page = await GetPageByGet($"{_settings.ServerUrl}/timetables/setup/campuses", CancellationToken.None);
+
+        if (page is null)
+            return campusIdList;
+
+        SentralConfiguration? timetablesCampusList = await _appSettings.Sentral(SentralPath.TimetablesCampusList);
+
+        if (timetablesCampusList is null)
+            return campusIdList;
+
+        HtmlNode? campusTable = page.DocumentNode.SelectSingleNode(timetablesCampusList.Path);
+
+        if (campusTable is null)
+            return campusIdList;
+
+        IEnumerable<HtmlNode> rows = campusTable.Descendants("tr");
+        
+        foreach (HtmlNode row in rows)
+        {
+            HtmlNode? link = row.Descendants("a").FirstOrDefault();
+
+            if (link is null)
+                continue;
+
+            string linkDestination = link.GetAttributeValue("href", "");
+            string campusIdString = linkDestination.Split('=').Last();
+
+            bool success = int.TryParse(campusIdString, out int campusId);
+
+            if (success)
+                campusIdList.Add(campusId);
+        }
+
+        return campusIdList;
+    }
+
     public async Task<ICollection<RollMarkReportDto>> GetRollMarkingReportAsync(DateOnly date)
     {
         if (_logOnly)
@@ -1668,24 +1716,18 @@ public class Gateway : ISentralGateway
 
         List<RollMarkReportDto> response = [];
 
-        int campus = 1;
-        int consecutiveFailures = 0;
+        List<int> campusIds = await GetCampusIds();
 
-        while (consecutiveFailures < 2)
+        foreach (int campusId in campusIds)
         {
-            HtmlDocument? page = await GetPageByGet($"{_settings.ServerUrl}/attendancepxp/period/administration/roll_report?campus_id={campus}&range=single_day&date={sentralDate}&export=1", CancellationToken.None);
+            HtmlDocument? page = await GetPageByGet($"{_settings.ServerUrl}/attendancepxp/period/administration/roll_report?campus_id={campusId}&range=single_day&date={sentralDate}&export=1", CancellationToken.None);
 
-            if (page is null)
+            if (page is null || page.DocumentNode.InnerHtml.StartsWith('<'))
             {
-                consecutiveFailures++;
                 continue;
             }
 
-            consecutiveFailures = 0;
-
-            List<string> list = [];
-            if (!page.DocumentNode.InnerHtml.StartsWith('<'))
-                list = page.DocumentNode.InnerHtml.Split('\u000A').ToList();
+            List<string> list = page.DocumentNode.InnerHtml.Split('\u000A').ToList();
 
             foreach (string entry in list)
             {
@@ -1709,8 +1751,6 @@ public class Gateway : ISentralGateway
                     Submitted = splitString[6].TrimStart('"').TrimEnd('"') == "Submitted"
                 });
             }
-
-            campus++;
         }
 
         return response;
