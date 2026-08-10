@@ -15,6 +15,7 @@ public sealed class SentralPath : StringEnumeration<SentralPath>
     public static readonly SentralPath IndigenousStatus = new("Indigenous Status");
     public static readonly SentralPath StudentSRNTable = new("Student SRN Table");
     public static readonly SentralPath StudentEnrolmentDates = new("Student Enrolment Dates");
+    public static readonly SentralPath TimetablesCampusList = new("Timetables Campus List");
 
     private SentralPath(string name)
         : base (name, name) { }
