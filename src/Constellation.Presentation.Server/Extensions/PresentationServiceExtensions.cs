@@ -5,13 +5,15 @@ using Constellation.Presentation.Shared.Helpers.ModelBinders;
 using Microsoft.AspNetCore.Mvc.Razor;
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Staff.Areas.Staff.Helpers;
 
 public static class PresentationServiceExtensions
 {
     public static IServiceCollection AddConstellationPresentation(
         this IServiceCollection services)
     {
-        services.AddRazorPages()
+        services.AddRazorPages(options =>
+                options.Conventions.Add(new PeriodScopedRouteConvention()))
             .AddSessionStateTempDataProvider()
             .AddApplicationPart(Constellation.Presentation.Shared.AssemblyReference.Assembly)
             .AddApplicationPart(Constellation.Presentation.Staff.AssemblyReference.Assembly)

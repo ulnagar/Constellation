@@ -34,9 +34,8 @@ using System.ComponentModel.DataAnnotations;
 using ApplicationId = Core.Models.EnrolmentContext.Application.Identifiers.ApplicationId;
 
 [HasPermission(AuthPermission.Partners_Enrolments_Applications_Edit_Value)]
-public class UpsertModel : BasePageModel
+public class UpsertModel : PeriodScopedPageModel
 {
-    private readonly ISender _mediator;
     private readonly LinkGenerator _linkGenerator;
     private readonly ICurrentUserService _currentUserService;
     private readonly ILogger _logger;
@@ -46,8 +45,8 @@ public class UpsertModel : BasePageModel
         LinkGenerator linkGenerator,
         ICurrentUserService currentUserService,
         ILogger logger)
+        : base(mediator)
     {
-        _mediator = mediator;
         _linkGenerator = linkGenerator;
         _currentUserService = currentUserService;
         _logger = logger
@@ -60,10 +59,6 @@ public class UpsertModel : BasePageModel
 
     [BindProperty(SupportsGet = true)]
     public ApplicationId Id { get; set; } = ApplicationId.Empty;
-
-    [BindProperty]
-    public EnrolmentPeriodId PeriodId { get; set; } = EnrolmentPeriodId.Empty;
-    public string PeriodName { get; set; }
 
     [BindProperty]
     public string? StudentReferenceNumber { get; set; }
@@ -118,11 +113,10 @@ public class UpsertModel : BasePageModel
     [BindProperty]
     public List<EnrolmentCourse> SelectedCourses { get; set; } = [];
 
-    public List<EnrolmentPeriodResponse> Periods { get; set; } = [];
-    public SelectList PeriodList { get; set; }
     public IEnumerable<SelectListItem> SchoolList { get; set; }
     public SelectList ProgramList { get; set; }
     public SelectList GenderList { get; set; }
+    public IEnumerable<SelectListItem> CoursesList { get; set; }
 
     public async Task OnGet()
     {
@@ -211,27 +205,14 @@ public class UpsertModel : BasePageModel
             nameof(Gender.Name),
             StudentGender?.Value);
 
-        Result<List<EnrolmentPeriodResponse>> periods = await _mediator.Send(new GetCurrentEnrolmentPeriodsQuery());
-
-        if (periods.IsFailure)
+        if (Period.AvailableCourses.Count > 0)
         {
-            ModalContent = ErrorDisplay.Create(
-                periods.Error,
-                _linkGenerator.GetPathByPage("/Partner/Enrolments/Applications/Index", values: new { area = "Staff" }));
-
-            return;
+            CoursesList = Period.AvailableCourses
+                .OrderBy(s => s.Name)
+                .Select(s =>
+                    new SelectListItem { Value = s.Value, Text = s.Name, Selected = SelectedCourses.Contains(s) })
+                .ToList();
         }
-
-        if (PeriodId != EnrolmentPeriodId.Empty)
-            PeriodName = periods.Value.FirstOrDefault(entry => entry.Id == PeriodId)?.Label ?? string.Empty;
-
-        Periods = periods.Value;
-
-        PeriodList = new SelectList(
-            periods.Value,
-            nameof(EnrolmentPeriodResponse.Id),
-            nameof(EnrolmentPeriodResponse.Label),
-            PeriodId);
     }
     
     public async Task<IActionResult> OnPostCreate()
@@ -287,7 +268,7 @@ public class UpsertModel : BasePageModel
             return Page();
         }
 
-        return RedirectToPage("/Partner/Enrolments/Applications/Index", new { area = "Staff" });
+        return RedirectToPage("/Partner/Enrolments/Applications/Index", new { area = "Staff", PeriodId });
     }
 
     public async Task<IActionResult> OnPostUpdate()
@@ -343,17 +324,11 @@ public class UpsertModel : BasePageModel
             return Page();
         }
 
-        return RedirectToPage("/Partner/Enrolments/Applications/Index", new { area = "Staff" });
+        return RedirectToPage("/Partner/Enrolments/Applications/Index", new { area = "Staff", PeriodId });
     }
 
     private void ValidateForm()
     {
-        if (PeriodId == EnrolmentPeriodId.Empty)
-        {
-            ModelState.Remove(nameof(PeriodId));
-            ModelState.AddModelError(nameof(PeriodId), "You must select an Enrolment Period");
-        }
-
         if (StudentGender == Gender.Empty)
             ModelState.AddModelError(nameof(StudentGender), "Gender is required");
 

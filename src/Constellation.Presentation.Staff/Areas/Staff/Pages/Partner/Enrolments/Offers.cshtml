@@ -1,0 +1,26 @@
+﻿@page
+@model Constellation.Presentation.Staff.Areas.Staff.Pages.Partner.Enrolments.OffersModel
+@{
+}
+
+<h2>Enrolment Offers</h2>
+
+<hr />
+
+<h4>No Enrolment Period is currently selected. Please select from the active sessions below:</h4>
+
+<div class="row justify-content-center">
+    <div class="col-6">
+        <div class="vstack gap-3">
+            @foreach (var option in Model.Periods)
+            {
+                <div class="card">
+                    <div class="card-body">
+                        @option.Label
+                        <a href="@option.Url" class="stretched-link"></a>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>

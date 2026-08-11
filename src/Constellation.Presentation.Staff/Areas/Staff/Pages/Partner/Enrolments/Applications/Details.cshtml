@@ -17,7 +17,7 @@
     {
         if (Model.Application.Status == ApplicationStatus.Pending)
         {
-            <a asp-page="/Partner/Enrolments/Applications/Upsert" asp-area="Staff" asp-route-id="@Model.Id" class="btn btn-success">Edit</a>
+            <a asp-page="/Partner/Enrolments/Applications/Upsert" asp-area="Staff" asp-route-id="@Model.Id" asp-route-PeriodId="@Model.PeriodId" class="btn btn-success">Edit</a>
         }
 
         if (Model.Application.Status != ApplicationStatus.Offered)
@@ -203,8 +203,8 @@
                     {
                         <form method="post">
                             <input type="hidden" name="course" value="@entry.Course.Value" />
-                            <button type="submit" asp-page-handler="RejectApplication" class="btn btn-danger">Reject</button>
-                            <button type="submit" asp-page-handler="ApproveApplication" class="btn btn-success">Approve</button>
+                            <button type="submit" asp-page-handler="RejectApplication" asp-route-PeriodId="@Model.PeriodId" class="btn btn-danger">Reject</button>
+                            <button type="submit" asp-page-handler="ApproveApplication" asp-route-PeriodId="@Model.PeriodId" class="btn btn-success">Approve</button>
                         </form>
                     }
                 </td>
@@ -213,7 +213,7 @@
     </table>
 }
 
-<form method="post" asp-page-handler="UpdateStatus">
+<form method="post" asp-page-handler="UpdateStatus" asp-route-PeriodId="@Model.PeriodId">
     <div class="modal fade" tabindex="-1" id="update-status-modal">
         <div class="modal-dialog">
             <div class="modal-content">
@@ -239,7 +239,7 @@
     </div>
 </form>
 
-<form method="post" asp-page-handler="CreateOffer">
+<form method="post" asp-page-handler="CreateOffer" asp-route-PeriodId="@Model.PeriodId">
     <div class="modal fade" tabindex="-1" id="create-offer-modal">
         <div class="modal-dialog">
             <div class="modal-content">

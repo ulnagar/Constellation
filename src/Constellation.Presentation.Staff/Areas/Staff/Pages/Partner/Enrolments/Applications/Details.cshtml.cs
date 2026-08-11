@@ -20,9 +20,8 @@ using Presentation.Shared.Helpers.Attributes;
 using Serilog;
 
 [HasPermission(AuthPermission.Partners_Enrolments_Applications_View_Value)]
-public class DetailsModel : BasePageModel
+public class DetailsModel : PeriodScopedPageModel
 {
-    private readonly ISender _mediator;
     private readonly LinkGenerator _linkGenerator;
     private readonly ICurrentUserService _currentUserService;
     private readonly ILogger _logger;
@@ -32,8 +31,8 @@ public class DetailsModel : BasePageModel
         LinkGenerator linkGenerator,
         ICurrentUserService currentUserService,
         ILogger logger)
+        : base(mediator)
     {
-        _mediator = mediator;
         _linkGenerator = linkGenerator;
         _currentUserService = currentUserService;
         _logger = logger
@@ -55,7 +54,7 @@ public class DetailsModel : BasePageModel
         {
             ModalContent = ErrorDisplay.Create(
                 EnrolmentApplicationErrors.InvalidId,
-                _linkGenerator.GetPathByPage("/Partner/Enrolments/Applications/Index", values: new { area = "Staff" }));
+                _linkGenerator.GetPathByPage("/Partner/Enrolments/Applications/Index", values: new { area = "Staff", PeriodId }));
 
             return;
         }
@@ -77,7 +76,7 @@ public class DetailsModel : BasePageModel
             
             ModalContent = ErrorDisplay.Create(
                 application.Error,
-                _linkGenerator.GetPathByPage("/Partner/Enrolments/Applications/Index", values: new { area = "Staff" }));
+                _linkGenerator.GetPathByPage("/Partner/Enrolments/Applications/Index", values: new { area = "Staff", PeriodId }));
 
             return;
         }
@@ -110,7 +109,7 @@ public class DetailsModel : BasePageModel
             return Page();
         }
         
-        return RedirectToPage("/Partner/Enrolments/Applications/Index", new { area = "Staff" });
+        return RedirectToPage("/Partner/Enrolments/Applications/Index", new { area = "Staff", PeriodId });
     }
 
     public async Task<IActionResult> OnPostCreateOffer()
@@ -132,7 +131,7 @@ public class DetailsModel : BasePageModel
             return Page();
         }
 
-        return RedirectToPage();
+        return RedirectToPage(new { PeriodId });
     }
 
     public async Task<IActionResult> OnPostRejectApplication(EnrolmentCourse course)
@@ -158,7 +157,7 @@ public class DetailsModel : BasePageModel
             return Page();
         }
 
-        return RedirectToPage();
+        return RedirectToPage(new { PeriodId });
     }
 
     public async Task<IActionResult> OnPostApproveApplication(EnrolmentCourse course)
@@ -184,6 +183,6 @@ public class DetailsModel : BasePageModel
             return Page();
         }
 
-        return RedirectToPage();
+        return RedirectToPage(new { PeriodId });
     }
 }

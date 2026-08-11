@@ -21,9 +21,8 @@ using Presentation.Shared.Helpers.Attributes;
 using Serilog;
 
 [HasPermission(AuthPermission.Partners_Enrolments_Applications_Edit_Value)]
-public class ImportModel : BasePageModel
+public class ImportModel : PeriodScopedPageModel
 {
-    private readonly ISender _mediator;
     private readonly LinkGenerator _linkGenerator;
     private readonly IImportStagingCache _stagingCache;
     private readonly ICurrentUserService _currentUserService;
@@ -35,8 +34,8 @@ public class ImportModel : BasePageModel
         IImportStagingCache stagingCache,
         ICurrentUserService currentUserService,
         ILogger logger)
+        : base(mediator)
     {
-        _mediator = mediator;
         _linkGenerator = linkGenerator;
         _stagingCache = stagingCache;
         _currentUserService = currentUserService;
@@ -50,12 +49,7 @@ public class ImportModel : BasePageModel
 
     [BindProperty(SupportsGet = true)]
     public Guid Key { get; set; }
-
-    [BindProperty]
-    public EnrolmentPeriodId PeriodId { get; set; } = EnrolmentPeriodId.Empty;
-
-    public List<EnrolmentPeriodResponse> Periods { get; set; } = [];
-
+    
     public IReadOnlyList<ImportFieldDefinition> FieldDefinitions => EnrolmentApplicationImportFields.Definitions;
 
     [BindProperty]
@@ -81,19 +75,6 @@ public class ImportModel : BasePageModel
             return;
 
         AvailableHeaders = import.Headers;
-
-        Result<List<EnrolmentPeriodResponse>> periods = await _mediator.Send(new GetAllEnrolmentPeriodsQuery());
-
-        if (periods.IsFailure)
-        {
-            ModalContent = ErrorDisplay.Create(periods.Error);
-
-            return;
-        }
-
-        Periods = periods.Value
-            .OrderBy(entry => entry.OpenAt)
-            .ToList();
     }
 
     public async Task<IActionResult> OnPostMap()

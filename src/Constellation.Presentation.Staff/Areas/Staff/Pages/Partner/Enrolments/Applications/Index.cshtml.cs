@@ -14,7 +14,6 @@ using Constellation.Application.Domains.EnrolmentContext.Applications.Commands.U
 using Constellation.Core.Abstractions.Services;
 using Constellation.Core.Shared;
 using Core.Models.EnrolmentContext.Application.Enums;
-using Core.Models.EnrolmentContext.EnrolmentPeriod.Identifiers;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
@@ -25,9 +24,8 @@ using Shared.Components.UploadFileForImportStaging;
 using ApplicationId = Core.Models.EnrolmentContext.Application.Identifiers.ApplicationId;
 
 [HasPermission(AuthPermission.Partners_Enrolments_Applications_View_Value)]
-public class IndexModel : BasePageModel
+public class IndexModel : PeriodScopedPageModel
 {
-    private readonly ISender _mediator;
     private readonly LinkGenerator _linkGenerator;
     private readonly IImportService _importService;
     private readonly ICurrentUserService _currentUserService;
@@ -39,8 +37,8 @@ public class IndexModel : BasePageModel
         IImportService importService,
         ICurrentUserService currentUserService,
         ILogger logger)
+        : base(mediator)
     {
-        _mediator = mediator;
         _linkGenerator = linkGenerator;
         _importService = importService;
         _currentUserService = currentUserService;
@@ -51,9 +49,6 @@ public class IndexModel : BasePageModel
 
     [ViewData] public string ActivePage => Shared.Components.StaffSidebarMenu.ActivePage.Partner_Enrolments_Applications;
     [ViewData] public string PageTitle => "Enrolment Applications";
-
-    [BindProperty(SupportsGet = true)]
-    public EnrolmentPeriodId PeriodId { get; set; } = EnrolmentPeriodId.Empty;
 
     [BindProperty(SupportsGet = true)]
     public StatusFilter Status { get; set; } = StatusFilter.All;
@@ -78,15 +73,7 @@ public class IndexModel : BasePageModel
             .OrderBy(entry => entry.OpenAt)
             .ToList();
 
-        if (PeriodId == EnrolmentPeriodId.Empty)
-        {
-            if (Periods.Count is 0 or > 1)
-                return Page();
-
-            return RedirectToPage(new { PeriodId = Periods.First().Id });
-        }
-
-        Result<List<EnrolmentApplicationResponse>> applications = await _mediator.Send(new GetEnrolmentApplicationsByPeriodQuery(PeriodId));
+        Result<List<EnrolmentApplicationResponse>> applications = await _mediator.Send(new GetEnrolmentApplicationsByPeriodQuery(Period.Id));
 
         if (applications.IsFailure)
         {
@@ -129,7 +116,7 @@ public class IndexModel : BasePageModel
                 return await PreparePage();
             }
 
-            return RedirectToPage("/Partner/Enrolments/Applications/Import", new { area = "Staff", Key = key.Value });
+            return RedirectToPage("/Partner/Enrolments/Applications/Import", new { area = "Staff", PeriodId, Key = key.Value });
         }
         catch (Exception ex)
         {
@@ -172,7 +159,7 @@ public class IndexModel : BasePageModel
             return await PreparePage();
         }
 
-        return RedirectToPage(new { PeriodId, Status });
+        return RedirectToPage(new { Status, PeriodId });
     }
 
     public async Task<IActionResult> OnPostBulkCreateOffer(
@@ -203,7 +190,7 @@ public class IndexModel : BasePageModel
             return await PreparePage();
         }
 
-        return RedirectToPage(new { PeriodId, Status });
+        return RedirectToPage(new { Status, PeriodId });
     }
 
     public async Task<IActionResult> OnPostExport(List<ApplicationId> applicationIds)

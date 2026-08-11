@@ -22,9 +22,8 @@ using Presentation.Shared.Helpers.Attributes;
 using Serilog;
 
 [HasPermission(AuthPermission.Partners_Enrolments_Offers_View_Value)]
-public class IndexModel : BasePageModel
+public class IndexModel : PeriodScopedPageModel
 {
-    private readonly ISender _mediator;
     private readonly LinkGenerator _linkGenerator;
     private readonly ICurrentUserService _currentUserService;
     private readonly ILogger _logger;
@@ -34,8 +33,8 @@ public class IndexModel : BasePageModel
         LinkGenerator linkGenerator,
         ICurrentUserService currentUserService,
         ILogger logger)
+        : base(mediator)
     {
-        _mediator = mediator;
         _linkGenerator = linkGenerator;
         _currentUserService = currentUserService;
         _logger = logger
@@ -47,10 +46,7 @@ public class IndexModel : BasePageModel
     [ViewData] public string PageTitle => "Enrolment Offers";
 
     [BindProperty(SupportsGet = true)]
-    public EnrolmentPeriodId PeriodId { get; set; } = EnrolmentPeriodId.Empty;
-    [BindProperty(SupportsGet = true)]
     public StatusFilter Status { get; set; } = StatusFilter.All;
-    public List<EnrolmentPeriodResponse> Periods { get; set; } = [];
     public List<EnrolmentOfferResponse> Offers { get; set; } = [];
 
     public async Task<IActionResult> OnGet()
@@ -60,27 +56,6 @@ public class IndexModel : BasePageModel
 
     public async Task<IActionResult> PreparePage()
     {
-        Result<List<EnrolmentPeriodResponse>> periods = await _mediator.Send(new GetAllEnrolmentPeriodsQuery());
-
-        if (periods.IsFailure)
-        {
-            ModalContent = ErrorDisplay.Create(periods.Error);
-
-            return Page();
-        }
-
-        Periods = periods.Value
-            .OrderBy(entry => entry.OpenAt)
-            .ToList();
-
-        if (PeriodId == EnrolmentPeriodId.Empty)
-        {
-            if (Periods.Count is 0 or > 1)
-                return Page();
-
-            return RedirectToPage(new { PeriodId = Periods.First().Id });
-        }
-
         Result<List<EnrolmentOfferResponse>> offers = await _mediator.Send(new GetOffersForPeriodQuery(PeriodId));
 
         if (offers.IsFailure)

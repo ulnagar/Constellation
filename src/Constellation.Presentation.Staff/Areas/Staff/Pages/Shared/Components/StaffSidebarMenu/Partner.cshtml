@@ -4,6 +4,9 @@
 @{
     var segments = Model.Split('.');
     var module = segments[1];
+
+    var hasPeriod = ViewContext.RouteData.Values.TryGetValue("periodId", out var periodIdValue)
+                    && periodIdValue is not null;
 }
 
 <nav id="accordion" class="d-none d-md-block bg-light sidebar">
@@ -128,21 +131,42 @@
                                 Periods
                             </a>
                         </li>
-                        <li class="nav-item">
-                            <a class="nav-link show-loader @(Model == ActivePage.Partner_Enrolments_Applications ? "active" : "")" asp-page="/Partner/Enrolments/Applications/Index" asp-area="Staff">
-                                Applications
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link show-loader @(Model == ActivePage.Partner_Enrolments_Offers ? "active" : "")" asp-page="/Partner/Enrolments/Offers/Index" asp-area="Staff">
-                                Offers
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link show-loader @(Model == ActivePage.Partner_Enrolments_Reports ? "active" : "")" asp-page="/Partner/Enrolments/Reports/Index" asp-area="Staff">
-                                Reports
-                            </a>
-                        </li>
+                        @if (!hasPeriod)
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link show-loader @(Model == ActivePage.Partner_Enrolments_Applications ? "active" : "")" asp-page="/Partner/Enrolments/Applications" asp-area="Staff">
+                                    Applications
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link show-loader @(Model == ActivePage.Partner_Enrolments_Offers ? "active" : "")" asp-page="/Partner/Enrolments/Offers" asp-area="Staff">
+                                    Offers
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link show-loader @(Model == ActivePage.Partner_Enrolments_Reports ? "active" : "")" asp-page="/Partner/Enrolments/Reports" asp-area="Staff">
+                                    Reports
+                                </a>
+                            </li>
+                        }
+                        else
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link show-loader @(Model == ActivePage.Partner_Enrolments_Applications ? "active" : "")" asp-page="/Partner/Enrolments/Applications/Index" asp-route-PeriodId="@periodIdValue" asp-area="Staff">
+                                    Applications
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link show-loader @(Model == ActivePage.Partner_Enrolments_Offers ? "active" : "")" asp-page="/Partner/Enrolments/Offers/Index" asp-route-PeriodId="@periodIdValue" asp-area="Staff">
+                                    Offers
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link show-loader @(Model == ActivePage.Partner_Enrolments_Reports ? "active" : "")" asp-page="/Partner/Enrolments/Reports/Index" asp-route-PeriodId="@periodIdValue" asp-area="Staff">
+                                    Reports
+                                </a>
+                            </li>
+                        }
                     </ul>
                 </div>
             </div>

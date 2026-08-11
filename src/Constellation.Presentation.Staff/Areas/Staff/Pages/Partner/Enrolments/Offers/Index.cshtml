@@ -52,34 +52,20 @@
         <button class="btn btn-secondary" id="export-button">Export</button>
 
         <div class="btn-group" role="group">
-            <button class="btn btn-warning" id="bulk-send-offer-button">Create Offers</button>
+            <button class="btn btn-warning" id="bulk-send-offer-button">Send Offers</button>
         </div>
     }
 </div>
 
 <hr />
 
-<form method="get">
-    @Html.AntiForgeryToken()
-    <div class="mb-3 row">
-        <label for="PeriodId" class="col-md-2">Enrolment Period</label>
-        <div class="col-md-3">
-            <select name="PeriodId" id="PeriodId" class="form-control">
-                <option value=""> -- Select -- </option>
-                @foreach (var period in Model.Periods)
-                {
-                    <option value="@period.Id"
-                            selected="@(period.Id == Model.PeriodId ? "selected" : null)">
-                        @period.Label
-                    </option>
-                }
-            </select>
-        </div>
-        <div class="col-md-2">
-            <button type="submit" class="btn btn-primary">Filter</button>
-        </div>
+<div class="mb-3 row">
+    <label class="col-md-2">Current Enrolment Period</label>
+    <label class="col-md-5">@Model.Period.Label</label>
+    <div class="col-md-2">
+        <vc:period-switcher />
     </div>
-</form>
+</div>
 
 <table class="table table-striped table-hover">
     <thead>
@@ -106,8 +92,8 @@
             <td>
                 @if (canEditTest.Succeeded)
                 {
-                    <a asp-page="/Partner/Enrolments/Offers/Details" asp-route-Id="@offer.Id" class="btn btn-sm btn-info btn-show-hover showLoader">More Info...</a>
-                    <a asp-page="/Partner/Enrolments/Offers/Respond" asp-route-Id="@offer.Id" class="btn btn-sm btn-info btn-show-hover showLoader">Respond</a>
+                    <a asp-page="/Partner/Enrolments/Offers/Details" asp-route-Id="@offer.Id" asp-route-PeriodId="@Model.PeriodId" class="btn btn-sm btn-info btn-show-hover showLoader">More Info...</a>
+                    <a asp-page="/Partner/Enrolments/Offers/Respond" asp-route-Id="@offer.Id" asp-route-PeriodId="@Model.PeriodId" class="btn btn-sm btn-info btn-show-hover showLoader">Respond</a>
                 }
             </td>
         </tr>
@@ -115,7 +101,7 @@
     </tbody>
 </table>
 
-<form method="post" asp-page-handler="BulkSendOffer">
+<form method="post" asp-page-handler="BulkSendOffer" asp-route-PeriodId="@Model.PeriodId">
     <div class="modal fade" tabindex="-1" id="bulk-send-offer-modal">
         <div class="modal-dialog">
             <div class="modal-content">

@@ -69,7 +69,7 @@ internal sealed class UpdateEnrolmentApplicationCommandHandler
             return updateResult;
         }
 
-        foreach (CourseSelection course in application.SelectedCourses)
+        foreach (CourseSelection course in application.SelectedCourses.ToList())
         {
             if (request.Courses.Any(entry => entry == course.Course))
                 continue;

@@ -44,26 +44,12 @@ else
         .GroupBy(f => f.GroupLabel) // null key = ungrouped, standalone fields
         .ToList();
 
-    <form asp-page-handler="Map" method="post">
+    <form asp-page-handler="Map" asp-route-PeriodId="@Model.PeriodId" method="post">
         
         <div class="row mb-3 mapping-row mapping-row--required">
-            <label for="PeriodId" class="col-md-3">
-                Enrolment Period
-                <span class="required-marker" aria-hidden="true">*</span>
-                <span class="visually-hidden">(required)</span>
-            </label>
-
+            <label class="col-md-3">Enrolment Period</label>
             <div class="col-md-5">
-                <select name="PeriodId" id="PeriodId" class="form-control custom-select2">
-                    <option value=""> -- Select -- </option>
-                    @foreach (var period in Model.Periods)
-                    {
-                        <option value="@period.Id"
-                                selected="@(period.Id == Model.PeriodId ? "selected" : null)">
-                            @period.Label
-                        </option>
-                    }
-                </select>
+                <label>@Model.Period.Label</label>
             </div>
         </div>
        

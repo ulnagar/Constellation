@@ -18,9 +18,8 @@ using Presentation.Shared.Helpers.Attributes;
 using Serilog;
 
 [HasPermission(AuthPermission.Partners_Enrolments_Offers_Edit_Value)]
-public class RespondModel : BasePageModel
+public class RespondModel : PeriodScopedPageModel
 {
-    private readonly ISender _mediator;
     private readonly LinkGenerator _linkGenerator;
     private readonly ICurrentUserService _currentUserService;
     private readonly ILogger _logger;
@@ -30,8 +29,8 @@ public class RespondModel : BasePageModel
         LinkGenerator linkGenerator,
         ICurrentUserService currentUserService,
         ILogger logger)
+        : base(mediator)
     {
-        _mediator = mediator;
         _linkGenerator = linkGenerator;
         _currentUserService = currentUserService;
         _logger = logger
@@ -68,7 +67,7 @@ public class RespondModel : BasePageModel
 
             ModalContent = ErrorDisplay.Create(
                 EnrolmentOfferErrors.InvalidId,
-                _linkGenerator.GetPathByPage("/Partner/Enrolments/Offers/Index", values: new { area = "Staff" }));
+                _linkGenerator.GetPathByPage("/Partner/Enrolments/Offers/Index", values: new { area = "Staff", PeriodId }));
 
             return;
         }
@@ -83,7 +82,7 @@ public class RespondModel : BasePageModel
 
             ModalContent = ErrorDisplay.Create(
                 offer.Error,
-                _linkGenerator.GetPathByPage("/Partner/Enrolments/Offers/Index", values: new { area = "Staff" }));
+                _linkGenerator.GetPathByPage("/Partner/Enrolments/Offers/Index", values: new { area = "Staff", PeriodId }));
 
             return;
         }
@@ -159,7 +158,7 @@ public class RespondModel : BasePageModel
                 return Page();
             }
 
-            return RedirectToPage("/Partner/Enrolments/Offers/Index", new { area = "Staff" });
+            return RedirectToPage("/Partner/Enrolments/Offers/Index", new { area = "Staff", PeriodId });
         }
 
         if (CourtOrders == "Unset")
@@ -201,6 +200,6 @@ public class RespondModel : BasePageModel
             return Page();
         }
 
-        return RedirectToPage("/Partner/Enrolments/Offers/Index", new { area = "Staff" });
+        return RedirectToPage("/Partner/Enrolments/Offers/Index", new { area = "Staff", PeriodId });
     }
 }
