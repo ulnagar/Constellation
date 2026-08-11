@@ -1,7 +1,9 @@
 ﻿namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Shared.Components.PeriodSwitcher;
 
 using Application.Domains.EnrolmentContext.EnrolmentPeriods.Models;
+using Application.Domains.EnrolmentContext.EnrolmentPeriods.Queries.GetAllEnrolmentPeriods;
 using Application.Domains.EnrolmentContext.EnrolmentPeriods.Queries.GetCurrentEnrolmentPeriods;
+using Core.Models.EnrolmentContext.EnrolmentPeriod.Enums;
 using Core.Models.EnrolmentContext.EnrolmentPeriod.Identifiers;
 using Core.Shared;
 using MediatR;
@@ -20,7 +22,7 @@ public sealed class PeriodSwitcherViewComponent : ViewComponent
 
     public async Task<IViewComponentResult> InvokeAsync()
     {
-        Result<List<EnrolmentPeriodResponse>> periodsResult = await _mediator.Send(new GetCurrentEnrolmentPeriodsQuery());
+        Result<List<EnrolmentPeriodResponse>> periodsResult = await _mediator.Send(new GetAllEnrolmentPeriodsQuery());
         string? currentPeriodId = ViewContext.RouteData.Values["periodId"]?.ToString();
 
         RouteValueDictionary baseValues = new RouteValueDictionary(ViewContext.RouteData.Values);
@@ -34,7 +36,8 @@ public sealed class PeriodSwitcherViewComponent : ViewComponent
             .Select(p => new PeriodSwitcherOption { 
                 PeriodId = p.Id,
                 Label = p.Label,
-                IsCurrent = p.Id.ToString() == currentPeriodId,
+                IsCurrent = p.Status <= PeriodStatus.Open,
+                CurrentlySelected = p.Id.ToString() == currentPeriodId,
                 Url = BuildSwitchUrl(baseValues, p.Id)
             })
             .ToList();

@@ -7,6 +7,7 @@ using Constellation.Application.Domains.EnrolmentContext.EnrolmentPeriods.Models
 using Core.Models.EnrolmentContext.EnrolmentPeriod.Identifiers;
 using Core.Shared;
 using MediatR;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.AspNetCore.Mvc.RazorPages;
@@ -18,6 +19,9 @@ public abstract class BasePageModel : PageModel, IBaseModel
 
 public abstract class PeriodScopedPageModel : BasePageModel
 {
+    private const string LastPeriodCookieName = "Enrolments.LastPeriodId";
+    private static readonly TimeSpan LastPeriodTtl = TimeSpan.FromMinutes(10);
+    
     protected readonly ISender _mediator;
 
     protected PeriodScopedPageModel(
@@ -50,6 +54,19 @@ public abstract class PeriodScopedPageModel : BasePageModel
         }
 
         Period = result.Value;
+
+        Response.Cookies.Append(
+            LastPeriodCookieName,
+            PeriodId.Value.ToString(),
+            new CookieOptions
+            {
+                Expires = DateTimeOffset.UtcNow.Add(LastPeriodTtl),
+                HttpOnly = true,
+                Secure = true,
+                SameSite = SameSiteMode.Lax,
+                IsEssential = true
+            });
+
         await next();
     }
 }

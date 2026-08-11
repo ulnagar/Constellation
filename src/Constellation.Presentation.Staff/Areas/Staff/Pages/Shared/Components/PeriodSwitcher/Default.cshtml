@@ -1,8 +1,17 @@
 @model Constellation.Presentation.Staff.Areas.Staff.Pages.Shared.Components.PeriodSwitcher.PeriodSwitcherViewModel
 
-<button type="button" class="btn btn-outline-secondary btn-sm" data-bs-toggle="modal" data-bs-target="#periodSwitcherModal">
-    Switch Period
-</button>
+@{
+    var currentPeriod = Model.Periods.FirstOrDefault(entry => entry.IsCurrent);
+}
+
+<div class="mb-3 alert alert-danger clearfix">
+    <label>Current Enrolment Period: </label> <label>@currentPeriod?.Label</label> 
+    <div class="float-end">
+        <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-toggle="modal" data-bs-target="#periodSwitcherModal">
+            Switch Period
+        </button>
+    </div>
+</div>
 
 <div class="modal fade" id="periodSwitcherModal" tabindex="1" aria-labelledby="periodSwitcherModalLabel" aria-hidden="true">
     <div class="modal-dialog">
@@ -11,19 +20,31 @@
                 <h5 class="modal-title" id="periodSwitcherModalLabel">Switch enrolment period</h5>
             </div>
             <div class="modal-body">
-                <div class="list-group">
-                    @foreach (var option in Model.Periods)
-                    {
-                        <a href="@option.Url"
-                           class="list-group-item list-group-item-action d-flex justify-content-between align-items-center @(option.IsCurrent ? "active" : "")"
-                           aria-current="@(option.IsCurrent ? "true" : null)">
-                            @option.Label
-                            @if (option.IsCurrent)
-                            {
-                                <span class="badge bg-light text-dark">Current</span>
-                            }
-                        </a>
-                    }
+                <div class="row justify-content-center">
+                    <div class="vstack gap-3">
+                        <h5>Current:</h5>
+                        @foreach (var option in Model.Periods.Where(entry => entry.IsCurrent).OrderBy(entry => entry.Label))
+                        {
+                            <div class="card @(option.CurrentlySelected ? "text-bg-primary" : "")">
+                                <div class="card-body">
+                                    @option.Label
+                                    <a href="@option.Url" class="stretched-link"></a>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                    <div class="vstack gap-3 mt-3">
+                        <h5>Archived:</h5>
+                        @foreach (var option in Model.Periods.Where(entry => !entry.IsCurrent).OrderBy(entry => entry.Label))
+                        {
+                            <div class="card  @(option.CurrentlySelected ? "text-bg-primary" : "text-bg-light")">
+                                <div class="card-body">
+                                    @option.Label
+                                    <a href="@option.Url" class="stretched-link"></a>
+                                </div>
+                            </div>
+                        }
+                    </div>
                 </div>
             </div>
             <div class="modal-footer justify-content-between">

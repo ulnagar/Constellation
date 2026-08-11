@@ -12,9 +12,23 @@
 <div class="row justify-content-center">
     <div class="col-6">
         <div class="vstack gap-3">
-            @foreach (var option in Model.Periods)
+            <h5>Current:</h5>
+            @foreach (var option in Model.Periods.Where(entry => entry.IsCurrent).OrderBy(entry => entry.Label))
             {
                 <div class="card">
+                    <div class="card-body">
+                        @option.Label
+                        <a href="@option.Url" class="stretched-link"></a>
+                    </div>
+                </div>
+            }
+        </div>
+        <hr />
+        <div class="vstack gap-3">
+            <h5>Archived:</h5>
+            @foreach (var option in Model.Periods.Where(entry => !entry.IsCurrent).OrderBy(entry => entry.Label))
+            {
+                <div class="card text-bg-light">
                     <div class="card-body">
                         @option.Label
                         <a href="@option.Url" class="stretched-link"></a>
