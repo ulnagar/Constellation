@@ -13,18 +13,20 @@
 <div class="page-menu">
     @if (canEditTest.Succeeded)
     {
-        if (Model.Period.IsSuspended)
-        {
-            <button data-bs-toggle="modal" data-bs-target="#reinstate-period-modal" class="btn btn-secondary">Reinstate</button>
-        }
-        else
-        {
-            <button data-bs-toggle="modal" data-bs-target="#suspend-period-modal" class="btn btn-secondary">Suspend</button>
-        }
-
         if (Model.Period.Status != PeriodStatus.Archived)
         {
+            if (Model.Period.IsSuspended)
+            {
+                <button data-bs-toggle="modal" data-bs-target="#reinstate-period-modal" class="btn btn-secondary">Reinstate</button>
+            }
+            else
+            {
+                <button data-bs-toggle="modal" data-bs-target="#suspend-period-modal" class="btn btn-secondary">Suspend</button>
+            }
+
             <a asp-page="/Partner/Enrolments/Periods/Upsert" asp-area="Staff" asp-route-id="@Model.Id" class="btn btn-success">Edit</a>
+
+            <button data-bs-toggle="modal" data-bs-target="#archive-period-modal" class="btn btn-danger">Archive</button>
         }
     }
     
@@ -139,6 +141,29 @@
                 </div>
                 <div class="modal-footer">
                     <button type="submit" class="btn btn-success show-loader">Reinstate</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal" data-bs-dismiss="modal">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+
+<form method="post" asp-page-handler="Archive">
+    <div class="modal fade" tabindex="-1" id="archive-period-modal">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Archive Period</h5>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="form-group col-12">
+                            <span class="control-label">Archiving the period will prevent any applications or offers from being updated. Are you sure you wish to do this?</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-success show-loader">Archive</button>
                     <button type="button" class="btn btn-secondary" data-dismiss="modal" data-bs-dismiss="modal">Cancel</button>
                 </div>
             </div>

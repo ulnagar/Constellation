@@ -7,6 +7,7 @@ using Constellation.Core.Models.Identifiers;
 using Constellation.Core.Models.Students.Enums;
 using Constellation.Core.Models.Students.ValueObjects;
 using Constellation.Core.ValueObjects;
+using Core.Models.EnrolmentContext.Application.Enums;
 using Core.Models.EnrolmentContext.Application.Identifiers;
 using Core.Models.EnrolmentContext.Offer.Enums;
 using Core.Models.EnrolmentContext.Offer.Identifiers;
@@ -29,8 +30,12 @@ public sealed record EnrolmentOfferExport(
     string DestinationSchool,
     Program Program,
     Grade Grade,
+    List<EnrolmentCourse> Courses,
     OfferStatus Status,
     DateTime? OfferedAt,
     DateTime? RespondBy,
     DateTime? ReminderSentAt,
-    DateTime? RespondedAt);
+    DateTime? RespondedAt,
+    bool? HasCourtOrders,
+    bool? HasHealthConcerns,
+    bool? LaptopRequested);

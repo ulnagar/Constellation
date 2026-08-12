@@ -36,7 +36,7 @@ public sealed class PeriodSwitcherViewComponent : ViewComponent
             .Select(p => new PeriodSwitcherOption { 
                 PeriodId = p.Id,
                 Label = p.Label,
-                IsCurrent = p.Status <= PeriodStatus.Open,
+                IsCurrent = p.Status < PeriodStatus.Archived,
                 CurrentlySelected = p.Id.ToString() == currentPeriodId,
                 Url = BuildSwitchUrl(baseValues, p.Id)
             })

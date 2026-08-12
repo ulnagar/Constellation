@@ -46,7 +46,7 @@ public sealed class EnrolmentPeriod
     public bool IsSuspended { get; private set; }
     public string? SuspensionReason { get; private set; }
 
-    private bool IsArchived { get; set; }
+    public bool IsArchived { get; private set; }
 
     public bool IsWithinWindow(DateTimeOffset now) =>
         now >= OpenAt && now < ClosedAt;
@@ -169,4 +169,6 @@ public sealed class EnrolmentPeriod
         if (_courses.Contains(course))
             _courses.Remove(course);
     }
+
+    public void Archive() => IsArchived = true;
 }

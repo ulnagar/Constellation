@@ -50,7 +50,7 @@ public class IndexModel : BasePageModel
         JobDefinitions.Add(new(typeof(IAttachmentManagementJob), nameof(IAttachmentManagementJob), "0 4 * * *"));
         JobDefinitions.Add(new(typeof(ISentralComplianceScanJob), nameof(ISentralComplianceScanJob), "0 4 * * *"));
         JobDefinitions.Add(new(typeof(ITeamsAccessAuditJob), nameof(ITeamsAccessAuditJob), "* 2-22 * * *"));
-        JobDefinitions.Add(new(typeof(IEnrolmentTimingJob), nameof(IEnrolmentTimingJob), "30 12 * * *"));
+        JobDefinitions.Add(new(typeof(IEnrolmentTimingJob), nameof(IEnrolmentTimingJob), "30 17 * * *"));
     }
 
     public sealed record JobDefinition(

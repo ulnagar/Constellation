@@ -3,11 +3,13 @@
 
 @using Constellation.Core.Extensions
 @using Constellation.Core.Models.EnrolmentContext.Application.Enums
+@using Constellation.Core.Models.EnrolmentContext.EnrolmentPeriod.Enums
 @using Constellation.Presentation.Staff.Areas.Staff.Pages.Partner.Enrolments.Applications;
 
 @inject IAuthorizationService AuthorizationService
 @{
     var canEditTest = await AuthorizationService.AuthorizeAsync(User, AuthPermission.Partners_Enrolments_Applications_Edit_Value);
+    var isArchived = Model.Period.Status == PeriodStatus.Archived;
 }
 
 <h2>Enrolment Applications</h2>
@@ -45,23 +47,27 @@
 
     @if (canEditTest.Succeeded)
     {
-        <div class="btn-group" role="group">
-            <button type="button" class="btn btn-success dropdown-toggle" data-bs-toggle="dropdown">Create <span class="caret"></span></button>
-            <div class="dropdown-menu">
-                <a asp-page="/Partner/Enrolments/Applications/Upsert" asp-area="Staff" asp-route-PeriodId="@Model.PeriodId" class="dropdown-item">Manually</a>
-                <button data-bs-toggle="modal" data-bs-target="#import-modal" class="dropdown-item">Import</button>
+        @if (!isArchived)
+        {
+            <div class="btn-group" role="group">
+                <button type="button" class="btn btn-success dropdown-toggle" data-bs-toggle="dropdown">Create <span class="caret"></span></button>
+                <div class="dropdown-menu">
+                    <a asp-page="/Partner/Enrolments/Applications/Upsert" asp-area="Staff" asp-route-PeriodId="@Model.PeriodId" class="dropdown-item">Manually</a>
+                    <button data-bs-toggle="modal" data-bs-target="#import-modal" class="dropdown-item">Import</button>
+                </div>
             </div>
-        </div>
+
+
+            <div class="btn-group" role="group">
+                <button type="button" class="btn btn-warning dropdown-toggle" data-bs-toggle="dropdown">Bulk Actions <span class="caret"></span></button>
+                <div class="dropdown-menu">
+                    <button class="dropdown-item" id="bulk-update-status-button">Update Status</button>
+                    <button class="dropdown-item" id="bulk-create-offer-button">Create Offers</button>
+                </div>
+            </div>
+        }
 
         <button class="btn btn-secondary" id="export-button">Export</button>
-
-        <div class="btn-group" role="group">
-            <button type="button" class="btn btn-warning dropdown-toggle" data-bs-toggle="dropdown">Bulk Actions <span class="caret"></span></button>
-            <div class="dropdown-menu">
-                <button class="dropdown-item" id="bulk-update-status-button">Update Status</button>
-                <button class="dropdown-item" id="bulk-create-offer-button">Create Offers</button>
-            </div>
-        </div>
     }
 </div>
 

@@ -1,7 +1,7 @@
 @model Constellation.Presentation.Staff.Areas.Staff.Pages.Shared.Components.PeriodSwitcher.PeriodSwitcherViewModel
 
 @{
-    var currentPeriod = Model.Periods.FirstOrDefault(entry => entry.IsCurrent);
+    var currentPeriod = Model.Periods.FirstOrDefault(entry => entry.CurrentlySelected);
 }
 
 <div class="mb-3 alert alert-danger clearfix">

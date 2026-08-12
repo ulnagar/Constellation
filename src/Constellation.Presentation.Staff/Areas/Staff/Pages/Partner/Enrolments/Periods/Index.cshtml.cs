@@ -74,10 +74,7 @@ public class IndexModel : BasePageModel
             EnrolmentPeriodFilter.All => periods.ToList(),
 
             EnrolmentPeriodFilter.Current => periods
-                .Where(period => period.Status is
-                    PeriodStatus.Open or
-                    PeriodStatus.Suspended or
-                    PeriodStatus.Scheduled)
+                .Where(period => period.Status is not PeriodStatus.Archived)
                 .ToList(),
 
             EnrolmentPeriodFilter.Archived => periods

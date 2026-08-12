@@ -1,6 +1,10 @@
 ﻿@page "{id}"
 @model Constellation.Presentation.Staff.Areas.Staff.Pages.Partner.Enrolments.Offers.DetailsModel
+
+@using Constellation.Core.Models.EnrolmentContext.EnrolmentPeriod.Enums
+
 @{
+    var isArchived = Model.Period.Status == PeriodStatus.Archived;
 }
 
 <h2>@Model.Offer.StudentName</h2>

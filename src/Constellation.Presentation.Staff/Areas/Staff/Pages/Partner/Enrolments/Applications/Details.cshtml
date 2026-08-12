@@ -3,17 +3,19 @@
 
 @using Constellation.Core.Extensions
 @using Constellation.Core.Models.EnrolmentContext.Application.Enums
+@using Constellation.Core.Models.EnrolmentContext.EnrolmentPeriod.Enums
 
 @inject IAuthorizationService AuthorizationService
 
 @{
     var canEditTest = await AuthorizationService.AuthorizeAsync(User, AuthPermission.Partners_Enrolments_Applications_Edit_Value);
+    var isArchived = Model.Period.Status == PeriodStatus.Archived;
 }
 
 <h2>Enrolment Application Details</h2>
 
 <div class="page-menu">
-    @if (canEditTest.Succeeded)
+    @if (canEditTest.Succeeded && !isArchived)
     {
         if (Model.Application.Status == ApplicationStatus.Pending)
         {
@@ -199,7 +201,7 @@
                 <td>@entry.Course.Name</td>
                 <td>@entry.Status</td>
                 <td>
-                    @if (entry.Status != CourseSelectionStatus.Withdrawn)
+                    @if (entry.Status != CourseSelectionStatus.Withdrawn && canEditTest.Succeeded && !isArchived)
                     {
                         <form method="post">
                             <input type="hidden" name="course" value="@entry.Course.Value" />

@@ -59,7 +59,7 @@ public class ApplicationsModel : BasePageModel
             {
                 PeriodId = p.Id,
                 Label = p.Label,
-                IsCurrent = p.Status <= PeriodStatus.Open,
+                IsCurrent = p.Status < PeriodStatus.Archived,
                 CurrentlySelected = false,
                 Url = _linkGenerator.GetPathByPage("/Partner/Enrolments/Applications/Index", values: new { area = "Staff", PeriodId = p.Id })
             })

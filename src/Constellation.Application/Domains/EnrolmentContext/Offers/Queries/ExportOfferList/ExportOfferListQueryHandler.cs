@@ -2,6 +2,7 @@
 
 using Abstractions.Messaging;
 using Application.Interfaces.Services.Excel;
+using Constellation.Core.Models.EnrolmentContext.Application.Enums;
 using Constellation.Core.Models.EnrolmentContext.Application.Errors;
 using Core.Extensions;
 using Core.Models.EnrolmentContext.Application;
@@ -80,11 +81,15 @@ internal sealed class ExportOfferListQueryHandler
                 application.DestinationSchool ?? string.Empty,
                 application.Program,
                 application.Grade,
+                application.SelectedCourses.Where(entry => entry.Status == CourseSelectionStatus.Approved).Select(entry => entry.Course).ToList(),
                 offer.Status,
                 offer.OfferedAt?.DateTime,
                 offer.RespondBy?.DateTime,
                 offer.ReminderSentAt?.DateTime,
-                offer.RespondedAt?.DateTime));
+                offer.RespondedAt?.DateTime,
+                offer.RespondedAt.HasValue ? offer.HasCourtOrders : null,
+                offer.RespondedAt.HasValue ? offer.HasHealthConcerns : null,
+                offer.RespondedAt.HasValue ? offer.RequestedLaptop : null));
         }
 
         IExcelWorkbook workbook = _writer.CreateWorkbook();
@@ -96,9 +101,10 @@ internal sealed class ExportOfferListQueryHandler
             new("Student Given Names", a => a.StudentName.FirstName),
             new("Student Preferred Name", a => a.StudentName.PreferredName),
             new("Full Name", a => a.StudentName.DisplayName),
-            new("Gender", a => a.StudentGender.Name),
+            new("Gender", a => a.StudentGender?.Name ?? "Unknown"),
             new("Cohort", a => a.Grade.AsNumber(), ExcelColumnFormat.Text),
             new("Program", a => a.Program.Name),
+            new("Courses", a => String.Join("; ", a.Courses.Select(entry => entry.Name))),
             new("Current School Code", a => a.CurrentSchoolCode, ExcelColumnFormat.Text),
             new("Current School", a => a.CurrentSchool),
             new("Destination School Code", a => a.DestinationSchoolCode, ExcelColumnFormat.Text),
@@ -111,7 +117,10 @@ internal sealed class ExportOfferListQueryHandler
             new("Offered At", a => a.OfferedAt, ExcelColumnFormat.Date),
             new("Respond By", a => a.RespondBy, ExcelColumnFormat.Date),
             new("Reminder Sent At", a => a.ReminderSentAt, ExcelColumnFormat.Date),
-            new("Responded At", a => a.RespondedAt, ExcelColumnFormat.Date));
+            new("Responded At", a => a.RespondedAt, ExcelColumnFormat.Date),
+            new("Court Orders", a => a.HasCourtOrders is null ? "N/A" : a.HasCourtOrders.Value ? "Yes" : "No"),
+            new("Health Concerns", a => a.HasHealthConcerns is null ? "N/A" : a.HasHealthConcerns.Value ? "Yes" : "No"),
+            new ("Laptop Requested", a => a.LaptopRequested is null ? "N/A" : a.LaptopRequested.Value ? "Yes" : "No"));
 
         _writer.ApplyHeaderStyle(sheet, 1);
         _writer.AddAutoFilter(sheet);

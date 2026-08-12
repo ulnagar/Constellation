@@ -7,6 +7,7 @@ using OfficeOpenXml.DataValidation;
 using OfficeOpenXml.DataValidation.Contracts;
 using OfficeOpenXml.Style;
 using System.Drawing;
+using System.Management.Automation;
 
 public sealed class EpplusExcelWriter : IExcelWriter
 {

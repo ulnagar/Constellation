@@ -1,6 +1,7 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Partner.Enrolments.Periods;
 
 using Application.Common.PresentationModels;
+using Application.Domains.EnrolmentContext.EnrolmentPeriods.Commands.ArchiveEnrolmentPeriod;
 using Application.Domains.EnrolmentContext.EnrolmentPeriods.Commands.ReinstateEnrolmentPeriod;
 using Application.Domains.EnrolmentContext.EnrolmentPeriods.Commands.SuspendEnrolmentPeriod;
 using Application.Domains.EnrolmentContext.EnrolmentPeriods.Models;
@@ -117,6 +118,32 @@ public class DetailsModel : BasePageModel
                 .ForContext(nameof(ReinstateEnrolmentPeriodCommand), command, true)
                 .ForContext(nameof(Error), result.Error, true)
                 .Warning("Failed to reinstate Enrolment Period by user {User}", _currentUserService.UserName);
+
+            ModalContent = ErrorDisplay.Create(result.Error);
+
+            await PreparePage();
+            return Page();
+        }
+
+        return RedirectToPage();
+    }
+
+    public async Task<IActionResult> OnPostArchive()
+    {
+        ArchiveEnrolmentPeriodCommand command = new(Id);
+
+        _logger
+            .ForContext(nameof(ArchiveEnrolmentPeriodCommand), command, true)
+            .Information("Requested to archive Enrolment Period by user {User}", _currentUserService);
+
+        Result result = await _mediator.Send(command);
+
+        if (result.IsFailure)
+        {
+            _logger
+                .ForContext(nameof(ArchiveEnrolmentPeriodCommand), command, true)
+                .ForContext(nameof(Error), result.Error, true)
+                .Warning("Failed to archive Enrolment Period by user {User}", _currentUserService.UserName);
 
             ModalContent = ErrorDisplay.Create(result.Error);
 

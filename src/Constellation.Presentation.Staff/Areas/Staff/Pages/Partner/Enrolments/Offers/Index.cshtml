@@ -2,11 +2,13 @@
 @model Constellation.Presentation.Staff.Areas.Staff.Pages.Partner.Enrolments.Offers.IndexModel
 
 @using Constellation.Core.Extensions
+@using Constellation.Core.Models.EnrolmentContext.EnrolmentPeriod.Enums
 @using Constellation.Presentation.Staff.Areas.Staff.Pages.Partner.Enrolments.Offers
 
 @inject IAuthorizationService AuthorizationService
 @{
     var canEditTest = await AuthorizationService.AuthorizeAsync(User, AuthPermission.Partners_Enrolments_Offers_Edit_Value);
+    var isArchived = Model.Period.Status == PeriodStatus.Archived;
 }
 
 <h2>Offers</h2>
@@ -51,9 +53,12 @@
     {
         <button class="btn btn-secondary" id="export-button">Export</button>
 
-        <div class="btn-group" role="group">
-            <button class="btn btn-warning" id="bulk-send-offer-button">Send Offers</button>
-        </div>
+        if (!isArchived)
+        {
+            <div class="btn-group" role="group">
+                <button class="btn btn-warning" id="bulk-send-offer-button">Send Offers</button>
+            </div>
+        }
     }
 </div>
 
@@ -87,7 +92,11 @@
                 @if (canEditTest.Succeeded)
                 {
                     <a asp-page="/Partner/Enrolments/Offers/Details" asp-route-Id="@offer.Id" asp-route-PeriodId="@Model.PeriodId" class="btn btn-sm btn-info btn-show-hover showLoader">More Info...</a>
-                    <a asp-page="/Partner/Enrolments/Offers/Respond" asp-route-Id="@offer.Id" asp-route-PeriodId="@Model.PeriodId" class="btn btn-sm btn-info btn-show-hover showLoader">Respond</a>
+
+                    if (!isArchived)
+                    {
+                        <a asp-page="/Partner/Enrolments/Offers/Respond" asp-route-Id="@offer.Id" asp-route-PeriodId="@Model.PeriodId" class="btn btn-sm btn-info btn-show-hover showLoader">Respond</a>
+                    }
                 }
             </td>
         </tr>

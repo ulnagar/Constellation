@@ -4,9 +4,11 @@ using Abstractions.Messaging;
 using Application.Interfaces.Services.Excel;
 using Core.Extensions;
 using Core.Models.EnrolmentContext.Application;
+using Core.Models.EnrolmentContext.Application.Enums;
 using Core.Models.EnrolmentContext.Application.Errors;
 using Core.Models.EnrolmentContext.Application.Repositories;
 using Core.Models.EnrolmentContext.EnrolmentPeriod.Repositories;
+using Core.Models.Students.Enums;
 using Core.Shared;
 using Serilog;
 using System.Globalization;
@@ -49,8 +51,9 @@ internal sealed class ExportApplicationsListQueryHandler
             new("Student Preferred Name", a => a.StudentName.PreferredName),
             new("Full Name", a => a.StudentName.DisplayName),
             new("DoB", a => a.DateOfBirth, ExcelColumnFormat.Date),
-            new("Gender", a => a.StudentGender.Name),
+            new("Gender", a => a.StudentGender?.Name ?? "Unknown"),
             new("Cohort", a => a.Grade.AsNumber(), ExcelColumnFormat.Text),
+            new("Courses", a => String.Join("; ", a.SelectedCourses.Where(entry => entry.Status <= CourseSelectionStatus.Approved).Select(entry => entry.Course.Name))),
             new("Current School Code", a => a.CurrentSchoolCode, ExcelColumnFormat.Text),
             new("Current School", a => a.CurrentSchool),
             new("Destination School Code", a => a.DestinationSchoolCode, ExcelColumnFormat.Text),
