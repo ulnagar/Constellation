@@ -39,7 +39,7 @@ public class IndexModel : BasePageModel
     }
 
     [BindProperty(SupportsGet = true)]
-    public string? Token { get; set; }
+    public string? OfferToken { get; set; }
     
     [BindProperty]
     public OfferId Id { get; set; }
@@ -152,7 +152,7 @@ public class IndexModel : BasePageModel
 
     private async Task<IActionResult> PreparePage(CancellationToken cancellationToken = default)
     {
-        if (!Guid.TryParse(Token, out var offerGuid))
+        if (!Guid.TryParse(OfferToken, out var offerGuid))
             return RedirectToExpired();
 
         Id = OfferId.FromValue(offerGuid);
