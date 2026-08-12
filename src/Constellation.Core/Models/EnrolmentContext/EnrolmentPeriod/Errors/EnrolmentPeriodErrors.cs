@@ -44,4 +44,8 @@ public static class EnrolmentPeriodErrors
     public static readonly Error CannotSuspendArchivedPeriod = new(
         "Enrolment.Period.CannotSuspendArchivedPeriod",
         "The current status is Archived, so you cannot suspend it");
+
+    public static readonly Error PeriodMismatch = new(
+        "Enrolment.Period.PeriodMismatch",
+        "The requested record does not belong to the currently selected Enrolment Period");
 }

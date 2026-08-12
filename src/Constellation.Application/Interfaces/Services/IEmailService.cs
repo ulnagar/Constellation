@@ -90,6 +90,7 @@ public interface IEmailService
     // Enrolment Emails
     Task<Result> SendEnrolmentOfferNotification(Application application, Offer offer, string year, CancellationToken cancellationToken = default);
     Task<Result> SendEnrolmentOfferReminder(Application application, Offer offer, string year, CancellationToken cancellationToken = default);
+    Task<Result> SendEnrolmentOfferReceipt(Application application, Offer offer, string year, CancellationToken cancellationToken = default);
 
     // Messaging Emails
     Task<Result> SendQueuedMessage(MessageSender sender, EmailRecipient receiver, string subject, string messageBody, CancellationToken cancellationToken = default);

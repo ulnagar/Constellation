@@ -6,6 +6,7 @@ using Application.Domains.EnrolmentContext.Offers.Commands.MarkOfferDeclinedBySt
 using Application.Domains.EnrolmentContext.Offers.Queries.GetOfferForResponse;
 using Application.Models.Auth;
 using Constellation.Core.Abstractions.Services;
+using Constellation.Core.Models.EnrolmentContext.EnrolmentPeriod.Errors;
 using Core.Models.EnrolmentContext.Offer.Enums;
 using Core.Models.EnrolmentContext.Offer.Errors;
 using Core.Models.EnrolmentContext.Offer.Identifiers;
@@ -82,6 +83,19 @@ public class RespondModel : PeriodScopedPageModel
 
             ModalContent = ErrorDisplay.Create(
                 offer.Error,
+                _linkGenerator.GetPathByPage("/Partner/Enrolments/Offers/Index", values: new { area = "Staff", PeriodId }));
+
+            return;
+        }
+
+        if (offer.Value.PeriodId != PeriodId)
+        {
+            _logger
+                .ForContext(nameof(Error), EnrolmentPeriodErrors.PeriodMismatch, true)
+                .Warning("Failed to retrieve Offer for response by user {User}", _currentUserService.UserName);
+
+            ModalContent = ErrorDisplay.Create(
+                EnrolmentPeriodErrors.PeriodMismatch,
                 _linkGenerator.GetPathByPage("/Partner/Enrolments/Offers/Index", values: new { area = "Staff", PeriodId }));
 
             return;

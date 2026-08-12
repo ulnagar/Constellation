@@ -1,0 +1,56 @@
+@model Constellation.Infrastructure.Templates.Views.Emails.Enrolments.EnrolmentOfferResponseReceiptEmailViewModel
+
+@using Constellation.Core.Enums
+@using Constellation.Core.Extensions
+@using Constellation.Core.Models.EnrolmentContext.Offer.Enums
+
+@{
+    Layout = "/Views/Shared/EmailLayout.cshtml";
+
+    ViewData["Preheader"] = Model.Preheader;
+    ViewData["Title"] = Model.Title;
+    ViewData["SenderName"] = Model.SenderName;
+    ViewData["SenderTitle"] = Model.SenderTitle;
+}
+
+<p>Dear @Model.ParentName.ToString()</p>
+
+<p>Thank you for confirming your intentions for the enrolment of @Model.StudentName.ToString(), in @Model.Grade.AsName() at Aurora College. Please find below a copy of the information you provided.</p>
+
+@if (Model.Status == OfferStatus.Declined)
+{
+    <p>You have declined the offer of enrolment.</p>
+}
+else
+{
+    <p>You have accepted the offer of enrolment.</p>
+
+    @if (Model.HasCourtOrders)
+    {
+        <p>@Model.StudentName.PreferredName does have court orders regarding care or custody. A staff member will be in touch shortly to request details and copies of orders.</p>
+    }
+    else
+    {
+        <p>@Model.StudentName.PreferredName does not have any court orders regarding care or custody.</p>
+    }
+    
+    @if (Model.HasHealthConcerns)
+    {
+        <p>@Model.StudentName.PreferredName does have health concerns. A staff member will be in touch shortly to request details and copies of any health care plans.</p>
+    }
+    else
+    {
+        <p>@Model.StudentName.PreferredName does not have any health concerns.</p>
+    }
+
+    @if (Model is { Grade: >= Grade.Y11, LaptopRequested: true })
+    {
+        <p>@Model.StudentName.PreferredName has requested a student laptop on loan from Aurora College. A device will be shipped to the partner school before the start of classes.</p>
+    }
+    else if (Model is { Grade: >= Grade.Y11, LaptopRequested: false })
+    {
+        <p>@Model.StudentName.PreferredName has will provide their own, suitable learning device for Aurora College lessons.</p>
+    }
+}
+
+<p>If any of the information above is incorrect or you would like to change your responses, please contact Aurora College on 1300 287 629.</p>

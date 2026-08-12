@@ -12,6 +12,7 @@ using Constellation.Application.Domains.Schools.Models;
 using Constellation.Application.Domains.Schools.Queries.GetSchoolsForSelectionList;
 using Constellation.Core.Abstractions.Services;
 using Constellation.Core.Enums;
+using Constellation.Core.Models.EnrolmentContext.EnrolmentPeriod.Errors;
 using Constellation.Core.Models.Identifiers;
 using Constellation.Core.Models.Offerings.Identifiers;
 using Constellation.Core.Models.Students.Enums;
@@ -142,7 +143,20 @@ public class UpsertModel : PeriodScopedPageModel
 
             ModalContent = ErrorDisplay.Create(
                 application.Error,
-                _linkGenerator.GetPathByPage("/Partner/Enrolments/Applications/Index", values: new { area = "Staff" }));
+                _linkGenerator.GetPathByPage("/Partner/Enrolments/Applications/Index", values: new { area = "Staff", PeriodId }));
+
+            return;
+        }
+        
+        if (application.Value.PeriodId != PeriodId)
+        {
+            _logger
+                .ForContext(nameof(Error), EnrolmentPeriodErrors.PeriodMismatch, true)
+                .Warning("Failed to load Enrolment Application for update by user {User}", _currentUserService.UserName);
+
+            ModalContent = ErrorDisplay.Create(
+                EnrolmentPeriodErrors.PeriodMismatch,
+                _linkGenerator.GetPathByPage("/Partner/Enrolments/Applications/Index", values: new { area = "Staff", PeriodId }));
 
             return;
         }
@@ -183,7 +197,7 @@ public class UpsertModel : PeriodScopedPageModel
         {
             ModalContent = ErrorDisplay.Create(
                 schools.Error,
-                _linkGenerator.GetPathByPage("/Partner/Enrolments/Applications/Index", values: new { area = "Staff" }));
+                _linkGenerator.GetPathByPage("/Partner/Enrolments/Applications/Index", values: new { area = "Staff", PeriodId }));
 
             return;
         }

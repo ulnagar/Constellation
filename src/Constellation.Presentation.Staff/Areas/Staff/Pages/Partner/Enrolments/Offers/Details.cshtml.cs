@@ -5,6 +5,7 @@ using Application.Models.Auth;
 using Constellation.Application.Common.PresentationModels;
 using Constellation.Core.Shared;
 using Core.Abstractions.Services;
+using Core.Models.EnrolmentContext.EnrolmentPeriod.Errors;
 using Core.Models.EnrolmentContext.Offer.Errors;
 using Core.Models.EnrolmentContext.Offer.Identifiers;
 using MediatR;
@@ -68,6 +69,19 @@ public class DetailsModel : PeriodScopedPageModel
 
             ModalContent = ErrorDisplay.Create(
                 offer.Error,
+                _linkGenerator.GetPathByPage("/Partner/Enrolments/Offers/Index", values: new { area = "Staff", PeriodId }));
+
+            return;
+        }
+
+        if (offer.Value.PeriodId != PeriodId)
+        {
+            _logger
+                .ForContext(nameof(Error), EnrolmentPeriodErrors.PeriodMismatch, true)
+                .Information("Failed to load Enrolment Offer details by user {User}", _currentUserService.UserName);
+
+            ModalContent = ErrorDisplay.Create(
+                EnrolmentPeriodErrors.PeriodMismatch,
                 _linkGenerator.GetPathByPage("/Partner/Enrolments/Offers/Index", values: new { area = "Staff", PeriodId }));
 
             return;

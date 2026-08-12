@@ -173,6 +173,8 @@ public sealed class Offer : AggregateRoot
         HasHealthConcerns = healthConditions;
         RequestedLaptop = requestedLaptop;
 
+        RaiseDomainEvent(new EnrolmentOfferRespondedDomainEvent(new(), Id));
+
         return Result.Success();
     }
 }

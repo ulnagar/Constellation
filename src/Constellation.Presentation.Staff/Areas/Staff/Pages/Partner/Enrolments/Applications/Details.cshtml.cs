@@ -8,6 +8,8 @@ using Application.Domains.EnrolmentContext.Offers.Commands.CreateOfferFromApplic
 using Application.Models.Auth;
 using Constellation.Application.Common.PresentationModels;
 using Constellation.Core.Abstractions.Services;
+using Constellation.Core.Models.EnrolmentContext.EnrolmentPeriod.Errors;
+using Constellation.Core.Models.EnrolmentContext.Offer;
 using Core.Models.EnrolmentContext.Application.Enums;
 using Core.Models.EnrolmentContext.Application.Errors;
 using Core.Models.EnrolmentContext.Application.Identifiers;
@@ -76,6 +78,19 @@ public class DetailsModel : PeriodScopedPageModel
             
             ModalContent = ErrorDisplay.Create(
                 application.Error,
+                _linkGenerator.GetPathByPage("/Partner/Enrolments/Applications/Index", values: new { area = "Staff", PeriodId }));
+
+            return;
+        }
+
+        if (application.Value.PeriodId != PeriodId)
+        {
+            _logger
+                .ForContext(nameof(Error), EnrolmentPeriodErrors.PeriodMismatch, true)
+                .Information("Failed to load Enrolment Application details by user {User}", _currentUserService.UserName);
+
+            ModalContent = ErrorDisplay.Create(
+                EnrolmentPeriodErrors.PeriodMismatch,
                 _linkGenerator.GetPathByPage("/Partner/Enrolments/Applications/Index", values: new { area = "Staff", PeriodId }));
 
             return;

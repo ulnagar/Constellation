@@ -33,9 +33,9 @@ public sealed partial class Service : IEmailService
             Preheader = "",
             Id = offer.Id,
             Grade = application.Grade,
-            ParentName = application.ParentName,
+            ParentName = application.ParentName!,
             StudentName = application.StudentName,
-            RespondBy = offer.RespondBy.Value,
+            RespondBy = offer.RespondBy!.Value,
             Year = year,
             Courses = application.SelectedCourses
                 .Where(entry => entry.Status == CourseSelectionStatus.Approved)
@@ -83,10 +83,60 @@ public sealed partial class Service : IEmailService
             Preheader = "",
             Id = offer.Id,
             Grade = application.Grade,
-            ParentName = application.ParentName,
+            ParentName = application.ParentName!,
             StudentName = application.StudentName,
-            RespondBy = offer.RespondBy.Value,
+            RespondBy = offer.RespondBy!.Value,
             Year = year
+        };
+
+        if (application.ParentName is null)
+            return Result.Failure(ApplicationErrors.ArgumentNull(nameof(Application.ParentName)));
+
+        if (application.ParentEmailAddress is null)
+            return Result.Failure(ApplicationErrors.ArgumentNull(nameof(Application.ParentEmailAddress)));
+
+        Result<EmailRecipient> recipient = EmailRecipient.Create(application.ParentName, application.ParentEmailAddress);
+
+        if (recipient.IsFailure)
+            return recipient;
+
+        return await BuildAndSendEmail(
+            viewModel,
+            EmailRecipient.AuroraCollege,
+            "Enrolments",
+            viewModel.Title,
+            [recipient.Value],
+            cancellationToken: cancellationToken);
+    }
+
+    public async Task<Result> SendEnrolmentOfferReceipt(
+        Application application,
+        Offer offer,
+        string year,
+        CancellationToken cancellationToken = default)
+    {
+        List<ContactsConfiguration> contacts = await _appSettings.Contacts(cancellationToken);
+
+        ContactsConfiguration? principals = contacts.FirstOrDefault(entry => entry.Position == ContactPosition.Principal);
+
+        string? principal = principals?.Contacts.FirstOrDefault(entry => entry.Value.Contains(application.Grade)).Key.Name.DisplayName;
+
+        EnrolmentOfferResponseReceiptEmailViewModel viewModel = new()
+        {
+            Title = $"Enrolment Offer Receipt",
+            SenderName = principal ?? "",
+            SenderTitle = "Principal",
+            Preheader = "",
+            Id = offer.Id,
+            Grade = application.Grade,
+            ParentName = application.ParentName!,
+            StudentName = application.StudentName,
+            RespondedAt = offer.RespondedAt!.Value,
+            Year = year,
+            Status = offer.Status,
+            HasCourtOrders = offer.HasCourtOrders,
+            HasHealthConcerns = offer.HasHealthConcerns,
+            LaptopRequested = offer.RequestedLaptop
         };
 
         if (application.ParentName is null)
