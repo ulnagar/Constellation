@@ -200,7 +200,7 @@ internal sealed class TrackItSyncJob : ITrackItSyncJob
             {
                 Customer customer = CreateCustomerFromStudent(acosStudent);
                 _tiContext.Customers.Add(customer);
-
+                SetNextCustomerSequence();
                 await _tiContext.SaveChangesAsync(cancellationToken);
             }
         }
@@ -225,6 +225,7 @@ internal sealed class TrackItSyncJob : ITrackItSyncJob
             {
                 Customer customer = CreateCustomerFromStaff(acosStaffMember);
                 _tiContext.Customers.Add(customer);
+                SetNextCustomerSequence();
                 await _tiContext.SaveChangesAsync(cancellationToken);
             }
         }
@@ -259,6 +260,7 @@ internal sealed class TrackItSyncJob : ITrackItSyncJob
             {
                 Customer customer = CreateCustomerFromContact(acosContact);
                 _tiContext.Customers.Add(customer);
+                SetNextCustomerSequence();
                 await _tiContext.SaveChangesAsync(cancellationToken);
             }
         }
