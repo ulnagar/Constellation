@@ -37,8 +37,8 @@ internal sealed class SmsRepository : ISmsRepository
         await _context
             .Set<SmsMessage>()
             .Where(message => 
-                message.Sender.Number == phoneNumber.ToString(PhoneNumber.Format.None) ||
-                message.Recipient.Number == phoneNumber.ToString(PhoneNumber.Format.None))
+                message.Sender.Value == phoneNumber.ToString(PhoneNumber.Format.None) ||
+                message.Recipient.Value == phoneNumber.ToString(PhoneNumber.Format.None))
             .ToListAsync(cancellationToken);
 
     public async Task<List<SmsMessage>> GetRecent(

@@ -45,9 +45,10 @@ public class TutorialsModel : BasePageModel
     public List<TutorialPosition> Positions { get; set; } = [];
     public List<StaffSelectionListResponse> StaffMembers { get; set; } = [];
 
-    public async Task OnGet()
+    public async Task<IActionResult> OnGet()
     {
-        Position ??= TutorialPosition.Approver;
+        if (Position is null)
+            return RedirectToPage(routeValues: new { area = "Admin", Position = TutorialPosition.Approver.Value });
 
         TutorialsConfiguration? configuration = await _appSettings.Tutorials(Position);
 
@@ -64,11 +65,13 @@ public class TutorialsModel : BasePageModel
         {
             ModalContent = ErrorDisplay.Create(staffMembers.Error);
 
-            return;
+            return Page();
         }
 
         StaffMembers = staffMembers.Value;
         Positions = TutorialPosition.GetEnumerable.ToList();
+
+        return Page();
     }
 
     public async Task<IActionResult> OnPostSave()
