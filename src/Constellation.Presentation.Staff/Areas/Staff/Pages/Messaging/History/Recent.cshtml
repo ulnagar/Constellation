@@ -1,13 +1,24 @@
 ﻿@page
-@using Constellation.Core.Models.Messaging.Email.Enums
-@using Constellation.Core.Models.Messaging.Enums
 @model Constellation.Presentation.Staff.Areas.Staff.Pages.Messaging.History.RecentModel
 @{
 }
 
 <h2>Recent Messages</h2>
 
-<table class="table table-striped">
+<div class="row">
+    <label class="mr-1 col-1">Date Range: </label>
+    <div class="col">
+        <select id="dateRangeFilter" class="form-select">
+            <option value="Last30Days" selected>Last 30 Days</option>
+            <option value="CurrentCalendarYear">This Year</option>
+            <option value="AllTime">All Time</option>
+        </select>
+    </div>
+</div>
+
+<hr />
+
+<table id="messagesTable" class="table table-striped" style="width:100%">
     <thead>
         <tr>
             <th>Type</th>
@@ -19,65 +30,48 @@
             <th></th>
         </tr>
     </thead>
-
-    <tbody>
-        @foreach (var day in Model.Records.OrderByDescending(entry => entry.Timestamp).GroupBy(entry => entry.Timestamp.ToLocalTime().Date))
-        {
-            <tr>
-                <th colspan="7">@day.Key.Date.ToLongDateString()</th>
-            </tr>
-            foreach (var message in day)
-            {
-                <tr>
-                    <td>
-                        @if (message.Type == MessageType.Email)
-                        {
-                            <i class="fal fa-envelope"></i>
-                        }
-                        else if (message.Type == MessageType.SMS)
-                        {
-                            <i class="fal fa-comment-alt-lines"></i>
-                        }
-                    </td>
-                    <td><span class="text-nowrap">@message.Timestamp.ToLocalTime().ToString("hh:mm:ss tt")</span></td>
-                    <td>
-                        <span title="@message.From.Contact" role="button" class="badge border border-secondary text-secondary text-nowrap">@message.From.Name</span>
-                    </td>
-                    <td>
-                        <span class="font-weight-bold">To:</span>
-                        @foreach (var entry in message.Recipients.Where(entry => entry.Type == EmailRecipientType.To).OrderBy(entry => entry.Name))
-                        {
-                            <span title="@entry.Contact" role="button" class="badge border border-secondary text-secondary text-nowrap">@entry.Name</span>
-                            <br/>
-                        }
-
-                        @if (message.Recipients.Any(entry => entry.Type == EmailRecipientType.Cc))
-                        {
-                            <span class="font-weight-bold">Cc:</span>
-                        }
-                        @foreach (var entry in message.Recipients.Where(entry => entry.Type == EmailRecipientType.Cc).OrderBy(entry => entry.Name))
-                        {
-                            <span title="@entry.Contact" role="button" class="badge border border-secondary text-secondary text-nowrap">@entry.Name</span>
-                            <br/>
-                        }
-
-                        @if (message.Recipients.Any(entry => entry.Type == EmailRecipientType.Bcc))
-                        {
-                            <span class="font-weight-bold">Bcc:</span>
-                        }
-                        @foreach (var entry in message.Recipients.Where(entry => entry.Type == EmailRecipientType.Bcc).OrderBy(entry => entry.Name))
-                        {
-                            <span title="@entry.Contact" role="button" class="badge border border-secondary text-secondary text-nowrap">@entry.Name</span>
-                            <br/>
-                        }
-                    </td>
-                    <td>@message.Subject</td>
-                    <td>@message.Status.Name</td>
-                    <td>
-                        <a asp-page="/Messaging/History/ViewMessage" asp-area="Staff" asp-route-id="@message.Id" asp-route-type="@message.Type.Value" target="_blank" class="btn btn-secondary btn-sm btn-show-hover show-spinner-5">View Message</a>
-                    </td>
-                </tr>
-            }
-        }
-        </tbody>
 </table>
+
+@section Scripts
+{
+    <script>
+        $(function () {
+            var table = $('#messagesTable').DataTable({
+                serverSide: true,
+                processing: true,
+                ajax: {
+                    url: '@Url.Page("/Messaging/History/Recent", "Data")',
+                    type: 'GET',
+                    data: function (d) {
+                        d.dateRange = $('#dateRangeFilter').val();
+                        d.searchValue = d.search.value;
+                    }
+                },
+                order: [[1, 'desc']],
+                columns: [
+                    { data: 'typeIcon', render: function (icon) { return '<i class="' + icon +'"></i>'; } },
+                    { data: 'timestamp' },
+                    {
+                        data: null,
+                        render: function (row) {
+                            return '<span title="' + row.fromContact + '" class="badge border border-secondary text-secondary text-nowrap">' + row.fromName + '</span>';
+                        }
+                    },
+                    { data: 'recipientsHtml' },
+                    { data: 'subject' },
+                    { data: 'status' },
+                    {
+                        data: null,
+                        render: function (row){
+                            return '<a href="' + row.viewUrl + '" target="_blank" class="btn btn-secondary btn-sm btn-show-hover">ViewMessage</a>';
+                        }
+                    }
+                ]
+            });
+
+            $('#dateRangeFilter').on('change', function () {
+                table.ajax.reload();
+            });
+        });
+    </script>
+}
