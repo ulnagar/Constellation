@@ -1,0 +1,81 @@
+﻿@page "{type}/{id}"
+@using Constellation.Core.Models.Messaging.Email.Enums
+@model Constellation.Presentation.Staff.Areas.Staff.Pages.Messaging.History.ViewMessageModel
+
+@{
+    Layout = null;
+}
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Constellation</title>
+
+    @await Html.PartialAsync("_FavIcons")
+    <link rel="stylesheet" href="~/lib/bootstrap5/css/bootstrap.min.css" />
+    <script src="~/lib/bootstrap5/js/bootstrap.bundle.min.js"></script>
+    <script language="javascript">
+        function closeWindow() {
+            window.close();
+        }
+    </script>
+</head>
+<body class="p-3">
+<div class="container-md">
+    @if (Model.Message == null)
+    {
+        <div class="text-center p-4">
+            <p>This message could not be found</p>
+        </div>
+    }
+    else
+    {
+        <div class="row">
+            <h4 class="col-11">@Model.Message.Subject</h4>
+            <div class="col-1"><button onclick="closeWindow()">Close</button></div>
+            
+            <label class="col-1">From:</label>
+            <div class="col-11 mb-2">
+                    <span class="mr-2">@Model.Message.From.Name (@Model.Message.From.Contact)</span>
+            </div>
+            
+            <label class="col-1">Sent:</label>
+            <div class="col-11 mb-2">
+                <span class="mr-2">@Model.Message.Timestamp.ToString("f")</span>
+            </div>
+
+            <label class="col-1">To:</label>
+            <div class="col-11 mb-2">
+                @foreach (var recipient in Model.Message.Recipients.Where(entry => entry.Type == EmailRecipientType.To))
+                {
+                    <span class="mr-2">@recipient.Name (@recipient.Contact)</span>
+                }
+            </div>
+
+            <label class="col-1">Cc:</label>
+            <div class="col-11 mb-2">
+                @foreach (var recipient in Model.Message.Recipients.Where(entry => entry.Type == EmailRecipientType.Cc))
+                {
+                    <span class="mr-2">@recipient.Name (@recipient.Contact)</span>
+                }
+            </div>
+
+            <label class="col-1">Bcc:</label>
+            <div class="col-11 mb-2">
+                @foreach (var recipient in Model.Message.Recipients.Where(entry => entry.Type == EmailRecipientType.Bcc))
+                {
+                    <span class="mr-2">@recipient.Name (@recipient.Contact)</span>
+                }
+            </div>
+        </div>
+        <hr/>
+        <div class="row">
+            @Html.Raw(@Model.Message.Body)
+        </div>
+    }
+</div>
+</body>
+</html>

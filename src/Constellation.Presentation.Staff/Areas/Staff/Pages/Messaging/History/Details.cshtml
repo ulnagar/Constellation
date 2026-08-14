@@ -15,6 +15,7 @@
             <th>Recipients</th>
             <th>Subject</th>
             <th>Status</th>
+            <th></th>
         </tr>
     </thead>
     
@@ -22,7 +23,7 @@
        @foreach (var day in Model.Records.OrderByDescending(entry => entry.Timestamp).GroupBy(entry => entry.Timestamp.ToLocalTime().Date))
        {
            <tr>
-               <th colspan="6">@day.Key.Date.ToLongDateString()</th>
+               <th colspan="7">@day.Key.Date.ToLongDateString()</th>
            </tr>
            foreach (var message in day)
            {
@@ -71,6 +72,9 @@
                    </td>
                    <td>@message.Subject</td>
                    <td>@message.Status.Name</td>
+                   <td>
+                       <a asp-page="/Messaging/History/ViewMessage" asp-area="Staff" asp-route-id="@message.Id" asp-route-type="@message.Type.Value" target="_blank" class="btn btn-secondary btn-sm btn-show-hover show-spinner-5">View Message</a>
+                   </td>
                </tr>
            }
        }

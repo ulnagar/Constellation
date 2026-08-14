@@ -1,5 +1,6 @@
 ﻿namespace Constellation.Core.Models.Messaging.Email.Errors;
 
+using Identifiers;
 using Messaging.Enums;
 using Shared;
 using System.Collections.Generic;
@@ -25,4 +26,8 @@ public static class EmailMessagingErrors
     public static Error SendFailed(string error) => new(
         "EmailMessage.SendFailed", 
         error);
+
+    public static readonly Func<EmailId, Error> NotFound = id => new(
+        "EmailMessage.NotFound",
+        $"Could not find an Email Message with the Id '{id}'");
 }
