@@ -17,6 +17,7 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using Presentation.Shared.Extensions;
 using Serilog;
 using System.ComponentModel.DataAnnotations;
+using System.Diagnostics;
 using System.DirectoryServices.AccountManagement;
 using System.Threading.Tasks;
 
@@ -55,7 +56,7 @@ public class LoginModel : PageModel
     }
 
     [BindProperty]
-    public InputModel Input { get; set; }
+    public InputModel Input { get; set; } = new();
 
     [BindProperty(SupportsGet = true)]
     public bool Manual { get; set; }
@@ -75,12 +76,11 @@ public class LoginModel : PageModel
         public string Email { get; set; } = string.Empty;
 
         [DataType(DataType.Password)]
-        public string? Password { get; set; } = string.Empty;
+        public string? Password { get; init; } = string.Empty;
     }
 
     internal enum LoginType
     {
-        Local,
         Domain,
         MagicLink,
         Sms,
@@ -163,7 +163,7 @@ public class LoginModel : PageModel
         if (!ModelState.IsValid)
             return Page();
 
-        LoginType loginType = GetLoginParameters();
+        LoginType loginType = GetLoginParameters(Input.Email);
 
         _logger.Information("Starting Login Attempt by {Email}", Input.Email);
 
@@ -251,6 +251,9 @@ public class LoginModel : PageModel
             // Create login url with embedded token
             string? url = Url.Page("Login", "Passwordless", new { token, userId = user.Id.ToString() }, Request.Scheme);
 
+            if (string.IsNullOrWhiteSpace(url))
+                throw new UnreachableException();
+
             // Email login url to user
             MagicLinkEmail notification = new()
             {
@@ -258,7 +261,7 @@ public class LoginModel : PageModel
                 Name = user.Name.DisplayName
             };
 
-            Result<EmailRecipient> recipient = EmailRecipient.Create(user.Name.DisplayName, user.Email);
+            Result<EmailRecipient> recipient = EmailRecipient.Create(user.Name.DisplayName, user.Email!);
 
             if (recipient.IsFailure)
             {
@@ -288,7 +291,7 @@ public class LoginModel : PageModel
 
     private LoginType GetLoginParameters(string username)
     {
-        LoginType loginType = LoginType.Local;
+        LoginType loginType;
         
         switch (username)
         {
@@ -328,7 +331,7 @@ public class LoginModel : PageModel
 
         if (!ModelState.IsValid) return Page();
 
-        LoginType loginType = GetLoginParameters();
+        LoginType loginType = GetLoginParameters(Input.Email);
 
         _logger.Information("Continuing Login Attempt by {Email}", Input.Email);
         AppUser? user = await _userManager.FindByEmailAsync(Input.Email);
@@ -429,9 +432,9 @@ public class LoginModel : PageModel
 
         // Redirect to home page
 
-        string? redirectUri = Url.IsLocalUrl(ReturnUrl) 
+        string redirectUri = Url.IsLocalUrl(ReturnUrl) 
             ? ReturnUrl 
-            : _linkGenerator.GetPathByPage("/Dashboard", values: new { area = "Parents" });
+            : _linkGenerator.GetPathByPage("/Dashboard", values: new { area = "Parents" }) ?? "/";
 
         return LocalRedirect(redirectUri);
     }
@@ -449,7 +452,7 @@ public class LoginModel : PageModel
 
         if (!ModelState.IsValid) return Page();
 
-        LoginType loginType = GetLoginParameters();
+        LoginType loginType = GetLoginParameters(Input.Email);
 
         Result<PhoneNumber> phoneNumber = PhoneNumber.Create(Input.Email);
 
@@ -505,9 +508,9 @@ public class LoginModel : PageModel
             await _userManager.UpdateAsync(parent.Value);
 
             // Redirect to home page
-            string? redirectUri = Url.IsLocalUrl(ReturnUrl)
+            string redirectUri = Url.IsLocalUrl(ReturnUrl)
                 ? ReturnUrl
-                : _linkGenerator.GetPathByPage("/Dashboard", values: new { area = "Parents" });
+                : _linkGenerator.GetPathByPage("/Dashboard", values: new { area = "Parents" }) ?? "/";
 
             return LocalRedirect(redirectUri);
         }
