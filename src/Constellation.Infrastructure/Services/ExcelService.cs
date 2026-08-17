@@ -1559,8 +1559,8 @@ public class ExcelService : IExcelService
     }
 
     public Task<List<SentralIncidentDetails>> ConvertSentralIncidentReport(
-        Stream baseFile, 
-        Stream detailFile,
+        Stream? baseFile, 
+        Stream? detailFile,
         List<DateOnly> excludedDates, 
         CancellationToken cancellationToken = default)
     {
@@ -1635,12 +1635,12 @@ public class ExcelService : IExcelService
             // Index 17: Required Student Actions
             // Index 18: New Due Date
 
-            string incidentId = row[5].ToString().FormatField;
+            string incidentId = row[5].ToString()?.FormatField ?? string.Empty;
 
             if (response.Any(entry => entry.IncidentId == incidentId))
                 continue;
 
-            string srn = row[0].ToString();
+            string srn = row[0].ToString() ?? string.Empty;
 
             bool dateExtractionSucceeded = DateOnly.TryParse(row[6].ToString(), out DateOnly dateCreated);
 
@@ -1668,12 +1668,12 @@ public class ExcelService : IExcelService
             response.Add(new(
                 srn,
                 dateCreated,
-                row[5].ToString().FormatField,
-                row[11].ToString().FormatField,
-                row[13].ToString().FormatField,
-                matchingRow[19].ToString().FormatField,
-                row[1].ToString().FormatField,
-                row[2].ToString().FormatField,
+                row[5].ToString()?.FormatField ?? string.Empty,
+                row[11].ToString()?.FormatField ?? string.Empty,
+                row[13].ToString()?.FormatField ?? string.Empty,
+                matchingRow[19].ToString()?.FormatField ?? string.Empty,
+                row[1].ToString()?.FormatField ?? string.Empty,
+                row[2].ToString()?.FormatField ?? string.Empty,
                 grade,
                 severity));
         }

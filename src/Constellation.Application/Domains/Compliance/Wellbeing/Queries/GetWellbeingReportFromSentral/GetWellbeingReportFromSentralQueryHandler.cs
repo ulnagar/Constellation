@@ -2,6 +2,9 @@
 
 using Abstractions.Messaging;
 using Core.Abstractions.Clock;
+using Core.Models.Students;
+using Core.Models.Students.Repositories;
+using Core.Models.Students.ValueObjects;
 using Core.Shared;
 using Interfaces.Gateways;
 using Interfaces.Services;
@@ -14,15 +17,18 @@ using System.Threading.Tasks;
 internal sealed class GetWellbeingReportFromSentralQueryHandler
 : IQueryHandler<GetWellbeingReportFromSentralQuery, List<SentralIncidentDetails>>
 {
+    private readonly IStudentRepository _studentRepository;
     private readonly ISentralGateway _sentralGateway;
     private readonly IExcelService _excelService;
     private readonly IDateTimeProvider _dateTime;
 
     public GetWellbeingReportFromSentralQueryHandler(
+        IStudentRepository studentRepository,
         ISentralGateway sentralGateway,
         IExcelService excelService,
         IDateTimeProvider dateTime)
     {
+        _studentRepository = studentRepository;
         _sentralGateway = sentralGateway;
         _excelService = excelService;
         _dateTime = dateTime;
@@ -39,7 +45,24 @@ internal sealed class GetWellbeingReportFromSentralQueryHandler
 
             List<SentralIncidentDetails> data = await _excelService.ConvertSentralIncidentReport(files.BasicReport, files.DetailReport, excludedDates, cancellationToken);
 
-            return data;
+            List<SentralIncidentDetails> returnData = [];
+
+            foreach (SentralIncidentDetails entry in data)
+            {
+                Result<StudentReferenceNumber> srn = StudentReferenceNumber.Create(entry.StudentReferenceNumber);
+
+                if (srn.IsFailure)
+                    continue;
+
+                Student? student = await _studentRepository.GetBySRN(srn.Value, cancellationToken);
+
+                if (student is null || student.IsDeleted)
+                    continue;
+
+                returnData.Add(entry);
+            }
+
+            return returnData;
         }
 
         return Result.Failure<List<SentralIncidentDetails>>(new("Gateway.Sentral.NoValue", "Could not access the Sentral Page required"));
