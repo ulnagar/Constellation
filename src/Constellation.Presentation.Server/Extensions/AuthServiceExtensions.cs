@@ -85,7 +85,7 @@ public static class AuthServiceExtensions
                     {
                         // Pull the hint from wherever it's available to you at
                         // challenge time — query string, TempData, a known claim, etc.
-                        string? loginHint = context.Properties.Items.TryGetValue("login_hint", out var hint)
+                        var loginHint = context.Properties.Items.TryGetValue("login_hint", out var hint)
                             ? hint
                             : null;
 
@@ -93,9 +93,6 @@ public static class AuthServiceExtensions
                         {
                             context.ProtocolMessage.LoginHint = loginHint;
                         }
-
-                        string currentUrl = context.Request.Path + context.Request.QueryString;
-                        context.ProtocolMessage.RedirectUri = currentUrl;
 
                         return Task.CompletedTask;
                     }

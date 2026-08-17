@@ -17,7 +17,6 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using Presentation.Shared.Extensions;
 using Serilog;
 using System.ComponentModel.DataAnnotations;
-using System.Diagnostics;
 using System.DirectoryServices.AccountManagement;
 using System.Threading.Tasks;
 
@@ -30,7 +29,6 @@ public class LoginModel : PageModel
     private readonly IAppSettingsService _appSettings;
     private readonly IEmailService _emailService;
     private readonly ISMSService _smsService;
-    private readonly LinkGenerator _linkGenerator;
     private readonly ILogger _logger;
 
     public LoginModel(
@@ -40,7 +38,6 @@ public class LoginModel : PageModel
         IAppSettingsService appSettings,
         IEmailService emailService,
         ISMSService smsService,
-        LinkGenerator linkGenerator,
         ILogger logger)
     {
         _mediator = mediator;
@@ -49,21 +46,17 @@ public class LoginModel : PageModel
         _appSettings = appSettings;
         _emailService = emailService;
         _smsService = smsService;
-        _linkGenerator = linkGenerator;
         _logger = logger
             .ForContext<LoginModel>()
             .ForStaffPortal();
     }
 
     [BindProperty]
-    public InputModel Input { get; set; } = new();
+    public InputModel Input { get; set; }
 
     [BindProperty(SupportsGet = true)]
     public bool Manual { get; set; }
-
-    [BindProperty(SupportsGet = true)]
-    public string? ReturnUrl { get; set; }
-
+    
     public bool LoginEnabled { get; set; } = true;
     public bool SSOEnabled { get; set; }
 
@@ -76,11 +69,12 @@ public class LoginModel : PageModel
         public string Email { get; set; } = string.Empty;
 
         [DataType(DataType.Password)]
-        public string? Password { get; init; } = string.Empty;
+        public string? Password { get; set; } = string.Empty;
     }
 
     internal enum LoginType
     {
+        Local,
         Domain,
         MagicLink,
         Sms,
@@ -114,10 +108,8 @@ public class LoginModel : PageModel
             LoginEnabled = true;
     }
 
-    public async Task<IActionResult> OnGet(string? returnUrl = null)
+    public async Task<IActionResult> OnGet()
     {
-        ReturnUrl = returnUrl;
-
         string? sessionUser = HttpContext.Session.GetString("KnownUser");
         string? cookieUser = Request.Cookies[".Constellation.KnownUser"];
 
@@ -126,9 +118,7 @@ public class LoginModel : PageModel
 
         await PreparePage();
 
-        if (!Manual 
-            && !string.IsNullOrWhiteSpace(sessionUser)
-            && GetLoginParameters(sessionUser) == LoginType.SSO)
+        if (SSOEnabled && !Manual && !string.IsNullOrWhiteSpace(sessionUser))
             // This browser session already had a successful SSO login - 
             // treat this as a timeout, not a fresh attempt.
             return ChallengeSingleSignOn(sessionUser);
@@ -142,16 +132,11 @@ public class LoginModel : PageModel
         return Page();
     }
 
-    private ChallengeResult ChallengeSingleSignOn(string? loginHint)
+    private IActionResult ChallengeSingleSignOn(string? loginHint)
     {
-        string? redirectUri = Url.IsLocalUrl(ReturnUrl) ? ReturnUrl : "/Index";
-
         AuthenticationProperties props = new();
         if (!string.IsNullOrWhiteSpace(loginHint))
-        {
             props.Items["login_hint"] = loginHint;
-            props.RedirectUri = redirectUri;
-        }
 
         return Challenge(props, OpenIdConnectDefaults.AuthenticationScheme);
     }
@@ -163,7 +148,7 @@ public class LoginModel : PageModel
         if (!ModelState.IsValid)
             return Page();
 
-        LoginType loginType = GetLoginParameters(Input.Email);
+        LoginType loginType = GetLoginParameters();
 
         _logger.Information("Starting Login Attempt by {Email}", Input.Email);
 
@@ -238,9 +223,8 @@ public class LoginModel : PageModel
         {
             _logger.Information(" - DEBUG code found. Bypass login check.");
             await _signInManager.SignInAsync(user, false);
-            
-            string? redirectUri = Url.IsLocalUrl(ReturnUrl) ? ReturnUrl : "/Index";
-            return LocalRedirect(redirectUri);
+
+            return LocalRedirect("/");
         }
 #endif
 
@@ -251,9 +235,6 @@ public class LoginModel : PageModel
             // Create login url with embedded token
             string? url = Url.Page("Login", "Passwordless", new { token, userId = user.Id.ToString() }, Request.Scheme);
 
-            if (string.IsNullOrWhiteSpace(url))
-                throw new UnreachableException();
-
             // Email login url to user
             MagicLinkEmail notification = new()
             {
@@ -261,7 +242,7 @@ public class LoginModel : PageModel
                 Name = user.Name.DisplayName
             };
 
-            Result<EmailRecipient> recipient = EmailRecipient.Create(user.Name.DisplayName, user.Email!);
+            Result<EmailRecipient> recipient = EmailRecipient.Create(user.Name.DisplayName, user.Email);
 
             if (recipient.IsFailure)
             {
@@ -289,13 +270,13 @@ public class LoginModel : PageModel
         return Page();
     }
 
-    private LoginType GetLoginParameters(string username)
+    private LoginType GetLoginParameters()
     {
-        LoginType loginType;
+        LoginType loginType = LoginType.Local;
         
-        switch (username)
+        switch (Input.Email)
         {
-            case not null when username.StartsWith('!'):
+            case not null when Input.Email.StartsWith('!'):
                 loginType = LoginType.SSO;
                 Input.Email = Input.Email.Replace("!", "", StringComparison.InvariantCultureIgnoreCase);
                 break;
@@ -303,11 +284,11 @@ public class LoginModel : PageModel
                 loginType = LoginType.Debug;
                 Input.Email = Input.Email.Replace("~", "", StringComparison.InvariantCultureIgnoreCase);
                 break;
-            case not null when username.Contains("@det.nsw.edu.au", StringComparison.InvariantCultureIgnoreCase):
-            case not null when username.Contains("@education.nsw.gov.au", StringComparison.InvariantCultureIgnoreCase):
+            case not null when Input.Email.Contains("@det.nsw.edu.au", StringComparison.InvariantCultureIgnoreCase):
+            case not null when Input.Email.Contains("@education.nsw.gov.au", StringComparison.InvariantCultureIgnoreCase):
                 loginType = SSOEnabled ? LoginType.SSO : LoginType.Domain;
                 break;
-            case not null when username.All(Char.IsDigit):
+            case not null when Input.Email.All(Char.IsDigit):
                 loginType = LoginType.Sms;
                 break;
             default:
@@ -331,7 +312,7 @@ public class LoginModel : PageModel
 
         if (!ModelState.IsValid) return Page();
 
-        LoginType loginType = GetLoginParameters(Input.Email);
+        LoginType loginType = GetLoginParameters();
 
         _logger.Information("Continuing Login Attempt by {Email}", Input.Email);
         AppUser? user = await _userManager.FindByEmailAsync(Input.Email);
@@ -375,9 +356,7 @@ public class LoginModel : PageModel
             user.AddLogin(DateTime.UtcNow, Core.Models.Auth.Enums.LoginStatus.Success);
             await _userManager.UpdateAsync(user);
 
-            string? redirectUri = Url.IsLocalUrl(ReturnUrl) ? ReturnUrl : "/Index";
-
-            return LocalRedirect(redirectUri);
+            return LocalRedirect("/Index");
         }
 
         ModelState.AddModelError(string.Empty, "Invalid login attempt.");
@@ -431,12 +410,7 @@ public class LoginModel : PageModel
         await _userManager.UpdateAsync(user);
 
         // Redirect to home page
-
-        string redirectUri = Url.IsLocalUrl(ReturnUrl) 
-            ? ReturnUrl 
-            : _linkGenerator.GetPathByPage("/Dashboard", values: new { area = "Parents" }) ?? "/";
-
-        return LocalRedirect(redirectUri);
+        return RedirectToPage("/Dashboard", new { area = "Parents" });
     }
 
     public async Task<IActionResult> OnPostTokenLogin()
@@ -452,7 +426,7 @@ public class LoginModel : PageModel
 
         if (!ModelState.IsValid) return Page();
 
-        LoginType loginType = GetLoginParameters(Input.Email);
+        LoginType loginType = GetLoginParameters();
 
         Result<PhoneNumber> phoneNumber = PhoneNumber.Create(Input.Email);
 
@@ -508,11 +482,7 @@ public class LoginModel : PageModel
             await _userManager.UpdateAsync(parent.Value);
 
             // Redirect to home page
-            string redirectUri = Url.IsLocalUrl(ReturnUrl)
-                ? ReturnUrl
-                : _linkGenerator.GetPathByPage("/Dashboard", values: new { area = "Parents" }) ?? "/";
-
-            return LocalRedirect(redirectUri);
+            return RedirectToPage("/Dashboard", new { area = "Parents" });
         }
 
         ModelState.AddModelError(string.Empty, "Invalid login attempt.");
