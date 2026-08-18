@@ -13,20 +13,24 @@ using Core.Models.Messaging.Sms.Identifiers;
 using Core.Models.Messaging.Sms.Repositories;
 using Core.Shared;
 using Serilog;
+using Tracking.Repositories;
 
 internal sealed class GetMessageDetailsQueryHandler
 : IQueryHandler<GetMessageDetailsQuery, MessageDetailResponse>
 {
     private readonly IEmailRepository _emailRepository;
+    private readonly IEmailTrackingRepository _trackingRepository;
     private readonly ISmsRepository _smsRepository;
     private readonly ILogger _logger;
 
     public GetMessageDetailsQueryHandler(
         IEmailRepository emailRepository,
+        IEmailTrackingRepository trackingRepository,
         ISmsRepository smsRepository,
         ILogger logger)
     {
         _emailRepository = emailRepository;
+        _trackingRepository = trackingRepository;
         _smsRepository = smsRepository;
         _logger = logger
             .ForContext<GetMessageDetailsQuery>();
@@ -75,6 +79,18 @@ internal sealed class GetMessageDetailsQueryHandler
                 recipient.Email));
         }
 
+        List<EmailTrackingEvent> trackingEvents = await _trackingRepository.GetTrackingEventsByEmailId(message.Id, cancellationToken);
+
+        List<MessageDetailResponse.RecordData> metadata = [];
+
+        foreach (EmailTrackingEvent trackingEvent in trackingEvents)
+        {
+            metadata.Add(new(
+                trackingEvent.EventType.ToString(),
+                trackingEvent.OccurredAt,
+                trackingEvent.LinkUrl));
+        }
+
         MessageDetailResponse response = new(
             message.Id,
             MessageType.Email,
@@ -83,7 +99,8 @@ internal sealed class GetMessageDetailsQueryHandler
             message.Subject,
             message.BodyHtml,
             message.Status,
-            message.SentAt ?? DateTimeOffset.MinValue);
+            message.SentAt ?? DateTimeOffset.MinValue,
+            metadata);
 
         return response;
     }
@@ -107,16 +124,32 @@ internal sealed class GetMessageDetailsQueryHandler
         List<MessageDetailResponse.Recipient> recipients = [
             new (EmailRecipientType.To, message.Recipient.Name, message.Recipient.Number)
         ];
+        
+        List<MessageDetailResponse.RecordData> metadata = [];
+
+        metadata.Add(new(
+            "Sent",
+            message.CreatedAt,
+            string.Empty));
+
+        if (message.Status == MessageStatus.Delivered)
+        {
+            metadata.Add(new(
+                "Delivered",
+                message.SmsGlobalDate ?? message.CreatedAt,
+                string.Empty));
+        }
 
         MessageDetailResponse response = new(
             message.Id,
-            MessageType.Email,
+            MessageType.SMS,
             sender,
             recipients,
             message.Message,
             string.Empty,
             message.Status,
-            message.CreatedAt);
+            message.CreatedAt,
+            metadata);
 
         return response;
     }

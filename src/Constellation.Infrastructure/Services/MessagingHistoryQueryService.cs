@@ -48,14 +48,25 @@ internal class MessagingHistoryQueryService : IMessagingHistoryQueryService
 
         if (!string.IsNullOrWhiteSpace(searchQuery))
         {
-            string[] terms = searchQuery.Trim().Split(' ', StringSplitOptions.RemoveEmptyEntries);
+            if (searchQuery == "sms")
+            {
+                query = query.Where(r => r.MessageType == MessageType.SMS.Value);
+            }
+            else if (searchQuery == "email")
+            {
+                query = query.Where(r => r.MessageType == MessageType.Email.Value);
+            }
+            else
+            {
+                string[] terms = searchQuery.Trim().Split(' ', StringSplitOptions.RemoveEmptyEntries);
 
-            query = query.Where(r => terms.All(t =>
-                r.Subject.Contains(t) ||
-                r.FromName.Contains(t) ||
-                (r.FromAddress != null && r.FromAddress.Contains(t)) ||
-                (r.RecipientSearchText != null && r.RecipientSearchText.Contains(t)) ||
-                (r.BodyText != null && r.BodyText.Contains(t))));
+                query = query.Where(r => terms.All(t =>
+                    r.Subject.Contains(t) ||
+                    r.FromName.Contains(t) ||
+                    (r.FromAddress != null && r.FromAddress.Contains(t)) ||
+                    (r.RecipientSearchText != null && r.RecipientSearchText.Contains(t)) ||
+                    (r.BodyText != null && r.BodyText.Contains(t))));
+            }
         }
 
         int totalCount = await query.CountAsync(cancellationToken);

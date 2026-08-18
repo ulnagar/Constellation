@@ -16,7 +16,8 @@ public sealed record MessageDetailResponse(
     string Subject,
     string Body,
     MessageStatus Status,
-    DateTimeOffset Timestamp)
+    DateTimeOffset Timestamp,
+    List<MessageDetailResponse.RecordData> Metadata)
 {
     public sealed record Sender(
         string Name,
@@ -26,4 +27,9 @@ public sealed record MessageDetailResponse(
         EmailRecipientType Type,
         string Name,
         string Contact);
+
+    public sealed record RecordData(
+        string Type,
+        DateTimeOffset Timestamp,
+        string? Detail);
 }

@@ -54,8 +54,11 @@ public class ViewMessageModel : BasePageModel
 
         try
         {
-            var convertedValue = ConvertValue(Id, entry.ValueType);
-            var id = (IStronglyTypedId)entry.FromValue.Invoke(null, new[] { convertedValue });
+            object convertedValue = ConvertValue(Id, entry.ValueType);
+            IStronglyTypedId? id = (IStronglyTypedId)entry.FromValue.Invoke(null, new[] { convertedValue });
+
+            if (id is null)
+                return BadRequest($"Unknown entity id: {convertedValue}");
 
             GetMessageDetailsQuery query = new(id);
 

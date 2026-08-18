@@ -1,16 +1,51 @@
-<Project>
+<!--<Project>
 	<Target Name="UpdateAssemblyVersion" BeforeTargets="BeforeBuild" Condition="'$(IsHotReloadBuild)' != 'true'">
 		<PropertyGroup>
-			<!-- YY -->
+			--><!-- YY --><!--
 			<_YearYY>$([System.DateTime]::Now.ToString('yy'))</_YearYY>
 
-			<!-- DDD -->
+			--><!-- DDD --><!--
 			<_DayOfYear>$([System.DateTime]::Now.DayOfYear.ToString('D3'))</_DayOfYear>
 
-			<!-- YYDDD -->
+			--><!-- YYDDD --><!--
 			<_BuildNumber>$(_YearYY)$(_DayOfYear)</_BuildNumber>
 
-			<!-- Final versions -->
+			--><!-- Final versions --><!--
+			<AssemblyVersion>$(VersionPrefix).$(_BuildNumber)</AssemblyVersion>
+			<FileVersion>$(AssemblyVersion)</FileVersion>
+			<InformationalVersion>$(AssemblyVersion)</InformationalVersion>
+		</PropertyGroup>
+	</Target>
+</Project>-->
+
+<Project>
+	<Target Name="UpdateAssemblyVersion" BeforeTargets="BeforeBuild">
+		<PropertyGroup>
+			<_BuildNumberFile>$(IntermediateOutputPath)buildnumber.txt</_BuildNumberFile>
+		</PropertyGroup>
+
+		<!-- Real build: compute today's build number and persist it -->
+		<PropertyGroup Condition="'$(IsHotReloadBuild)' != 'true'">
+			<_YearYY>$([System.DateTime]::Now.ToString('yy'))</_YearYY>
+			<_DayOfYear>$([System.DateTime]::Now.DayOfYear.ToString('D3'))</_DayOfYear>
+			<_BuildNumber>$(_YearYY)$(_DayOfYear)</_BuildNumber>
+		</PropertyGroup>
+		<WriteLinesToFile File="$(_BuildNumberFile)"
+		                  Lines="$(_BuildNumber)"
+		                  Overwrite="true"
+		                  Condition="'$(IsHotReloadBuild)' != 'true'" />
+
+		<!-- Hot reload build: reuse whatever the last real build wrote, so the identity doesn't shift -->
+		<ReadLinesFromFile File="$(_BuildNumberFile)"
+		                   Condition="'$(IsHotReloadBuild)' == 'true' and Exists('$(_BuildNumberFile)')">
+			<Output TaskParameter="Lines" PropertyName="_BuildNumber" />
+		</ReadLinesFromFile>
+
+		<PropertyGroup Condition="'$(_BuildNumber)' == ''">
+			<_BuildNumber>0</_BuildNumber>
+		</PropertyGroup>
+
+		<PropertyGroup>
 			<AssemblyVersion>$(VersionPrefix).$(_BuildNumber)</AssemblyVersion>
 			<FileVersion>$(AssemblyVersion)</FileVersion>
 			<InformationalVersion>$(AssemblyVersion)</InformationalVersion>

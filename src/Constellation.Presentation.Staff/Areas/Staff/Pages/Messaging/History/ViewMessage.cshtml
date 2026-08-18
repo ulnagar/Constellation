@@ -1,5 +1,6 @@
 ﻿@page "{type}/{id}"
 @using Constellation.Core.Models.Messaging.Email.Enums
+@using Constellation.Core.Models.Messaging.Enums
 @model Constellation.Presentation.Staff.Areas.Staff.Pages.Messaging.History.ViewMessageModel
 
 @{
@@ -16,6 +17,12 @@
 
     @await Html.PartialAsync("_FavIcons")
     <link rel="stylesheet" href="~/lib/bootstrap5/css/bootstrap.min.css" />
+    <style>
+        .custom-striped > tbody:nth-of-type(odd) > tr {
+            --bs-table-accent-bg: var(--bs-table-striped-bg);
+            background-color: var(--bs-table-striped-bg);
+        }
+    </style>
     <script src="~/lib/bootstrap5/js/bootstrap.bundle.min.js"></script>
     <script language="javascript">
         function closeWindow() {
@@ -34,24 +41,29 @@
     else
     {
         <div class="row">
-            <h4 class="col-11">@Model.Message.Subject</h4>
+            <h4 class="col-11">
+                @if (Model.Message.Type == MessageType.Email)
+                {
+                    @Model.Message.Subject
+                }
+            </h4>
             <div class="col-1"><button onclick="closeWindow()">Close</button></div>
             
             <label class="col-1">From:</label>
             <div class="col-11 mb-2">
-                    <span class="mr-2">@Model.Message.From.Name (@Model.Message.From.Contact)</span>
+                <span class="mr-2">@Model.Message.From.Name (@Model.Message.From.Contact)</span>
             </div>
             
             <label class="col-1">Sent:</label>
             <div class="col-11 mb-2">
-                <span class="mr-2">@Model.Message.Timestamp.ToString("f")</span>
+                <span class="mr-2">@Model.Message.Timestamp.ToLocalTime().ToString("f")</span>
             </div>
 
             <label class="col-1">To:</label>
             <div class="col-11 mb-2">
                 @foreach (var recipient in Model.Message.Recipients.Where(entry => entry.Type == EmailRecipientType.To))
                 {
-                    <span class="mr-2">@recipient.Name (@recipient.Contact)</span>
+                    <span class="mr-2">@recipient.Name (@recipient.Contact);</span>
                 }
             </div>
 
@@ -59,7 +71,7 @@
             <div class="col-11 mb-2">
                 @foreach (var recipient in Model.Message.Recipients.Where(entry => entry.Type == EmailRecipientType.Cc))
                 {
-                    <span class="mr-2">@recipient.Name (@recipient.Contact)</span>
+                    <span class="mr-2">@recipient.Name (@recipient.Contact);</span>
                 }
             </div>
 
@@ -67,13 +79,55 @@
             <div class="col-11 mb-2">
                 @foreach (var recipient in Model.Message.Recipients.Where(entry => entry.Type == EmailRecipientType.Bcc))
                 {
-                    <span class="mr-2">@recipient.Name (@recipient.Contact)</span>
+                    <span class="mr-2">@recipient.Name (@recipient.Contact);</span>
                 }
             </div>
         </div>
+        @if (Model.Message.Metadata.Count > 0)
+        {
+            <div class="row mt-3">
+                <p class="d-inline-flex gap-1">
+                    <button type="button" data-bs-toggle="collapse" data-bs-target="#collapseExample">
+                        View Events
+                    </button>
+                </p>
+                <div class="collapse" id="collapseExample">
+                    <table class="table custom-striped">
+                        <thead>
+                        <tr>
+                            <th class="w-25"></th>
+                            <th></th>
+                        </tr>
+                        </thead>
+                        @foreach (var trackingEvent in Model.Message.Metadata.OrderBy(entry => entry.Timestamp))
+                        {
+                            <tbody>
+                                <tr>
+                                    <td>@trackingEvent.Type</td>
+                                    <td>@trackingEvent.Timestamp.ToLocalTime().ToString("f")</td>
+                                </tr>
+                                @if (!string.IsNullOrWhiteSpace(trackingEvent.Detail))
+                                {
+                                    <tr>
+                                        <td colspan="2">@trackingEvent.Detail</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        }
+                    </table>
+                </div>
+            </div>
+        }
         <hr/>
         <div class="row">
-            @Html.Raw(@Model.Message.Body)
+            @if (Model.Message.Type == MessageType.Email)
+            {
+                @Html.Raw(@Model.Message.Body)
+            }
+            else
+            {
+                <h4>@Model.Message.Subject</h4>
+            }
         </div>
     }
 </div>
