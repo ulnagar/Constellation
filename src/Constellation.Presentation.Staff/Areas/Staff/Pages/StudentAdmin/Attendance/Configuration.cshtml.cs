@@ -1,5 +1,7 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.StudentAdmin.Attendance;
 
+using Application.Domains.Students.Commands.UpdateStudentAbsenceConfiguration;
+using Application.Domains.Students.Models;
 using Constellation.Application.Common.PresentationModels;
 using Constellation.Application.Domains.Students.Queries.GetStudentsWithAbsenceSettings;
 using Constellation.Application.Models.Auth;
@@ -8,11 +10,13 @@ using Constellation.Core.Models.Absences.Enums;
 using Constellation.Core.Shared;
 using Constellation.Presentation.Shared.Helpers.Attributes;
 using Constellation.Presentation.Staff.Areas;
+using Core.Models.Students.Identifiers;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using Presentation.Shared.Extensions;
 using Serilog;
+using Shared.PartialViews.UpdateStudentAttendanceConfigurationEndDate;
 
 [HasPermission(AuthPermission.StudentAdmin_AttendanceSettings_View_Value)]
 public class ConfigurationModel : BasePageModel
@@ -95,6 +99,44 @@ public class ConfigurationModel : BasePageModel
                 })
                 .ToList();
         }
+    }
+
+    public async Task<IActionResult> OnPostAjaxUpdateEndDate(StudentId studentId, AbsenceType type)
+    {
+        UpdateStudentAttendanceConfigurationEndDateViewModel viewModel = new()
+        {
+            StudentId = studentId,
+            Type = type
+        };
+
+        return Partial(viewModel.ViewName, viewModel);
+    }
+
+    public async Task<IActionResult> OnPostUpdateEndDate(UpdateStudentAttendanceConfigurationEndDateViewModel viewModel)
+    {
+        UpdateStudentAbsenceConfigurationCommand command = new(viewModel.StudentId, viewModel.Type, viewModel.EndDate);
+
+        _logger
+            .ForContext(nameof(UpdateStudentAbsenceConfigurationCommand), command, true)
+            .Information("Requested to update student absence configuration by user {User}", _currentUserService.UserName);
+
+        Result result = await _mediator.Send(command);
+
+        if (result.IsFailure)
+        {
+            _logger
+                .ForContext(nameof(UpdateStudentAbsenceConfigurationCommand), command, true)
+                .ForContext(nameof(Error), result.Error, true)
+                .Information("Requested to update student absence configuration by user {User}", _currentUserService.UserName);
+
+            ModalContent = ErrorDisplay.Create(
+                result.Error,
+                _linkGenerator.GetPathByPage("/StudentAdmin/Attendance/Configuration", values: new { area = "Staff" }));
+
+            return Page();
+        }
+
+        return RedirectToPage();
     }
 
     public enum FilterDto

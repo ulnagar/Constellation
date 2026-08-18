@@ -16,11 +16,13 @@ using Constellation.Core.Shared;
 using Core.Models.Identifiers;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.Routing;
 using Presentation.Shared.Extensions;
 using Presentation.Shared.Helpers.Attributes;
 using Serilog;
+using System.ComponentModel.DataAnnotations;
 using System.Threading;
 
 [HasPermission(AuthPermission.StudentAdmin_AttendanceSettings_Edit_Value)]
@@ -55,9 +57,11 @@ public class SettingsModel : BasePageModel
     public SelectList Students { get; set; }
     public SelectList Grades { get; set; }
 
-    [BindProperty] 
+    [BindProperty]
+    [ValidateNever]
     public StudentId StudentId { get; set; } = StudentId.Empty;
     [BindProperty]
+    [ValidateNever]
     public SchoolCode SchoolCode { get; set; } = SchoolCode.Empty;
     [BindProperty]
     public int? Grade { get; set; }

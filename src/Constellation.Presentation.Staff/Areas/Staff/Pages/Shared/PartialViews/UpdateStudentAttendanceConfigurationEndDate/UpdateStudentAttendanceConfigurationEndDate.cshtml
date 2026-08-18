@@ -1,0 +1,21 @@
+@model Constellation.Presentation.Staff.Areas.Staff.Pages.Shared.PartialViews.UpdateStudentAttendanceConfigurationEndDate.UpdateStudentAttendanceConfigurationEndDateViewModel
+
+<form asp-page-handler="UpdateEndDate" method="post">
+    <div class="modal-header">
+        <h5 class="modal-title">Update End Date</h5>
+    </div>
+    <div class="modal-body">
+        <div class="form-group row">
+            <label class="col-md-3">Date</label>
+            <div class="col-md-9">
+                @Html.HiddenFor(model => model.StudentId)
+                <input type="hidden" name="Type" value="@Model.Type.Value" />
+                <input asp-for="EndDate" type="date" class="form-control" />
+            </div>
+        </div>
+    </div>
+    <div class="modal-footer">
+        <button type="submit" class="btn btn-success">Update</button>
+        <button type="button" class="btn btn-secondary" data-dismiss="modal" data-bs-dismiss="modal">Close</button>
+    </div>
+</form>

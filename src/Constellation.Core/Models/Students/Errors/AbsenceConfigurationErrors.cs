@@ -13,4 +13,7 @@ public static class AbsenceConfigurationErrors
         "Student.AbsenceConfiguration.RecordForRangeExists",
         $"A current configuration exists that covers some or all of the dates from {startDate} to {endDate}");
 
+    public static readonly Error NoMatchFound = new(
+        "Student.AbsenceConfiguration.NoMatchFound",
+        "An absence configuration that matched the requirements could not be found");
 }

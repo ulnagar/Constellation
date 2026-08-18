@@ -49,47 +49,89 @@
 
 <table class="table table-striped table-hover grouped-data-table" style="width: 100%">
     <thead>
-        <tr>
-            <th>School</th>
-            <th>SRN</th>
-            <th>Name</th>
-            <th>Grade</th>
-            <th>Enabled?</th>
-            <th>Scan Range</th>
-        </tr>
+    <tr>
+        <th>School</th>
+        <th>SRN</th>
+        <th>Name</th>
+        <th>Grade</th>
+        <th>Enabled?</th>
+        <th>Scan Range</th>
+        <th></th>
+    </tr>
     </thead>
     <tbody>
-        @foreach (var item in Model.Students)
-        {
-            bool anyWholeAbsences = item.AbsenceSettings.Any(entry => entry.AbsenceType == AbsenceType.Whole);
-            bool anyPartialAbsences = item.AbsenceSettings.Any(entry => entry.AbsenceType == AbsenceType.Partial);
-
-            <tr>
-                <td>@item.School</td>
-                <td>@item.SRN</td>
-                <td>@Html.DisplayFor(model => item.Gender, "Gender") @item.Name</td>
-                <td>@Html.DisplayFor(model => item.Grade, "Grade")</td>
-                <td>@Html.DisplayFor(model => anyWholeAbsences, "Boolean") Whole</td>
-                <td>
-                    @foreach (var entry in item.AbsenceSettings.Where(entry => entry.AbsenceType == AbsenceType.Whole))
-                    {
-                        <span>@entry.StartDate.ToShortDateString() - @entry.EndDate.ToShortDateString()</span>
-                    }
-                </td>
-            </tr>
-            <tr>
-                <td>@item.School</td>
-                <td>@item.SRN</td>
-                <td>@Html.DisplayFor(model => item.Gender, "Gender") @item.Name</td>
-                <td>@Html.DisplayFor(model => item.Grade, "Grade")</td>
-                <td>@Html.DisplayFor(model => anyPartialAbsences, "Boolean") Partial</td>
-                <td>
-                    @foreach (var entry in item.AbsenceSettings.Where(entry => entry.AbsenceType == AbsenceType.Partial))
-                    {
-                        <span>@entry.StartDate.ToShortDateString() - @entry.EndDate.ToShortDateString()</span>
-                    }
-                </td>
-            </tr>
-        }
+    @foreach (var item in Model.Students)
+    {
+        <tr>
+            <td>@item.School</td>
+            <td>@item.SRN</td>
+            <td>@Html.DisplayFor(model => item.Gender, "Gender") @item.Name</td>
+            <td>@Html.DisplayFor(model => item.Grade, "Grade")</td>
+            <td>@Html.DisplayFor(model => item.ActiveWhole, "Boolean") Whole</td>
+            <td>
+                @foreach (var entry in item.AbsenceSettings.Where(entry => entry.AbsenceType == AbsenceType.Whole))
+                {
+                    <div>@entry.StartDate.ToShortDateString() - @entry.EndDate.ToShortDateString()</div>
+                }
+            </td>
+            <td>
+                @if (authorised.Succeeded)
+                {
+                    <button class="update-end-date-button btn btn-sm btn-danger btn-show-hover" data-student-id="@item.StudentId" data-type="@AbsenceType.Whole.Value">Update</button>
+                }
+            </td>
+        </tr>
+        <tr>
+            <td>@item.School</td>
+            <td>@item.SRN</td>
+            <td>@Html.DisplayFor(model => item.Gender, "Gender") @item.Name</td>
+            <td>@Html.DisplayFor(model => item.Grade, "Grade")</td>
+            <td>@Html.DisplayFor(model => item.ActivePartial, "Boolean") Partial</td>
+            <td>
+                @foreach (var entry in item.AbsenceSettings.Where(entry => entry.AbsenceType == AbsenceType.Partial))
+                {
+                    <div>@entry.StartDate.ToShortDateString() - @entry.EndDate.ToShortDateString()</div>
+                }
+            </td>
+            <td>
+                @if (authorised.Succeeded)
+                {
+                    <button class="update-end-date-button btn btn-sm btn-danger btn-show-hover" data-student-id="@item.StudentId" data-type="@AbsenceType.Partial.Value">Update</button>
+                }
+            </td>
+        </tr>
+    }
     </tbody>
 </table>
+
+<div class="modal fade" tabindex="-1" id="page-modal">
+    <div class="modal-dialog">
+        <div id="modal-content" class="modal-content">
+        </div>
+    </div>
+</div>
+
+@Html.AntiForgeryToken()
+
+@section scripts {
+    <script>
+        $('.update-end-date-button').click(function(event) {
+            var studentId = $(this).data("studentId");
+            var type = $(this).data("type");
+            var xsrfHeader = $('input:hidden[name="__RequestVerificationToken"]').val();
+
+            $.ajax({
+                url: "?handler=AjaxUpdateEndDate",
+                type: "POST",
+                data: {
+                    studentId: studentId,
+                    type: type,
+                    __RequestVerificationToken: xsrfHeader
+                }
+            }).done(function(data) {
+                $('#page-modal .modal-content').html(data);
+                $('#page-modal').modal('show');
+            });
+        });
+    </script>
+}
