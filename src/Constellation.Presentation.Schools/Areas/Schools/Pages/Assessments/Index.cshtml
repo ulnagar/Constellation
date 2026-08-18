@@ -130,7 +130,7 @@
                                                     }
                                                 </div>
                                                 <div class="fa-icon-sizing">
-                                                    @if (Model.CanAccessRestrictedFiles)
+                                                    @if (!download.IsRestricted || Model.CanAccessRestrictedFiles)
                                                     {
                                                         <a asp-page-handler="DownloadFile" asp-route-downloadId="@download.DownloadId" asp-route-assessmentId="@assessment.Id" class="stretched-link">
                                                             <i class="fad fa-file-download fa-3x app-theme"></i>
