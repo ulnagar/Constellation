@@ -31,7 +31,7 @@ public sealed record EnrolmentOfferExport(
     Program Program,
     Grade Grade,
     List<EnrolmentCourse> Courses,
-    OfferStatus Status,
+    OfferResponse Status,
     DateTime? OfferedAt,
     DateTime? RespondBy,
     DateTime? ReminderSentAt,

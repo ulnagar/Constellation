@@ -82,7 +82,7 @@ internal sealed class ExportOfferListQueryHandler
                 application.Program,
                 application.Grade,
                 application.SelectedCourses.Where(entry => entry.Status == CourseSelectionStatus.Approved).Select(entry => entry.Course).ToList(),
-                offer.Status,
+                offer.Response,
                 offer.OfferedAt?.DateTime,
                 offer.RespondBy?.DateTime,
                 offer.ReminderSentAt?.DateTime,

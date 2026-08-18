@@ -17,6 +17,7 @@ using Microsoft.AspNetCore.Routing;
 using Presentation.Shared.Extensions;
 using Presentation.Shared.Helpers.Attributes;
 using Serilog;
+using OfferResponse = Application.Domains.EnrolmentContext.Offers.Queries.GetOfferForResponse.OfferResponse;
 
 [HasPermission(AuthPermission.Partners_Enrolments_Offers_Edit_Value)]
 public class RespondModel : PeriodScopedPageModel
@@ -108,32 +109,32 @@ public class RespondModel : PeriodScopedPageModel
 
         OfferResponse = Offer.Status switch
         {
-            OfferStatus.Accepted => "Accept",
-            OfferStatus.Declined => "Decline",
+            Core.Models.EnrolmentContext.Offer.Enums.OfferResponse.Accepted => "Accept",
+            Core.Models.EnrolmentContext.Offer.Enums.OfferResponse.Declined => "Decline",
             _ => "Unset"
         };
         CourtOrders = Offer.Status switch
         {
-            OfferStatus.Accepted when Offer.HasCourtOrders => "Yes",
-            OfferStatus.Accepted when !Offer.HasCourtOrders => "No",
-            OfferStatus.Declined when Offer.HasCourtOrders => "Yes",
-            OfferStatus.Declined when !Offer.HasCourtOrders => "No",
+            Core.Models.EnrolmentContext.Offer.Enums.OfferResponse.Accepted when Offer.HasCourtOrders => "Yes",
+            Core.Models.EnrolmentContext.Offer.Enums.OfferResponse.Accepted when !Offer.HasCourtOrders => "No",
+            Core.Models.EnrolmentContext.Offer.Enums.OfferResponse.Declined when Offer.HasCourtOrders => "Yes",
+            Core.Models.EnrolmentContext.Offer.Enums.OfferResponse.Declined when !Offer.HasCourtOrders => "No",
             _ => "Unset"
         };
         HealthConditions = Offer.Status switch
         {
-            OfferStatus.Accepted when Offer.HasHealthConcerns => "Yes",
-            OfferStatus.Accepted when !Offer.HasHealthConcerns => "No",
-            OfferStatus.Declined when Offer.HasHealthConcerns => "Yes",
-            OfferStatus.Declined when !Offer.HasHealthConcerns => "No",
+            Core.Models.EnrolmentContext.Offer.Enums.OfferResponse.Accepted when Offer.HasHealthConcerns => "Yes",
+            Core.Models.EnrolmentContext.Offer.Enums.OfferResponse.Accepted when !Offer.HasHealthConcerns => "No",
+            Core.Models.EnrolmentContext.Offer.Enums.OfferResponse.Declined when Offer.HasHealthConcerns => "Yes",
+            Core.Models.EnrolmentContext.Offer.Enums.OfferResponse.Declined when !Offer.HasHealthConcerns => "No",
             _ => "Unset"
         };
         LoanLaptop = Offer.Status switch
         {
-            OfferStatus.Accepted when Offer.RequestedLaptop => "Yes",
-            OfferStatus.Accepted when !Offer.RequestedLaptop => "No",
-            OfferStatus.Declined when Offer.RequestedLaptop=> "Yes",
-            OfferStatus.Declined when !Offer.RequestedLaptop => "No",
+            Core.Models.EnrolmentContext.Offer.Enums.OfferResponse.Accepted when Offer.RequestedLaptop => "Yes",
+            Core.Models.EnrolmentContext.Offer.Enums.OfferResponse.Accepted when !Offer.RequestedLaptop => "No",
+            Core.Models.EnrolmentContext.Offer.Enums.OfferResponse.Declined when Offer.RequestedLaptop=> "Yes",
+            Core.Models.EnrolmentContext.Offer.Enums.OfferResponse.Declined when !Offer.RequestedLaptop => "No",
             _ => "Unset"
         };
     }

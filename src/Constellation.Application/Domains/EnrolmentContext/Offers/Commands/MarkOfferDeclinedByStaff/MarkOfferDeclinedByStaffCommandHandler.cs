@@ -41,7 +41,7 @@ internal sealed class MarkOfferDeclinedByStaffCommandHandler
             return Result.Failure(EnrolmentOfferErrors.NotFound(request.OfferId));
         }
 
-        Result declined = offer.Respond(OfferStatus.Declined);
+        Result declined = offer.Respond(OfferResponse.Declined);
 
         if (declined.IsFailure)
         {

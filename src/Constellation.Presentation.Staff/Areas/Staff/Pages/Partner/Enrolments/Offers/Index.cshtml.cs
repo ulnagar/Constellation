@@ -128,19 +128,19 @@ public class IndexModel : PeriodScopedPageModel
             StatusFilter.All => offers.ToList(),
 
             StatusFilter.Processing => offers
-                .Where(offer => offer.Status == OfferStatus.Processing)
+                .Where(offer => offer.Status == OfferResponse.Processing)
                 .ToList(),
 
             StatusFilter.Pending => offers
-                .Where(offer => offer.Status == OfferStatus.Pending || offer.Status == OfferStatus.Lapsed)
+                .Where(offer => offer.Status == OfferResponse.Pending || offer.Status == OfferResponse.Lapsed)
                 .ToList(),
 
             StatusFilter.Accepted => offers
-                .Where(offer => offer.Status == OfferStatus.Accepted)
+                .Where(offer => offer.Status == OfferResponse.Accepted)
                 .ToList(),
 
             StatusFilter.Declined => offers
-                .Where(offer => offer.Status == OfferStatus.Declined)
+                .Where(offer => offer.Status == OfferResponse.Declined)
                 .ToList(),
 
             _ => throw new ArgumentOutOfRangeException(nameof(filter), filter, null)

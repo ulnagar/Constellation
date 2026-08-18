@@ -41,7 +41,7 @@ internal sealed class AcceptOfferCommandHandler
             return Result.Failure(EnrolmentOfferErrors.NotFound(request.OfferId));
         }
 
-        Result response = offer.Respond(OfferStatus.Accepted, request.HasCourtOrders, request.HasHealthConditions);
+        Result response = offer.Respond(OfferResponse.Accepted, request.HasCourtOrders, request.HasHealthConditions);
 
         if (response.IsFailure)
         {

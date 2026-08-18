@@ -87,7 +87,7 @@ internal sealed class GetOffersForPeriodQueryHandler
                 application.DestinationSchool ?? string.Empty,
                 application.Program,
                 application.Grade,
-                offer.Status));
+                offer.Response));
         }
 
         return responses;

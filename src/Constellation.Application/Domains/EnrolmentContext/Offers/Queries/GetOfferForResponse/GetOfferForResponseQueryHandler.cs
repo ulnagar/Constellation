@@ -63,7 +63,7 @@ internal sealed class GetOfferForResponseQueryHandler
             application.Grade,
             application.Program,
             application.SelectedCourses.Where(entry => entry.Status == CourseSelectionStatus.Approved).ToList(),
-            offer.Status,
+            offer.Response,
             offer.OfferedAt,
             offer.RespondBy,
             offer.RespondedAt,

@@ -18,7 +18,7 @@ public sealed record OfferResponse(
     Grade Grade,
     Program Program,
     List<CourseSelection> Courses,
-    OfferStatus Status,
+    Core.Models.EnrolmentContext.Offer.Enums.OfferResponse Status,
     DateTimeOffset? OfferedAt,
     DateTimeOffset? RespondBy,
     DateTimeOffset? RespondedAt,

@@ -14,6 +14,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using Models;
 using Serilog;
+using OfferResponse = Application.Domains.EnrolmentContext.Offers.Queries.GetOfferForResponse.OfferResponse;
 
 [AllowAnonymous]
 public class IndexModel : BasePageModel
@@ -165,7 +166,7 @@ public class IndexModel : BasePageModel
 
         Result<OfferResponse> offer = await _mediator.Send(command, cancellationToken);
 
-        if (offer.IsFailure || (offer.Value.Status == OfferStatus.Pending && offer.Value.RespondBy < _dateTime.Now))
+        if (offer.IsFailure || (offer.Value.Status == Core.Models.EnrolmentContext.Offer.Enums.OfferResponse.Pending && offer.Value.RespondBy < _dateTime.Now))
         {
             _logger
                 .ForContext(nameof(GetOfferForResponseQuery), command, true)
@@ -175,7 +176,7 @@ public class IndexModel : BasePageModel
             return RedirectToExpired();
         }
 
-        if (offer.Value.Status != OfferStatus.Pending)
+        if (offer.Value.Status != Core.Models.EnrolmentContext.Offer.Enums.OfferResponse.Pending)
             Responded = true;
 
         Offer = offer.Value;
@@ -183,8 +184,8 @@ public class IndexModel : BasePageModel
         {
             OfferResponse = Offer.Status switch
             {
-                OfferStatus.Accepted => "Accept",
-                OfferStatus.Declined => "Decline",
+                Core.Models.EnrolmentContext.Offer.Enums.OfferResponse.Accepted => "Accept",
+                Core.Models.EnrolmentContext.Offer.Enums.OfferResponse.Declined => "Decline",
                 _ => "Unset"
             };
 

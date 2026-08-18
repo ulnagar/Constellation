@@ -90,7 +90,7 @@ internal sealed class GetEnrolmentOfferByIdQueryHandler
             application.DestinationSchool,
             application.Program,
             application.Grade,
-            offer.Status,
+            offer.Response,
             offer.OfferedAt,
             offer.RespondBy,
             offer.RespondedAt,

@@ -41,7 +41,7 @@ internal sealed class DeclineOfferCommandHandler
             return Result.Failure(EnrolmentOfferErrors.NotFound(request.OfferId));
         }
 
-        Result response = offer.Respond(OfferStatus.Declined);
+        Result response = offer.Respond(OfferResponse.Declined);
 
         if (response.IsFailure)
         {

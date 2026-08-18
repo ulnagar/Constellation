@@ -29,4 +29,4 @@ public sealed record EnrolmentOfferResponse(
     string DestinationSchool,
     Program Program,
     Grade Grade,
-    OfferStatus Status);
+    OfferResponse Status);

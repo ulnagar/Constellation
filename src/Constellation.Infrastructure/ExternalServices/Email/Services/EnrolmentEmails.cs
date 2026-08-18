@@ -133,7 +133,7 @@ public sealed partial class Service : IEmailService
             StudentName = application.StudentName,
             RespondedAt = offer.RespondedAt!.Value,
             Year = year,
-            Status = offer.Status,
+            Status = offer.Response,
             HasCourtOrders = offer.HasCourtOrders,
             HasHealthConcerns = offer.HasHealthConcerns,
             LaptopRequested = offer.RequestedLaptop

@@ -28,7 +28,7 @@ internal sealed class OfferConfiguration : IEntityTypeConfiguration<Offer>
             .OnDelete(DeleteBehavior.Restrict);
 
         builder
-            .Property(entry => entry.Status)
+            .Property(entry => entry.Response)
             .HasConversion<string>();
     }
 }

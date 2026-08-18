@@ -24,6 +24,7 @@ public sealed class Offer : AggregateRoot
     {
         Id = new();
         Status = OfferStatus.Processing;
+        Response = OfferResponse.Pending;
     }
 
     public OfferId Id { get; private set; }
@@ -35,7 +36,7 @@ public sealed class Offer : AggregateRoot
     public DateTimeOffset? RespondedAt { get; private set; }
 
     /// <summary>
-    /// The deadline for a parent/carer to respond to a <see cref="OfferStatus.Pending"/> offer.
+    /// The deadline for a parent/carer to respond to a <see cref="OfferResponse.Pending"/> offer.
     /// Always resolves to 5:00pm local school time on the date <see cref="LapsedPeriod"/> days
     /// after <see cref="OfferedAt"/>, rather than preserving the time-of-day component of
     /// <see cref="OfferedAt"/> itself.
@@ -44,7 +45,7 @@ public sealed class Offer : AggregateRoot
     {
         get
         {
-            if (Status != OfferStatus.Pending || RespondedAt is not null)
+            if (Response != OfferResponse.Pending || RespondedAt is not null)
                 return null;
 
             DateTime localOfferedDate = TimeZoneInfo
@@ -62,13 +63,14 @@ public sealed class Offer : AggregateRoot
         }
     }
 
+    public OfferResponse Response { get; private set; }
     public bool HasCourtOrders { get; private set; }
     public bool HasHealthConcerns { get; private set; }
     public bool RequestedLaptop { get; private set; }
 
     public bool IsReminderDue(DateTimeOffset asOf)
     {
-        if (Status != OfferStatus.Pending || ReminderSentAt is not null || RespondBy is null)
+        if (Response != OfferResponse.Pending || ReminderSentAt is not null || RespondBy is null)
             return false;
 
         DateTime reminderDate = TimeZoneInfo
@@ -105,6 +107,7 @@ public sealed class Offer : AggregateRoot
 
         OfferedAt = asOf;
         Status = OfferStatus.Pending;
+        Response = OfferResponse.Pending;
 
         RaiseDomainEvent(new EnrolmentOfferGeneratedDomainEvent(new(), Id));
 
@@ -114,7 +117,7 @@ public sealed class Offer : AggregateRoot
     public Result MarkReminderSent(
         DateTimeOffset asOf)
     {
-        if (Status != OfferStatus.Pending)
+        if (Response != OfferResponse.Pending)
             return Result.Failure(EnrolmentOfferErrors.ReminderInvalid);
 
         ReminderSentAt = asOf;
@@ -125,9 +128,9 @@ public sealed class Offer : AggregateRoot
     public Result MarkLapsed()
     {
         if (Status != OfferStatus.Pending)
-            return Result.Failure(EnrolmentOfferErrors.InvalidStatusChange(Status, OfferStatus.Lapsed));
+            return Result.Failure(EnrolmentOfferErrors.InvalidStatusChange(Status, OfferStatus.));
 
-        Status = OfferStatus.Lapsed;
+        Response = OfferResponse.Lapsed;
 
         return Result.Success();
     }
@@ -138,23 +141,23 @@ public sealed class Offer : AggregateRoot
         {
             (OfferStatus.Processing, not OfferStatus.Pending) => false,
             (OfferStatus.Pending, OfferStatus.Processing) => false,
-            (OfferStatus.Accepted or OfferStatus.Declined or OfferStatus.Lapsed,
-                OfferStatus.Processing or OfferStatus.Pending) => false,
+            (OfferResponse.Accepted or OfferResponse.Declined or OfferResponse.Lapsed,
+                OfferResponse.Processing or OfferResponse.Pending) => false,
             // Lapsed is only reachable via Lapse() — rejected here defensively
             // in case UpdateStatus is ever called directly with Lapsed.
-            (_, OfferStatus.Lapsed) => false,
+            (_, OfferResponse.Lapsed) => false,
             _ => true
         };
 
         if (!isValid)
-            return Result.Failure(EnrolmentOfferErrors.InvalidStatusChange(Status, newStatus));
+            return Result.Failure(EnrolmentOfferErrors.InvalidStatusChange(Response, newStatus));
 
-        Status = newStatus;
+        Response = newStatus;
         return Result.Success();
     }
 
     public Result Respond(
-        OfferStatus status, 
+        OfferResponse status, 
         bool courtOrders = false, 
         bool healthConditions = false,
         bool requestedLaptop = true)
@@ -166,7 +169,7 @@ public sealed class Offer : AggregateRoot
 
         RespondedAt = DateTime.UtcNow;
 
-        if (status != OfferStatus.Accepted)
+        if (status != OfferResponse.Accepted)
             return Result.Success();
 
         HasCourtOrders = courtOrders;

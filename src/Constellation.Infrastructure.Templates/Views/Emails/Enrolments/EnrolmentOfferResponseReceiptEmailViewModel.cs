@@ -18,7 +18,7 @@ public sealed class EnrolmentOfferResponseReceiptEmailViewModel : EmailLayoutBas
     public required Name StudentName { get; init; }
     public required Grade Grade { get; init; }
     public required DateTimeOffset RespondedAt { get; init; }
-    public required OfferStatus Status { get; init; }
+    public required OfferResponse Status { get; init; }
     public required bool HasCourtOrders { get; init; }
     public required bool HasHealthConcerns { get; init; }
     public required bool LaptopRequested { get; init; }

@@ -29,7 +29,7 @@ public sealed record EnrolmentOfferDetailsResponse(
     string DestinationSchool,
     Program Program,
     Grade Grade,
-    OfferStatus Status,
+    OfferResponse Status,
     DateTimeOffset? OfferedAt,
     DateTimeOffset? RespondBy,
     DateTimeOffset? RespondedAt,
