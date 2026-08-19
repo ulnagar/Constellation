@@ -2,6 +2,7 @@
 
 using Abstractions.Messaging;
 using Core.Models.EnrolmentContext.Application;
+using Core.Models.EnrolmentContext.Application.Enums;
 using Core.Models.EnrolmentContext.Application.Errors;
 using Core.Models.EnrolmentContext.Application.Repositories;
 using Core.Models.EnrolmentContext.EnrolmentPeriod;
@@ -90,9 +91,12 @@ internal sealed class GetEnrolmentOfferByIdQueryHandler
             application.StudentReferenceNumber,
             application.StudentName,
             application.StudentGender,
+            application.DateOfBirth,
+            application.StudentEmailAddress,
             application.ParentName,
             application.ParentEmailAddress,
             application.ParentPhoneNumber,
+            application.MailingAddress,
             application.ApplicationReference,
             application.CurrentSchoolCode,
             application.CurrentSchool,
@@ -100,6 +104,7 @@ internal sealed class GetEnrolmentOfferByIdQueryHandler
             application.DestinationSchool,
             application.Program,
             application.Grade,
+            application.SelectedCourses.Where(entry => entry.Status == CourseSelectionStatus.Approved).Select(entry => entry.Course).ToList(),
             offer.Status,
             offer.OfferedAt,
             offer.RespondBy,

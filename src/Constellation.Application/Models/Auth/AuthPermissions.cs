@@ -28,6 +28,9 @@ public sealed class AuthPermission : StringEnumeration<AuthPermission>
     public const string Partners_Enrolments_Applications_Edit_Value = "Partners.Enrolments.Applications.Edit";
     public const string Partners_Enrolments_Offers_View_Value = "Partners.Enrolments.Offers.View";
     public const string Partners_Enrolments_Offers_Edit_Value = "Partners.Enrolments.Offers.Edit";
+    public const string Partners_Enrolments_Offers_DocumentCollector_Value = "Partners.Enrolments.Offers.DocumentCollector";
+    public const string Partners_Enrolments_Offers_Reviewer_Value = "Partners.Enrolments.Offers.Reviewer";
+    public const string Partners_Enrolments_Offers_Approver_Value = "Partners.Enrolments.Offers.Approver";
     public const string Partners_Enrolments_Reports_View_Value = "Partners.Enrolments.Reports.View";
 
     public const string Messaging_Contacts_View_Value = "Partners.Contacts.View";
@@ -149,7 +152,10 @@ public sealed class AuthPermission : StringEnumeration<AuthPermission>
     public static readonly AuthPermission Partners_Enrolments_Offers_View = new(Partners_Enrolments_Offers_View_Value, "Partners: Enrolments: Offers: View");
     public static readonly AuthPermission Partners_Enrolments_Offers_Edit = new(Partners_Enrolments_Offers_Edit_Value, "Partners: Enrolments: Offers: Edit");
     public static readonly AuthPermission Partners_Enrolments_Reports_View = new(Partners_Enrolments_Reports_View_Value, "Partners: Enrolments: Reports: View");
-
+    public static readonly AuthPermission Partners_Enrolments_Offers_DocumentCollector = new(Partners_Enrolments_Offers_DocumentCollector_Value, "Partners: Enrolments: Offers: Document Collector");
+    public static readonly AuthPermission Partners_Enrolments_Offers_Reviewer = new(Partners_Enrolments_Offers_Reviewer_Value, "Partners: Enrolments: Offers: Reviewer");
+    public static readonly AuthPermission Partners_Enrolments_Offers_Approver = new(Partners_Enrolments_Offers_Approver_Value, "Partners: Enrolments: Offers: Approver");
+    
     public static readonly AuthPermission Messaging_Contacts_View = new(Messaging_Contacts_View_Value, "Messaging: Contacts: View");
     public static readonly AuthPermission Messaging_View = new(Messaging_View_Value, "Messaging: View");
     public static readonly AuthPermission Messaging_SMS_Send = new(Messaging_SMS_Send_Value, "Messaging: SMS: Send");

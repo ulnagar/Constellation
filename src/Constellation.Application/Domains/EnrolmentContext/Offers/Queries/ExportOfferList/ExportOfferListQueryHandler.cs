@@ -132,7 +132,7 @@ internal sealed class ExportOfferListQueryHandler
             new("Court Orders", a => a.HasCourtOrders is null ? "N/A" : a.HasCourtOrders.Value ? "Yes" : "No"),
             new("Health Concerns", a => a.HasHealthConcerns is null ? "N/A" : a.HasHealthConcerns.Value ? "Yes" : "No"),
             new ("Laptop Requested", a => a.LaptopRequested is null ? "N/A" : a.LaptopRequested.Value ? "Yes" : "No"),
-            new("Notes", a => string.Join("\n", a.Notes, ExcelColumnFormat.List)));
+            new("Notes", a => string.Join("\n", a.Notes), ExcelColumnFormat.List));
 
         _writer.ApplyHeaderStyle(sheet, 1);
         _writer.AddAutoFilter(sheet);

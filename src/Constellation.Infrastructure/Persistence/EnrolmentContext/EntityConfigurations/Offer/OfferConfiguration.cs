@@ -1,5 +1,6 @@
 ﻿namespace Constellation.Infrastructure.Persistence.EnrolmentContext.EntityConfigurations.Offer;
 
+using Converters;
 using Core.Models.EnrolmentContext.Application;
 using Core.Models.EnrolmentContext.EnrolmentPeriod;
 using Core.Models.EnrolmentContext.Offer;
@@ -28,8 +29,12 @@ internal sealed class OfferConfiguration : IEntityTypeConfiguration<Offer>
             .OnDelete(DeleteBehavior.Restrict);
 
         builder
+            .Property(entry => entry.Status)
+            .HasConversion<OfferStatusConverter>();
+
+        builder
             .Property(entry => entry.Response)
-            .HasConversion<string>();
+            .HasConversion<ResponseStatusConverter>();
 
         builder
             .HasMany(entry => entry.Notes)

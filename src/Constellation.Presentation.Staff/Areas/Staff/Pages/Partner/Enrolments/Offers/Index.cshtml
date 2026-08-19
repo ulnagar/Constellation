@@ -69,11 +69,6 @@
                 @if (canEditTest.Succeeded)
                 {
                     <a asp-page="/Partner/Enrolments/Offers/Details" asp-route-Id="@offer.Id" asp-route-PeriodId="@Model.PeriodId" class="btn btn-sm btn-info btn-show-hover showLoader">More Info...</a>
-
-                    if (!isArchived)
-                    {
-                        <a asp-page="/Partner/Enrolments/Offers/Respond" asp-route-Id="@offer.Id" asp-route-PeriodId="@Model.PeriodId" class="btn btn-sm btn-info btn-show-hover showLoader">Respond</a>
-                    }
                 }
             </td>
         </tr>

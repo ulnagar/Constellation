@@ -568,3 +568,9 @@ a.Senior-5:focus, a.Senior-5.focus {
 .select-button {
     margin: 2.5px;
 }
+
+/* th.col-fit : force a Bootstrap table column to the minumum space required for the contents of the column */
+.col-fit {
+    width: 1%;
+    white-space: nowrap;
+}

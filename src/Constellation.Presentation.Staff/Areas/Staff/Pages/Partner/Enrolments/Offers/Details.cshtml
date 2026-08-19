@@ -1,11 +1,321 @@
 ﻿@page "{id}"
 @model Constellation.Presentation.Staff.Areas.Staff.Pages.Partner.Enrolments.Offers.DetailsModel
 
+@using Constellation.Core.Extensions
 @using Constellation.Core.Models.EnrolmentContext.EnrolmentPeriod.Enums
+@using Constellation.Core.Models.EnrolmentContext.Offer.Enums
 
+@inject IAuthorizationService AuthorizationService
 @{
     var isArchived = Model.Period.Status == PeriodStatus.Archived;
+
+    var canEdit = await AuthorizationService.AuthorizeAsync(User, AuthPermission.Partners_Enrolments_Offers_Edit_Value);
+    var isDocumentCollector = await AuthorizationService.AuthorizeAsync(User, AuthPermission.Partners_Enrolments_Offers_DocumentCollector_Value);
+    var isReviewer = await AuthorizationService.AuthorizeAsync(User, AuthPermission.Partners_Enrolments_Offers_Reviewer_Value);
+    var isApprover = await AuthorizationService.AuthorizeAsync(User, AuthPermission.Partners_Enrolments_Offers_Approver_Value);
 }
 
 <h2>@Model.Offer.StudentName</h2>
 
+<div class="page-menu">
+    @if (!isArchived)
+    {
+        if (canEdit.Succeeded)
+        {
+            <a asp-page="/Partner/Enrolments/Offers/Respond" asp-route-Id="@Model.Offer.Id" asp-route-PeriodId="@Model.PeriodId" class="btn btn-success">Change Response</a>
+        }
+
+        if (Model.Offer.Status == OfferStatus.CollectingDocuments && isDocumentCollector.Succeeded)
+        {
+            <button class="btn btn-success">Mark Documents Collected</button>
+        }
+
+        if (Model.Offer.Status == OfferStatus.ReviewingResponse && isReviewer.Succeeded)
+        {
+            <button class="btn btn-success">Complete Review</button>
+        }
+
+        if (Model.Offer.Status == OfferStatus.PendingAcceptance && isApprover.Succeeded)
+        {
+            <button class="btn btn-success">Approve</button>
+            <button class="btn btn-danger">Reject</button>
+        }
+
+        if (canEdit.Succeeded)
+        {
+            <button class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#add-offer-note-modal">Add Note</button>
+        }
+    }
+
+    <a href="javascript:history.go(-1)" class="btn btn-danger btn-pull-right">Go Back</a>
+</div>
+
+<hr />
+
+<div class="card mt-3">
+    <div class="card-header">
+        <h4>Details</h4>
+    </div>
+    <div class="card-body">
+        <dl class="row">
+            <dt class="col-md-2">
+                <label asp-for="Offer.Status">Status</label>
+            </dt>
+            <dd class="col-md-10">
+                <span>@Model.Offer.Status</span>
+            </dd>
+        </dl>
+    </div>
+</div>
+
+<div class="card mt-3">
+    <div class="card-header" data-bs-toggle="collapse" data-bs-target="#StudentDetails">
+        <h4>Student Details</h4>
+    </div>
+    <div class="collapse card-body" id="StudentDetails">
+        <dl class="row">
+            <dt class="col-md-2">
+                <label asp-for="Offer.StudentReferenceNumber">SRN</label>
+            </dt>
+            <dd class="col-md-10">
+                <span>@Model.Offer.StudentReferenceNumber</span>
+            </dd>
+
+            <dt class="col-md-2">
+                <label asp-for="Offer.StudentName">Name</label>
+            </dt>
+            <dd class="col-md-10">
+                <span>@Model.Offer.StudentName</span>
+            </dd>
+
+            <dt class="col-md-2">
+                <label asp-for="Offer.StudentGender">Gender</label>
+            </dt>
+            <dd class="col-md-10">
+                <span>@Model.Offer.StudentGender</span>
+            </dd>
+
+            <dt class="col-md-2">
+                <label asp-for="Offer.DateOfBirth">Date Of Birth</label>
+            </dt>
+            <dd class="col-md-10">
+                <span>@Model.Offer.DateOfBirth?.ToString("d")</span>
+            </dd>
+
+            <dt class="col-md-2">
+                <label asp-for="Offer.StudentEmailAddress">Email Address</label>
+            </dt>
+            <dd class="col-md-10">
+                <span>@Model.Offer.StudentEmailAddress</span>
+            </dd>
+        </dl>
+    </div>
+</div>
+
+<div class="card mt-3">
+    <div class="card-header cursor-pointer" data-bs-toggle="collapse" data-bs-target="#ParentDetails">
+        <h4>Parent Details</h4>
+    </div>
+    <div class="collapse card-body" id="ParentDetails">
+        <dl class="row">
+            <dt class="col-md-2">
+                <label asp-for="Offer.ParentName">Name</label>
+            </dt>
+            <dd class="col-md-10">
+                <span>@Model.Offer.ParentName</span>
+            </dd>
+
+            <dt class="col-md-2">
+                <label asp-for="Offer.ParentEmailAddress">Email Address</label>
+            </dt>
+            <dd class="col-md-10">
+                <span>@Model.Offer.ParentEmailAddress</span>
+            </dd>
+
+            <dt class="col-md-2">
+                <label asp-for="Offer.ParentPhoneNumber">Phone Number</label>
+            </dt>
+            <dd class="col-md-10">
+                <span>@Model.Offer.ParentPhoneNumber</span>
+            </dd>
+        </dl>
+    </div>
+</div>
+
+<div class="card mt-3">
+    <div class="card-header cursor-pointer" data-bs-toggle="collapse" data-bs-target="#MailingAddress">
+        <h4>Mailing Address</h4>
+    </div>
+    <div class="collapse card-body" id="MailingAddress">
+        <dl class="row">
+            <dt class="col-md-2">
+                <label asp-for="Offer.MailingAddress.Street">Street Address</label>
+            </dt>
+            <dd class="col-md-10">
+                <span>@Model.Offer.MailingAddress?.Street</span>
+            </dd>
+
+            <dt class="col-md-2">
+                <label asp-for="Offer.MailingAddress.Town">Town</label>
+            </dt>
+            <dd class="col-md-10">
+                <span>@Model.Offer.MailingAddress?.Town</span>
+            </dd>
+
+            <dt class="col-md-2">
+                <label asp-for="Offer.MailingAddress.State">State</label>
+            </dt>
+            <dd class="col-md-10">
+                <span>@Model.Offer.MailingAddress?.State</span>
+            </dd>
+
+            <dt class="col-md-2">
+                <label asp-for="Offer.MailingAddress.Postcode">Post Code</label>
+            </dt>
+            <dd class="col-md-10">
+                <span>@Model.Offer.MailingAddress?.Postcode</span>
+            </dd>
+        </dl>
+    </div>
+</div>
+
+<div class="card mt-3">
+    <div class="card-header cursor-pointer" data-bs-toggle="collapse" data-bs-target="#ApplicationDetails">
+        <h4>Application Details</h4>
+    </div>
+    <div class="collapse card-body" id="ApplicationDetails">
+        <dl class="row">
+            <dt class="col-md-2">
+                <label asp-for="Offer.PeriodName">Enrolment Period</label>
+            </dt>
+            <dd class="col-md-10">
+                <span>@Model.Offer.PeriodName</span>
+            </dd>
+
+            <dt class="col-md-2">
+                <label asp-for="Offer.ApplicationReference">Reference</label>
+            </dt>
+            <dd class="col-md-10">
+                <span>@Model.Offer.ApplicationReference</span>
+            </dd>
+
+            <dt class="col-md-2">
+                <label asp-for="Offer.CurrentSchool">Current School</label>
+            </dt>
+            <dd class="col-md-10">
+                <span>@Model.Offer.CurrentSchoolCode - @Model.Offer.CurrentSchool</span>
+            </dd>
+
+            <dt class="col-md-2">
+                <label asp-for="Offer.DestinationSchool">Destination School</label>
+            </dt>
+            <dd class="col-md-10">
+                <span>@Model.Offer.DestinationSchoolCode - @Model.Offer.DestinationSchool</span>
+            </dd>
+
+            <dt class="col-md-2">
+                <label asp-for="Offer.Program">Program</label>
+            </dt>
+            <dd class="col-md-10">
+                <span>@Model.Offer.Program</span>
+            </dd>
+
+            <dt class="col-md-2">
+                <label asp-for="Offer.Grade">Grade</label>
+            </dt>
+            <dd class="col-md-10">
+                <span>@Model.Offer.Grade.AsName()</span>
+            </dd>
+        </dl>
+    </div>
+</div>
+
+@if (Model.Offer.SelectedCourses.Any())
+{
+    <div class="card mt-3">
+        <div class="card-header cursor-pointer" data-bs-toggle="collapse" data-bs-target="#Subjects">
+            <h4>Subjects</h4>
+        </div>
+        <div class="collapse card-body" id="Subjects">
+            <table class="table table-striped table-hover">
+                <thead>
+                <tr>
+                    <th>Code</th>
+                    <th>Name</th>
+                </tr>
+                </thead>
+                @foreach (var entry in Model.Offer.SelectedCourses)
+                {
+                    <tr>
+                        <td>@entry.Value</td>
+                        <td>@entry.Name</td>
+                    </tr>
+                }
+            </table>
+        </div>
+    </div>
+}
+
+<div class="card mt-3">
+    <div class="card-header cursor-pointer" data-bs-toggle="collapse" data-bs-target="#Response">
+        <h4>Response</h4>
+    </div>
+    <div class="collapse card-body" id="Response">
+        <dl class="row">
+            <dt class="col-md-2">
+                <label asp-for="Offer.Response">Response</label>
+            </dt>
+            <dd class="col-md-10">
+                <span>@Model.Offer.Response</span>
+            </dd>
+
+            <dt class="col-md-2">
+                <label asp-for="Offer.HasCourtOrders">Has Court Orders</label>
+            </dt>
+            <dd class="col-md-10">
+                <boolean-field value="Model.Offer.HasCourtOrders" />
+            </dd>
+
+            <dt class="col-md-2">
+                <label asp-for="Offer.HasHealthConcerns">Has Health Concerns</label>
+            </dt>
+            <dd class="col-md-10">
+                <boolean-field value="Model.Offer.HasHealthConcerns" />
+            </dd>
+
+            <dt class="col-md-2">
+                <label asp-for="Offer.RequestedLaptop">Requests Laptop</label>
+            </dt>
+            <dd class="col-md-10">
+                <boolean-field value="Model.Offer.RequestedLaptop" />
+            </dd>
+        </dl>
+    </div>
+</div>
+
+<div class="card mt-3">
+    <div class="card-header cursor-pointer" data-bs-toggle="collapse" data-bs-target="#Notes">
+        <h4>Notes</h4>
+    </div>
+    <div class="collapse card-body" id="Notes">
+        <table class="table table-striped table-hover">
+            <thead>
+            <tr>
+                <th class="col-fit">Timestamp</th>
+                <th class="col-fit">By</th>
+                <th>Note</th>
+            </tr>
+            </thead>
+            @foreach (var entry in Model.Offer.Notes)
+            {
+                <tr>
+                    <td class="text-nowrap" data-order="@entry.Timestamp.ToString("u")">@entry.Timestamp.ToLocalTime().ToString("f")</td>
+                    <td class="text-nowrap">@entry.CreatedBy</td>
+                    <td>@entry.Message</td>
+                </tr>
+            }
+        </table>
+    </div>
+</div>
+
+<vc:add-offer-note />

@@ -1,5 +1,6 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Partner.Enrolments.Offers;
 
+using Application.Domains.EnrolmentContext.Offers.Commands.AddOfferNote;
 using Application.Domains.EnrolmentContext.Offers.Queries.GetEnrolmentOfferById;
 using Application.Models.Auth;
 using Constellation.Application.Common.PresentationModels;
@@ -13,6 +14,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using Presentation.Shared.Helpers.Attributes;
 using Serilog;
+using Shared.Components.AddOfferNote;
 
 [HasPermission(AuthPermission.Partners_Enrolments_Offers_View_Value)]
 public class DetailsModel : PeriodScopedPageModel
@@ -88,5 +90,39 @@ public class DetailsModel : PeriodScopedPageModel
         }
 
         Offer = offer.Value;
+    }
+
+    public async Task<IActionResult> OnPostAddNote(AddOfferNoteSelection viewModel)
+    {
+        if (string.IsNullOrWhiteSpace(viewModel.Note))
+        {
+            ModalContent = ErrorDisplay.Create(OfferNoteErrors.NoteEmpty);
+
+            await PreparePage();
+            return Page();
+        }
+
+        AddOfferNoteCommand command = new(Id, viewModel.Note, _currentUserService.UserName);
+
+        _logger
+            .ForContext(nameof(AddOfferNoteCommand), command, true)
+            .Information("Requested to add new Offer Note by user {User}", _currentUserService.UserName);
+
+        Result result = await _mediator.Send(command);
+
+        if (result.IsFailure)
+        {
+            _logger
+                .ForContext(nameof(AddOfferNoteCommand), command, true)
+                .ForContext(nameof(Error), result.Error, true)
+                .Warning("Failed to add new Offer Note by user {User}", _currentUserService.UserName);
+
+            ModalContent = ErrorDisplay.Create(result.Error);
+
+            await PreparePage();
+            return Page();
+        }
+
+        return RedirectToPage();
     }
 }

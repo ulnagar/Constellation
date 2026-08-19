@@ -169,24 +169,32 @@ public sealed class Offer : AggregateRoot
             var s when s == OfferStatus.Preparing =>
                 newStatus == OfferStatus.AwaitingResponse,
 
-            // CollectingDocuments/ReviewingResponse/Declined branch here is
-            // only reachable via RecordResponse(); Declined-via-AwaitingResponse
-            // is the parent-decline path.
+            // Parent's response routes here: flagged for court orders/health concerns
+            // goes to CollectingDocuments; otherwise goes straight to PendingAcceptance,
+            // skipping document collection and review entirely. Declined is the
+            // parent-decline path; Lapsed is the window-of-opportunity expiry, the
+            // only state Lapsed can ever be reached from.
             var s when s == OfferStatus.AwaitingResponse =>
                 newStatus == OfferStatus.CollectingDocuments
-                || newStatus == OfferStatus.ReviewingResponse
+                || newStatus == OfferStatus.PendingAcceptance
                 || newStatus == OfferStatus.Declined
                 || newStatus == OfferStatus.Lapsed,
 
+            // ReviewingResponse exists only to review the documents just collected
+            // here — it is never reached any other way.
             var s when s == OfferStatus.CollectingDocuments =>
                 newStatus == OfferStatus.ReviewingResponse,
 
             var s when s == OfferStatus.ReviewingResponse =>
                 newStatus == OfferStatus.PendingAcceptance,
 
-            // Accepted/Declined here is only reachable via FinalisePrincipalDecision().
+            // Accepted/Declined are the Principal's final call via
+            // FinalisePrincipalDecision(). CollectingDocuments is the correction
+            // path for when a court-order/health-concern flag is discovered late,
+            // after the offer had already skipped straight to PendingAcceptance.
             var s when s == OfferStatus.PendingAcceptance =>
-                newStatus == OfferStatus.Accepted || newStatus == OfferStatus.Declined,
+                newStatus == OfferStatus.Accepted
+                || newStatus == OfferStatus.Declined,
 
             _ => false
         };
@@ -214,11 +222,7 @@ public sealed class Offer : AggregateRoot
                 newStatus = OfferStatus.PendingAcceptance;
         }
 
-        Result statusUpdate = UpdateStatus(newStatus);
-
-        if (statusUpdate.IsFailure)
-            return statusUpdate;
-
+        Status = newStatus;
         RespondedAt = DateTime.UtcNow;
         Response = response;
 

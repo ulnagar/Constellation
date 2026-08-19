@@ -19,8 +19,8 @@ internal sealed class GenderConverter : ValueConverter<Gender, string?>
 
     private static Gender? StringToGender(string value) =>
         string.IsNullOrWhiteSpace(value) 
-            ? null 
-            : Gender.FromValue(value);
+            ? Gender.Empty 
+            : Gender.FromValue(value)!;
 
     public override bool ConvertsNulls => true;
 }
