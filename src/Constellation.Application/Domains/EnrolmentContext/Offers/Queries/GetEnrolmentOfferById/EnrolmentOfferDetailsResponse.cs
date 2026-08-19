@@ -29,10 +29,18 @@ public sealed record EnrolmentOfferDetailsResponse(
     string DestinationSchool,
     Program Program,
     Grade Grade,
-    OfferResponse Status,
+    OfferStatus Status,
     DateTimeOffset? OfferedAt,
     DateTimeOffset? RespondBy,
     DateTimeOffset? RespondedAt,
+    ResponseStatus Response,
     bool HasCourtOrders,
     bool HasHealthConcerns,
-    bool RequestedLaptop);
+    bool RequestedLaptop,
+    List<EnrolmentOfferDetailsResponse.Note> Notes)
+{
+    public sealed record Note(
+        DateTimeOffset Timestamp,
+        string CreatedBy,
+        string Message);
+}

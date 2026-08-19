@@ -9,5 +9,6 @@ public enum ExcelColumnFormat
 {
     Default,
     Text,
-    Date
+    Date,
+    List
 }

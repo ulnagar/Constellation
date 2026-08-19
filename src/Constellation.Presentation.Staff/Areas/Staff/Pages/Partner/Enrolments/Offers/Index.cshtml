@@ -3,7 +3,7 @@
 
 @using Constellation.Core.Extensions
 @using Constellation.Core.Models.EnrolmentContext.EnrolmentPeriod.Enums
-@using Constellation.Presentation.Staff.Areas.Staff.Pages.Partner.Enrolments.Offers
+@using Constellation.Core.Models.EnrolmentContext.Offer.Enums
 
 @inject IAuthorizationService AuthorizationService
 @{
@@ -14,39 +14,16 @@
 <h2>Offers</h2>
 
 <div class="page-menu">
-    @{
-        var allStyle = "btn-outline-secondary";
-        var processingStyle = allStyle;
-        var pendingStyle = allStyle;
-        var acceptedStyle = allStyle;
-        var declinedStyle = allStyle;
-
-        switch (Model.Status)
-        {
-            case IndexModel.StatusFilter.All:
-                allStyle = "btn-primary";
-                break;
-            case IndexModel.StatusFilter.Processing:
-                processingStyle = "btn-primary";
-                break;
-            case IndexModel.StatusFilter.Pending:
-                pendingStyle = "btn-primary";
-                break;
-            case IndexModel.StatusFilter.Accepted:
-                acceptedStyle = "btn-primary";
-                break;
-            case IndexModel.StatusFilter.Declined:
-                declinedStyle = "btn-primary";
-                break;
-        }
-    }
-
-    <div class="btn-group">
-        <a asp-route-status="@IndexModel.StatusFilter.All" asp-route-periodId="@Model.PeriodId" class="btn @allStyle">All</a>
-        <a asp-route-status="@IndexModel.StatusFilter.Processing" asp-route-periodId="@Model.PeriodId" class="btn @processingStyle">Processing</a>
-        <a asp-route-status="@IndexModel.StatusFilter.Pending" asp-route-periodId="@Model.PeriodId" class="btn @pendingStyle">Pending</a>
-        <a asp-route-status="@IndexModel.StatusFilter.Accepted" asp-route-periodId="@Model.PeriodId" class="btn @acceptedStyle">Accepted</a>
-        <a asp-route-status="@IndexModel.StatusFilter.Declined" asp-route-periodId="@Model.PeriodId" class="btn @declinedStyle">Declined</a>
+    <div class="btn-group" role="group">
+        <button type="button" class="btn btn-secondary dropdown-toggle" data-bs-toggle="dropdown">With Status <span class="caret"></span></button>
+        <div class="dropdown-menu">
+            @{
+                foreach (var status in OfferStatus.GetOptions().OrderBy(entry => entry.Order))
+                {
+                    <a asp-route-status="@status.Value" class="dropdown-item">@status.Value</a>
+                }
+            }
+        </div>
     </div>
     
     @if (canEditTest.Succeeded)
@@ -158,7 +135,7 @@
             function getCountOfVisibleProcessingTableRows() {
                 return table.rows(
                     function(idx, data, node) {
-                        return data[5] === 'Processing';
+                        return data[5] === 'Preparing';
                     },
                     { search: 'applied' })
                     .count();
@@ -169,7 +146,7 @@
 
                 table.rows(
                     function (idx, data, node) {
-                        return data[5] === 'Processing';
+                        return data[5] === 'Preparing';
                     },
                     { search: 'applied'})
                     .every(function() {

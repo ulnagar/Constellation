@@ -1,4 +1,4 @@
-﻿namespace Constellation.Application.Domains.EnrolmentContext.Offers.Queries.GetOffersForPeriod;
+﻿namespace Constellation.Application.Domains.EnrolmentContext.Offers.Queries.GetOfferSummaryForPeriod;
 
 using Abstractions.Messaging;
 using Constellation.Application.Domains.EnrolmentContext.Offers.Models;
@@ -14,15 +14,15 @@ using Core.Shared;
 using Serilog;
 using System.Collections.Generic;
 
-internal sealed class GetOffersForPeriodQueryHandler
-    : IQueryHandler<GetOffersForPeriodQuery, List<EnrolmentOfferResponse>>
+internal sealed class GetOfferSummaryForPeriodQueryHandler
+    : IQueryHandler<GetOfferSummaryForPeriodQuery, List<EnrolmentOfferSummaryResponse>>
 {
     private readonly IEnrolmentOfferRepository _offerRepository;
     private readonly IEnrolmentApplicationRepository _applicationRepository;
     private readonly IEnrolmentPeriodRepository _periodRepository;
     private readonly ILogger _logger;
 
-    public GetOffersForPeriodQueryHandler(
+    public GetOfferSummaryForPeriodQueryHandler(
         IEnrolmentOfferRepository offerRepository,
         IEnrolmentApplicationRepository applicationRepository,
         IEnrolmentPeriodRepository periodRepository,
@@ -32,23 +32,23 @@ internal sealed class GetOffersForPeriodQueryHandler
         _applicationRepository = applicationRepository;
         _periodRepository = periodRepository;
         _logger = logger
-            .ForContext<GetOffersForPeriodQuery>();
+            .ForContext<GetOfferSummaryForPeriodQuery>();
     }
 
-    public async Task<Result<List<EnrolmentOfferResponse>>> Handle(GetOffersForPeriodQuery request, CancellationToken cancellationToken)
+    public async Task<Result<List<EnrolmentOfferSummaryResponse>>> Handle(GetOfferSummaryForPeriodQuery request, CancellationToken cancellationToken)
     {
-        List<EnrolmentOfferResponse> responses = [];
+        List<EnrolmentOfferSummaryResponse> responses = [];
         
         EnrolmentPeriod? period = await _periodRepository.GetEnrolmentPeriodById(request.PeriodId, cancellationToken);
 
         if (period is null)
         {
             _logger
-                .ForContext(nameof(GetOffersForPeriodQuery), request, true)
+                .ForContext(nameof(GetOfferSummaryForPeriodQuery), request, true)
                 .ForContext(nameof(Error), EnrolmentPeriodErrors.NotFound(request.PeriodId), true)
                 .Warning("Failed to find Enrolment Period linked to Offer");
 
-            return Result.Failure<List<EnrolmentOfferResponse>>(EnrolmentPeriodErrors.NotFound(request.PeriodId));
+            return Result.Failure<List<EnrolmentOfferSummaryResponse>>(EnrolmentPeriodErrors.NotFound(request.PeriodId));
         }
 
         List<Offer> offers = await _offerRepository.GetForPeriod(request.PeriodId, cancellationToken);
@@ -71,22 +71,13 @@ internal sealed class GetOffersForPeriodQueryHandler
 
             responses.Add(new(
                 offer.Id,
-                application.Id,
-                period.Id,
-                period.Label,
-                application.StudentReferenceNumber,
                 application.StudentName,
                 application.StudentGender,
-                application.ParentName,
-                application.ParentEmailAddress,
-                application.ParentPhoneNumber,
                 application.ApplicationReference ?? string.Empty,
-                application.CurrentSchoolCode,
-                application.CurrentSchool ?? string.Empty,
                 application.DestinationSchoolCode,
                 application.DestinationSchool ?? string.Empty,
-                application.Program,
                 application.Grade,
+                offer.Status,
                 offer.Response));
         }
 

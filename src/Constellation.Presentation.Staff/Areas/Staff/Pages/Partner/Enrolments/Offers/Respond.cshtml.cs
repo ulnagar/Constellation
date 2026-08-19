@@ -1,8 +1,7 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Partner.Enrolments.Offers;
 
 using Application.Common.PresentationModels;
-using Application.Domains.EnrolmentContext.Offers.Commands.MarkOfferAcceptedByStaff;
-using Application.Domains.EnrolmentContext.Offers.Commands.MarkOfferDeclinedByStaff;
+using Application.Domains.EnrolmentContext.Offers.Commands.RecordParentResponseToOffer;
 using Application.Domains.EnrolmentContext.Offers.Queries.GetOfferForResponse;
 using Application.Models.Auth;
 using Constellation.Core.Abstractions.Services;
@@ -107,34 +106,34 @@ public class RespondModel : PeriodScopedPageModel
         if (OfferResponse != "Unset")
             return;
 
-        OfferResponse = Offer.Status switch
+        OfferResponse = Offer.Response switch
         {
-            Core.Models.EnrolmentContext.Offer.Enums.OfferResponse.Accepted => "Accept",
-            Core.Models.EnrolmentContext.Offer.Enums.OfferResponse.Declined => "Decline",
+            var r when r == ResponseStatus.Accepted => "Accept",
+            var r when r == ResponseStatus.Declined => "Decline",
             _ => "Unset"
         };
-        CourtOrders = Offer.Status switch
+        CourtOrders = Offer.Response switch
         {
-            Core.Models.EnrolmentContext.Offer.Enums.OfferResponse.Accepted when Offer.HasCourtOrders => "Yes",
-            Core.Models.EnrolmentContext.Offer.Enums.OfferResponse.Accepted when !Offer.HasCourtOrders => "No",
-            Core.Models.EnrolmentContext.Offer.Enums.OfferResponse.Declined when Offer.HasCourtOrders => "Yes",
-            Core.Models.EnrolmentContext.Offer.Enums.OfferResponse.Declined when !Offer.HasCourtOrders => "No",
+            var r when r == ResponseStatus.Accepted && Offer.HasCourtOrders => "Yes",
+            var r when r == ResponseStatus.Accepted && !Offer.HasCourtOrders => "No",
+            var r when r == ResponseStatus.Declined && Offer.HasCourtOrders => "Yes",
+            var r when r == ResponseStatus.Declined && !Offer.HasCourtOrders => "No",
             _ => "Unset"
         };
-        HealthConditions = Offer.Status switch
+        HealthConditions = Offer.Response switch
         {
-            Core.Models.EnrolmentContext.Offer.Enums.OfferResponse.Accepted when Offer.HasHealthConcerns => "Yes",
-            Core.Models.EnrolmentContext.Offer.Enums.OfferResponse.Accepted when !Offer.HasHealthConcerns => "No",
-            Core.Models.EnrolmentContext.Offer.Enums.OfferResponse.Declined when Offer.HasHealthConcerns => "Yes",
-            Core.Models.EnrolmentContext.Offer.Enums.OfferResponse.Declined when !Offer.HasHealthConcerns => "No",
+            var r when r == ResponseStatus.Accepted && Offer.HasHealthConcerns => "Yes",
+            var r when r == ResponseStatus.Accepted && !Offer.HasHealthConcerns => "No",
+            var r when r == ResponseStatus.Declined && Offer.HasHealthConcerns => "Yes",
+            var r when r == ResponseStatus.Declined && !Offer.HasHealthConcerns => "No",
             _ => "Unset"
         };
-        LoanLaptop = Offer.Status switch
+        LoanLaptop = Offer.Response switch
         {
-            Core.Models.EnrolmentContext.Offer.Enums.OfferResponse.Accepted when Offer.RequestedLaptop => "Yes",
-            Core.Models.EnrolmentContext.Offer.Enums.OfferResponse.Accepted when !Offer.RequestedLaptop => "No",
-            Core.Models.EnrolmentContext.Offer.Enums.OfferResponse.Declined when Offer.RequestedLaptop=> "Yes",
-            Core.Models.EnrolmentContext.Offer.Enums.OfferResponse.Declined when !Offer.RequestedLaptop => "No",
+            var r when r == ResponseStatus.Accepted && Offer.RequestedLaptop => "Yes",
+            var r when r == ResponseStatus.Accepted && !Offer.RequestedLaptop => "No",
+            var r when r == ResponseStatus.Declined && Offer.RequestedLaptop => "Yes",
+            var r when r == ResponseStatus.Declined && !Offer.RequestedLaptop => "No",
             _ => "Unset"
         };
     }
@@ -150,33 +149,7 @@ public class RespondModel : PeriodScopedPageModel
             return Page();
         }
 
-        if (OfferResponse == "Decline")
-        {
-            MarkOfferDeclinedByStaffCommand declinedCommand = new(Id);
-
-            _logger
-                .ForContext(nameof(MarkOfferDeclinedByStaffCommand), declinedCommand, true)
-                .Information("Requested to mark Offer declined by user {User}", _currentUserService.UserName);
-
-            Result declinedResult = await _mediator.Send(declinedCommand);
-
-            if (declinedResult.IsFailure)
-            {
-                _logger
-                    .ForContext(nameof(MarkOfferDeclinedByStaffCommand), declinedCommand, true)
-                    .ForContext(nameof(Error), declinedResult.Error, true)
-                    .Warning("Failed to mark Offer declined by user {User}", _currentUserService.UserName);
-
-                ModalContent = ErrorDisplay.Create(declinedResult.Error);
-
-                await PreparePage();
-                return Page();
-            }
-
-            return RedirectToPage("/Partner/Enrolments/Offers/Index", new { area = "Staff", PeriodId });
-        }
-
-        if (CourtOrders == "Unset")
+        if (OfferResponse == "Accept" && CourtOrders == "Unset")
         {
             ModelState.AddModelError(nameof(CourtOrders),
                 "You must select either Yes or No to the question about court orders.");
@@ -185,7 +158,7 @@ public class RespondModel : PeriodScopedPageModel
             return Page();
         }
 
-        if (HealthConditions == "Unset")
+        if (OfferResponse == "Accept" && HealthConditions == "Unset")
         {
             ModelState.AddModelError(nameof(HealthConditions),
                 "You must select either Yes or No to the question about health conditions.");
@@ -194,22 +167,36 @@ public class RespondModel : PeriodScopedPageModel
             return Page();
         }
 
-        MarkOfferAcceptedByStaffCommand acceptedCommand = new(Id, CourtOrders == "Yes", HealthConditions == "Yes", LoanLaptop == "Yes");
+        if (OfferResponse == "Accept" && LoanLaptop == "Unset")
+        {
+            ModelState.AddModelError(nameof(LoanLaptop),
+                "You must select either Yes or No to the question about a loan laptop.");
+
+            await PreparePage();
+            return Page();
+        }
+
+        RecordParentResponseToOfferCommand command = new(
+            Id, 
+            OfferResponse == "Accept" ? ResponseStatus.Accepted : ResponseStatus.Declined,
+            CourtOrders == "Yes",
+            HealthConditions == "Yes", 
+            LoanLaptop == "Yes");
 
         _logger
-            .ForContext(nameof(MarkOfferAcceptedByStaffCommand), acceptedCommand, true)
-            .Information("Requested to mark Offer accepted by user {User}", _currentUserService.UserName);
+            .ForContext(nameof(RecordParentResponseToOfferCommand), command, true)
+            .Information("Requested to record parent response to offer by user {User}", _currentUserService.UserName);
 
-        Result acceptedResult = await _mediator.Send(acceptedCommand);
+        Result result = await _mediator.Send(command);
 
-        if (acceptedResult.IsFailure)
+        if (result.IsFailure)
         {
             _logger
-                .ForContext(nameof(MarkOfferAcceptedByStaffCommand), acceptedCommand, true)
-                .ForContext(nameof(Error), acceptedResult.Error, true)
-                .Warning("Failed to mark Offer accepted by user {User}", _currentUserService.UserName);
+                .ForContext(nameof(RecordParentResponseToOfferCommand), command, true)
+                .ForContext(nameof(Error), result.Error, true)
+                .Warning("Failed to record parent response to offer by user {User}", _currentUserService.UserName);
 
-            ModalContent = ErrorDisplay.Create(acceptedResult.Error);
+            ModalContent = ErrorDisplay.Create(result.Error);
 
             await PreparePage();
             return Page();

@@ -11,22 +11,13 @@ using Core.Models.EnrolmentContext.Application.Identifiers;
 using Core.Models.EnrolmentContext.Offer.Enums;
 using Core.Models.EnrolmentContext.Offer.Identifiers;
 
-public sealed record EnrolmentOfferResponse(
+public sealed record EnrolmentOfferSummaryResponse(
     OfferId Id,
-    ApplicationId ApplicationId,
-    EnrolmentPeriodId PeriodId,
-    string PeriodName,
-    StudentReferenceNumber? StudentReferenceNumber,
     Name StudentName,
     Gender StudentGender,
-    Name? ParentName,
-    EmailAddress? ParentEmailAddress,
-    PhoneNumber? ParentPhoneNumber,
     string ApplicationReference,
-    SchoolCode? CurrentSchoolCode,
-    string CurrentSchool,
     SchoolCode? DestinationSchoolCode,
     string DestinationSchool,
-    Program Program,
     Grade Grade,
-    OfferResponse Status);
+    OfferStatus Status,
+    ResponseStatus Response);

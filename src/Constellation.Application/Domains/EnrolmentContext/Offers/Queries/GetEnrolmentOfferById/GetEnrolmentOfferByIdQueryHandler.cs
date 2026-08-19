@@ -72,6 +72,16 @@ internal sealed class GetEnrolmentOfferByIdQueryHandler
             return Result.Failure<EnrolmentOfferDetailsResponse>(EnrolmentPeriodErrors.NotFound(offer.PeriodId));
         }
 
+        List<EnrolmentOfferDetailsResponse.Note> notes = [];
+
+        foreach (var note in offer.Notes)
+        {
+            notes.Add(new(
+                note.CreatedAt,
+                note.CreatedBy,
+                note.Note));
+        }
+
         return new EnrolmentOfferDetailsResponse(
             offer.Id,
             application.Id,
@@ -90,12 +100,14 @@ internal sealed class GetEnrolmentOfferByIdQueryHandler
             application.DestinationSchool,
             application.Program,
             application.Grade,
-            offer.Response,
+            offer.Status,
             offer.OfferedAt,
             offer.RespondBy,
             offer.RespondedAt,
+            offer.Response,
             offer.HasCourtOrders,
             offer.HasHealthConcerns,
-            offer.RequestedLaptop);
+            offer.RequestedLaptop,
+            notes);
     }
 }

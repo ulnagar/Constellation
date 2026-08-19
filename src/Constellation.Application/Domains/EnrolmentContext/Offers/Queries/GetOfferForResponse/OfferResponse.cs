@@ -18,10 +18,11 @@ public sealed record OfferResponse(
     Grade Grade,
     Program Program,
     List<CourseSelection> Courses,
-    Core.Models.EnrolmentContext.Offer.Enums.OfferResponse Status,
+    OfferStatus Status,
     DateTimeOffset? OfferedAt,
     DateTimeOffset? RespondBy,
     DateTimeOffset? RespondedAt,
+    ResponseStatus Response,
     bool HasCourtOrders,
     bool HasHealthConcerns,
     bool RequestedLaptop);

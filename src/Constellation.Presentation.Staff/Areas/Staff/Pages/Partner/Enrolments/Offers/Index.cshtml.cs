@@ -3,14 +3,11 @@ namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Partner.Enrolments.
 using Application.Domains.EnrolmentContext.Offers.Commands.MarkOfferPending;
 using Application.Domains.EnrolmentContext.Offers.Models;
 using Application.Domains.EnrolmentContext.Offers.Queries.ExportOfferList;
-using Application.Domains.EnrolmentContext.Offers.Queries.GetOffersForPeriod;
+using Application.Domains.EnrolmentContext.Offers.Queries.GetOfferSummaryForPeriod;
 using Application.Models.Auth;
 using Constellation.Application.Common.PresentationModels;
-using Constellation.Application.Domains.EnrolmentContext.EnrolmentPeriods.Models;
-using Constellation.Application.Domains.EnrolmentContext.EnrolmentPeriods.Queries.GetAllEnrolmentPeriods;
 using Constellation.Application.Helpers;
 using Constellation.Core.Abstractions.Services;
-using Constellation.Core.Models.EnrolmentContext.EnrolmentPeriod.Identifiers;
 using Constellation.Core.Shared;
 using Core.Models.EnrolmentContext.Offer.Enums;
 using Core.Models.EnrolmentContext.Offer.Identifiers;
@@ -46,8 +43,8 @@ public class IndexModel : PeriodScopedPageModel
     [ViewData] public string PageTitle => "Enrolment Offers";
 
     [BindProperty(SupportsGet = true)]
-    public StatusFilter Status { get; set; } = StatusFilter.All;
-    public List<EnrolmentOfferResponse> Offers { get; set; } = [];
+    public string? Status { get; set; }
+    public List<EnrolmentOfferSummaryResponse> Offers { get; set; } = [];
 
     public async Task<IActionResult> OnGet()
     {
@@ -56,7 +53,7 @@ public class IndexModel : PeriodScopedPageModel
 
     public async Task<IActionResult> PreparePage()
     {
-        Result<List<EnrolmentOfferResponse>> offers = await _mediator.Send(new GetOffersForPeriodQuery(PeriodId));
+        Result<List<EnrolmentOfferSummaryResponse>> offers = await _mediator.Send(new GetOfferSummaryForPeriodQuery(PeriodId));
 
         if (offers.IsFailure)
         {
@@ -65,7 +62,10 @@ public class IndexModel : PeriodScopedPageModel
             return Page();
         }
 
-        Offers = FilterOffers(offers.Value, Status);
+        if (!string.IsNullOrWhiteSpace(Status))
+            Offers = FilterOffers(offers.Value, Status);
+        else
+            Offers = offers.Value;
 
         return Page();
     }
@@ -110,40 +110,17 @@ public class IndexModel : PeriodScopedPageModel
         return RedirectToPage(new { PeriodId, Status });
     }
 
-    public enum StatusFilter
+    private static List<EnrolmentOfferSummaryResponse> FilterOffers(
+        IEnumerable<EnrolmentOfferSummaryResponse> offers,
+        string filter)
     {
-        All,
-        Processing,
-        Pending,
-        Accepted,
-        Declined
-    }
+        OfferStatus? status = OfferStatus.FromValue(filter);
 
-    private static List<EnrolmentOfferResponse> FilterOffers(
-        IEnumerable<EnrolmentOfferResponse> offers,
-        StatusFilter filter)
-    {
-        return filter switch
-        {
-            StatusFilter.All => offers.ToList(),
+        if (status is null)
+            return offers.ToList();
 
-            StatusFilter.Processing => offers
-                .Where(offer => offer.Status == OfferResponse.Processing)
-                .ToList(),
-
-            StatusFilter.Pending => offers
-                .Where(offer => offer.Status == OfferResponse.Pending || offer.Status == OfferResponse.Lapsed)
-                .ToList(),
-
-            StatusFilter.Accepted => offers
-                .Where(offer => offer.Status == OfferResponse.Accepted)
-                .ToList(),
-
-            StatusFilter.Declined => offers
-                .Where(offer => offer.Status == OfferResponse.Declined)
-                .ToList(),
-
-            _ => throw new ArgumentOutOfRangeException(nameof(filter), filter, null)
-        };
+        return offers
+            .Where(offer => offer.Status == status)
+            .ToList();
     }
 }

@@ -31,11 +31,13 @@ public sealed record EnrolmentOfferExport(
     Program Program,
     Grade Grade,
     List<EnrolmentCourse> Courses,
-    OfferResponse Status,
+    OfferStatus Status,
+    ResponseStatus Response,
     DateTime? OfferedAt,
     DateTime? RespondBy,
     DateTime? ReminderSentAt,
     DateTime? RespondedAt,
     bool? HasCourtOrders,
     bool? HasHealthConcerns,
-    bool? LaptopRequested);
+    bool? LaptopRequested,
+    List<string> Notes);

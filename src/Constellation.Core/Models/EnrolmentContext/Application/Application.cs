@@ -47,7 +47,7 @@ public sealed class Application
     /* Student Details */
     public StudentReferenceNumber? StudentReferenceNumber { get; private set; }
     public Name StudentName { get; private set; }
-    public Gender StudentGender { get; private set; }
+    public Gender StudentGender { get; private set; } = Gender.Empty;
     public DateOnly? DateOfBirth { get; private set; }
     public EmailAddress? StudentEmailAddress { get; private set; }
     

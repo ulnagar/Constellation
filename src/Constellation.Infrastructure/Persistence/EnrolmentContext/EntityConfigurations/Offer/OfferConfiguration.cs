@@ -30,5 +30,16 @@ internal sealed class OfferConfiguration : IEntityTypeConfiguration<Offer>
         builder
             .Property(entry => entry.Response)
             .HasConversion<string>();
+
+        builder
+            .HasMany(entry => entry.Notes)
+            .WithOne()
+            .HasForeignKey(note => note.OfferId)
+            .IsRequired()
+            .OnDelete(DeleteBehavior.Cascade);
+
+        builder
+            .Navigation(entry => entry.Notes)
+            .AutoInclude();
     }
 }

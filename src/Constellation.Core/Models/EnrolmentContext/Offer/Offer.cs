@@ -13,6 +13,9 @@ using Shared;
 
 public sealed class Offer : AggregateRoot
 {
+
+    private readonly List<OfferNote> _notes = [];
+
     public static TimeSpan ReminderPeriod => TimeSpan.FromDays(7);
     public static TimeSpan LapsedPeriod => TimeSpan.FromDays(14);
 
@@ -23,8 +26,8 @@ public sealed class Offer : AggregateRoot
     public Offer()
     {
         Id = new();
-        Status = OfferStatus.Processing;
-        Response = OfferResponse.Pending;
+        Status = OfferStatus.Preparing;
+        Response = ResponseStatus.NoResponse;
     }
 
     public OfferId Id { get; private set; }
@@ -34,6 +37,7 @@ public sealed class Offer : AggregateRoot
     public DateTimeOffset? OfferedAt { get; private set; }
     public DateTimeOffset? ReminderSentAt { get; private set; }
     public DateTimeOffset? RespondedAt { get; private set; }
+    public IReadOnlyList<OfferNote> Notes => _notes.AsReadOnly();
 
     /// <summary>
     /// The deadline for a parent/carer to respond to a <see cref="OfferResponse.Pending"/> offer.
@@ -45,7 +49,7 @@ public sealed class Offer : AggregateRoot
     {
         get
         {
-            if (Response != OfferResponse.Pending || RespondedAt is not null)
+            if (Status != OfferStatus.AwaitingResponse || RespondedAt is not null)
                 return null;
 
             DateTime localOfferedDate = TimeZoneInfo
@@ -63,14 +67,14 @@ public sealed class Offer : AggregateRoot
         }
     }
 
-    public OfferResponse Response { get; private set; }
+    public ResponseStatus Response { get; private set; }
     public bool HasCourtOrders { get; private set; }
     public bool HasHealthConcerns { get; private set; }
     public bool RequestedLaptop { get; private set; }
 
     public bool IsReminderDue(DateTimeOffset asOf)
     {
-        if (Response != OfferResponse.Pending || ReminderSentAt is not null || RespondBy is null)
+        if (Status != OfferStatus.AwaitingResponse || ReminderSentAt is not null || RespondBy is null)
             return false;
 
         DateTime reminderDate = TimeZoneInfo
@@ -102,13 +106,13 @@ public sealed class Offer : AggregateRoot
     public Result MarkOffered(
         DateTimeOffset asOf)
     {
-        if (Status != OfferStatus.Processing)
-            return Result.Failure(EnrolmentOfferErrors.InvalidStatusChange(Status, OfferStatus.Pending));
+        Result statusChange = UpdateStatus(OfferStatus.AwaitingResponse);
+
+        if (statusChange.IsFailure)
+            return statusChange;
 
         OfferedAt = asOf;
-        Status = OfferStatus.Pending;
-        Response = OfferResponse.Pending;
-
+        
         RaiseDomainEvent(new EnrolmentOfferGeneratedDomainEvent(new(), Id));
 
         return Result.Success();
@@ -117,7 +121,7 @@ public sealed class Offer : AggregateRoot
     public Result MarkReminderSent(
         DateTimeOffset asOf)
     {
-        if (Response != OfferResponse.Pending)
+        if (Status != OfferStatus.AwaitingResponse)
             return Result.Failure(EnrolmentOfferErrors.ReminderInvalid);
 
         ReminderSentAt = asOf;
@@ -125,51 +129,100 @@ public sealed class Offer : AggregateRoot
         return Result.Success();
     }
 
-    public Result MarkLapsed()
-    {
-        if (Status != OfferStatus.Pending)
-            return Result.Failure(EnrolmentOfferErrors.InvalidStatusChange(Status, OfferStatus.));
+    public Result MarkLapsed() =>
+        UpdateStatus(OfferStatus.Lapsed);
 
-        Response = OfferResponse.Lapsed;
+    public Result MarkDocumentsCollected() =>
+        UpdateStatus(OfferStatus.ReviewingResponse);
+
+    public Result AddReviewNote(
+        string note,
+        string createdBy)
+    {
+        Result<OfferNote> offerNote = OfferNote.Create(Id, note, createdBy);
+
+        if (offerNote.IsFailure)
+            return offerNote;
+
+        _notes.Add(offerNote.Value);
 
         return Result.Success();
     }
 
-    public Result UpdateStatus(OfferStatus newStatus)
+    public Result MarkReviewComplete() =>
+        UpdateStatus(OfferStatus.PendingAcceptance);
+
+    public Result MarkFinalApproval(bool confirmed) =>
+        confirmed 
+            ? UpdateStatus(OfferStatus.Accepted) 
+            : UpdateStatus(OfferStatus.Declined);
+
+    private Result UpdateStatus(OfferStatus newStatus)
     {
-        bool isValid = (Status, newStatus) switch
+        bool isValid = Status switch
         {
-            (OfferStatus.Processing, not OfferStatus.Pending) => false,
-            (OfferStatus.Pending, OfferStatus.Processing) => false,
-            (OfferResponse.Accepted or OfferResponse.Declined or OfferResponse.Lapsed,
-                OfferResponse.Processing or OfferResponse.Pending) => false,
-            // Lapsed is only reachable via Lapse() — rejected here defensively
-            // in case UpdateStatus is ever called directly with Lapsed.
-            (_, OfferResponse.Lapsed) => false,
-            _ => true
+            // Terminal states can never transition further.
+            var s when s == OfferStatus.Accepted
+                       || s == OfferStatus.Declined
+                       || s == OfferStatus.Lapsed => false,
+
+            var s when s == OfferStatus.Preparing =>
+                newStatus == OfferStatus.AwaitingResponse,
+
+            // CollectingDocuments/ReviewingResponse/Declined branch here is
+            // only reachable via RecordResponse(); Declined-via-AwaitingResponse
+            // is the parent-decline path.
+            var s when s == OfferStatus.AwaitingResponse =>
+                newStatus == OfferStatus.CollectingDocuments
+                || newStatus == OfferStatus.ReviewingResponse
+                || newStatus == OfferStatus.Declined
+                || newStatus == OfferStatus.Lapsed,
+
+            var s when s == OfferStatus.CollectingDocuments =>
+                newStatus == OfferStatus.ReviewingResponse,
+
+            var s when s == OfferStatus.ReviewingResponse =>
+                newStatus == OfferStatus.PendingAcceptance,
+
+            // Accepted/Declined here is only reachable via FinalisePrincipalDecision().
+            var s when s == OfferStatus.PendingAcceptance =>
+                newStatus == OfferStatus.Accepted || newStatus == OfferStatus.Declined,
+
+            _ => false
         };
 
         if (!isValid)
-            return Result.Failure(EnrolmentOfferErrors.InvalidStatusChange(Response, newStatus));
+            return Result.Failure(EnrolmentOfferErrors.InvalidStatusChange(Status, newStatus));
 
-        Response = newStatus;
+        Status = newStatus;
         return Result.Success();
     }
 
     public Result Respond(
-        OfferResponse status, 
+        ResponseStatus response, 
         bool courtOrders = false, 
         bool healthConditions = false,
         bool requestedLaptop = true)
     {
-        Result statusUpdate = UpdateStatus(status);
+        OfferStatus newStatus = OfferStatus.Declined;
+
+        if (response == ResponseStatus.Accepted)
+        {
+            if (courtOrders || healthConditions)
+                newStatus = OfferStatus.CollectingDocuments;
+            else
+                newStatus = OfferStatus.PendingAcceptance;
+        }
+
+        Result statusUpdate = UpdateStatus(newStatus);
 
         if (statusUpdate.IsFailure)
             return statusUpdate;
 
         RespondedAt = DateTime.UtcNow;
+        Response = response;
 
-        if (status != OfferResponse.Accepted)
+        if (Response != ResponseStatus.Accepted)
             return Result.Success();
 
         HasCourtOrders = courtOrders;

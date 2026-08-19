@@ -71,6 +71,7 @@ public sealed class EpplusExcelWriter : IExcelWriter
         int row = startRow;
         foreach (T item in items)
         {
+            int maxLines = 1;
             for (int col = 0; col < columns.Length; col++)
             {
                 var column = columns[col];
@@ -92,12 +93,23 @@ public sealed class EpplusExcelWriter : IExcelWriter
                             cell.Value = value;
                         break;
 
+                    case ExcelColumnFormat.List:
+                        cell.Style.WrapText = true;
+                        int lines = value?.ToString()?.Count(c => c == '\n') + 1 ?? 1;
+                        maxLines = Math.Max(maxLines, lines);
+                        cell.Value = value;
+                        break;
+
                     case ExcelColumnFormat.Default:
                     default:
                         cell.Value = value;
                         break;
                 }
             }
+
+            if (maxLines > 1)
+                epplusSheet.Row(row).Height = maxLines * 15;
+
             row++;
         }
     }

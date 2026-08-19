@@ -46,7 +46,7 @@ internal sealed class EnrolmentTimingJob : IEnrolmentTimingJob
 
         foreach (Offer offer in offers)
         {
-            if (offer.Response != OfferResponse.Pending)
+            if (offer.Status != OfferStatus.AwaitingResponse)
                 continue;
 
             EnrolmentPeriod? period = periods.FirstOrDefault(entry => entry.Id == offer.PeriodId);

@@ -17,7 +17,7 @@
 
 <p>Thank you for confirming your intentions for the enrolment of @Model.StudentName.ToString(), in @Model.Grade.AsName() at Aurora College. Please find below a copy of the information you provided.</p>
 
-@if (Model.Status == OfferResponse.Declined)
+@if (Model.Status == ResponseStatus.Declined)
 {
     <p>You have declined the offer of enrolment.</p>
 }

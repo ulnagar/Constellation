@@ -1,7 +1,6 @@
 namespace Constellation.Presentation.Enrolments.Areas.Enrolments.Pages.Offer;
 
-using Application.Domains.EnrolmentContext.Offers.Commands.AcceptOffer;
-using Application.Domains.EnrolmentContext.Offers.Commands.DeclineOffer;
+using Application.Domains.EnrolmentContext.Offers.Commands.RecordParentResponseToOffer;
 using Application.Domains.EnrolmentContext.Offers.Queries.GetOfferForResponse;
 using Constellation.Core.Abstractions.Services;
 using Constellation.Core.Shared;
@@ -77,31 +76,7 @@ public class IndexModel : BasePageModel
             return redirect;
         }
 
-        if (OfferResponse == "Decline")
-        {
-            DeclineOfferCommand declineCommand = new(Id);
-
-            _logger
-                .ForContext(nameof(DeclineOfferCommand), declineCommand, true)
-                .Information("Requested to decline Offer by user {User}", _currentUserService.UserName);
-
-            Result declineResult = await _mediator.Send(declineCommand, cancellationToken);
-
-            if (declineResult.IsFailure)
-            {
-                _logger
-                    .ForContext(nameof(DeclineOfferCommand), declineCommand, true)
-                    .ForContext(nameof(Error), declineResult.Error, true)
-                    .Warning("Failed to decline Offer by user {User}", _currentUserService.UserName);
-
-                IActionResult redirect = await PreparePage(cancellationToken);
-                return redirect;
-            }
-
-            return RedirectToPage();
-        }
-
-        if (CourtOrders == "Unset")
+        if (OfferResponse == "Accept" && CourtOrders == "Unset")
         {
             ModelState.AddModelError(nameof(CourtOrders), "You must select either Yes or No to the question about court orders.");
 
@@ -109,7 +84,7 @@ public class IndexModel : BasePageModel
             return redirect;
         }
 
-        if (HealthConditions == "Unset")
+        if (OfferResponse == "Accept" && HealthConditions == "Unset")
         {
             ModelState.AddModelError(nameof(HealthConditions), "You must select either Yes or No to the question about health conditions.");
 
@@ -117,7 +92,7 @@ public class IndexModel : BasePageModel
             return redirect;
         }
 
-        if (LoanLaptop == "Unset")
+        if (OfferResponse == "Accept" && LoanLaptop == "Unset")
         {
             ModelState.AddModelError(nameof(LoanLaptop), "You must select either Yes or No to the question about borrowing a laptop.");
 
@@ -125,24 +100,25 @@ public class IndexModel : BasePageModel
             return redirect;
         }
 
-        AcceptOfferCommand acceptCommand = new(
+        RecordParentResponseToOfferCommand command = new(
             Id,
+            OfferResponse == "Accept" ? ResponseStatus.Accepted : ResponseStatus.Declined,
             CourtOrders == "Yes",
             HealthConditions == "Yes",
             LoanLaptop == "Yes");
 
         _logger
-            .ForContext(nameof(AcceptOfferCommand), acceptCommand, true)
-            .Information("Requested to accept Offer by user {User}", _currentUserService.UserName);
+            .ForContext(nameof(RecordParentResponseToOfferCommand), command, true)
+            .Information("Requested to record parent response to Offer by user {User}", _currentUserService.UserName);
 
-        Result acceptResult = await _mediator.Send(acceptCommand, cancellationToken);
+        Result result = await _mediator.Send(command, cancellationToken);
 
-        if (acceptResult.IsFailure)
+        if (result.IsFailure)
         {
             _logger
-                .ForContext(nameof(AcceptOfferCommand), acceptCommand, true)
-                .ForContext(nameof(Error), acceptResult.Error, true)
-                .Warning("Failed to accept Offer by user {User}", _currentUserService.UserName);
+                .ForContext(nameof(RecordParentResponseToOfferCommand), command, true)
+                .ForContext(nameof(Error), result.Error, true)
+                .Warning("Failed to record parent response to Offer by user {User}", _currentUserService.UserName);
 
             IActionResult redirect = await PreparePage(cancellationToken);
             return redirect;
@@ -166,7 +142,7 @@ public class IndexModel : BasePageModel
 
         Result<OfferResponse> offer = await _mediator.Send(command, cancellationToken);
 
-        if (offer.IsFailure || (offer.Value.Status == Core.Models.EnrolmentContext.Offer.Enums.OfferResponse.Pending && offer.Value.RespondBy < _dateTime.Now))
+        if (offer.IsFailure || (offer.Value.Status == OfferStatus.AwaitingResponse && offer.Value.RespondBy < _dateTime.Now))
         {
             _logger
                 .ForContext(nameof(GetOfferForResponseQuery), command, true)
@@ -176,16 +152,16 @@ public class IndexModel : BasePageModel
             return RedirectToExpired();
         }
 
-        if (offer.Value.Status != Core.Models.EnrolmentContext.Offer.Enums.OfferResponse.Pending)
+        if (offer.Value.Status != OfferStatus.AwaitingResponse)
             Responded = true;
 
         Offer = offer.Value;
         if (Offer.RespondedAt.HasValue)
         {
-            OfferResponse = Offer.Status switch
+            OfferResponse = Offer.Response switch
             {
-                Core.Models.EnrolmentContext.Offer.Enums.OfferResponse.Accepted => "Accept",
-                Core.Models.EnrolmentContext.Offer.Enums.OfferResponse.Declined => "Decline",
+                var r when r == ResponseStatus.Accepted => "Accept",
+                var r when r == ResponseStatus.Declined => "Decline",
                 _ => "Unset"
             };
 
