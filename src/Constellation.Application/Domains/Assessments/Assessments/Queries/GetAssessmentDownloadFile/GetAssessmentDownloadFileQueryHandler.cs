@@ -88,7 +88,7 @@ internal sealed class GetAssessmentDownloadFileQueryHandler
         bool hasStaffPermission = await _authService.UserHasPermission(user, AuthPermission.Subjects_Assessments_ViewRestrictedDocuments, cancellationToken);
         bool hasSchoolPermission = await _authService.UserHasPermission(user, AuthPermission.SchoolsPortal_Assessments_ViewRestrictedDocuments, cancellationToken);
 
-        if (!hasStaffPermission && !hasSchoolPermission)
+        if (download.IsRestricted && !hasStaffPermission && !hasSchoolPermission)
         {
             _logger
                 .ForContext(nameof(GetAssessmentDownloadFileQuery), request, true)
