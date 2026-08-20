@@ -1,6 +1,7 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Partner.Staff;
 
 using Application.Common.PresentationModels;
+using Application.Domains.Auth.Queries.DoesStaffMemberHaveRegisteredPasskey;
 using Application.Domains.StaffMembers.Commands.AddStaffToFaculty;
 using Application.Domains.StaffMembers.Commands.ReinstateStaffMember;
 using Application.Domains.StaffMembers.Commands.RemoveSchoolAssignment;
@@ -63,6 +64,8 @@ public class DetailsModel : BasePageModel
     public StaffDetailsResponse StaffMember { get; set; }
 
     public RecordLifecycleDetailsResponse RecordLifecycle { get; set; }
+
+    public bool ShowPasskeyButton { get; set; } = false;
 
     public async Task OnGet()
     {
@@ -313,6 +316,13 @@ public class DetailsModel : BasePageModel
         StaffMember = staffRequest.Value;
 
         PageTitle = $"Details - {StaffMember.StaffName.DisplayName}";
+
+        // Is the current user the same as the page displays?
+        bool isSamePerson = _currentUserService.StaffId == Id;
+        Result<bool> doesPersonHavePasskey = await _mediator.Send(new DoesStaffMemberHaveRegisteredPasskeyQuery(_currentUserService.EmailAddress));
+
+        if (isSamePerson && !doesPersonHavePasskey.Value)
+            ShowPasskeyButton = true;
 
         Result<RecordLifecycleDetailsResponse> recordLifecycle = await _mediator.Send(new GetLifecycleDetailsForStaffMemberQuery(Id));
 

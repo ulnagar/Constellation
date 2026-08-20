@@ -24,6 +24,7 @@ public sealed class AppUser : IdentityUser<Guid>
 
     public IReadOnlyList<AppUserLoginAttempt> Logins => _logins.AsReadOnly();
     public IReadOnlyList<AppUserLink> Links => _links.AsReadOnly();
+    public ICollection<AppUserPasskey> PasskeyCredentials { get; set; } = [];
 
     public void AddLogin(DateTime dateTime, LoginStatus status) 
         => _logins.Add(new(Id, dateTime, status));

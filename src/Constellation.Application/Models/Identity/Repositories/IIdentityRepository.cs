@@ -10,6 +10,7 @@ using System.Threading;
 public interface IIdentityRepository
 {
     Task<AppUser?> GetUser(Guid Id, CancellationToken cancellationToken = default);
+    Task<AppUser?> GetUserByEmail(string email, CancellationToken cancellationToken = default);
     Task<List<AppUser>> GetUsers(CancellationToken cancellationToken = default);
     Task<List<AppUser>> GetUsersInRole(string role, CancellationToken cancellationToken = default);
     Task<List<AppUser>> GetUsersWithTransientClaim(AuthPermission permission, CancellationToken cancellationToken = default);

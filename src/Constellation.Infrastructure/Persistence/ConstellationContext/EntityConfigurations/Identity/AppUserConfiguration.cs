@@ -51,5 +51,9 @@ internal sealed class AppUserConfiguration : IEntityTypeConfiguration<AppUser>
         builder
             .Navigation(user => user.Links)
             .AutoInclude();
+
+        builder
+            .Navigation(user => user.PasskeyCredentials)
+            .AutoInclude();
     }
 }

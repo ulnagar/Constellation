@@ -80,11 +80,28 @@ app.MapSmsEndpoints();
 app.MapLissEndpoints();
 app.MapTrackingEndpoints();
 app.MapTileProxyEndpoints();
+
+RouteGroupBuilder passkeys = app.MapGroup("/passkey")
+    .DisableAntiforgery();
+passkeys.MapPasskeyRegistration();
+passkeys.MapPasskeyLogin();
+
 app.MapDebugServices(builder.Services);
 app.MapDebugAuth();
 app.MapHangfireDashboardWithAuthorizationPolicy(
     AuthPolicies.IsSiteAdmin,
     "/hangfire",
     new DashboardOptions { DashboardTitle = "Hangfire Dashboard", AppPath = "/" });
+
+app.MapGet("/debug/endpoints", (IEnumerable<EndpointDataSource> sources) =>
+    sources
+        .SelectMany(s => s.Endpoints)
+        .Select(e => new
+        {
+            Name = e.DisplayName,
+            Route = (e as RouteEndpoint)?.RoutePattern?.RawText,
+            Methods = e.Metadata.GetMetadata<HttpMethodMetadata>()?.HttpMethods
+        })
+);
 
 await app.RunAsync();

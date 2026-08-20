@@ -18,11 +18,22 @@ public static class AuthServiceExtensions
         this IServiceCollection services,
         IConfiguration configuration)
     {
-        services.AddIdentity<AppUser, AppRole>()
+        services.AddIdentity<AppUser, AppRole>(options =>
+            {
+                options.SignIn.RequireConfirmedAccount = false;
+            })
             .AddClaimsPrincipalFactory<CustomUserPropertiesClaimsFactory>()
             .AddEntityFrameworkStores<ConstellationDbContext>()
             .AddDefaultTokenProviders()
             .AddPasswordlessLoginProvider();
+
+        services.AddFido2(options =>
+        {
+            options.ServerDomain = configuration["Fido2:ServerDomain"];
+            options.ServerName = "Constellation";
+            options.Origins = configuration.GetSection("Fido2:Origins")
+                .Get<HashSet<string>>();
+        });
 
         services.Configure<IdentityOptions>(options =>
         {

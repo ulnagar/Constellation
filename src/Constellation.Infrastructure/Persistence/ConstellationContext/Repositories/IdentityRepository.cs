@@ -38,6 +38,14 @@ public sealed class IdentityRepository : IIdentityRepository
                 user.Id == id, 
                 cancellationToken);
 
+    public async Task<AppUser?> GetUserByEmail(
+        string email,
+        CancellationToken cancellationToken = default) =>
+        await _userManager.Users
+            .FirstOrDefaultAsync(user =>
+                    user.Email == email,
+                cancellationToken);
+
     public async Task<List<AppUser>> GetUsers(
         CancellationToken cancellationToken = default) =>
         _userManager.Users.ToList();

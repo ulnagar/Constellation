@@ -31,8 +31,13 @@
     <button class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#lifecycleDetailsModal">View Extended Details</button>
     
     <a asp-page="/Subject/Periods/Timetables/Staff" asp-area="Staff" asp-route-id="@Model.StaffMember.StaffId" class="btn btn-secondary">View Timetable</a>
-
+    
     <a href="javascript:history.go(-1)" class="btn btn-danger btn-pull-right">Go Back</a>
+    
+    @if (Model.ShowPasskeyButton)
+    {
+        <button id="register-passkey-btn" class="btn btn-primary btn-pull-right me-2">Register PassKey</button>
+    }
 </div>
 
 <hr />
@@ -259,6 +264,8 @@
 
 @section scripts
 {
+    <script src="~/js/passkeys.js"></script>
+
 	<script>
         $(document).ready(function (){
             $('.school-data-table').DataTable({
@@ -292,5 +299,43 @@
             });
         });
 
+        document.getElementById('register-passkey-btn').addEventListener('click', async () => {
+            // Step 1 — get registration options
+            const optionsRes = await fetch('/passkey/register/options', { method: 'POST' });
+            if (!optionsRes.ok) { alert('Could not start passkey registration.'); return; }
+
+            const options = await optionsRes.json();
+            options.challenge = PasskeyUtils.base64UrlToBuffer(options.challenge);
+            options.user.id = PasskeyUtils.base64UrlToBuffer(options.user.id);
+
+            if (options.excludeCredentials) {
+                options.excludeCredentials = options.excludeCredentials.map(c => ({
+                    ...c,
+                    id: PasskeyUtils.base64UrlToBuffer(c.id)
+                }));
+            }
+
+            // Step 2 — browser prompts user to create a passkey
+            let credential;
+            try {
+                credential = await navigator.credentials.create({ publicKey: options });
+            } catch (e) {
+                alert('Passkey registration cancelled or failed.');
+                return;
+            }
+
+            // Step 3 — send new credential to server
+            const completeRes = await fetch('/passkey/register/complete', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(PasskeyUtils.serializeRegistrationCredential(credential))
+            });
+
+            if (completeRes.ok) {
+                alert('Passkey registered successfully.');
+            } else {
+                alert('Passkey registration failed.');
+            }
+        });
     </script>
 }

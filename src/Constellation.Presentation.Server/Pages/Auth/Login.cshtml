@@ -36,7 +36,7 @@
                      or LoginModel.LoginStatus.InvalidUsername
                      or LoginModel.LoginStatus.TokenInvalid)
                 {
-                    <form method="post">
+                    <form method="post" id="password-login-form">
                         <div class="form-box">
                             <div class="form-value">
                                 <h2>Login</h2>
@@ -45,7 +45,7 @@
                                 </div>
                                 <div class="inputbox">
                                     <span class="glyphicon glyphicon-envelope" aria-hidden="true"></span>
-                                    <input asp-for="Input.Email" placeholder=" "/>
+                                    <input asp-for="Input.Email" placeholder=" " autocomplete="username webauthn" />
                                     <label asp-for="Input.Email">Email</label>
                                 </div>
                             </div>
@@ -211,5 +211,52 @@
 
     <script src="~/lib/jquery/jquery.min.js"></script>
     <partial name="_ValidationScriptsPartial"/>
+    <script src="~/js/passkeys.js"></script>
+    <script>
+        let conditionalController = null;
+
+        async function initConditionalPasskey() {
+            if (!window.PublicKeyCredential ||
+                !PublicKeyCredential.isConditionalMediationAvailable) return;
+
+            const available = await PublicKeyCredential.isConditionalMediationAvailable();
+            if (!available) return;
+
+            const optionsRes = await fetch('/passkey/login/options', { method: 'POST' });
+            if (!optionsRes.ok) return;
+
+            const options = await optionsRes.json();
+            options.challenge = PasskeyUtils.base64UrlToBuffer(options.challenge);
+
+            conditionalController = new AbortController();
+
+            let assertion;
+            try {
+                assertion = await navigator.credentials.get({
+                    mediation: 'conditional',
+                    signal: conditionalController.signal,   // <-- allows cancellation
+                    publicKey: options
+                });
+            } catch (e) {
+                if (e.name === 'AbortError') return;        // intentionally cancelled
+                return;
+            }
+
+            const completeRes = await fetch('/passkey/login/complete', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(PasskeyUtils.serializeAssertionCredential(assertion))
+            });
+
+            if (completeRes.ok) window.location.href = '/';
+        }
+
+        // Abort the conditional request if the user submits the password form instead
+        document.getElementById('password-login-form').addEventListener('submit', () => {
+            conditionalController?.abort();
+        });
+
+        initConditionalPasskey();
+    </script>
 </body>
 </html>
