@@ -12,6 +12,7 @@ using Core.Models.Assets.Repositories;
 using Core.Shared;
 using DTOs;
 using Interfaces.Services;
+using Interfaces.Services.Excel;
 using Serilog;
 using System.Collections.Generic;
 using System.IO;
@@ -22,18 +23,18 @@ internal sealed class ExportAssetsToExcelQueryHandler
 : IQueryHandler<ExportAssetsToExcelQuery, FileDto>
 {
     private readonly IAssetRepository _assetsRepository;
-    private readonly IExcelService _excelService;
+    private readonly IExcelWriter _writer;
     private readonly IDateTimeProvider _dateTime;
     private readonly ILogger _logger;
     
     public ExportAssetsToExcelQueryHandler(
         IAssetRepository assetsRepository,
-        IExcelService excelService,
+        IExcelWriter writer,
         IDateTimeProvider dateTime,
         ILogger logger)
     {
         _assetsRepository = assetsRepository;
-        _excelService = excelService;
+        _writer = writer;
         _dateTime = dateTime;
         _logger = logger.ForContext<ExportAssetsToExcelQuery>();
     }
@@ -57,21 +58,38 @@ internal sealed class ExportAssetsToExcelQueryHandler
             return Result.Failure<FileDto>(AssetErrors.NoneFound);
         }
 
-        MemoryStream stream = await _excelService.CreateAssetExportFile(assets, cancellationToken);
+        IExcelWorkbook workbook = _writer.CreateWorkbook();
+        IExcelWorksheet sheet = _writer.AddWorksheet(workbook, "Sheet 1");
 
-        if (stream is null)
-        {
-            _logger
-                .ForContext(nameof(ExportAssetsToExcelQuery), request, true)
-                .ForContext(nameof(Error), ApplicationErrors.ExportServiceFailed, true)
-                .Warning("Failed to export Assets to Excel");
+        _writer.WriteRange(sheet, 2, assets.OrderBy(entry => entry.AssetNumber),
+            new("Asset Number", a => a.AssetNumber),
+            new("Serial Number", a => a.SerialNumber),
+            new("SAP Equipment Number", a => a.SapEquipmentNumber),
+            new("Manufacturer", a => a.Manufacturer),
+            new("Model Number", a => a.ModelNumber),
+            new ("Model Description", a => a.ModelDescription),
+            new ("Status", a => a.Status.Name),
+            new("Device Category", a => a.Category.Name),
+            new("Purchase Date", a => a.PurchaseDate == DateOnly.MinValue ? null : a.PurchaseDate, ExcelColumnFormat.Date),
+            new ("Purchase Cost", a => a.PurchaseCost, ExcelColumnFormat.Financial),
+            new ("Warranty End Date", a => a.WarrantyEndDate == DateOnly.MinValue ? null : a.WarrantyEndDate, ExcelColumnFormat.Date),
+            new ("Location Category", a => a.CurrentLocation?.Category.Name ?? string.Empty),
+            new("Location Site", a => a.CurrentLocation?.Site ?? string.Empty),
+            new ("Location Room", a => a.CurrentLocation?.Room ?? string.Empty),
+            new("Responsible Officer", a => a.CurrentAllocation?.ResponsibleOfficer ?? string.Empty),
+            new("Last Seen", a => a.LastSighting?.SightedAt, ExcelColumnFormat.Date),
+            new("Last Seen By", a => a.LastSighting?.SightedBy ?? string.Empty),
+            new ("Notes", a => string.Join("\n", a.Notes
+                .OrderByDescending(note => note.CreatedAt)
+                .Select(note => $"{note.CreatedAt} - {note.CreatedBy} - {note.Message}")), ExcelColumnFormat.List));
 
-            return Result.Failure<FileDto>(ApplicationErrors.ExportServiceFailed);
-        }
+        _writer.ApplyHeaderStyle(sheet, 1);
+        _writer.AddAutoFilter(sheet);
+        _writer.AutoFitColumns(sheet);
 
         FileDto response = new()
         {
-            FileData = stream.ToArray(),
+            FileData = _writer.GetAsByteArray(workbook),
             FileName = $"Assets Export - {_dateTime.Today:O}.xlsx",
             FileType = FileContentTypes.ExcelModernFile
         };

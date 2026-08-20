@@ -100,6 +100,12 @@ public sealed class EpplusExcelWriter : IExcelWriter
                         cell.Value = value;
                         break;
 
+                    case ExcelColumnFormat.Financial:
+                        cell.Style.Numberformat.Format = "[$$-C09]#,##0.00;[$$-C09]-#,##0.00";
+                        cell.Value = value; // must stay a decimal/double — do NOT stringify like the Text case
+                        cell.Style.HorizontalAlignment = ExcelHorizontalAlignment.Right;
+                        break;
+
                     case ExcelColumnFormat.Default:
                     default:
                         cell.Value = value;
