@@ -67,7 +67,7 @@ public class DashboardModel : BasePageModel
         Result<List<StocktakeEventResponse>>? stocktakeEvents = await _mediator.Send(new GetCurrentStocktakeEventsQuery(), cancellationToken);
         ActiveStocktakeEvents = stocktakeEvents.IsSuccess ? stocktakeEvents.Value : new List<StocktakeEventResponse>();
 
-        VersionLabel = Assembly.GetExecutingAssembly().GetName().Version.ToString();
+        VersionLabel = Assembly.GetExecutingAssembly().GetName().Version?.ToString() ?? string.Empty;
 
         return Page();
     }

@@ -33,4 +33,10 @@ public sealed class ShowDashboardWidgetsViewComponentModel
     public bool ShowStocktakeWidget { get; set; } = false;
     public double StocktakePercentage { get; set; }
     public StocktakeEventId StocktakeEventId { get; set; }
+
+    public bool ShowEnrolmentOffersNeedingReview { get; set; } = false;
+    public double EnrolmentOffersNeedingReview { get; set; }
+
+    public bool ShowEnrolmentOffersNeedingApproval { get; set; } = false;
+    public double EnrolmentOffersNeedingApproval { get; set; }
 }

@@ -12,5 +12,8 @@ public interface IEnrolmentOfferRepository
     Task<Offer?> GetByApplicationId(ApplicationId applicationId, CancellationToken cancellationToken = default);
     Task<List<Offer>> GetListFromIds(List<OfferId> offerIds, CancellationToken cancellationToken = default);
 
+    Task<int> CountPendingAcceptanceOffers(CancellationToken cancellationToken = default);
+    Task<int> CountReviewingResponseOffers(CancellationToken cancellationToken = default);
+
     void Insert(Offer offer);
 }

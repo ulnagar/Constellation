@@ -165,3 +165,31 @@
         </div>
     </div>
 }
+
+@if (Model.ShowEnrolmentOffersNeedingReview)
+{
+    <div class="col mb-4 sortable" data-id="card-enrolment-forReview">
+        <div class="card h-100 @(Model.EnrolmentOffersNeedingReview > 0 ? "text-white bg-primary" : "text-white bg-success")">
+            <div class="card-header">Enrolment Responses</div>
+            <div class="card-body">
+                <h3 class="card-title card-title-large">@Model.EnrolmentOffersNeedingReview</h3>
+                <p class="card-text">pending review</p>
+                <a asp-page="/Partner/Enrolments/Offers" asp-area="Staff" class="stretched-link"></a>
+            </div>
+        </div>
+    </div>
+}
+
+@if (Model.ShowEnrolmentOffersNeedingApproval)
+{
+    <div class="col mb-4 sortable" data-id="card-enrolment-forApproval">
+        <div class="card h-100 @(Model.EnrolmentOffersNeedingApproval > 0 ? "text-white bg-primary" : "text-white bg-success")">
+            <div class="card-header">Enrolment Responses</div>
+            <div class="card-body">
+                <h3 class="card-title card-title-large">@Model.EnrolmentOffersNeedingApproval</h3>
+                <p class="card-text">pending approval</p>
+                <a asp-page="/Partner/Enrolments/Offers" asp-area="Staff"class="stretched-link"></a>
+            </div>
+        </div>
+    </div>
+}

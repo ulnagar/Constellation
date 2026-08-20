@@ -3,6 +3,8 @@
 using Application.Domains.AssetManagement.Stocktake.Queries.CountStocktakeItemsOutstanding;
 using Application.Domains.Attendance.Plans.Queries.CountAttendancePlansWithStatus;
 using Application.Domains.Edval.Queries.CountEdvalDifferences;
+using Application.Domains.EnrolmentContext.Offers.Queries.CountOffersInPendingAcceptanceStatus;
+using Application.Domains.EnrolmentContext.Offers.Queries.CountOffersInReviewingResponseStatus;
 using Application.Domains.Students.Queries.CountStudentsWithAbsenceScanDisabled;
 using Application.Domains.Students.Queries.CountStudentsWithAwardOverages;
 using Application.Domains.Students.Queries.CountStudentsWithoutSentralId;
@@ -45,6 +47,8 @@ public class ShowDashboardWidgetsViewComponent : ViewComponent
         var attendancePlanTest = await _authService.AuthorizeAsync(user, AuthPermission.StudentAdmin_AttendancePlans_Edit_Value);
         var awardsTest = await _authService.AuthorizeAsync(user, AuthPermission.StudentAdmin_Awards_Edit_Value);
         var tutorialsTest = await _authService.AuthorizeAsync(user, AuthPermission.Subjects_Tutorials_Edit_Value);
+        var enrolmentOfferReviewer = await _authService.AuthorizeAsync(user, AuthPermission.Partners_Enrolments_Offers_Reviewer_Value);
+        var enrolmentOfferApprover = await _authService.AuthorizeAsync(user, AuthPermission.Partners_Enrolments_Offers_Approver_Value);
 
         StaffId staffId = _currentUserService.StaffId;
 
@@ -146,6 +150,26 @@ public class ShowDashboardWidgetsViewComponent : ViewComponent
                 viewModel.StocktakePercentage = stocktakeRequest.Value.Percentage;
                 viewModel.StocktakeEventId = stocktakeRequest.Value.EventId;
             }
+        }
+
+        if (enrolmentOfferReviewer.Succeeded)
+        {
+            viewModel.ShowEnrolmentOffersNeedingReview = true;
+
+            Result<int> reviewingResponse = await _mediator.Send(new CountOffersInReviewingResponseStatusQuery(), cancellationToken);
+
+            if (reviewingResponse.IsSuccess)
+                viewModel.EnrolmentOffersNeedingReview = reviewingResponse.Value;
+        }
+
+        if (enrolmentOfferApprover.Succeeded)
+        {
+            viewModel.ShowEnrolmentOffersNeedingApproval = true;
+
+            Result<int> pendingAcceptance = await _mediator.Send(new CountOffersInPendingAcceptanceStatusQuery(), cancellationToken);
+
+            if (pendingAcceptance.IsSuccess)
+                viewModel.EnrolmentOffersNeedingApproval = pendingAcceptance.Value;
         }
 
         return View(viewModel);
