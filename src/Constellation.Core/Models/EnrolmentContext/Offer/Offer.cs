@@ -40,7 +40,7 @@ public sealed class Offer : AggregateRoot
     public IReadOnlyList<OfferNote> Notes => _notes.AsReadOnly();
 
     /// <summary>
-    /// The deadline for a parent/carer to respond to a <see cref="OfferResponse.Pending"/> offer.
+    /// The deadline for a parent/carer to respond to a <see cref="OfferStatus.AwaitingResponse"/> offer.
     /// Always resolves to 5:00pm local school time on the date <see cref="LapsedPeriod"/> days
     /// after <see cref="OfferedAt"/>, rather than preserving the time-of-day component of
     /// <see cref="OfferedAt"/> itself.
@@ -132,8 +132,17 @@ public sealed class Offer : AggregateRoot
     public Result MarkLapsed() =>
         UpdateStatus(OfferStatus.Lapsed);
 
-    public Result MarkDocumentsCollected() =>
-        UpdateStatus(OfferStatus.ReviewingResponse);
+    public Result MarkDocumentsCollected(string username)
+    {
+        Result success = UpdateStatus(OfferStatus.ReviewingResponse);
+
+        if (success.IsFailure)
+            return success;
+
+        success = AddReviewNote("All documents have been collected and are ready for review", username);
+
+        return success;
+    }
 
     public Result AddReviewNote(
         string note,
@@ -149,13 +158,31 @@ public sealed class Offer : AggregateRoot
         return Result.Success();
     }
 
-    public Result MarkReviewComplete() =>
-        UpdateStatus(OfferStatus.PendingAcceptance);
+    public Result MarkReviewComplete(string username)
+    {
+        Result success = UpdateStatus(OfferStatus.PendingAcceptance);
+        
+        if (success.IsFailure)
+            return success;
 
-    public Result MarkFinalApproval(bool confirmed) =>
-        confirmed 
+        success = AddReviewNote("Response review has been completed", username);
+
+        return success;
+    }
+
+    public Result MarkFinalApproval(bool confirmed, string username)
+    {
+        Result success = confirmed 
             ? UpdateStatus(OfferStatus.Accepted) 
             : UpdateStatus(OfferStatus.Declined);
+
+        if (success.IsFailure)
+            return success;
+
+        success = AddReviewNote($"Enrolment {(confirmed ? "approved" : "rejected")}", username);
+
+        return success;
+    }
 
     private Result UpdateStatus(OfferStatus newStatus)
     {

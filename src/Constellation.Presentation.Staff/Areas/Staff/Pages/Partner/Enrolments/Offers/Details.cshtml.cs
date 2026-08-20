@@ -1,6 +1,10 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Partner.Enrolments.Offers;
 
 using Application.Domains.EnrolmentContext.Offers.Commands.AddOfferNote;
+using Application.Domains.EnrolmentContext.Offers.Commands.MarkOfferApproved;
+using Application.Domains.EnrolmentContext.Offers.Commands.MarkOfferDocumentsCollected;
+using Application.Domains.EnrolmentContext.Offers.Commands.MarkOfferRejected;
+using Application.Domains.EnrolmentContext.Offers.Commands.MarkOfferReviewCompleted;
 using Application.Domains.EnrolmentContext.Offers.Queries.GetEnrolmentOfferById;
 using Application.Models.Auth;
 using Constellation.Application.Common.PresentationModels;
@@ -119,6 +123,106 @@ public class DetailsModel : PeriodScopedPageModel
 
             ModalContent = ErrorDisplay.Create(result.Error);
 
+            await PreparePage();
+            return Page();
+        }
+
+        return RedirectToPage();
+    }
+
+    public async Task<IActionResult> OnPostMarkDocumentsCollected()
+    {
+        MarkOfferDocumentsCollectedCommand command = new(Id, _currentUserService.UserName);
+
+        _logger
+            .ForContext(nameof(MarkOfferDocumentsCollectedCommand), command, true)
+            .Information("Requested to mark Offer as Documents Collected by user {User}", _currentUserService.UserName);
+
+        Result result = await _mediator.Send(command);
+
+        if (result.IsFailure)
+        {
+            _logger
+                .ForContext(nameof(MarkOfferDocumentsCollectedCommand), command, true)
+                .ForContext(nameof(Error), result.Error, true)
+                .Warning("Failed to mark Offer as Documents Collected by user {User}", _currentUserService.UserName);
+
+            ModalContent = ErrorDisplay.Create(result.Error);
+            await PreparePage();
+            return Page();
+        }
+        
+        return RedirectToPage();
+    }
+
+    public async Task<IActionResult> OnPostMarkReviewCompleted()
+    {
+        MarkOfferReviewCompletedCommand command = new(Id, _currentUserService.UserName);
+
+        _logger
+            .ForContext(nameof(MarkOfferReviewCompletedCommand), command, true)
+            .Information("Requested to mark Offer as Review Completed by user {User}", _currentUserService.UserName);
+
+        Result result = await _mediator.Send(command);
+
+        if (result.IsFailure)
+        {
+            _logger
+                .ForContext(nameof(MarkOfferReviewCompletedCommand), command, true)
+                .ForContext(nameof(Error), result.Error, true)
+                .Warning("Failed to mark Offer as Review Completed by user {User}", _currentUserService.UserName);
+
+            ModalContent = ErrorDisplay.Create(result.Error);
+            await PreparePage();
+            return Page();
+        }
+
+        return RedirectToPage();
+    }
+
+    public async Task<IActionResult> OnPostMarkApproved()
+    {
+        MarkOfferApprovedCommand command = new(Id, _currentUserService.UserName);
+
+        _logger
+            .ForContext(nameof(MarkOfferApprovedCommand), command, true)
+            .Information("Requested to mark Offer as Approved by user {User}", _currentUserService.UserName);
+
+        Result result = await _mediator.Send(command);
+
+        if (result.IsFailure)
+        {
+            _logger
+                .ForContext(nameof(MarkOfferApprovedCommand), command, true)
+                .ForContext(nameof(Error), result.Error, true)
+                .Warning("Failed to mark Offer as Approved by user {User}", _currentUserService.UserName);
+
+            ModalContent = ErrorDisplay.Create(result.Error);
+            await PreparePage();
+            return Page();
+        }
+
+        return RedirectToPage();
+    }
+
+    public async Task<IActionResult> OnPostMarkRejected()
+    {
+        MarkOfferRejectedCommand command = new(Id, _currentUserService.UserName);
+
+        _logger
+            .ForContext(nameof(MarkOfferRejectedCommand), command, true)
+            .Information("Requested to mark Offer as Rejected by user {User}", _currentUserService.UserName);
+
+        Result result = await _mediator.Send(command);
+
+        if (result.IsFailure)
+        {
+            _logger
+                .ForContext(nameof(MarkOfferRejectedCommand), command, true)
+                .ForContext(nameof(Error), result.Error, true)
+                .Warning("Failed to mark Offer as Rejected by user {User}", _currentUserService.UserName);
+
+            ModalContent = ErrorDisplay.Create(result.Error);
             await PreparePage();
             return Page();
         }

@@ -23,22 +23,30 @@
         if (canEdit.Succeeded)
         {
             <a asp-page="/Partner/Enrolments/Offers/Respond" asp-route-Id="@Model.Offer.Id" asp-route-PeriodId="@Model.PeriodId" class="btn btn-success">Change Response</a>
+
+            <span class="mx-2"> | </span>
         }
 
         if (Model.Offer.Status == OfferStatus.CollectingDocuments && isDocumentCollector.Succeeded)
         {
-            <button class="btn btn-success">Mark Documents Collected</button>
+            <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#confirm-documents-collected-modal">Mark Documents Collected</button>
+            
+            <span class="mx-2"> | </span>
         }
 
         if (Model.Offer.Status == OfferStatus.ReviewingResponse && isReviewer.Succeeded)
         {
-            <button class="btn btn-success">Complete Review</button>
+            <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#confirm-review-completed-modal">Complete Review</button>
+
+            <span class="mx-2"> | </span>
         }
 
         if (Model.Offer.Status == OfferStatus.PendingAcceptance && isApprover.Succeeded)
         {
-            <button class="btn btn-success">Approve</button>
-            <button class="btn btn-danger">Reject</button>
+            <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#confirm-approval-modal">Approve</button>
+            <button class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#confirm-rejection-modal">Reject</button>
+
+            <span class="mx-2"> | </span>
         }
 
         if (canEdit.Succeeded)
@@ -273,21 +281,30 @@
                 <label asp-for="Offer.HasCourtOrders">Has Court Orders</label>
             </dt>
             <dd class="col-md-10">
-                <boolean-field value="Model.Offer.HasCourtOrders" />
+                @if (Model.Offer.Response != ResponseStatus.NoResponse)
+                {
+                    <boolean-field value="Model.Offer.HasCourtOrders" />
+                }
             </dd>
 
             <dt class="col-md-2">
                 <label asp-for="Offer.HasHealthConcerns">Has Health Concerns</label>
             </dt>
             <dd class="col-md-10">
-                <boolean-field value="Model.Offer.HasHealthConcerns" />
+                @if (Model.Offer.Response != ResponseStatus.NoResponse)
+                {
+                    <boolean-field value="Model.Offer.HasHealthConcerns" />
+                }
             </dd>
 
             <dt class="col-md-2">
                 <label asp-for="Offer.RequestedLaptop">Requests Laptop</label>
             </dt>
             <dd class="col-md-10">
-                <boolean-field value="Model.Offer.RequestedLaptop" />
+                @if (Model.Offer.Response != ResponseStatus.NoResponse)
+                {
+                    <boolean-field value="Model.Offer.RequestedLaptop" />
+                }
             </dd>
         </dl>
     </div>
@@ -319,3 +336,95 @@
 </div>
 
 <vc:add-offer-note />
+
+<form method="post" asp-page-handler="MarkDocumentsCollected">
+    <div class="modal fade" tabindex="-1" id="confirm-documents-collected-modal">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Confirmation</h5>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="form-group col">
+                            <span class="control-label">This action will confirm that all documents relating to court orders and/or health concerns for @Model.Offer.StudentName.PreferredName have been collected and are ready for review.</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-success show-loader">Confirm</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal" data-bs-dismiss="modal">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+
+<form method="post" asp-page-handler="MarkReviewCompleted">
+    <div class="modal fade" tabindex="-1" id="confirm-review-completed-modal">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Confirmation</h5>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="form-group col">
+                            <span class="control-label">This action will confirm that the review of the responses has been completed for @Model.Offer.StudentName.PreferredName.</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-success show-loader">Confirm</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal" data-bs-dismiss="modal">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+
+<form method="post" asp-page-handler="MarkApproved">
+    <div class="modal fade" tabindex="-1" id="confirm-approval-modal">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Confirmation</h5>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="form-group col">
+                            <span class="control-label">This action will approve the enrolment of @Model.Offer.StudentName.PreferredName.</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-success show-loader">Confirm</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal" data-bs-dismiss="modal">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+
+<form method="post" asp-page-handler="MarkRejected">
+    <div class="modal fade" tabindex="-1" id="confirm-rejection-modal">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Confirmation</h5>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="form-group col">
+                            <span class="control-label">This action will reject the enrolment of @Model.Offer.StudentName.PreferredName.</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-success show-loader">Confirm</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal" data-bs-dismiss="modal">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
