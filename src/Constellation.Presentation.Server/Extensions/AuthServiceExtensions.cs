@@ -105,8 +105,8 @@ public static class AuthServiceExtensions
                             context.ProtocolMessage.LoginHint = loginHint;
                         }
 
-                        string currentUrl = context.Request.Path + context.Request.QueryString;
-                        context.ProtocolMessage.RedirectUri = currentUrl;
+                        //string currentUrl = context.Request.Path + context.Request.QueryString;
+                        //context.ProtocolMessage.RedirectUri = currentUrl;
 
                         return Task.CompletedTask;
                     }
