@@ -204,6 +204,10 @@ public static class ServicesRegistration
         // Register the IMemoryCache for the Authorization functions
         services.AddKeyedSingleton<IMemoryCache>("AuthPermissions", (sp, key) =>
             new MemoryCache(new MemoryCacheOptions())); // no SizeLimit — small, self-limiting by role count
+        
+        // Register the IMemoryCache for the Authorization functions
+        services.AddKeyedSingleton<IMemoryCache>("AuthService", (sp, key) =>
+            new MemoryCache(new MemoryCacheOptions())); // no SizeLimit — small, self-limiting by role count
 
         return services;
     }

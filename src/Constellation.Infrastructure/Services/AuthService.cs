@@ -7,6 +7,7 @@ using Constellation.Core.Models.Auth;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.DependencyInjection;
 using System.Security.Claims;
 
 internal class AuthService : IAuthService
@@ -23,7 +24,7 @@ internal class AuthService : IAuthService
         UserManager<AppUser> userManager,
         RoleManager<AppRole> roleManager,
         SignInManager<AppUser> signInManager,
-        IMemoryCache cache,
+        [FromKeyedServices("AuthService")] IMemoryCache cache,
         ILogger logger)
     {
         _userManager = userManager;
