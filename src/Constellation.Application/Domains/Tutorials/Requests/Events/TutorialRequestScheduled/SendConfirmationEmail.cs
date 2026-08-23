@@ -27,6 +27,7 @@ using Serilog;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection.Metadata.Ecma335;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -37,7 +38,6 @@ internal sealed class SendConfirmationEmail
     private readonly IStudentRepository _studentRepository;
     private readonly IFamilyRepository _familyRepository;
     private readonly ISchoolContactRepository _contactRepository;
-    private readonly ITeamRepository _teamRepository;
     private readonly IStaffRepository _staffRepository;
     private readonly IPeriodRepository _periodRepository;
     private readonly IEmailService _emailService;
@@ -48,7 +48,6 @@ internal sealed class SendConfirmationEmail
         IStudentRepository studentRepository,
         IFamilyRepository familyRepository,
         ISchoolContactRepository contactRepository,
-        ITeamRepository teamRepository,
         IStaffRepository staffRepository,
         IPeriodRepository periodRepository,
         IEmailService emailService,
@@ -58,7 +57,6 @@ internal sealed class SendConfirmationEmail
         _studentRepository = studentRepository;
         _familyRepository = familyRepository;
         _contactRepository = contactRepository;
-        _teamRepository = teamRepository;
         _staffRepository = staffRepository;
         _periodRepository = periodRepository;
         _emailService = emailService;
@@ -104,13 +102,14 @@ internal sealed class SendConfirmationEmail
             return;
         }
 
-        string teamName = tutorial.Teams.FirstOrDefault()?.Name ?? tutorialRequest.Plan.Name;
+        string teamName = tutorial.Teams.FirstOrDefault()?.Name ?? tutorialRequest.Plan?.Name ?? string.Empty;
 
         List<(string Period, string Teacher)> tutorialSchedule = [];
 
         List<StaffMember> staff = [];
         List<Period> periods = await _periodRepository.GetAll(cancellationToken);
         List<int> periodDayNumbers = [];
+        List<EmailRecipient> recipients = [];
 
         foreach (TutorialSession session in tutorial.Sessions)
         {
@@ -119,10 +118,22 @@ internal sealed class SendConfirmationEmail
             if (staffMember is null)
             {
                 staffMember = await _staffRepository.GetById(session.StaffId, cancellationToken);
-                staff.Add(staffMember!);
+
+                if (staffMember is null)
+                    continue;
+
+                staff.Add(staffMember);
+
+                Result<EmailRecipient> staffRecipient = staffMember.GetEmailRecipient;
+
+                if (staffRecipient.IsSuccess)
+                    recipients.Add(staffRecipient.Value);
             }
 
             Period? period = periods.FirstOrDefault(entry => entry.Id == session.PeriodId);
+
+            if (period is null)
+                continue;
 
             periodDayNumbers.Add(period.DayNumber);
 
@@ -130,8 +141,6 @@ internal sealed class SendConfirmationEmail
         }
 
         DateOnly firstLessonDate = tutorial.StartDate.GetFirstDayFromCycleAfterDate(periodDayNumbers);
-        
-        List<EmailRecipient> recipients = [];
         
         Student? student = await _studentRepository.GetById(tutorialRequest.StudentId, cancellationToken);
 
@@ -144,7 +153,7 @@ internal sealed class SendConfirmationEmail
 
             return;
         }
-
+        
         Result<EmailRecipient> studentRecipient = EmailRecipient.Create(student.Name, student.EmailAddress);
 
         if (studentRecipient.IsSuccess)
