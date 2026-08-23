@@ -78,7 +78,7 @@ internal sealed class GetContactListForParentPortalQueryHandler
                 staffMember.Key.Name.FirstName,
                 staffMember.Key.Name.LastName,
                 staffMember.Key.Name.DisplayName,
-                staffMember.Key.EmailAddress.Email,
+                "wellbeing@aurora.nsw.edu.au",
                 string.Empty,
                 "Support",
                 "School Counsellor"));
@@ -176,7 +176,7 @@ internal sealed class GetContactListForParentPortalQueryHandler
             return response;
         }
 
-        foreach (var staffMember in librarianConfiguration.Contacts)
+        foreach (var staffMember in lastConfiguration.Contacts)
         {
             if (!staffMember.Value.Contains(student.CurrentEnrolment?.Grade ?? Grade.SpecialProgram))
                 continue;
