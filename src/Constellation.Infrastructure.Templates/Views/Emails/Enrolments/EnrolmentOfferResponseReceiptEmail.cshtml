@@ -15,7 +15,7 @@
 
 <p>Dear @Model.ParentName.ToString()</p>
 
-<p>Thank you for confirming your intentions for the enrolment of @Model.StudentName.ToString(), in @Model.Grade.AsName() at Aurora College. Please find below a copy of the information you provided.</p>
+<p>Thank you for completing the enrolment form for @Model.StudentName.ToString(), in @Model.Grade.AsName() at Aurora College. Please find below a copy of the information you provided.</p>
 
 @if (Model.Status == ResponseStatus.Declined)
 {
@@ -51,6 +51,8 @@ else
     {
         <p>@Model.StudentName.PreferredName has will provide their own, suitable learning device for Aurora College lessons.</p>
     }
+
+    <p>Please note: Enrolment in Aurora College is contigent on the student being co-enrolled in an authorised host school. Students who do not meet this requirement are ineligible for enrolment at Aurora College.</p>
 }
 
 <p>If any of the information above is incorrect or you would like to change your responses, please contact Aurora College on 1300 287 629.</p>

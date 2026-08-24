@@ -8,7 +8,7 @@
     var responded = Model.Offer.RespondedAt.HasValue;
 }
 
-<h2>Offer of Enrolment</h2>
+<h2>Enrolment Form</h2>
 
 <h5 class="mt-3 w-100">@Model.Offer.Student.DisplayName has been offered enrolment at Aurora College in @Model.Offer.Grade.AsName() of the @Model.Offer.Program.</h5>
 
@@ -25,7 +25,7 @@
 
 @if (responded)
 {
-    <h6 class="mt-2">Below is the response we received for this Offer. If you need to change any details, please contact the school on 1300 287 629, or via email at <a href="mailto:auroracoll-h.school@det.nsw.edu.au">auroracoll-h.school@det.nsw.edu.au</a></h6>
+    <h6 class="mt-2">Below is the response we received for this Offer. If you need to change any details, please contact the school on <tel>1300 287 629</tel>, or via email at <a href="mailto:auroracoll-h.school@det.nsw.edu.au">auroracoll-h.school@det.nsw.edu.au</a></h6>
 }
 
 <hr class="mb-3" />
@@ -56,97 +56,144 @@
         <span class="text-danger" asp-validation-for="OfferResponse"></span>
     </div>
 
-    <div data-show-when="OfferResponse=Accept">
-        <hr/>
+    <div class="spaced" data-show-when="OfferResponse=Accept">
+        <div>
+            <hr/>
 
-        @{
-            var courtOrderId = Html.IdFor(m => m.CourtOrders).ToString();
-        }
-
-        <div class="w-100">
-            <h5>Are there any Court Orders that apply to @Model.Offer.Student.PreferredName?</h5>
-            <p class="text-muted">This could include Family Court orders, access orders (e.g. AVO), or any others that determine care arrangements for the student.</p>
-        </div>
-
-        <div class="btn-group w-100" role="group">
-            <input type="radio" class="btn-check" asp-for="CourtOrders" id="@(courtOrderId)-yes" value="Yes" autocomplete="off">
-            <label class="btn btn-outline-success" for="@(courtOrderId)-yes">Yes</label>
-
-            <input type="radio" class="btn-check" asp-for="CourtOrders" id="@(courtOrderId)-unset" value="Unset" autocomplete="off">
-            <label class="btn btn-outline-secondary" for="@(courtOrderId)-unset" data-unset>Please Select</label>
-
-            <input type="radio" class="btn-check" asp-for="CourtOrders" id="@(courtOrderId)-no" value="No" autocomplete="off">
-            <label class="btn btn-outline-danger" for="@(courtOrderId)-no">No</label>
-        </div>
-
-        <div class="w-100">
-            <span class="text-danger" asp-validation-for="CourtOrders"></span>
-            <span class="text-muted" data-show-when="CourtOrders=Yes">A member of staff will be in contact to discuss specific details.</span>
-        </div>
-
-        <hr/>
-
-        @{
-            var healthConditionsId = Html.IdFor(m => m.HealthConditions).ToString();
-        }
-
-        <div class="w-100">
-            <h5>Does @Model.Offer.Student.PreferredName have any Health Conditions?</h5>
-            <p class="text-muted">This could include conditions such as anaphylaxis or any other allergies, or ADD/ADHD.</p>
-        </div>
-
-        <div class="btn-group w-100" role="group">
-            <input type="radio" class="btn-check" asp-for="HealthConditions" id="@(healthConditionsId)-yes" value="Yes" autocomplete="off">
-            <label class="btn btn-outline-success" for="@(healthConditionsId)-yes">Yes</label>
-
-            <input type="radio" class="btn-check" asp-for="HealthConditions" id="@(healthConditionsId)-unset" value="Unset" autocomplete="off">
-            <label class="btn btn-outline-secondary" for="@(healthConditionsId)-unset" data-unset>Please Select</label>
-
-            <input type="radio" class="btn-check" asp-for="HealthConditions" id="@(healthConditionsId)-no" value="No" autocomplete="off">
-            <label class="btn btn-outline-danger" for="@(healthConditionsId)-no">No</label>
-        </div>
-
-        <div class="w-100">
-            <span class="text-danger" asp-validation-for="HealthConditions"></span>
-            <span class="text-muted" data-show-when="HealthConditions=Yes">A member of staff will be in contact to discuss specific details.</span>
-        </div>
-        
-        @if (Model.Offer.Grade >= Grade.Y11)
-        {
-            <hr />
-
-            var loanLaptopId = Html.IdFor(m => m.LoanLaptop).ToString();
+            @{
+                var courtOrderId = Html.IdFor(m => m.CourtOrders).ToString();
+            }
 
             <div class="w-100">
-                <h5>Will @Model.Offer.Student.PreferredName borrow a student laptop from Aurora College?</h5>
-                <p class="text-muted">The student laptop is highly recommended as it has been specifically selected for use in our virtual classroom environment. If you have any concerns about borrowing a student laptop, please contact the school on 1300 287 629 to discuss before declining this loan.</p>
+                <h5>Are there any Court Orders that apply to @Model.Offer.Student.PreferredName?</h5>
+                <p class="text-muted">This could include Family Court orders, access orders (e.g. AVO), or any others that determine care arrangements for the student.</p>
             </div>
 
             <div class="btn-group w-100" role="group">
-                <input type="radio" class="btn-check" asp-for="LoanLaptop" id="@(loanLaptopId)-yes" value="Yes" autocomplete="off">
-                <label class="btn btn-outline-success" for="@(loanLaptopId)-yes">Yes</label>
+                <input type="radio" class="btn-check" asp-for="CourtOrders" id="@(courtOrderId)-yes" value="Yes" autocomplete="off">
+                <label class="btn btn-outline-success" for="@(courtOrderId)-yes">Yes</label>
 
-                <input type="radio" class="btn-check" asp-for="LoanLaptop" id="@(loanLaptopId)-unset" value="Unset" autocomplete="off">
-                <label class="btn btn-outline-secondary" for="@(loanLaptopId)-unset" data-unset>Please Select</label>
+                <input type="radio" class="btn-check" asp-for="CourtOrders" id="@(courtOrderId)-unset" value="Unset" autocomplete="off">
+                <label class="btn btn-outline-secondary" for="@(courtOrderId)-unset" data-unset>Please Select</label>
 
-                <input type="radio" class="btn-check" asp-for="LoanLaptop" id="@(loanLaptopId)-no" value="No" autocomplete="off">
-                <label class="btn btn-outline-danger" for="@(loanLaptopId)-no">No</label>
+                <input type="radio" class="btn-check" asp-for="CourtOrders" id="@(courtOrderId)-no" value="No" autocomplete="off">
+                <label class="btn btn-outline-danger" for="@(courtOrderId)-no">No</label>
             </div>
 
             <div class="w-100">
-                <span class="text-danger" asp-validation-for="LoanLaptop"></span>
-                <span class="text-muted" data-show-when="LoanLaptop=Yes">A student laptop will be sent to the partner school before the start of classes.</span>
-                <span class="text-muted" data-show-when="LoanLaptop=No">@Model.Offer.Student.PreferredName must have a suitable laptop to use in classes.</span>
+                <span class="text-danger" asp-validation-for="CourtOrders"></span>
+                <span class="text-muted spaced" data-show-when="CourtOrders=Yes">
+                    <div>A member of staff will be in contact to discuss specific details.</div>
+                </span>
             </div>
-        }
-        else 
-        {
-            <input type="hidden" asp-for="LoanLaptop" value="Yes" />
-        }
 
+            <hr/>
+
+            @{
+                var healthConditionsId = Html.IdFor(m => m.HealthConditions).ToString();
+            }
+
+            <div class="w-100">
+                <h5>Does @Model.Offer.Student.PreferredName have any Health Conditions?</h5>
+                <p class="text-muted">This could include conditions such as anaphylaxis or any other allergies, or ADD/ADHD.</p>
+            </div>
+
+            <div class="btn-group w-100" role="group">
+                <input type="radio" class="btn-check" asp-for="HealthConditions" id="@(healthConditionsId)-yes" value="Yes" autocomplete="off">
+                <label class="btn btn-outline-success" for="@(healthConditionsId)-yes">Yes</label>
+
+                <input type="radio" class="btn-check" asp-for="HealthConditions" id="@(healthConditionsId)-unset" value="Unset" autocomplete="off">
+                <label class="btn btn-outline-secondary" for="@(healthConditionsId)-unset" data-unset>Please Select</label>
+
+                <input type="radio" class="btn-check" asp-for="HealthConditions" id="@(healthConditionsId)-no" value="No" autocomplete="off">
+                <label class="btn btn-outline-danger" for="@(healthConditionsId)-no">No</label>
+            </div>
+
+            <div class="w-100">
+                <span class="text-danger" asp-validation-for="HealthConditions"></span>
+                <span class="text-muted spaced" data-show-when="HealthConditions=Yes">
+                    <div>A member of staff will be in contact to discuss specific details.</div>
+                </span>
+            </div>
+
+            @if (Model.Offer.Grade >= Grade.Y11)
+            {
+                <hr/>
+
+                var loanLaptopId = Html.IdFor(m => m.LoanLaptop).ToString();
+
+                <div class="w-100">
+                    <h5>Will @Model.Offer.Student.PreferredName borrow a student laptop from Aurora College?</h5>
+                    <p class="text-muted">The student laptop is highly recommended as it has been specifically selected for use in our virtual classroom environment. If you have any concerns about borrowing a student laptop, please contact the school on 1300 287 629 to discuss before declining this loan.</p>
+                </div>
+
+                <div class="btn-group w-100" role="group">
+                    <input type="radio" class="btn-check" asp-for="LoanLaptop" id="@(loanLaptopId)-yes" value="Yes" autocomplete="off">
+                    <label class="btn btn-outline-success" for="@(loanLaptopId)-yes">Yes</label>
+
+                    <input type="radio" class="btn-check" asp-for="LoanLaptop" id="@(loanLaptopId)-unset" value="Unset" autocomplete="off">
+                    <label class="btn btn-outline-secondary" for="@(loanLaptopId)-unset" data-unset>Please Select</label>
+
+                    <input type="radio" class="btn-check" asp-for="LoanLaptop" id="@(loanLaptopId)-no" value="No" autocomplete="off">
+                    <label class="btn btn-outline-danger" for="@(loanLaptopId)-no">No</label>
+                </div>
+
+                <div class="w-100">
+                    <span class="text-danger" asp-validation-for="LoanLaptop"></span>
+                    <span class="text-muted spaced" data-show-when="LoanLaptop=Yes">
+                        <div>A student laptop will be sent to the partner school before the start of classes.</div>
+                    </span>
+                    <span class="text-muted spaced" data-show-when="LoanLaptop=No">
+                        <div>@Model.Offer.Student.PreferredName must have a suitable laptop to use in classes.</div>
+                    </span>
+                </div>
+            }
+            else
+            {
+                <input type="hidden" asp-for="LoanLaptop" value="Yes"/>
+            }
+
+            <hr/>
+
+            <div class="mt-3">
+                <p class="h4">Please note:</p>
+                <ul>
+                    <li>Enrolment in Aurora College is contigent on the student being co-enrolled in an authorised host school. Students who do not meet this requirement are ineligible for enrolment at Aurora College.</li>
+                    <li>To update details after this form has been submitted, contact the school on <tel>1300 287 629</tel> or at <a href="mailto:aurorcoll-h.school@det.nsw.edu.au">auroracoll-h.school@det.nsw.edu.au</a></li>
+                    <li>
+                        <div data-show-when="CourtOrders=Yes">
+                            <div>
+                                A staff member will contact your family to discuss <span class="fw-bold">court orders</span>
+                            </div>
+                        </div>
+                    </li>
+                    <li>
+                        <div data-show-when="HealthConditions=Yes">
+                            <div>
+                                A staff member will contact your family to discuss <span class="fw-bold">health condititions</span>
+                            </div>
+                        </div>
+                    </li>
+                    <li>
+                        <div data-show-when="LoanLaptop=Yes">
+                            <div>
+                                A student laptop will be delivered to the partner school before the start of lessons
+                            </div>
+                        </div>
+                    </li>
+                    <li>
+                        <div data-show-when="LoanLaptop=No">
+                            <div>
+                                You will be responsible for ensuring that @Model.Offer.Student.PreferredName has a suitable device for use in Aurora College lessons
+                            </div>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </div>
     </div>
 
     <div class="mt-3 @(responded ? "d-none" : "")">
-        <input type="submit" class="btn btn-success vw-25 p-2 fs-5" value="Save"/>
+        <input type="submit" class="btn btn-success vw-25 p-2 fs-5" value="Submit"/>
     </div>
 </form>

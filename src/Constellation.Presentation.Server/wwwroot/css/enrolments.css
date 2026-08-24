@@ -30,20 +30,40 @@
     }
 }
 
-[data-show-when] {
-    overflow: hidden;
-    max-height: 0;
-    opacity: 0;
-    margin-top: 0 !important;
-    transition: max-height 0.3s ease, opacity 0.25s ease, margin-top 0.25s ease;
+.spaced {
+    margin-top: 0.75rem !important;
 }
 
-    [data-show-when].tri-show {
-        max-height: 500px;
-        opacity: 1;
-        margin-top: 0.75rem !important;
-    }
+[data-show-when] {
+    display: grid;
+    grid-template-rows: 0fr;
+    opacity: 0;
+    margin-top: 0 !important;
+    transition: grid-template-rows 0.3s ease, opacity 0.25s ease, margin-top 0.25s ease;
+}
+
+[data-show-when] > * {
+    overflow: hidden;
+    min-height: 0;
+}
+
+[data-show-when].tri-show {
+    grid-template-rows: 1fr;
+    opacity: 1;
+}
 
 .vw-25 {
     width: 25vw !important;
+}
+
+li:has([data-show-when]) {
+    list-style: none;
+}
+
+li:has([data-show-when].tri-show) {
+    list-style: revert; /* or explicitly e.g. list-style: disc; to match your existing style */
+}
+
+tel {
+    font-weight: bold;
 }

@@ -27,7 +27,7 @@ public sealed partial class Service : IEmailService
 
         EnrolmentOfferNotificationEmailViewModel viewModel = new()
         {
-            Title = $"Enrolment Offer",
+            Title = $"Enrolment Form",
             SenderName = principal ?? "",
             SenderTitle = "Principal",
             Preheader = "",
@@ -77,7 +77,7 @@ public sealed partial class Service : IEmailService
 
         EnrolmentOfferReminderEmailViewModel viewModel = new()
         {
-            Title = $"Enrolment Offer Reminder",
+            Title = $"Enrolment Form Reminder",
             SenderName = principal ?? "",
             SenderTitle = "Principal",
             Preheader = "",
@@ -123,7 +123,7 @@ public sealed partial class Service : IEmailService
 
         EnrolmentOfferResponseReceiptEmailViewModel viewModel = new()
         {
-            Title = $"Enrolment Offer Receipt",
+            Title = $"Enrolment Form Receipt",
             SenderName = principal ?? "",
             SenderTitle = "Principal",
             Preheader = "",
