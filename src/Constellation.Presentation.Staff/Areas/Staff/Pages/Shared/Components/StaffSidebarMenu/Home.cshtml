@@ -1,0 +1,56 @@
+@using Constellation.Presentation.Staff.Areas.Staff.Pages.Shared.Components.StaffSidebarMenu
+@model string
+
+@{
+}
+
+<nav id="accordion" class="d-none d-md-block bg-light sidebar">
+    <div class="sidebar-sticky pt-3">
+        <div class="card">
+            <div class="card-header" id="contactsHeading">
+                <h4 class="sidebar-heading d-flex justify-content-between p-3 mb-1 text-muted">
+                    Home
+                </h4>
+            </div>
+
+            <div id="contacts">
+                <div class="card-body">
+                    <ul class="nav flex-column">
+                        <li class="nav-item">
+                            <a class="nav-link show-loader @(Model == ActivePage.Staff_Dashboard ? "active" : "")" asp-page="/Dashboard" asp-area="Staff">
+                                Dashboard
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link show-loader @(Model == ActivePage.Staff_Profile ? "active" : "")" asp-page="/Profile/Index" asp-area="Staff">
+                                Profile
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<nav class="navbar navbar-expand-md navbar-toggleable-sm d-md-none bg-light">
+    <div class="mx-2">
+        <h4 class="navbar-brand px-2">Home</h4>
+    </div>
+    <div class="me-2">
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#sidebar-navbar" data-toggle="collapse" data-target="#sidebar-navbar" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+    </div>
+    <div class="navbar-collapse collapse justify-content-between" id="sidebar-navbar">
+        <ul class="navbar-nav me-auto ms-3 mb-2">
+            <li class="nav-item dropdown">
+                <a class="nav-link" asp-page="/Dashboard" asp-area="Staff">Dashboard</a>
+            </li>
+            
+            <li class="nav-item dropdown">
+                <a class="nav-link" asp-page="/Profile/Index" asp-area="Staff">Profile</a>
+            </li>
+        </ul>
+    </div>
+</nav>

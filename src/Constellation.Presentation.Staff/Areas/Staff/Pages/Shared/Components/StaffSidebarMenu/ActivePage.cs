@@ -6,6 +6,7 @@
 internal static class ActivePage
 {
     public const string Staff_Dashboard = "Dashboard..";
+    public const string Staff_Profile = "Profile..";
 
     public const string Messaging_Contacts_List = "Messaging.Contacts.List";
     public const string Messaging_History_List = "Messaging.History.List";

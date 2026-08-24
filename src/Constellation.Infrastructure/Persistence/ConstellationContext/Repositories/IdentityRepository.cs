@@ -246,4 +246,20 @@ public sealed class IdentityRepository : IIdentityRepository
 
         return claims.ToList();
     }
+
+    public async Task<AppUserPasskey?> GetPasskeyById(
+        byte[] id,
+        CancellationToken cancellationToken = default) =>
+        await _context
+            .Set<AppUserPasskey>()
+            .FirstOrDefaultAsync(entry => entry.CredentialId == id, cancellationToken);
+
+    public async Task<bool> DoesCredentialAlreadyExist(
+        byte[] id,
+        CancellationToken cancellationToken = default) =>
+        await _context
+            .Set<AppUserPasskey>()
+            .AnyAsync(entry => entry.CredentialId == id, cancellationToken);
+
+    public void Insert(AppUserPasskey passkey) => _context.Set<AppUserPasskey>().Add(passkey);
 }

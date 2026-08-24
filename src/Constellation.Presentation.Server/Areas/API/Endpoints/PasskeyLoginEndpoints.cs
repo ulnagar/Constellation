@@ -1,13 +1,15 @@
 ﻿namespace Constellation.Presentation.Server.Areas.API.Endpoints;
 
-using Constellation.Infrastructure.Persistence.ConstellationContext;
+using Application.Interfaces.Repositories;
+using Application.Models.Identity.Repositories;
+using Constellation.Infrastructure.Persistence.ConstellationContext.Repositories;
 using Core.Models.Auth;
+using Core.Models.Auth.Enums;
 using Fido2NetLib;
 using Fido2NetLib.Objects;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.WebUtilities;
-using Microsoft.EntityFrameworkCore;
-using System.Buffers.Text;
 using System.Text;
 
 public static class PasskeyLoginEndpoints
@@ -45,20 +47,20 @@ public static class PasskeyLoginEndpoints
         HttpContext context,
         IFido2 fido2,
         SignInManager<AppUser> signInManager,
-        ConstellationDbContext db)
+        IIdentityRepository identityRepository,
+        IUnitOfWork unitOfWork,
+        CancellationToken cancellationToken = default)
     {
-        await context.Session.LoadAsync();
+        await context.Session.LoadAsync(cancellationToken);
 
         string? json = context.Session.GetString("fido2.assertion.options");
         if (json is null) return Results.BadRequest("Login session expired.");
 
         AssertionOptions options = AssertionOptions.FromJson(json);
 
-        var credentialId = WebEncoders.Base64UrlDecode(response.Id);
+        byte[] credentialId = WebEncoders.Base64UrlDecode(response.Id);
 
-        AppUserPasskey? credential = await db.Set<AppUserPasskey>()
-            .Include(c => c.User)
-            .FirstOrDefaultAsync(c => c.CredentialId == credentialId);
+        AppUserPasskey? credential = await identityRepository.GetPasskeyById(credentialId, cancellationToken);
 
         if (credential is null) return Results.Unauthorized();
 
@@ -76,10 +78,11 @@ public static class PasskeyLoginEndpoints
             RequestTokenBindingId = []
         };
 
-        VerifyAssertionResult result = await fido2.MakeAssertionAsync(credParams);
+        VerifyAssertionResult result = await fido2.MakeAssertionAsync(credParams, cancellationToken);
 
         credential.SignatureCounter = result.SignCount;
-        await db.SaveChangesAsync();
+        credential.User.AddLogin(DateTime.UtcNow, LoginStatus.Passkey);
+        await unitOfWork.CompleteAsync(cancellationToken);
 
         await signInManager.SignInAsync(credential.User, isPersistent: true,
             authenticationMethod: "passkey");

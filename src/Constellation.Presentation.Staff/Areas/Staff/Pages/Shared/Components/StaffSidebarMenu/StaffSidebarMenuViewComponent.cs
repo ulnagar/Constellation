@@ -54,6 +54,7 @@ public class StaffSidebarMenuViewComponent : ViewComponent
         return module switch
         {
             "Dashboard" => View("Dashboard", await GenerateDashboardData(staffId)),
+            "Profile" => View("Home", activePage),
             "Messaging" => View("Messaging", (activePage, showEmergencyConsole)),
             "Equipment" => View("Equipment", activePage),
             "Partner" => View("Partner", activePage),

@@ -4,6 +4,7 @@ namespace Microsoft.Extensions.DependencyInjection;
 using Caching.Memory;
 using Constellation.Application.Clock;
 using Constellation.Application.Domains.Import.Interfaces;
+using Constellation.Application.Interfaces.Configuration;
 using Constellation.Application.Interfaces.Jobs;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Interfaces.Services;
@@ -35,6 +36,10 @@ public static class ServicesRegistration
 {
     public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration, IHostEnvironment environment)
     {
+        // Add Scanner Matching Middleware
+        services.AddOptions<ScannerBlocklistOptions>();
+        services.Configure<ScannerBlocklistOptions>(configuration.GetSection(ScannerBlocklistOptions.SectionName));
+
         // Add Logging
         services.AddSingleton(Log.Logger);
 

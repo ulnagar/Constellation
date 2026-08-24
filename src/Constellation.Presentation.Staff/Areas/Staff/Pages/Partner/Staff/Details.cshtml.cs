@@ -64,9 +64,7 @@ public class DetailsModel : BasePageModel
     public StaffDetailsResponse StaffMember { get; set; }
 
     public RecordLifecycleDetailsResponse RecordLifecycle { get; set; }
-
-    public bool ShowPasskeyButton { get; set; } = false;
-
+    
     public async Task OnGet()
     {
         _logger.Information("Requested to retrieve details of Staff Member with id {Id} by user {User}", Id.ToString(), _currentUserService.UserName);
@@ -316,13 +314,6 @@ public class DetailsModel : BasePageModel
         StaffMember = staffRequest.Value;
 
         PageTitle = $"Details - {StaffMember.StaffName.DisplayName}";
-
-        // Is the current user the same as the page displays?
-        bool isSamePerson = _currentUserService.StaffId == Id;
-        Result<bool> doesPersonHavePasskey = await _mediator.Send(new DoesStaffMemberHaveRegisteredPasskeyQuery(_currentUserService.EmailAddress));
-
-        if (isSamePerson && !doesPersonHavePasskey.Value)
-            ShowPasskeyButton = true;
 
         Result<RecordLifecycleDetailsResponse> recordLifecycle = await _mediator.Send(new GetLifecycleDetailsForStaffMemberQuery(Id));
 

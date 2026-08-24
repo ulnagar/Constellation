@@ -1,0 +1,210 @@
+﻿@page
+@model Constellation.Presentation.Staff.Areas.Staff.Pages.Profile.IndexModel
+
+@using Constellation.Core.Models.Auth.Enums
+@using Microsoft.AspNetCore.WebUtilities
+
+@{
+}
+
+<h2>User Profile</h2>
+
+<div class="page-menu"></div>
+
+<hr />
+
+<div class="row">
+    <div class="col">
+        <dl>
+            <dt>Name</dt>
+            <dd>@Model.CurrentUser.Name.DisplayName</dd>
+            
+            <dt>Email Address</dt>
+            <dd>@Model.CurrentUser.Email</dd>
+            
+            <dt>Profiles</dt>
+            @foreach (var link in Model.CurrentUser.Links.OrderBy(link => link.Type))
+            {
+                <dd>
+                    @if (link.Type == LinkType.Staff)
+                    {
+                        <a asp-page="/Partner/Staff/Details" asp-area="Staff" asp-route-id="@link.LinkId" class="badge bg-primary link-underline link-underline-opacity-0" tooltip="Id: @link.LinkId">Staff</a>
+                    }
+
+                    @if (link.Type == LinkType.Student)
+                    {
+                        <a asp-page="/Partner/Students/Details" asp-area="Staff" asp-route-id="@link.LinkId" class="badge bg-primary link-underline link-underline-opacity-0" tooltip="Id: @link.LinkId">Student</a>
+                    }
+
+                    @if (link.Type == LinkType.Contact)
+                    {
+                        <a asp-page="/Partner/Schools/Contacts/Details" asp-area="Staff" asp-route-id="@link.LinkId" class="badge bg-primary link-underline link-underline-opacity-0" tooltip="Id: @link.LinkId">Contact</a>
+                    }
+
+                    @if (link.Type == LinkType.Family)
+                    {
+                        <a asp-page="/Partner/Students/Families/Details" asp-area="Staff" asp-route-id="@link.LinkId" class="badge bg-primary link-underline link-underline-opacity-0" tooltip="Id: @link.LinkId">Family</a>
+                    }
+
+                    @if (link.Type == LinkType.Parent)
+                    {
+                        <span class="badge bg-primary" tooltip="Id: @link.LinkId">Parent</span>
+                    }
+                </dd>
+            }
+        </dl>
+    </div>
+</div>
+
+<div>
+    <h4>Passkeys</h4>
+    
+    <div class="row row-cols row-cols-lg-2 row-cols-xl-3">
+        @foreach (var passkey in @Model.CurrentUser.Passkeys)
+        {
+            <div class="col">
+                <div class="card mb-3">
+                    <div class="card-header">
+                        <h5 class="card-title">@passkey.Name</h5>
+                    </div>
+                    <div class="card-body">
+                        <p class="card-text">Registered: @passkey.CreatedAt.ToLocalTime().ToString("f")</p>
+                    </div>
+                    <div class="card-footer">
+                        <button class="btn btn-danger delete-passkey-btn"
+                                data-credential-id="@WebEncoders.Base64UrlEncode(passkey.CredentialId)"
+                                data-name="@passkey.Name">
+                            Remove
+                        </button>
+                    </div>
+                </div>
+            </div>
+        }
+        
+        <div class="w-100"></div>
+
+        <div class="col">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title">New Passkey</h5>
+                </div>
+                <div class="card-body">
+                    <label for="passkey-name" class="form-label">Passkey name</label>
+                    <input type="text" class="form-control" id="passkey-name" placeholder="e.g. Work laptop, iPhone, etc"
+                           maxlength="50" value="My Passkey"/>
+                </div>
+                <div class="card-footer">
+                    <button class="btn btn-primary" id="register-passkey-btn">Register</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card mt-3">
+    <div class="card-header" data-bs-toggle="collapse" data-bs-target="#roles">
+        <h4>Roles <span class="badge text-bg-secondary">@Model.CurrentUser.Roles.Count</span></h4>
+    </div>
+    <div class="collapse card-body" id="roles">
+        <div class="row row-cols-1 row-cols-lg-2 row-cols-xl-3 g-2">
+            @foreach (var role in Model.CurrentUser.Roles)
+            {
+                <div class="col"><div class="p-2 border border-primary rounded text-bg-light">@role.Name</div></div>
+            }
+        </div>
+    </div>
+</div>
+
+<div class="card mt-3">
+    <div class="card-header" data-bs-toggle="collapse" data-bs-target="#permissions">
+        <h4>Permissions <span class="badge text-bg-secondary">@Model.CurrentUser.Claims.Count</span></h4>
+    </div>
+    <div class="collapse card-body" id="permissions">
+        <div class="row row-cols-1 row-cols-lg-2 row-cols-xl-3 g-2">
+            @foreach (var permission in Model.CurrentUser.Claims.OrderBy(entry => entry.Value))
+            {
+                <div class="col"><div class="p-2 border border-primary rounded text-bg-light">@permission.Value</div></div>
+            }
+        </div>
+    </div>
+</div>
+
+@section Scripts
+{
+    <script src="~/js/passkeys.js"></script>
+
+    <script>
+        document.querySelectorAll('.delete-passkey-btn').forEach(btn => {
+            btn.addEventListener('click', async (e) => {
+                const { credentialId, name } = e.target.dataset;
+
+                const confirmed = await AppModal.confirm(
+                    'Remove Passkey',
+                    `Remove passkey "${name}"? This cannot be undone.`,
+                    'Remove',
+                    'btn-danger'
+                );
+
+                if (!confirmed) return;
+
+                const res = await fetch(`/passkey/register/${encodeURIComponent(credentialId)}`, {
+                    method: 'DELETE'
+                });
+
+                if (res.ok) {
+                    e.target.closest('.card').remove();
+                } else if (res.status === 400) {
+                    await AppModal.notify('Cannot Remove Passkey', await res.text());
+                } else {
+                    await AppModal.notify('Error', 'Failed to remove passkey. Please try again.');
+                }
+            });
+        });
+
+        document.getElementById('register-passkey-btn').addEventListener('click', async () => {
+            const name = document.getElementById('passkey-name').value.trim() || 'My Passkey';
+
+            const optionsRes = await fetch(`/passkey/register/options?name=${encodeURIComponent(name)}`, {
+                method: 'POST'
+            });
+
+            if (!optionsRes.ok) {
+                await AppModal.notify('Registration Failed', 'Could not start passkey registration.');
+                return;
+            }
+
+            const options = await optionsRes.json();
+            options.challenge = PasskeyUtils.base64UrlToBuffer(options.challenge);
+            options.user.id = PasskeyUtils.base64UrlToBuffer(options.user.id);
+
+            if (options.excludeCredentials) {
+                options.excludeCredentials = options.excludeCredentials.map(c => ({
+                    ...c,
+                    id: PasskeyUtils.base64UrlToBuffer(c.id)
+                }));
+            }
+
+            let credential;
+            try {
+                credential = await navigator.credentials.create({ publicKey: options });
+            } catch (e) {
+                await AppModal.notify('Registration Cancelled', 'Passkey registration was cancelled or failed.');
+                return;
+            }
+
+            const completeRes = await fetch('/passkey/register/complete', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(PasskeyUtils.serializeRegistrationCredential(credential))
+            });
+
+            if (completeRes.ok) {
+                await AppModal.notify('Passkey Registered', `"${name}" was registered successfully.`);
+                window.location.reload();
+            } else {
+                await AppModal.notify('Registration Failed', 'Passkey registration failed. Please try again.');
+            }
+        });
+    </script>
+}
+

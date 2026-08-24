@@ -4,6 +4,10 @@
     <Configurations>Debug;Release</Configurations>
   </PropertyGroup>
 
+	<ItemGroup>
+		<InternalsVisibleTo Include="Constellation.Infrastructure.Tests.Unit" />
+	</ItemGroup>
+
   <ItemGroup>
     <EmbeddedResource Include="ExternalResources\logo.png" />
   </ItemGroup>

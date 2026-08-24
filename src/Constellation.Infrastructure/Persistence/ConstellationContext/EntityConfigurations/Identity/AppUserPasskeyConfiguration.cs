@@ -21,5 +21,9 @@ internal sealed class AppUserPasskeyConfiguration : IEntityTypeConfiguration<App
             .HasOne(entry => entry.User)
             .WithMany(entry => entry.PasskeyCredentials)
             .HasForeignKey(entry => entry.AppUserId);
+
+        builder
+            .Navigation(entry => entry.User)
+            .AutoInclude();
     }
 }

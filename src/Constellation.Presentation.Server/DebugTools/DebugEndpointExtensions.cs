@@ -112,6 +112,25 @@ public static class DebugEndpointExtensions
         return app;
     }
 
+    public static WebApplication MapDebugEndpoints(this WebApplication app)
+    {
+        if (!app.Environment.IsDevelopment())
+            return app;
+
+        app.MapGet("/debug/endpoints", (IEnumerable<EndpointDataSource> sources) =>
+            sources
+                .SelectMany(s => s.Endpoints)
+                .Select(e => new
+                {
+                    Name = e.DisplayName,
+                    Route = (e as RouteEndpoint)?.RoutePattern?.RawText,
+                    Methods = e.Metadata.GetMetadata<HttpMethodMetadata>()?.HttpMethods
+                })
+        );
+
+        return app;
+    }
+
     public static WebApplication MapDebugServices(this WebApplication app, IServiceCollection services)
     {
         if (!app.Environment.IsDevelopment())

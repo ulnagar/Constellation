@@ -205,5 +205,21 @@
                 });
             });
         });
+
+        $('.data-table').DataTable({ 
+            "order": [[0, 'asc']] 
+        });
+
+        $('.grouped-data-table').DataTable({
+            "order": [],
+            "autoWidth": false,
+            "rowGroup": {
+                "dataSrc": 0
+            },
+            "columnDefs": [
+                { "visible": false, "targets": 0 },
+                { "width": "300px", "targets": 3 }
+            ]
+        });
     </script>
 }

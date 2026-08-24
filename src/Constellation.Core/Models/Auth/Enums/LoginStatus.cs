@@ -10,6 +10,7 @@ public sealed class LoginStatus : StringEnumeration<LoginStatus>
     public static readonly LoginStatus Failed = new("Failed");
     public static readonly LoginStatus Started = new("Started");
     public static readonly LoginStatus SingleSignOn = new("SSO Success");
+    public static readonly LoginStatus Passkey = new("Passkey Success");
     
     private LoginStatus(string value)
         : base(value, value) { }

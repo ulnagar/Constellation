@@ -31,4 +31,8 @@ public interface IIdentityRepository
 
     Task<AppRole?> AddRole(AppRole role, CancellationToken cancellationToken = default);
     Task<List<Claim>> GetClaims(AppUser user, CancellationToken cancellationToken = default);
+
+    Task<AppUserPasskey?> GetPasskeyById(byte[] id, CancellationToken cancellationToken = default);
+    Task<bool> DoesCredentialAlreadyExist(byte[] id, CancellationToken cancellationToken = default);
+    void Insert(AppUserPasskey passkey);
 }

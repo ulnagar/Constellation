@@ -61,6 +61,16 @@ internal sealed class GetUserDetailsQueryHandler
             userClaims.Add(new (string.Empty, claim.Type, claim.Value));
         }
 
+        List<UserResponse.Passkey> passkeys = [];
+
+        foreach (AppUserPasskey passkey in user.PasskeyCredentials)
+        {
+            passkeys.Add(new(
+                passkey.Name,
+                passkey.CreatedAt,
+                passkey.CredentialId));
+        }
+
         UserResponse response = new(
             user.Id,
             user.Name,
@@ -68,7 +78,8 @@ internal sealed class GetUserDetailsQueryHandler
             user.Logins.ToList(),
             user.Links.Where(link => !link.IsDeleted).ToList(),
             roles,
-            userClaims);
+            userClaims,
+            passkeys);
 
         return response;
     }

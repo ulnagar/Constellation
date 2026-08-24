@@ -7,7 +7,7 @@
 
 <div class="main-content">
     <div class="page-heading">
-        <h2 class="text-center m-2">Welcome, @Model.UserName</h2>
+        <h2 class="text-center m-2">Welcome, <a asp-page="/Profile/Index" asp-area="Staff" class="link-underline link-underline-opacity-0 link-dark">@Model.UserName</a></h2>
 
         @if (!string.IsNullOrWhiteSpace(Model.Message))
         {

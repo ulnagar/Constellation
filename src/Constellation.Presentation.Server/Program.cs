@@ -1,6 +1,7 @@
 using Constellation.Application.Models.Auth;
 using Constellation.Core.Abstractions.Services;
 using Constellation.Infrastructure.DependencyInjection;
+using Constellation.Infrastructure.Middleware;
 using Constellation.Presentation.Server.Areas.API.Endpoints;
 using Constellation.Presentation.Server.DebugTools;
 using Constellation.Presentation.Server.Extensions;
@@ -67,6 +68,7 @@ await app.SeedIdentityAsync();
 app.UseSerilogRequestLogging();
 app.UseHttpsRedirection();
 app.UseStaticFiles();
+app.UseScannerBlocklist();
 app.UseRouting();
 app.UseSession();
 app.UseAuthentication();
@@ -88,20 +90,11 @@ passkeys.MapPasskeyLogin();
 
 app.MapDebugServices(builder.Services);
 app.MapDebugAuth();
+app.MapDebugEndpoints();
+
 app.MapHangfireDashboardWithAuthorizationPolicy(
     AuthPolicies.IsSiteAdmin,
     "/hangfire",
     new DashboardOptions { DashboardTitle = "Hangfire Dashboard", AppPath = "/" });
-
-app.MapGet("/debug/endpoints", (IEnumerable<EndpointDataSource> sources) =>
-    sources
-        .SelectMany(s => s.Endpoints)
-        .Select(e => new
-        {
-            Name = e.DisplayName,
-            Route = (e as RouteEndpoint)?.RoutePattern?.RawText,
-            Methods = e.Metadata.GetMetadata<HttpMethodMetadata>()?.HttpMethods
-        })
-);
 
 await app.RunAsync();

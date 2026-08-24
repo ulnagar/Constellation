@@ -2,12 +2,13 @@
 
 public sealed class AppUserPasskey
 {
-    public byte[] CredentialId { get; set; }
-    public byte[] PublicKey { get; set; }
+    public required byte[] CredentialId { get; init; }
+    public required byte[] PublicKey { get; init; }
     public uint SignatureCounter { get; set; }
-    public string CredType { get; set; }
-    public Guid AaGuid { get; set; }
-    public DateTimeOffset CreatedAt { get; set; }
-    public Guid AppUserId { get; set; }
-    public AppUser User { get; set; }
+    public required string CredType { get; init; }
+    public required Guid AaGuid { get; init; }
+    public required DateTimeOffset CreatedAt { get; init; }
+    public required Guid AppUserId { get; init; }
+    public AppUser? User { get; init; }
+    public required string Name { get; init; }
 }
