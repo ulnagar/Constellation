@@ -18,4 +18,6 @@ public static class ActivePage
     public const string Contacts = "Contacts";
 
     public const string ThirdParty = "ThirdParty";
+
+    public const string Profile = "Profile";
 }

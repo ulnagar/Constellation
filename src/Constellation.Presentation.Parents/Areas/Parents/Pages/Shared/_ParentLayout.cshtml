@@ -49,9 +49,7 @@
 
         <main>
             <div class="navbar sticky-top top-row">
-                <div class="col-md-8">
-                </div>
-                <div class="col">
+                <div class="ml-auto">
                     @if (User?.Identity is not null && User.Identity.IsAuthenticated)
                     {
                         <a class="btn btn-sm btn-warning ml-4" asp-area="" asp-page="/Auth/Logout">Log Out</a>
@@ -99,10 +97,10 @@
     <vc:modal-content-display content="@Model.ModalContent"/>
 
     <script>
-                $(document).ready(function () {
-                    $('#ux-modal').modal('show');
-                });
-            </script>
+        $(document).ready(function () {
+            $('#ux-modal').modal('show');
+        });
+    </script>
 }
 
 <div class="modal fade" tabindex="-1" id="page-modal">
@@ -117,11 +115,11 @@
 @await RenderSectionAsync("Scripts", required: false)
 
 <script>
-            $(document).ready(function () {
-                setTimeout(function () {
-                    $('.spinner-overlay').addClass('d-none');
-                }, 1000);
-            });
-        </script>
+    $(document).ready(function () {
+        setTimeout(function () {
+            $('.spinner-overlay').addClass('d-none');
+        }, 1000);
+    });
+</script>
 </body>
 </html>

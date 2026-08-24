@@ -4,6 +4,14 @@
     --bs-form-check-bg: red; /* Checkbox slider */
 }
 
+@media (min-width: 992px) {
+    #nav-sidebar nav {
+        display: flex;
+        flex-direction: column;
+        height: calc(100vh - 56px);
+    }
+}
+
 /* Prevent the backdrop from hiding access to Modal from top-bar */
 /*.modal-backdrop.show {
     z-index: 0 !important;

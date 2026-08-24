@@ -112,7 +112,7 @@
                     <em>@user.Email</em>
                 </td>
                 <td>
-                    @foreach (var link in user.Links)
+                    @foreach (var link in user.Links.Where(link => !link.IsDeleted))
                     {
                         if (link.Type == LinkType.Staff)
                         {
