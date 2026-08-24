@@ -1,5 +1,10 @@
 [
   {
+    "Datestamp": "2026-08-24 09:00",
+    "Title": "Messaging",
+    "Body": "Add full search for messaging history (Recent) page, including view option for emails with full metadata."
+  },
+  {
     "Datestamp": "2026-06-01 09:00",
     "Title": "Assessments",
     "Body": "Add Assessments module to replace the Assignments module with expanded features and options."
