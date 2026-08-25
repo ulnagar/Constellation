@@ -2,12 +2,15 @@
 
 using Application.Common.PresentationModels;
 using Application.Domains.Attendance.Plans.Queries.CountPendingPlansForSchool;
-using Application.Domains.Students.Queries.GetCurrentStudentsFromSchool;
-using Constellation.Application.Domains.Students.Models;
+using Application.Domains.SciencePracs.Queries.CountOutstandingScienceRollsForSchool;
+using Constellation.Application.Domains.AssetManagement.Stocktake.Models;
+using Constellation.Application.Domains.AssetManagement.Stocktake.Queries.GetCurrentStocktakeEvents;
+using Constellation.Application.Domains.Attendance.Absences.Queries.GetOutstandingAbsencesForSchool;
 using Constellation.Application.Models.Auth;
 using Constellation.Presentation.Shared.Helpers.Attributes;
 using Core.Abstractions.Services;
 using Core.Errors;
+using Core.Models.Absences.Identifiers;
 using Core.Models.Identifiers;
 using Core.Shared;
 using MediatR;
@@ -38,9 +41,13 @@ public class DashboardModel : BasePageModel
 
     [ViewData] public string ActivePage => Models.ActivePage.Dashboard;
 
-    public List<StudentResponse> Students { get; set; } = new();
+    public int CountPendingAttendancePlans { get; set; }
 
-    public int CountPendingAttendancePlans { get; set; } = 0;
+    public int CountOverdueSciencePracs { get; set; }
+
+    public int CountAbsencesPendingVerification { get; set; }
+
+    public bool CurrentStocktakePeriod { get; set; }
 
     public async Task OnGet()
     {
@@ -63,20 +70,38 @@ public class DashboardModel : BasePageModel
             CountPendingAttendancePlans = plansRequest.Value;
         }
 
-        _logger.Information("Requested to retrieve student list by user {user} for school {school}", _currentUserService.UserName, CurrentSchoolCode);
+        Result<int> lessonsRequest = await _mediator.Send(new CountOutstandingScienceRollsForSchoolQuery(CurrentSchoolCode));
 
-        Result<List<StudentResponse>> studentsRequest = await _mediator.Send(new GetCurrentStudentsFromSchoolQuery(CurrentSchoolCode));
-
-        if (studentsRequest.IsFailure)
+        if (lessonsRequest.IsFailure)
         {
-            ModalContent = ErrorDisplay.Create(studentsRequest.Error);
-
-            return;
+            _logger
+                .Warning("Failed to retrieve count of outstanding Science Prac rolls for school {school} by user {user}", CurrentSchoolCode, _currentUserService.UserName);
+        }
+        else
+        {
+            CountOverdueSciencePracs = lessonsRequest.Value;
         }
 
-        Students = studentsRequest.Value
-            .OrderBy(student => student.Grade)
-            .ThenBy(student => student.Name.SortOrder)
-            .ToList();
+        Result<List<OutstandingAbsencesForSchoolResponse>> absencesRequest = await _mediator.Send(new GetOutstandingAbsencesForSchoolQuery(CurrentSchoolCode!));
+
+        if (absencesRequest.IsFailure)
+        {
+            _logger
+                .Warning("Failed to retrieve count of absences pending verification for school {school} by user {user}", CurrentSchoolCode, _currentUserService.UserName);
+        }
+        else
+        {
+            CountAbsencesPendingVerification = absencesRequest.Value
+                .Count(absence => 
+                    absence.AbsenceTimeframe != absence.PeriodTimeframe 
+                    && absence.AbsenceResponseId != AbsenceResponseId.Empty);
+        }
+
+        Result<List<StocktakeEventResponse>> eventsRequest = await _mediator.Send(new GetCurrentStocktakeEventsQuery());
+
+        if (eventsRequest.IsSuccess && eventsRequest.Value.Count > 0)
+        {
+            CurrentStocktakePeriod = true;
+        }
     }
 }

@@ -10,7 +10,7 @@
 </div>
 
 <div class="collapse navbar-collapse" id="nav-sidebar">
-    <nav class="flex-column">
+    <nav class="d-lg-flex flex-column h-lg-100">
         <div class="nav-item px-3">
             <a class="nav-link @(Model == ActivePage.Dashboard ? "active" : "")" asp-page="/Dashboard" asp-area="Schools" onclick="showLoader()">
                 <i class="fas fa-home-lg" aria-hidden="true"></i> Home
@@ -59,6 +59,12 @@
         <div class="nav-item px-3">
             <a class="nav-link @(Model == ActivePage.Help ? "active" : "")" asp-page="/Help/Index" asp-area="Schools" onclick="showLoader()">
                 <i class="fas fa-question" aria-hidden="true"></i> Help
+            </a>
+        </div>
+        
+        <div class="nav-item profile px-3 mt-lg-auto">
+            <a class="nav-link @(Model == ActivePage.Profile ? "active" : "")" asp-page="/Profile/Index" asp-area="Schools" onclick="showLoader()">
+                <i class="fas fa-user" aria-hidden="true"></i> Profile
             </a>
         </div>
     </nav>
