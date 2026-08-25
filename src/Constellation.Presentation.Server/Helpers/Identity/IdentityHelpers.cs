@@ -111,7 +111,16 @@ internal static class IdentityHelpers
             .Debug("User logged in and being redirected");
 
         context.HandleResponse();
-        context.Response.Redirect("/");
+
+        string? redirectUri = context.HttpContext.Session.GetString("RedirectUri");
+
+        if (string.IsNullOrWhiteSpace(redirectUri))
+            context.Response.Redirect("/");
+        else
+        {
+            context.HttpContext.Session.Remove("RedirectUri");
+            context.Response.Redirect(redirectUri);
+        }
     }
 
     internal static void UpdateKnownUserSession(TokenValidatedContext context)

@@ -126,12 +126,14 @@ public class LoginModel : PageModel
 
         await PreparePage();
 
-        if (!Manual 
+        if (!Manual
             && !string.IsNullOrWhiteSpace(sessionUser)
             && GetLoginParameters(sessionUser) == LoginType.SSO)
+        {
             // This browser session already had a successful SSO login - 
             // treat this as a timeout, not a fresh attempt.
             return ChallengeSingleSignOn(sessionUser);
+        }
         
         if (!string.IsNullOrWhiteSpace(sessionUser))
             Input.Email = sessionUser;
@@ -144,13 +146,13 @@ public class LoginModel : PageModel
 
     private ChallengeResult ChallengeSingleSignOn(string? loginHint)
     {
-        string? redirectUri = Url.IsLocalUrl(ReturnUrl) ? ReturnUrl : "/Index";
+        if (!string.IsNullOrWhiteSpace(ReturnUrl))
+            HttpContext.Session.SetString("RedirectUri", ReturnUrl);
 
         AuthenticationProperties props = new();
         if (!string.IsNullOrWhiteSpace(loginHint))
         {
             props.Items["login_hint"] = loginHint;
-            props.RedirectUri = redirectUri;
         }
 
         return Challenge(props, OpenIdConnectDefaults.AuthenticationScheme);

@@ -14,6 +14,7 @@ public static class LoggingConfiguration
 
         LoggerConfiguration logger = new LoggerConfiguration()
             .MinimumLevel.Information()
+            .MinimumLevel.Override("Constellation", LogEventLevel.Debug)
             .Enrich.FromLogContext();
 
         if (!string.IsNullOrWhiteSpace(seqServer))
