@@ -1,33 +1,61 @@
 ﻿@page
 @model Constellation.Presentation.Schools.Areas.Schools.Pages.DashboardModel
 
-@using Constellation.Core.Extensions
+<h2>Aurora College Schools Portal</h2>
 
-<h1>Aurora College Schools Portal</h1>
-
-@if (Model.CountPendingAttendancePlans > 0)
-{
-    <div class="alert alert-warning" role="alert">
-        <h4 class="alert-heading">Pending Attendance Plans</h4>
-        <p>Aurora College requires your response to confirm the availability of our shared students.</p>
-        <p class="mb-0">Click here to <a asp-page="/Absences/Plans/Index" asp-area="Schools" class="alert-link">view pending Attendance Plans</a>.</p>
-    </div>
-}
-
-@foreach (var group in Model.Students.GroupBy(student => student.Grade))
-{
-    <h4>@group.Key?.AsName()</h4>
-
-    <div class="d-flex flex-row flex-wrap">
-        @foreach (var student in group)
-        {
-            <div class="card m-3 float-start">
-                <vc:student-photo student-id="@student.StudentId" />
-                <div class="card-body">
-                    <h5 class="card-title">@student.Name.PreferredName @student.Name.LastName</h5>
-                    <p class="card-text">Grade: @student.Grade</p>
-                </div>
+<h4 class="mt-2">Pending actions</h4>
+<ul class="list-group g-2">
+    @if (Model.CountPendingAttendancePlans > 0)
+    {
+        <li class="list-group-item mb-3 rounded d-flex justify-content-between list-group-item-danger">
+            <div class="m-2 icon-box d-flex align-items-center justify-content-center">
+                <i class="fas fa-poll-people fa-fw" aria-hidden="true"></i>
             </div>
-        }
-    </div>
-}
+            <div class="ms-2 me-auto">
+                <div class="fw-bold">Pending Attendance Plans</div>
+                <span>There are @Model.CountPendingAttendancePlans plans requiring your attention</span>
+                <a asp-page="/Absences/Plans/Index" asp-area="Schools" class="stretched-link"></a>
+            </div>
+        </li>
+    }
+    @if (Model.CountAbsencesPendingVerification > 0)
+    {
+        <li class="list-group-item mb-3 rounded d-flex justify-content-between list-group-item-danger">
+            <div class="m-2 icon-box d-flex align-items-center justify-content-center">
+                <i class="fas fa-poll-people fa-fw" aria-hidden="true"></i>
+            </div>
+            <div class="ms-2 me-auto">
+                <div class="fw-bold">Absences Pending Verification</div>
+                <span>There are @Model.CountAbsencesPendingVerification absences requiring verification by your school</span>
+                <a asp-page="/Absences/Index" asp-area="Schools" asp-route-type="@Areas.Schools.Pages.Absences.IndexModel.AbsenceCategory.UnverifiedPartials" class="stretched-link"></a>
+            </div>
+        </li>
+    }
+    @if (Model.CountOverdueSciencePracs > 0)
+    {
+        <li class="list-group-item mb-3 rounded d-flex justify-content-between list-group-item-danger">
+            <div class="m-2 icon-box d-flex align-items-center justify-content-center">
+                <i class="fas fa-flask-potion fa-fw" aria-hidden="true"></i>
+            </div>
+            <div class="ms-2 me-auto">
+                <div class="fw-bold">Overdue Science Prac Lessons</div>
+                <span>There are @Model.CountOverdueSciencePracs rolls outstanding</span>
+                <a asp-page="/ScienceRolls/Index" asp-area="Schools" asp-route-filter="@Areas.Schools.Pages.ScienceRolls.IndexModel.FilterEnum.Overdue" class="stretched-link"></a>
+            </div>
+        </li>
+    }
+    @if (Model.CurrentStocktakePeriod)
+    {
+        <li class="list-group-item mb-3 rounded d-flex justify-content-between list-group-item-warning">
+            <div class="m-2 icon-box d-flex align-items-center justify-content-center">
+                <i class="fas fa-inventory fa-fw" aria-hidden="true"></i>
+            </div>
+            <div class="ms-2 me-auto">
+                <div class="fw-bold">Stocktake Period</div>
+                <span>There is an open Stocktake period for Aurora College equipment</span>
+                <a asp-page="/Stocktake/Index" asp-area="Schools" class="stretched-link"></a>
+            </div>
+        </li>
+    }
+</ul>
+

@@ -24,4 +24,6 @@ public static class ActivePage
     public const string Stocktake = "Stocktake";
 
     public const string Timetables = "Timetables";
+
+    public const string Profile = "Profile";
 }

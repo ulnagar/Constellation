@@ -1,3 +1,11 @@
+@media (min-width: 992px) {
+    #nav-sidebar nav {
+        display: flex;
+        flex-direction: column;
+        height: calc(100vh - 56px);
+    }
+}
+
 .navbar-toggler {
     background-color: rgba(255, 255, 255, 0.1);
 }
@@ -47,14 +55,26 @@
         line-height: 3rem;
     }
 
+    .nav-item.profile ::deep a {
+        color: darkslategrey;
+    }
+
         .nav-item ::deep a.active {
             background-color: rgba(255,255,255,0.25);
             color: white;
         }
 
+        .nav-item.profile ::deep a.active {
+            color: darkslategrey;
+        }
+
         .nav-item ::deep a:hover {
             background-color: rgba(255,255,255,0.1);
             color: white;
+        }
+
+        .nav-item.profile ::deep a:hover {
+            color: darkslategrey;
         }
 
 @media (min-width: 641px) {

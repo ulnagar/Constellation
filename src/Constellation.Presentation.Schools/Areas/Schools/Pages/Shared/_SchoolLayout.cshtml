@@ -44,12 +44,11 @@
                 </div>
 
                 <main>
-                    @* <div class="top-row main px-4 text-right"> *@
-                    <div class="navbar sticky-top top-row">
-                        <div class="col-md-8">
+                    <div class="navbar sticky-top top-row d-flex justify-content-between align-items-center">
+                        <div class="m-0">
                             <vc:school-selector selected-school-code="@Model.CurrentSchoolCode"/>
                         </div>
-                        <div class="col">
+                        <div>
                             @if (User?.Identity is not null && User.Identity.IsAuthenticated)
                             {
                                 <a class="btn btn-sm btn-warning ml-4" asp-area="" asp-page="/Auth/Logout">Log Out</a>
