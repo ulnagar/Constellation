@@ -262,4 +262,21 @@ public sealed class IdentityRepository : IIdentityRepository
             .AnyAsync(entry => entry.CredentialId == id, cancellationToken);
 
     public void Insert(AppUserPasskey passkey) => _context.Set<AppUserPasskey>().Add(passkey);
+
+    public async Task<bool> UserHasOptedInToNotification(
+        string email,
+        NotificationType notificationType,
+        CancellationToken cancellationToken = default)
+    {
+        AppUser? user = await _userManager.Users.FirstOrDefaultAsync(user => user.Email == email, cancellationToken);
+
+        if (user is null)
+            return false;
+
+        return await _context
+            .Set<AppUserNotificationPreference>()
+            .AnyAsync(entry => entry.AppUserId == user.Id && entry.NotificationType == notificationType,
+                cancellationToken);
+    }
+
 }

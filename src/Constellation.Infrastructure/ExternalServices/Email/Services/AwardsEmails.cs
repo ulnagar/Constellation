@@ -1,5 +1,6 @@
 ﻿namespace Constellation.Infrastructure.ExternalServices.Email.Services;
 
+using Application.Domains.MeritAwards.Awards.Models;
 using Constellation.Application.Interfaces.Services;
 using Constellation.Core.Models.Attachments.DTOs;
 using Constellation.Core.Models.Awards;
@@ -81,6 +82,29 @@ public sealed partial class Service : IEmailService
             viewModel.Title,
             recipients,
             ccRecipients: ccRecipients,
+            cancellationToken: cancellationToken);
+    }
+
+    public async Task<Result> SendAwardDigestToSchools(
+        List<EmailRecipient> recipients, 
+        List<StudentAwardTally> awards, 
+        CancellationToken cancellationToken = default)
+    {
+        SchoolAwardDigestEmailViewModel viewModel = new()
+        {
+            Title = $"Student Awards - Weekly update",
+            SenderName = "Aurora College",
+            SenderTitle = "",
+            Preheader = "",
+            Students = awards
+        };
+
+        return await BuildAndSendEmail(
+            viewModel,
+            EmailRecipient.AuroraCollege,
+            "Awards",
+            viewModel.Title,
+            recipients,
             cancellationToken: cancellationToken);
     }
 

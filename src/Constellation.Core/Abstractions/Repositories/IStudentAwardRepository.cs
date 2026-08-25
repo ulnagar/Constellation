@@ -15,6 +15,7 @@ public interface IStudentAwardRepository
     Task<List<StudentAward>> GetFromYear(int Year, CancellationToken cancellationToken = default);
     Task<List<StudentAward>> GetFromRecentMonths(int Months, CancellationToken cancellationToken = default);
     Task<List<StudentAward>> GetToRecentCount(int Count, CancellationToken cancellationToken = default);
+    Task<List<StudentAward>> GetAllIssuedAfter(DateTime cutoff, CancellationToken cancellationToken = default);
 
     void Insert(StudentAward studentAward);
     void Remove(StudentAward studentAward);
