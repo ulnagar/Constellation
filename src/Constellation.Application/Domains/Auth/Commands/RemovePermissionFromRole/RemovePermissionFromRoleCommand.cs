@@ -1,7 +1,7 @@
 ﻿namespace Constellation.Application.Domains.Auth.Commands.RemovePermissionFromRole;
 
 using Abstractions.Messaging;
-using Models.Auth;
+using Application.Models.Auth;
 using System;
 
 public sealed record RemovePermissionFromRoleCommand(

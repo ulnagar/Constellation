@@ -1,11 +1,11 @@
 ﻿namespace Constellation.Application.Domains.Auth.Commands.UpdateRole;
 
 using Abstractions.Messaging;
+using Application.Models.Identity.Errors;
 using Constellation.Application.Models.Identity;
 using Constellation.Application.Models.Identity.Repositories;
 using Core.Shared;
 using Interfaces.Repositories;
-using Models.Identity.Errors;
 using Serilog;
 using System;
 using System.Threading.Tasks;

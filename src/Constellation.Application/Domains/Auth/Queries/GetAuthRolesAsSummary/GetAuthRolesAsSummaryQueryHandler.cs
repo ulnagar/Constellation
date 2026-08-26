@@ -1,9 +1,9 @@
 ﻿namespace Constellation.Application.Domains.Auth.Queries.GetAuthRolesAsSummary;
 
 using Abstractions.Messaging;
+using Application.Models.Identity;
+using Application.Models.Identity.Repositories;
 using Core.Shared;
-using Models.Identity;
-using Models.Identity.Repositories;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 

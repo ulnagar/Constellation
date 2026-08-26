@@ -1,8 +1,8 @@
 ﻿namespace Constellation.Application.Domains.Auth.Queries.GetUserDetails;
 
+using Application.Models.Identity;
 using Core.Models.Auth;
 using Core.ValueObjects;
-using Models.Identity;
 using System;
 using System.Collections.Generic;
 

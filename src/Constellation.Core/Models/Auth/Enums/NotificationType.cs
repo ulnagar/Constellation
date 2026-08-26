@@ -8,4 +8,6 @@ public sealed class NotificationType : StringEnumeration<NotificationType>
 
     private NotificationType(string value, string name)
         : base(value, name) { }
+
+    public static IEnumerable<NotificationType> GetOptions => GetEnumerable;
 }

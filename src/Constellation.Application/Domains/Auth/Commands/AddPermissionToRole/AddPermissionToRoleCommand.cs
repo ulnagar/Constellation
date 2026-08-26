@@ -1,7 +1,7 @@
 ﻿namespace Constellation.Application.Domains.Auth.Commands.AddPermissionToRole;
 
 using Abstractions.Messaging;
-using Models.Auth;
+using Application.Models.Auth;
 using System;
 
 public sealed record AddPermissionToRoleCommand(

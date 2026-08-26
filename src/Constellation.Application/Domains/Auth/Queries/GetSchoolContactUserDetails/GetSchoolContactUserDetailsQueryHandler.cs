@@ -1,15 +1,14 @@
 ﻿namespace Constellation.Application.Domains.Auth.Queries.GetSchoolContactUserDetails;
 
 using Abstractions.Messaging;
+using Application.Models.Identity.Errors;
+using Application.Models.Identity.Repositories;
 using Core.Models.Auth;
 using Core.Models.Auth.Enums;
 using Core.Models.SchoolContacts;
 using Core.Models.SchoolContacts.Identifiers;
 using Core.Models.SchoolContacts.Repositories;
 using Core.Shared;
-using GetParentUserDetails;
-using Models.Identity.Errors;
-using Models.Identity.Repositories;
 using Serilog;
 
 internal sealed class GetSchoolContactUserDetailsQueryHandler
@@ -76,12 +75,15 @@ internal sealed class GetSchoolContactUserDetailsQueryHandler
                 passkey.CredentialId));
         }
 
+        List<NotificationType> optedInNotifications = await _identityRepository.GetOptedInNotificationTypesForUser(user.Id, cancellationToken);
+
         ContactUserResponse response = new(
             user.Id,
             user.Name,
             user.Email,
             roles,
-            passkeys);
+            passkeys,
+            optedInNotifications);
 
         return response;
     }

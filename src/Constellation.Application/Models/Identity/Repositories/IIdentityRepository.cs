@@ -38,4 +38,8 @@ public interface IIdentityRepository
     void Insert(AppUserPasskey passkey);
 
     Task<bool> UserHasOptedInToNotification(string email, NotificationType notificationType, CancellationToken cancellationToken = default);
+    Task<bool> UserHasOptedInToNotification(Guid id, NotificationType notificationType, CancellationToken cancellationToken = default);
+    Task<List<NotificationType>> GetOptedInNotificationTypesForUser(Guid id, CancellationToken cancellationToken = default);
+    void Insert(AppUserNotificationPreference preference);
+    void Remove(AppUserNotificationPreference preference);
 }

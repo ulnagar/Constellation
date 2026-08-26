@@ -9,6 +9,8 @@ internal sealed class AppUserNotificationPreferenceConfiguration : IEntityTypeCo
 {
     public void Configure(EntityTypeBuilder<AppUserNotificationPreference> builder)
     {
+        builder.ToTable("AspNetUserNotificationPreferences");
+
         builder
             .HasKey(entry => new { entry.AppUserId, entry.NotificationType });
 

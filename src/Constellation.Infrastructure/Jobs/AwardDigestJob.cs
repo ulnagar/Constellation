@@ -46,7 +46,7 @@ internal sealed class AwardDigestJob : IAwardDigestJob
 
     public async Task StartJob(Guid jobId, CancellationToken cancellationToken)
     {
-        DateTime cutoff = DateTime.Today.AddDays(-30);
+        DateTime cutoff = DateTime.Today.AddDays(-7);
 
         List<StudentAward> recentAwards = await _awardRepository.GetAllIssuedAfter(cutoff, cancellationToken);
 

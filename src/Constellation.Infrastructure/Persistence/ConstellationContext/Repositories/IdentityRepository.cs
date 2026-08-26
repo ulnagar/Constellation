@@ -1,7 +1,6 @@
 ﻿namespace Constellation.Infrastructure.Persistence.ConstellationContext.Repositories;
 
 using Application.Models.Auth;
-using Application.Models.Identity.Enums;
 using Application.Models.Identity.Repositories;
 using Constellation.Application.Domains.Auth.Queries.GetFilteredUsers;
 using Constellation.Application.Models.Identity;
@@ -273,10 +272,27 @@ public sealed class IdentityRepository : IIdentityRepository
         if (user is null)
             return false;
 
-        return await _context
-            .Set<AppUserNotificationPreference>()
-            .AnyAsync(entry => entry.AppUserId == user.Id && entry.NotificationType == notificationType,
-                cancellationToken);
+        return await UserHasOptedInToNotification(user.Id, notificationType, cancellationToken);
     }
 
+    public async Task<bool> UserHasOptedInToNotification(
+        Guid id,
+        NotificationType notificationType,
+        CancellationToken cancellationToken = default) =>
+        await _context
+            .Set<AppUserNotificationPreference>()
+            .AnyAsync(entry => entry.AppUserId == id && entry.NotificationType == notificationType,
+                cancellationToken);
+    
+    public async Task<List<NotificationType>> GetOptedInNotificationTypesForUser(
+        Guid id,
+        CancellationToken cancellationToken = default) =>
+        await _context
+            .Set<AppUserNotificationPreference>()
+            .Where(entry => entry.AppUserId == id)
+            .Select(entry => entry.NotificationType)
+            .ToListAsync(cancellationToken);
+
+    public void Insert(AppUserNotificationPreference preference) => _context.Set<AppUserNotificationPreference>().Add(preference);
+    public void Remove(AppUserNotificationPreference preference) => _context.Set<AppUserNotificationPreference>().Remove(preference);
 }

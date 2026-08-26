@@ -1,14 +1,14 @@
 ﻿namespace Constellation.Application.Domains.Auth.Commands.AddPermissionToRole;
 
 using Abstractions.Messaging;
+using Application.Models.Auth;
+using Application.Models.Identity;
+using Application.Models.Identity.Errors;
+using Application.Models.Identity.Repositories;
 using Core.Errors;
 using Core.Shared;
 using Interfaces.Services;
 using Microsoft.AspNetCore.Identity;
-using Models.Auth;
-using Models.Identity;
-using Models.Identity.Errors;
-using Models.Identity.Repositories;
 using Serilog;
 using System.Threading.Tasks;
 

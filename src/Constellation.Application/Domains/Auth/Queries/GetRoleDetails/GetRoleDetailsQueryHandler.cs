@@ -1,13 +1,13 @@
 ﻿namespace Constellation.Application.Domains.Auth.Queries.GetRoleDetails;
 
 using Abstractions.Messaging;
+using Application.Models.Auth;
+using Application.Models.Identity;
+using Application.Models.Identity.Errors;
 using Constellation.Application.Models.Identity.Repositories;
 using Core.Abstractions.Services;
 using Core.Models.Auth;
 using Core.Shared;
-using Models.Auth;
-using Models.Identity;
-using Models.Identity.Errors;
 using Serilog;
 
 internal sealed class GetRoleDetailsQueryHandler

@@ -1,11 +1,11 @@
 ﻿namespace Constellation.Application.Domains.Auth.Commands.RemoveUserFromRole;
 
 using Abstractions.Messaging;
+using Application.Models.Identity;
 using Core.Errors;
 using Core.Models.Auth;
 using Core.Shared;
 using Microsoft.AspNetCore.Identity;
-using Models.Identity;
 using System.Threading;
 using System.Threading.Tasks;
 

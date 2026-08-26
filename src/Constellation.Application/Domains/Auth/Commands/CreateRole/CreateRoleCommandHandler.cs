@@ -1,10 +1,10 @@
 ﻿namespace Constellation.Application.Domains.Auth.Commands.CreateRole;
 
 using Abstractions.Messaging;
+using Application.Models.Identity;
+using Application.Models.Identity.Repositories;
 using Core.Errors;
 using Core.Shared;
-using Models.Identity;
-using Models.Identity.Repositories;
 using Serilog;
 using System;
 using System.Threading.Tasks;

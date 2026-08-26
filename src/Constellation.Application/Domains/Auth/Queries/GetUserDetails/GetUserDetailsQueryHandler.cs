@@ -1,12 +1,12 @@
 ﻿namespace Constellation.Application.Domains.Auth.Queries.GetUserDetails;
 
 using Abstractions.Messaging;
+using Application.Models.Auth;
+using Application.Models.Identity;
+using Application.Models.Identity.Errors;
+using Application.Models.Identity.Repositories;
 using Core.Models.Auth;
 using Core.Shared;
-using Models.Auth;
-using Models.Identity;
-using Models.Identity.Errors;
-using Models.Identity.Repositories;
 using Serilog;
 using System.Security.Claims;
 using System.Threading.Tasks;

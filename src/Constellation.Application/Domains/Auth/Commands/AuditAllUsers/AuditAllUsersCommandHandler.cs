@@ -1,6 +1,8 @@
 ﻿namespace Constellation.Application.Domains.Auth.Commands.AuditAllUsers;
 
 using Abstractions.Messaging;
+using Application.Models.Identity;
+using Application.Models.Identity.Repositories;
 using Core.Abstractions.Repositories;
 using Core.Models.Auth;
 using Core.Models.Auth.Enums;
@@ -19,8 +21,6 @@ using Core.Shared;
 using Core.ValueObjects;
 using Interfaces.Repositories;
 using Microsoft.AspNetCore.Identity;
-using Models.Identity;
-using Models.Identity.Repositories;
 using Serilog;
 using System.Collections.Generic;
 using System.Linq;
