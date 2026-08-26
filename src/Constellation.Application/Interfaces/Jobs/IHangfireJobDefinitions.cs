@@ -20,6 +20,8 @@ public interface IAttachmentManagementJob : IHangfireJob { }
 
 public interface IAttendanceReportJob : IHangfireJob  { }
 
+public interface IAwardDigestJob : IHangfireJob { }
+
 public interface IClassMonitorJob : IHangfireJob { }
 
 public interface IEnrolmentTimingJob : IHangfireJob { }

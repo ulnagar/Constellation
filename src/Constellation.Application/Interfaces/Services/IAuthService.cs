@@ -1,6 +1,7 @@
 ﻿namespace Constellation.Application.Interfaces.Services;
 
 using Core.Models.Auth;
+using Core.Models.Auth.Enums;
 using Models.Auth;
 using System.Security.Claims;
 

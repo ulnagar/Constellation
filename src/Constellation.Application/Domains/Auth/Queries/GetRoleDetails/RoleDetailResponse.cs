@@ -1,10 +1,9 @@
 ﻿namespace Constellation.Application.Domains.Auth.Queries.GetRoleDetails;
 
+using Application.Models.Auth;
+using Application.Models.Identity.Enums;
 using Core.Models.Auth;
 using Core.ValueObjects;
-using Models.Auth;
-using Models.Identity;
-using Models.Identity.Enums;
 using System;
 using System.Collections.Generic;
 

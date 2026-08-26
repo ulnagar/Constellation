@@ -4,6 +4,7 @@ using Application.Models.Auth;
 using Application.Models.Identity;
 using Constellation.Application.Interfaces.Services;
 using Constellation.Core.Models.Auth;
+using Core.Models.Auth.Enums;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Caching.Memory;
@@ -142,4 +143,5 @@ internal class AuthService : IAuthService
 
     public void InvalidateRoleClaimsCache(string roleName) =>
         _cache.Remove($"role-claims:{roleName}");
+
 }

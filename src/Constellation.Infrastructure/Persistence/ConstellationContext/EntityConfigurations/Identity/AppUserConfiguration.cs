@@ -55,5 +55,11 @@ internal sealed class AppUserConfiguration : IEntityTypeConfiguration<AppUser>
         builder
             .Navigation(user => user.PasskeyCredentials)
             .AutoInclude();
+
+        builder
+            .HasMany<AppUserNotificationPreference>()
+            .WithOne()
+            .HasForeignKey(entry => entry.AppUserId)
+            .OnDelete(DeleteBehavior.Cascade);
     }
 }

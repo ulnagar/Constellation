@@ -1,0 +1,48 @@
+@using Constellation.Core.Extensions
+@model Constellation.Infrastructure.Templates.Views.Emails.Awards.SchoolAwardDigestEmailViewModel
+
+@{
+    Layout = "/Views/Shared/EmailLayout.cshtml";
+
+    ViewData["Preheader"] = Model.Preheader;
+    ViewData["Title"] = Model.Title;
+    ViewData["SenderName"] = Model.SenderName;
+    ViewData["SenderTitle"] = Model.SenderTitle;
+}
+
+<p>The following students received awards from Aurora College in the past week:</p>
+
+<dl>
+    @foreach (var student in Model.Students.OrderBy(entry => entry.Grade).ThenBy(entry => entry.Student.SortOrder))
+    {
+        <dt><b>@student.Student.DisplayName - @student.Grade.AsName()</b></dt>
+        <dd>
+            @if (student.Astras > 0)
+            {
+                <div>Astra: @student.Astras</div>
+            }
+            
+            @if (student.Stellars > 0)
+            {
+                <div>Stellar: @student.Stellars</div>
+            }
+            
+            @if (student.Galaxies > 0)
+            {
+                <div>Galaxy Medal: @student.Galaxies</div>
+            }
+            
+            @if (student.Universals > 0)
+            {
+                <div>Universal Achiever: @student.Universals</div>
+            }
+            
+            @if (student.Other > 0)
+            {
+                <div>Other: @student.Other</div>
+            }
+        </dd>
+    }
+</dl>
+
+<p>For more information, please log in to the Constellation Schools Portal at <a href="@Model.Link" target="_blank">@Model.Link</a></p>

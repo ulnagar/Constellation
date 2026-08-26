@@ -1,9 +1,9 @@
 ﻿namespace Constellation.Application.Domains.Auth.Queries.DoesStaffMemberHaveRegisteredPasskey;
 
+using Application.Models.Identity.Repositories;
 using Constellation.Application.Abstractions.Messaging;
 using Core.Models.Auth;
 using Core.Shared;
-using Models.Identity.Repositories;
 
 internal sealed class DoesStaffMemberHaveRegisteredPasskeyQueryHandler
     : IQueryHandler<DoesStaffMemberHaveRegisteredPasskeyQuery, bool>

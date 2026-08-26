@@ -2,6 +2,7 @@
 
 using Auth;
 using Core.Models.Auth;
+using Core.Models.Auth.Enums;
 using Domains.Auth.Queries.GetFilteredUsers;
 using Microsoft.AspNetCore.Identity;
 using System.Security.Claims;
@@ -35,4 +36,10 @@ public interface IIdentityRepository
     Task<AppUserPasskey?> GetPasskeyById(byte[] id, CancellationToken cancellationToken = default);
     Task<bool> DoesCredentialAlreadyExist(byte[] id, CancellationToken cancellationToken = default);
     void Insert(AppUserPasskey passkey);
+
+    Task<bool> UserHasOptedInToNotification(string email, NotificationType notificationType, CancellationToken cancellationToken = default);
+    Task<bool> UserHasOptedInToNotification(Guid id, NotificationType notificationType, CancellationToken cancellationToken = default);
+    Task<List<NotificationType>> GetOptedInNotificationTypesForUser(Guid id, CancellationToken cancellationToken = default);
+    void Insert(AppUserNotificationPreference preference);
+    void Remove(AppUserNotificationPreference preference);
 }

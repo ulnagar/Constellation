@@ -1,7 +1,7 @@
 ﻿namespace Constellation.Application.Domains.Auth.Commands.CreateRole;
 
 using Abstractions.Messaging;
-using Models.Identity.Enums;
+using Application.Models.Identity.Enums;
 using System;
 
 public sealed record CreateRoleCommand(

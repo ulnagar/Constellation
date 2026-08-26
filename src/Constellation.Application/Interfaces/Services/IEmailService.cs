@@ -25,6 +25,7 @@ using Core.Shared;
 using Core.ValueObjects;
 using Domains.Attendance.Absences.Commands.ConvertAbsenceToAbsenceEntry;
 using Domains.Attendance.Absences.Commands.ConvertResponseToAbsenceExplanation;
+using Domains.MeritAwards.Awards.Models;
 using DTOs;
 using DTOs.EmailRequests;
 using System;
@@ -81,6 +82,7 @@ public interface IEmailService
     Task SendAwardCertificateParentEmail(List<EmailRecipient> recipients, AttachmentResponse certificate, StudentAward award, Student student, StaffMember teacher, CancellationToken cancellationToken = default);
     Task<Result<EmailMessage>> SendAwardNominationNotificationEmailToParents(List<EmailRecipient> recipients, List<EmailRecipient> ccRecipients, Name parent, Name student, string school, DateOnly deliveryDate, List<Nomination> awards, CancellationToken cancellationToken = default);
     Task<Result<EmailMessage>> SendAwardNominationNotificationEmailToSchools(List<EmailRecipient> recipients, List<EmailRecipient> ccRecipients, string school, DateOnly deliveryDate, Dictionary<Name, List<Nomination>> students, CancellationToken cancellationToken = default);
+    Task<Result> SendAwardDigestToSchools(List<EmailRecipient> recipients, List<StudentAwardTally> awards, CancellationToken cancellationToken = default);
 
     // Cover Emails
     Task SendCancelledCoverEmail(Cover cover, Offering offering, EmailRecipient coveringTeacher, List<EmailRecipient> primaryRecipients, List<EmailRecipient> secondaryRecipients, TimeOnly startTime, TimeOnly endTime, string teamLink, List<Attachment> attachments, CancellationToken cancellationToken = default);

@@ -1,6 +1,7 @@
 ﻿namespace Constellation.Application.Domains.Auth.Events.AppIdentityCodeUpdatedIntegrationEvent;
 
 using Abstractions.Messaging;
+using Application.Models.Identity;
 using Commands.AuditAllUsers;
 using Constellation.Application.Models.Auth;
 using Constellation.Application.Models.Identity.Enums;
@@ -9,7 +10,6 @@ using Core.IntegrationEvents;
 using Core.Models.Auth;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
-using Models.Identity;
 using System.Security.Claims;
 using System.Threading.Tasks;
 

@@ -24,6 +24,7 @@ public static class PresentationServiceExtensions
 
         services.AddMvc(options =>
         {
+            options.ModelBinderProviders.Insert(0, new NotificationSettingModelBinderProvider());
             options.ModelBinderProviders.Insert(0, new StudentFlagBinderProvider());
             options.ModelBinderProviders.Insert(0, new StronglyTypedIdBinderProvider());
             options.ModelBinderProviders.Insert(0, new StringEnumerationBinderProvider());

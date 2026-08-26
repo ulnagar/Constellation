@@ -74,6 +74,14 @@ internal sealed class StudentAwardRepository : IStudentAwardRepository
             .Take(Count)
             .ToListAsync(cancellationToken);
 
+    public async Task<List<StudentAward>> GetAllIssuedAfter(
+        DateTime cutoff,
+        CancellationToken cancellationToken = default) =>
+        await _context
+            .Set<StudentAward>()
+            .Where(entry => entry.AwardedOn > cutoff)
+            .ToListAsync(cancellationToken);
+
     public void Insert(StudentAward studentAward) =>
         _context.Set<StudentAward>().Add(studentAward);
 

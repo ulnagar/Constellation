@@ -1,6 +1,8 @@
 ﻿namespace Constellation.Application.Domains.Auth.Queries.GetParentUserDetails;
 
 using Abstractions.Messaging;
+using Application.Models.Identity.Errors;
+using Application.Models.Identity.Repositories;
 using Core.Abstractions.Repositories;
 using Core.Enums;
 using Core.Models.Auth;
@@ -12,8 +14,6 @@ using Core.Models.Students.Identifiers;
 using Core.Models.Students.Repositories;
 using Core.Shared;
 using Core.ValueObjects;
-using Models.Identity.Errors;
-using Models.Identity.Repositories;
 using Serilog;
 using System.Threading.Tasks;
 

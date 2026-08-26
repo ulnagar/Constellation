@@ -1,12 +1,12 @@
 ﻿namespace Constellation.Application.Domains.Auth.Commands.UpdateUser;
 
 using Abstractions.Messaging;
+using Application.Models.Identity.Errors;
+using Application.Models.Identity.Repositories;
 using Core.Models.Auth;
 using Core.Shared;
 using Core.ValueObjects;
 using Interfaces.Repositories;
-using Models.Identity.Errors;
-using Models.Identity.Repositories;
 using Serilog;
 
 internal sealed class UpdateUserCommandHandler
