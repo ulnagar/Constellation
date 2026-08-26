@@ -13,6 +13,7 @@ public sealed partial class Service : IEmailService
         EmailRecipient receiver,
         string subject,
         string messageBody,
+        string module,
         CancellationToken cancellationToken = default)
     {
         EmergencyConsoleEmailViewModel viewModel = new()
@@ -27,7 +28,7 @@ public sealed partial class Service : IEmailService
         return await BuildAndSendEmail(
             viewModel,
             sender,
-            "Messaging",
+            module,
             subject,
             [receiver],
             cancellationToken: cancellationToken);

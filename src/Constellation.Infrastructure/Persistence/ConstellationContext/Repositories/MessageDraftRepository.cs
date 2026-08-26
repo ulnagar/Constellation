@@ -25,6 +25,7 @@ internal sealed class MessageDraftRepository : IMessageDraftRepository
     private async Task<MessageDraft> GetOrCreateDraft(
         ConstellationDbContext context,
         Guid userId,
+        string module = "",
         CancellationToken cancellationToken = default)
     {
         MessageDraft? draft = await context
@@ -33,8 +34,11 @@ internal sealed class MessageDraftRepository : IMessageDraftRepository
 
         if (draft is not null)
             return draft;
-        
-        draft = new(userId);
+
+        if (string.IsNullOrWhiteSpace(module))
+            draft = new(userId);
+        else
+            draft = new(userId, module);
 
         AppUser? user = await context
             .Set<AppUser>()
@@ -56,11 +60,12 @@ internal sealed class MessageDraftRepository : IMessageDraftRepository
 
     public async Task<MessageDraft> GetDraft(
         Guid userId,
+        string module = "",
         CancellationToken cancellationToken = default)
     {
         await using ConstellationDbContext context = await _dbContextFactory.CreateDbContextAsync(cancellationToken);
 
-        return await GetOrCreateDraft(context, userId, cancellationToken);
+        return await GetOrCreateDraft(context, userId, module, cancellationToken);
     }
 
     public async Task<Result> AddRecipient(
@@ -70,7 +75,7 @@ internal sealed class MessageDraftRepository : IMessageDraftRepository
     {
         await using ConstellationDbContext context = await _dbContextFactory.CreateDbContextAsync(cancellationToken);
 
-        MessageDraft draft = await GetOrCreateDraft(context, userId, cancellationToken);
+        MessageDraft draft = await GetOrCreateDraft(context, userId, string.Empty, cancellationToken);
 
         if (recipient.EmailAddress != EmailAddress.None && draft.Recipients.Any(entry => entry.EmailAddress == recipient.EmailAddress))
             return Result.Failure(MessageDraftErrors.AddRecipient.DuplicateEmailFound);
@@ -92,7 +97,7 @@ internal sealed class MessageDraftRepository : IMessageDraftRepository
     {
         await using ConstellationDbContext context = await _dbContextFactory.CreateDbContextAsync(cancellationToken);
 
-        MessageDraft draft = await GetOrCreateDraft(context, userId, cancellationToken);
+        MessageDraft draft = await GetOrCreateDraft(context, userId, string.Empty, cancellationToken);
 
         MessageRecipient? recipient = draft.Recipients.FirstOrDefault(recipient => recipient.Id == recipientId);
 
@@ -113,7 +118,7 @@ internal sealed class MessageDraftRepository : IMessageDraftRepository
     {
         await using ConstellationDbContext context = await _dbContextFactory.CreateDbContextAsync(cancellationToken);
 
-        MessageDraft draft = await GetOrCreateDraft(context, userId, cancellationToken);
+        MessageDraft draft = await GetOrCreateDraft(context, userId,string.Empty, cancellationToken);
 
         apply(draft);
         draft.UpdatedAt = DateTimeOffset.UtcNow;

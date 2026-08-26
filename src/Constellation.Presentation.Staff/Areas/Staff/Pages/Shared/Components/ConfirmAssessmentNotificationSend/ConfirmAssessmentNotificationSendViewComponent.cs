@@ -6,6 +6,8 @@ public sealed class ConfirmAssessmentNotificationSendViewComponent : ViewCompone
 {
     public IViewComponentResult Invoke()
     {
-        return View();
+        ConfirmAssessmentNotificationSendSelection viewModel = new();
+
+        return View(viewModel);
     }
 }

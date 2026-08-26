@@ -1,0 +1,46 @@
+@model Constellation.Presentation.Staff.Areas.Staff.Pages.Shared.Components.CreateMessageDraftFromAssessment.CreateMessageDraftFromAssessmentSelection
+
+<form asp-page-handler="CreateDraft" method="post">
+    <div class="modal fade" tabindex="-1" id="create-draft-modal">
+        <div class="modal-dialog wide">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Send Message</h5>
+                </div>
+                <div class="modal-body">
+                    <div class="fw-bold">
+                        Warning: This will remove any message draft in progress.
+                    </div>
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" asp-for="IncludeStudents" id="includeStudents">
+                        <label class="form-check-label" for="includeStudents">
+                            Include Students
+                        </label>
+                    </div>
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" asp-for="IncludeParents" id="includeParents">
+                        <label class="form-check-label" for="includeParents">
+                            Include Parents
+                        </label>
+                    </div>
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" asp-for="IncludeSchoolContacts" id="includeSchoolContacts">
+                        <label class="form-check-label" for="includeSchoolContacts">
+                            Include ACCs
+                        </label>
+                    </div>
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" asp-for="IncludeClassroomTeachers" id="includeClassroomTeachers">
+                        <label class="form-check-label" for="includeClassroomTeachers">
+                            Include Classroom Teachers
+                        </label>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-primary">Add Recipients</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>

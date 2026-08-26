@@ -1,4 +1,4 @@
-@model Constellation.Infrastructure.Templates.Views.Emails.Assessments.AssessmentNotificationForSchoolsEmailViewModel
+@model Constellation.Infrastructure.Templates.Views.Emails.Assessments.AssessmentNotificationEmailViewModel
 
 @{
     Layout = "/Views/Shared/EmailLayout.cshtml";
@@ -11,7 +11,7 @@
 
 <h3>Assessment Notification</h3>
 
-<p>A new assessment has been released for students shared with your school.</p>
+<p>A new assessment has been released in Constellation.</p>
 
 <dl>
     <dt>Course</dt>
@@ -24,4 +24,4 @@
     <dd>@Model.DueDate.ToLongDateString()</dd>
 </dl>
 
-<p>Please check the <a href="@Model.PortalLink" target="_blank">Aurora College Schools Portal</a> for details and any approved student provisions for this assessment.</p>
+<p>Please check the <a href="@Model.PortalLink" target="_blank">Aurora College Constellation Portal</a> to review the assessment information and any supporting documents provided.</p>

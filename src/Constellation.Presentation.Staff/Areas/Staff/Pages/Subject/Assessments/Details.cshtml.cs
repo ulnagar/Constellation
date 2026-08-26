@@ -9,7 +9,7 @@ using Application.Domains.Assessments.Assessments.Commands.LinkAssessmentToCanva
 using Application.Domains.Assessments.Assessments.Commands.RemoveDownloadFromAssessment;
 using Application.Domains.Assessments.Assessments.Commands.RemoveInstructionFromAssessment;
 using Application.Domains.Assessments.Assessments.Commands.RemoveStudentFromAssessment;
-using Application.Domains.Assessments.Assessments.Commands.SendAssessmentNotificationToSchools;
+using Application.Domains.Assessments.Assessments.Commands.SendAssessmentNotification;
 using Application.Domains.Assessments.Assessments.Commands.UploadSubmissionToCanvas;
 using Application.Domains.Assessments.Assessments.Queries.GetAssessmentDetailsById;
 using Application.Domains.Assessments.Assessments.Queries.GetAssessmentDownload;
@@ -20,6 +20,7 @@ using Application.Domains.Assessments.Assessments.Queries.GetCanvasCoursesAndAss
 using Application.Domains.Assessments.Provisions.Models;
 using Application.Domains.Assessments.Provisions.Queries.GetAssessmentProvisions;
 using Application.Domains.Assessments.Provisions.Queries.GetCurrentStudentProvisionsByStudentId;
+using Application.Domains.Messaging.Drafts.Commands.AddAssessmentRecipientsToDraft;
 using Application.Domains.Students.Models;
 using Application.Domains.Students.Queries.GetStudentById;
 using Application.DTOs;
@@ -43,6 +44,8 @@ using Presentation.Shared.Helpers.Attributes;
 using Serilog;
 using Shared.Components.AddDownloadToAssessment;
 using Shared.Components.AddSubmissionToAssessment;
+using Shared.Components.ConfirmAssessmentNotificationSend;
+using Shared.Components.CreateMessageDraftFromAssessment;
 using Shared.Components.LinkAssessmentToCanvas;
 using Shared.PartialViews.AddAssessmentProvisionForStudent;
 using Shared.PartialViews.ConfirmRemoveDocumentFromAssessmentModal;
@@ -704,11 +707,14 @@ public class DetailsModel : BasePageModel
         return RedirectToPage();
     }
     
-    public async Task<IActionResult> OnPostSendNotifications()
+    public async Task<IActionResult> OnPostSendNotifications(ConfirmAssessmentNotificationSendSelection viewModel)
     {
-        // Send emails
-
-        SendAssessmentNotificationToSchoolsCommand command = new(Id);
+        SendAssessmentNotificationCommand command = new(
+            Id,
+            viewModel.IncludeStudents,
+            viewModel.IncludeParents,
+            viewModel.IncludeSchoolContacts,
+            viewModel.IncludeClassroomTeachers);
 
         var result = await _mediator.Send(command);
 
@@ -722,5 +728,30 @@ public class DetailsModel : BasePageModel
         }
 
         return RedirectToPage();
+    }
+
+    public async Task<IActionResult> OnPostCreateDraft(CreateMessageDraftFromAssessmentSelection viewModel)
+    {
+        AddAssessmentRecipientsToDraftCommand command = new(
+            Id, 
+            User.GetUserId(), 
+            viewModel.IncludeStudents,
+            viewModel.IncludeParents, 
+            viewModel.IncludeSchoolContacts, 
+            viewModel.IncludeClassroomTeachers);
+
+        Result result = await _mediator.Send(command);
+
+        if (result.IsFailure)
+        {
+            ModalContent = ErrorDisplay.Create(result.Error);
+        }
+        else
+        {
+            ModalContent = FeedbackDisplay.Create("Draft Created", "The draft message has been created", "Ok", "btn-success");
+        }
+
+        await PreparePage();
+        return Page();
     }
 }

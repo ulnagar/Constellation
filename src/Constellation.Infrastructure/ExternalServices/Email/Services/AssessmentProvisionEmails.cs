@@ -47,14 +47,14 @@ public sealed partial class Service : IEmailService
             cancellationToken: cancellationToken);
     }
 
-    public async Task<Dictionary<Result, List<EmailRecipient>>> SendAssessmentNotificationToSchools(
+    public async Task<Dictionary<Result, List<EmailRecipient>>> SendAssessmentNotification(
         Assessment assessment,
         List<EmailRecipient> recipients,
         CancellationToken cancellationToken = default)
     {
-        AssessmentNotificationForSchoolsEmailViewModel viewModel = new()
+        AssessmentNotificationEmailViewModel viewModel = new()
         {
-            Title = "Assessment Notification",
+            Title = $"Assessment Notification - {assessment.Name}",
             SenderName = "Aurora College",
             SenderTitle = "",
             Preheader = "",

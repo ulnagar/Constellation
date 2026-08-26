@@ -15,12 +15,20 @@ public sealed class MessageDraft
         UpdatedAt = DateTime.UtcNow;
     }
 
+    public MessageDraft(Guid userId, string module)
+    {
+        UserId = userId;
+        UpdatedAt = DateTime.UtcNow;
+        SendingModule = module;
+    }
+
     public Guid UserId { get; init; }
     public MessageType Type { get; set; } = MessageType.Email;
     public MessageSender? Sender { get; set; } = EmailRecipient.NoReply;
     public IReadOnlyList<MessageRecipient> Recipients => _recipients.AsReadOnly(); 
     public string? Subject { get; set; }
     public string Body { get; set; } = string.Empty;
+    public string SendingModule { get; init; } = "Messaging";
     public DateTimeOffset UpdatedAt { get; set; }
 
     public void AddRecipient(MessageRecipient recipient) =>

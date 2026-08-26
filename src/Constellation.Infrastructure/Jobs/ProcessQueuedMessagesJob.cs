@@ -92,7 +92,7 @@ internal sealed class ProcessQueuedMessagesJob : IProcessQueuedMessagesJob
 
                 if (emailRecipient.IsSuccess)
                 {
-                    Result result = await _emailService.SendQueuedMessage(message.Sender!, emailRecipient.Value, message.Subject ?? string.Empty, message.Body, cancellationToken);
+                    Result result = await _emailService.SendQueuedMessage(message.Sender!, emailRecipient.Value, message.Subject ?? string.Empty, message.Body, message.SendingModule, cancellationToken);
                     
                     if (result.IsSuccess)
                         sent = true;

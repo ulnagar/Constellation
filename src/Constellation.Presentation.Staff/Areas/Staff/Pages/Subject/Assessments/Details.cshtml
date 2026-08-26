@@ -22,6 +22,8 @@
         {
             <button class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#confirm-notifications-modal">Send Notifications</button>
         }
+
+        <button class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#create-draft-modal">Send Message</button>
     }
 
     <a href="javascript:history.go(-1)" class="btn btn-danger btn-pull-right">Go Back</a>
@@ -376,6 +378,7 @@
     available-to="Model.Assessment.AvailableTo" />
 <vc:add-submission-to-assessment assessment-id="Model.Id" />
 <vc:confirm-assessment-notification-send />
+<vc:create-message-draft-from-assessment />
 
 <div class="modal fade" tabindex="-1" id="link-canvas-modal">
 </div>

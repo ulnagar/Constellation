@@ -3,9 +3,9 @@
 using Constellation.Infrastructure.Templates.Views.Shared;
 using System;
 
-public sealed class AssessmentNotificationForSchoolsEmailViewModel : EmailLayoutBaseViewModel
+public sealed class AssessmentNotificationEmailViewModel : EmailLayoutBaseViewModel
 {
-    private const string _viewLocation = "/Views/Emails/Assessments/AssessmentNotificationForSchoolsEmail.cshtml";
+    private const string _viewLocation = "/Views/Emails/Assessments/AssessmentNotificationEmail.cshtml";
     public override string ViewLocation => _viewLocation;
 
     public string PortalLink => BaseUrl;
