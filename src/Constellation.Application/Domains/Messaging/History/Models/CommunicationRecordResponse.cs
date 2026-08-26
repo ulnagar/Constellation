@@ -11,6 +11,7 @@ public sealed record CommunicationRecordResponse(
     CommunicationRecordResponse.Sender From,
     List<CommunicationRecordResponse.Recipient> Recipients,
     string Subject,
+    string SendingModule,
     MessageStatus Status,
     DateTimeOffset Timestamp)
 {

@@ -12,6 +12,8 @@ public interface IMessagingHistoryQueryService
     Task<PaginatedList<CommunicationRecordResponse>> GetRecentHistory(
         string? searchQuery,
         MessagingHistoryDateRange dateRange,
+        int sortFilter,
+        string sortDirection,
         int pageNumber,
         int pageSize,
         CancellationToken cancellationToken = default);

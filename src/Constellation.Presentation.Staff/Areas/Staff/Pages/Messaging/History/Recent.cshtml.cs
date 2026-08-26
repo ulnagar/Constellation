@@ -55,13 +55,21 @@ public class RecentModel : BasePageModel
         int length,
         string? searchValue,
         MessagingHistoryDateRange dateRange,
+        [FromQuery(Name = "order[0][column]")] int sortColumn,
+        [FromQuery(Name = "order[0][dir]")] string sortDirection,
         CancellationToken cancellationToken = default)
     {
         int pageNumber = (start / length) + 1;
         int pageSize = length;
 
         var result = await _mediator.Send(
-            new GetRecentCommunicationsHistoryQuery(searchValue, dateRange, pageNumber, pageSize),
+            new GetRecentCommunicationsHistoryQuery(
+                searchValue, 
+                dateRange, 
+                sortColumn,
+                sortDirection,
+                pageNumber, 
+                pageSize),
             cancellationToken);
 
         if (result.IsFailure)
@@ -85,6 +93,7 @@ public class RecentModel : BasePageModel
             fromContact = message.From.Contact,
             recipientsHtml = BuildRecipientsHtml(message),
             subject = message.Subject,
+            module = message.SendingModule,
             status = message.Status.Name,
             viewUrl = Url.Page("/Messaging/History/ViewMessage", new { area = "Staff", id = message.Id, type = message.Type.Value })
         });

@@ -13,6 +13,7 @@ using Microsoft.EntityFrameworkCore;
 using Persistence.ConstellationContext;
 using Persistence.ConstellationContext.Views;
 using System;
+using System.DirectoryServices;
 using System.Linq.Expressions;
 
 internal class MessagingHistoryQueryService : IMessagingHistoryQueryService
@@ -28,11 +29,13 @@ internal class MessagingHistoryQueryService : IMessagingHistoryQueryService
     public async Task<PaginatedList<CommunicationRecordResponse>> GetRecentHistory(
         string? searchQuery, 
         MessagingHistoryDateRange dateRange,
+        int sortColumn,
+        string sortDirection,
         int pageNumber, 
         int pageSize, 
         CancellationToken cancellationToken = default)
     {
-        var query = _context.Set<MessagingHistoryIndexRow>().AsQueryable();
+        IQueryable<MessagingHistoryIndexRow> query = _context.Set<MessagingHistoryIndexRow>().AsQueryable();
 
         DateTimeOffset? cutoff = dateRange switch
         {
@@ -63,6 +66,7 @@ internal class MessagingHistoryQueryService : IMessagingHistoryQueryService
                 query = query.Where(r => terms.All(t =>
                     r.Subject.Contains(t) ||
                     r.FromName.Contains(t) ||
+                    r.SendingModule.Contains(t) ||
                     (r.FromAddress != null && r.FromAddress.Contains(t)) ||
                     (r.RecipientSearchText != null && r.RecipientSearchText.Contains(t)) ||
                     (r.BodyText != null && r.BodyText.Contains(t))));
@@ -71,36 +75,44 @@ internal class MessagingHistoryQueryService : IMessagingHistoryQueryService
 
         int totalCount = await query.CountAsync(cancellationToken);
 
-        var page = await query
-            .OrderByDescending(x => x.CreatedAt)
-            .ThenByDescending(x => x.Id)
+        IQueryable<MessagingHistoryIndexRow> sortedQuery = sortColumn switch
+        {
+            0 => sortDirection == "asc" ? query.OrderBy(r => r.MessageType).ThenByDescending(x => x.Id) : query.OrderByDescending(r => r.MessageType).ThenByDescending(x => x.Id),
+            1 => sortDirection == "asc" ? query.OrderBy(r => r.CreatedAt).ThenByDescending(x => x.Id) : query.OrderByDescending(r => r.CreatedAt).ThenByDescending(x => x.Id),
+            2 => sortDirection == "asc" ? query.OrderBy(r => r.FromName).ThenByDescending(x => x.Id) : query.OrderByDescending(r => r.FromName).ThenByDescending(x => x.Id),
+            4 => sortDirection == "asc" ? query.OrderBy(r => r.Subject).ThenByDescending(x => x.Id) : query.OrderByDescending(r => r.Subject).ThenByDescending(x => x.Id),
+            5 => sortDirection == "asc" ? query.OrderBy(r => r.SendingModule).ThenByDescending(x => x.Id) : query.OrderByDescending(r => r.SendingModule).ThenByDescending(x => x.Id),
+            _ => query.OrderByDescending(r => r.CreatedAt).ThenByDescending(x => x.Id)
+        };
+
+        List<MessagingHistoryIndexRow> page = await sortedQuery
             .Skip((pageNumber - 1) * pageSize)
             .Take(pageSize)
             .ToListAsync(cancellationToken);
 
-        var emailIds = page
+        List<EmailId> emailIds = page
             .Where(x => x.MessageTypeValue == MessageType.Email)
             .Select(x => EmailId.FromValue(x.Id))
             .ToList();
 
-        var smsIds = page
+        List<SmsId> smsIds = page
             .Where(x => x.MessageTypeValue == MessageType.SMS)
             .Select(x => SmsId.FromValue(x.Id))
             .ToList();
 
-        var emails = await _context.Set<EmailMessage>()
+        List<EmailMessage> emails = await _context.Set<EmailMessage>()
             .Where(e => emailIds.Contains(e.Id))
             .ToListAsync(cancellationToken);
 
-        var sms = await _context.Set<SmsMessage>()
+        List<SmsMessage> sms = await _context.Set<SmsMessage>()
             .Where(s => smsIds.Contains(s.Id))
             .ToListAsync(cancellationToken);
 
-        var responseById = emails.Select(MapEmailToResponse)
+        Dictionary<string?, CommunicationRecordResponse> responseById = emails.Select(MapEmailToResponse)
             .Concat(sms.Select(MapSmsToResponse))
             .ToDictionary(r => r.Id.ToString());
 
-        var records = page
+        List<CommunicationRecordResponse> records = page
             .Select(entry => responseById[entry.Id.ToString()])
             .ToList();
 
@@ -156,6 +168,7 @@ internal class MessagingHistoryQueryService : IMessagingHistoryQueryService
             new(email.From.Name, email.From.Destination),
             recipients,
             email.Subject,
+            email.SendingModule,
             email.Status,
             email.CreatedAt);
     }
@@ -177,6 +190,7 @@ internal class MessagingHistoryQueryService : IMessagingHistoryQueryService
             new(sms.Sender.Name, sms.Sender.Number),
             recipients,
             sms.Message,
+            sms.SendingModule,
             sms.Status,
             sms.CreatedAt);
     }

@@ -13,6 +13,7 @@ public class MessagingHistoryIndexRow
     public string? FromAddress { get; set; }
     public string? BodyText { get; set; }
     public string? RecipientSearchText { get; set; }
+    public string? SendingModule { get; set; }
 
     public MessageType MessageTypeValue =>
         MessageType == "Email"

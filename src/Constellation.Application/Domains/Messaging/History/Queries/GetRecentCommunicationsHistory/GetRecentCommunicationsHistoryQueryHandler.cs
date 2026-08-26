@@ -24,6 +24,8 @@ internal sealed class GetRecentCommunicationsHistoryQueryHandler
         PaginatedList<CommunicationRecordResponse> queryResponse = await _historyQueryService.GetRecentHistory(
             request.SearchQuery, 
             request.DateRange,
+            request.SortColumn,
+            request.SortDirection,
             request.PageNumber, 
             request.PageSize, 
             cancellationToken);

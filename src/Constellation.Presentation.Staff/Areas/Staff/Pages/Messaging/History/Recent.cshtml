@@ -26,6 +26,7 @@
             <th>From</th>
             <th>Recipients</th>
             <th>Subject</th>
+            <th>Module</th>
             <th>Status</th>
             <th></th>
         </tr>
@@ -57,11 +58,13 @@
                             return '<span title="' + row.fromContact + '" class="badge border border-secondary text-secondary text-nowrap">' + row.fromName + '</span>';
                         }
                     },
-                    { data: 'recipientsHtml' },
+                    { data: 'recipientsHtml', orderable: false },
                     { data: 'subject' },
-                    { data: 'status' },
+                    { data: 'module' },
+                    { data: 'status', orderable: false },
                     {
                         data: null,
+                        orderable: false,
                         render: function (row){
                             return '<a href="' + row.viewUrl + '" target="_blank" class="btn btn-secondary btn-sm btn-show-hover">ViewMessage</a>';
                         }

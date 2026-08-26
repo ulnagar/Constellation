@@ -89,6 +89,7 @@ internal sealed class GetCommunicationsHistoryForContactQueryHandler
                 new(email.From.Name, email.From.Destination),
                 recipients,
                 email.Subject,
+                email.SendingModule,
                 email.Status,
                 email.CreatedAt));
         }
@@ -110,6 +111,7 @@ internal sealed class GetCommunicationsHistoryForContactQueryHandler
                 new(sms.Sender.Name, sms.Sender.Number),
                 recipients,
                 sms.Message,
+                sms.SendingModule,
                 sms.Status,
                 sms.CreatedAt));
         }
