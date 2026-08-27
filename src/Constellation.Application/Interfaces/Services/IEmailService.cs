@@ -57,7 +57,7 @@ public interface IEmailService
     Task SendAdminAbsenceSentralAlert(string studentName);
     Task SendAdminLowCreditAlert(double credit);
     Task SendMasterFileConsistencyReportEmail(MemoryStream report, string emailAddress, CancellationToken cancellationToken = default);
-    Task SendIncomingSmsAlert(SmsMessage message, CancellationToken cancellationToken = default);
+    Task SendIncomingSmsAlert(SmsMessage message, List<string>? studentNames = null, CancellationToken cancellationToken = default);
 
     // Assessment Provisions Emails
     Task<Result> SendAssessmentSubmissionReceipt(Assessment assessment, AssessmentStudent student, AssessmentSubmission submission, CancellationToken cancellationToken = default);

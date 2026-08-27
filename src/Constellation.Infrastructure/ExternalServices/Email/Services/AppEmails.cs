@@ -8,6 +8,7 @@ using Core.ValueObjects;
 using System;
 using System.Globalization;
 using System.Net.Mail;
+using System.Text;
 using System.Threading.Tasks;
 
 public sealed partial class Service : IEmailService
@@ -97,14 +98,31 @@ public sealed partial class Service : IEmailService
 
     public async Task SendIncomingSmsAlert(
         SmsMessage message,
+        List<string>? studentNames = null,
         CancellationToken cancellationToken = default)
     {
-        string viewModel = $"""
-                            The following message was received as an SMS<br />
-                            <strong>Sender: </strong>{message.Sender.Name} ({message.Sender.Number})<br />
-                            <strong>Message: </strong>{message.Message}<br />
-                            <strong>Received: </strong>{message.CreatedAt.LocalDateTime.ToString("F", DateTimeFormatInfo.InvariantInfo)}
-                            """;
+        StringBuilder sb = new StringBuilder();
+
+        sb.AppendLine("The following message was received as an SMS");
+        sb.AppendLine("<br /><br />");
+        sb.AppendLine($@"<div style=""margin-bottom: 12px;""><span style=""font-weight: bold;"">Sender:</span><span style=""margin-left: 4px;"">{message.Sender.Name} ({message.Sender.Number})</span></div>");
+        sb.AppendLine($@"<div style=""margin-bottom: 12px;""><span style=""font-weight: bold;"">Message:</span><span style=""margin-left: 4px;"">{message.Message}</span></div>");
+        sb.AppendLine($@"<div style=""margin-bottom: 12px;""><span style=""font-weight: bold;"">Received:</span><span style=""margin-left: 4px;"">{message.CreatedAt.LocalDateTime.ToString("F", DateTimeFormatInfo.InvariantInfo)}</span></div>");
+        
+        if (studentNames is not null && studentNames.Count > 0)
+        {
+            sb.AppendLine("<br />");
+            sb.AppendLine("This parent is linked to the following students:<br />");
+            sb.AppendLine("<ul>");
+            foreach (string student in studentNames)
+            {
+                sb.AppendLine($"<li>{student}</li>");
+            }
+
+            sb.AppendLine("</ul>");
+        }
+
+        string viewModel = sb.ToString();
 
         await BuildAndSendEmail(
             viewModel,
