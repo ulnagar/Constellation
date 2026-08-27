@@ -1756,19 +1756,19 @@ public class Gateway : ISentralGateway
         return response;
     }
 
-    public async Task<HtmlDocument?> GetAwardsReport(CancellationToken cancellationToken = default)
+    public async Task<Stream> GetAwardsReport(CancellationToken cancellationToken = default)
     {
         if (_logOnly)
         {
             _logger.Information("GetAwardsReport");
 
-            return new HtmlDocument();
+            return new MemoryStream();
         }
         
         List<KeyValuePair<string, string>> payload =
             [new KeyValuePair<string, string>("action", "exportStudentAwards")];
 
-        HtmlDocument? report = await GetPageByPost(new($"{_settings.ServerUrl}/wellbeing/awards/export"), payload, cancellationToken);
+        Stream report = await GetStreamByPost(new($"{_settings.ServerUrl}/wellbeing/awards/export"), payload, cancellationToken);
 
         return report;
     }

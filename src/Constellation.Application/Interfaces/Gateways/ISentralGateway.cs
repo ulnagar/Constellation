@@ -25,7 +25,7 @@ public interface ISentralGateway
     Task<ICollection<RollMarkReportDto>> GetRollMarkingReportAsync(DateOnly date);
     Task<ICollection<SentralReportDto>> GetStudentReportList(string sentralStudentId);
     Task<byte[]> GetStudentReport(string sentralStudentId, string reportId);
-    Task<HtmlDocument?> GetAwardsReport(CancellationToken cancellationToken = default);
+    Task<Stream> GetAwardsReport(CancellationToken cancellationToken = default);
     Task<HtmlDocument?> GetAwardsListing(string sentralStudentId, string calYear, CancellationToken cancellationToken = default);
     Task<HtmlDocument?> GetIncidentDetailsPage(string uri, CancellationToken cancellationToken = default);
     Task<byte[]> GetAwardDocument(string sentralStudentId, string incidentId);

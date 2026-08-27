@@ -1,12 +1,12 @@
 ﻿namespace Constellation.Application.Domains.MeritAwards.Awards.Commands.IssueAwardInSentral;
 
 using Abstractions.Messaging;
+using Constellation.Application.Domains.Import.Models;
 using Constellation.Core.Enums;
+using Constellation.Core.Primitives;
 using Core.Abstractions.Repositories;
-using Core.Abstractions.Services;
 using Core.Models.Awards;
 using Core.Models.Students;
-using Core.Models.Students.Enums;
 using Core.Models.Students.Repositories;
 using Core.Shared;
 using Enums;
@@ -24,24 +24,24 @@ internal sealed record IssueAwardInSentralCommandHandler
 {
     private readonly IStudentRepository _studentRepository;
     private readonly IStudentAwardRepository _awardRepository;
+    private readonly SentralAwardReportCsvParser _parser;
     private readonly ISentralGateway _gateway;
     private readonly IUnitOfWork _unitOfWork;
-    private readonly ICurrentUserService _currentUserService;
     private readonly ILogger _logger;
 
     public IssueAwardInSentralCommandHandler(
         IStudentRepository studentRepository,
         IStudentAwardRepository awardRepository,
+        SentralAwardReportCsvParser parser,
         ISentralGateway gateway,
         IUnitOfWork unitOfWork,
-        ICurrentUserService currentUserService,
         ILogger logger)
     {
         _studentRepository = studentRepository;
         _awardRepository = awardRepository;
+        _parser = parser;
         _gateway = gateway;
         _unitOfWork = unitOfWork;
-        _currentUserService = currentUserService;
         _logger = logger
             .ForContext<IssueAwardInSentralCommand>();
     }
@@ -61,37 +61,71 @@ internal sealed record IssueAwardInSentralCommandHandler
         if (result.IsFailure)
             return result;
 
+        Stream stream = await _gateway.GetAwardsReport(cancellationToken);
+
+        Result<List<StudentAwardRow>> rows = _parser.Parse(stream);
+
+        string awardType = request.AwardType switch
+        {
+            IssueAwardType.Stellar => StudentAward.Stellar,
+            IssueAwardType.Galaxy => StudentAward.Galaxy,
+            IssueAwardType.Universal => StudentAward.Universal
+        };
+
         foreach (var student in students)
         {
-            string awardType = request.AwardType switch
+            SystemLink? systemLink = student.SystemLinks.FirstOrDefault(link => link.System == SystemType.Sentral);
+
+            if (systemLink is null)
+                continue;
+
+            List<StudentAwardRow> filteredRows = rows.Value
+                .Where(entry => 
+                    entry.StudentId == systemLink.Value 
+                    && entry.Type == awardType)
+                .ToList();
+
+            List<StudentAward> existingAwards = await _awardRepository.GetByStudentId(student.Id, cancellationToken);
+
+            foreach (StudentAwardRow item in filteredRows)
             {
-                IssueAwardType.Stellar => StudentAward.Stellar,
-                IssueAwardType.Galaxy => StudentAward.Galaxy,
-                IssueAwardType.Universal => StudentAward.Universal
-            };
+                StudentAward? matchingAward = existingAwards.FirstOrDefault(award =>
+                    award.Type == item.Type &&
+                    new DateTime(award.AwardedOn.Year, award.AwardedOn.Month, award.AwardedOn.Day, award.AwardedOn.Hour, award.AwardedOn.Minute, 0) == item.AwardCreated);
 
-            StudentAward entry = StudentAward.Create(
-                student.Id,
-                awardType,
-                awardType,
-                result.Value);
+                if (matchingAward is null)
+                {
+                    _logger
+                        .Information("Found new {type} on {date}", item.Type, item.AwardCreated.ToShortDateString());
 
-            switch (request.AwardType)
-            {
-                case IssueAwardType.Stellar:
-                    student.AwardTally.AddStellar();
-                    break;
+                    StudentAward entry = StudentAward.Create(
+                        student.Id,
+                        item.Category,
+                        item.Type,
+                        item.AwardCreated);
 
-                case IssueAwardType.Galaxy:
-                    student.AwardTally.AddGalaxyMedal();
-                    break;
+                    switch (item.Type)
+                    {
+                        case StudentAward.Stellar:
+                            student.AwardTally.AddStellar();
+                            break;
 
-                case IssueAwardType.Universal:
-                    student.AwardTally.AddUniversalAchiever();
-                    break;
+                        case StudentAward.Galaxy:
+                            student.AwardTally.AddGalaxyMedal();
+                            break;
+
+                        case StudentAward.Universal:
+                            student.AwardTally.AddUniversalAchiever();
+                            break;
+                    }
+
+                    _awardRepository.Insert(entry);
+                }
+                else
+                {
+                    existingAwards.Remove(matchingAward);
+                }
             }
-
-            _awardRepository.Insert(entry);
         }
 
         await _unitOfWork.CompleteAsync(cancellationToken);

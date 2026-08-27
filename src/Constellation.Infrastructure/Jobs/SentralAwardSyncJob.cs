@@ -87,7 +87,7 @@ internal sealed class SentralAwardSyncJob : ISentralAwardSyncJob
             if (enrolment is null)
                 continue;
 
-            SystemLink systemLink = student.SystemLinks.FirstOrDefault(link => link.System == SystemType.Sentral);
+            SystemLink? systemLink = student.SystemLinks.FirstOrDefault(link => link.System == SystemType.Sentral);
 
             if (systemLink is null)
                 continue;
@@ -110,7 +110,7 @@ internal sealed class SentralAwardSyncJob : ISentralAwardSyncJob
 
             foreach (AwardDetailResponse item in reportAwards)
             {
-                StudentAward matchingAward = existingAwards.FirstOrDefault(award =>
+                StudentAward? matchingAward = existingAwards.FirstOrDefault(award =>
                     award.Type == item.Type &&
                     new DateTime(award.AwardedOn.Year, award.AwardedOn.Month, award.AwardedOn.Day, award.AwardedOn.Hour, award.AwardedOn.Minute, 0) == item.AwardCreated);
 
@@ -146,9 +146,7 @@ internal sealed class SentralAwardSyncJob : ISentralAwardSyncJob
                                 awardIncidents = awardIncidentsRequest.Value;
                             }
                             
-                            AwardIncidentResponse matchingIncident = awardIncidents
-                                .FirstOrDefault(incident =>
-                                    incident.AwardedAt == entry.AwardedOn);
+                            AwardIncidentResponse? matchingIncident = awardIncidents.FirstOrDefault(incident => incident.AwardedAt == entry.AwardedOn);
 
                             if (matchingIncident is not null)
                                 ProcessAward(matchingIncident, entry, student, teachers);
@@ -183,7 +181,7 @@ internal sealed class SentralAwardSyncJob : ISentralAwardSyncJob
 
     private void ProcessAward(AwardIncidentResponse award, StudentAward matchingAward, Student student, List<StaffMember> teachers)
     {
-        StaffMember teacher = teachers.FirstOrDefault(staff =>
+        StaffMember? teacher = teachers.FirstOrDefault(staff =>
         {
             string[] splitName = award.TeacherName.Trim().Split(' ');
 

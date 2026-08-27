@@ -2,6 +2,7 @@ namespace Constellation.Presentation.Server.Areas.Test.Pages;
 
 using Application.Domains.Assessments.Assessments.Queries.GetCanvasCoursesAndAssessments;
 using Application.Domains.LinkedSystems.Canvas.Models;
+using Application.Domains.MeritAwards.Awards.Queries.GetAwardDetailsFromSentral;
 using Application.DTOs;
 using Application.Interfaces.Gateways;
 using Application.Models.Auth;
@@ -35,21 +36,10 @@ public class IndexModel : BasePageModel
     }
 
     [ViewData] public string ActivePage => "";
-
-    public List<CanvasCourseWithAssessmentResponse> Courses { get; set; }
-
+    
     public async Task OnGet()
     {
-        Result<List<CanvasCourseWithAssessmentResponse>> courses = await _mediator.Send(new GetCanvasCoursesAndAssessmentsQuery());
-
-        if (courses.IsFailure)
-            return;
-
-        Courses = courses.Value.OrderBy(entry => entry.CourseCode).ToList();
+        await _mediator.Send(new GetAwardDetailsFromSentralQuery());
     }
 
-    public async Task<IActionResult> OnGetLinkCanvasAssignment(CanvasCourseCode courseCode, int assignmentId)
-    {
-        return RedirectToPage();
-    }
 }
