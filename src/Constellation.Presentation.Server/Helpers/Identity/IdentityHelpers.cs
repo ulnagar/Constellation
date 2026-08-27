@@ -106,13 +106,16 @@ internal static class IdentityHelpers
         await userManager.UpdateAsync(user);
         await signInManager.SignInAsync(user, isPersistent: false);
 
-        _logger
-            .ForContext("RedirectUri", context.Properties?.RedirectUri)
-            .Debug("User logged in and being redirected");
 
         context.HandleResponse();
 
-        string? redirectUri = context.HttpContext.Session.GetString("RedirectUri");
+        //string? redirectUri = context.HttpContext.Session.GetString("RedirectUri");
+        string? redirectUri = context.Properties?.RedirectUri;
+
+        _logger
+            .ForContext("RedirectUri - Context", context.Properties?.RedirectUri)
+            .ForContext("RedirectUri - Session", context.HttpContext.Session.GetString("RedirectUri"))
+            .Debug("User logged in and being redirected");
 
         if (string.IsNullOrWhiteSpace(redirectUri))
             context.Response.Redirect("/");

@@ -114,10 +114,8 @@ public class LoginModel : PageModel
             LoginEnabled = true;
     }
 
-    public async Task<IActionResult> OnGet(string? returnUrl = null)
+    public async Task<IActionResult> OnGet()
     {
-        ReturnUrl = returnUrl;
-
         string? sessionUser = HttpContext.Session.GetString("KnownUser");
         string? cookieUser = Request.Cookies[".Constellation.KnownUser"];
 
@@ -146,13 +144,17 @@ public class LoginModel : PageModel
 
     private ChallengeResult ChallengeSingleSignOn(string? loginHint)
     {
-        if (!string.IsNullOrWhiteSpace(ReturnUrl))
-            HttpContext.Session.SetString("RedirectUri", ReturnUrl);
-
         AuthenticationProperties props = new();
+        
         if (!string.IsNullOrWhiteSpace(loginHint))
         {
             props.Items["login_hint"] = loginHint;
+        }
+
+        if (!string.IsNullOrWhiteSpace(ReturnUrl))
+        {
+            HttpContext.Session.SetString("RedirectUri", ReturnUrl);
+            props.RedirectUri = ReturnUrl;
         }
 
         return Challenge(props, OpenIdConnectDefaults.AuthenticationScheme);
