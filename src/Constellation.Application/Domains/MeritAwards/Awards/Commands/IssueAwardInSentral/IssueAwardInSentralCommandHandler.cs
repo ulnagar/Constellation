@@ -91,7 +91,7 @@ internal sealed record IssueAwardInSentralCommandHandler
             {
                 StudentAward? matchingAward = existingAwards.FirstOrDefault(award =>
                     award.Type == item.Type &&
-                    new DateTime(award.AwardedOn.Year, award.AwardedOn.Month, award.AwardedOn.Day, award.AwardedOn.Hour, award.AwardedOn.Minute, 0) == item.AwardCreated);
+                    award.AwardedOn == item.AwardCreated);
 
                 if (matchingAward is null)
                 {

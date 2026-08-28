@@ -61,9 +61,12 @@ namespace Constellation.Infrastructure.Templates.Services
         public async Task<RenderedEmail> RenderEmail<TModel>(string viewName, TModel model)
         {
             string html = await RenderViewToStringAsync(viewName, model);
-            string plainText = Convert(html);
 
-            return new RenderedEmail(html, plainText);
+            string sanitisedHtml = SafeLinksSanitiser.UnwrapAllInHtml(html);
+
+            string plainText = Convert(sanitisedHtml);
+
+            return new RenderedEmail(sanitisedHtml, plainText);
         }
 
         private IView FindView(ActionContext actionContext, string viewName)
@@ -235,6 +238,86 @@ namespace Constellation.Infrastructure.Templates.Services
                     foreach (var child in node.ChildNodes)
                         ProcessNode(child, sb);
                     break;
+            }
+        }
+
+        private static class SafeLinksSanitiser
+        {
+            private const string SafeLinksHost = "safelinks.protection.outlook.com";
+
+            /// <summary>
+            /// If the provided URL is an O365 Safe Links redirect, returns the original
+            /// destination URL. Otherwise returns the input unchanged.
+            /// </summary>
+            public static string Unwrap(string url)
+            {
+                if (string.IsNullOrWhiteSpace(url))
+                    return url;
+
+                if (!Uri.TryCreate(url, UriKind.Absolute, out var uri))
+                    return url;
+
+                if (!uri.Host.EndsWith(SafeLinksHost, StringComparison.OrdinalIgnoreCase))
+                    return url;
+
+                // Extract the inner 'url' query parameter
+                var query = System.Web.HttpUtility.ParseQueryString(uri.Query);
+                var inner = query["url"];
+
+                if (string.IsNullOrWhiteSpace(inner))
+                    return url;
+
+                // Validate the extracted URL before returning it
+                if (!Uri.TryCreate(inner, UriKind.Absolute, out var innerUri)
+                    || (innerUri.Scheme != Uri.UriSchemeHttp
+                        && innerUri.Scheme != Uri.UriSchemeHttps))
+                    return url;
+
+                return inner;
+            }
+
+            ///// <summary>
+            ///// Unwraps all O365 Safe Links redirects found in a block of HTML content.
+            ///// </summary>
+            //public static string UnwrapAllInHtml(string html)
+            //{
+            //    if (string.IsNullOrWhiteSpace(html))
+            //        return html;
+
+            //    return System.Text.RegularExpressions.Regex.Replace(
+            //        html,
+            //        @"https://[a-z0-9]+\.safelinks\.protection\.outlook\.com/\?[^\s""'<>]+",
+            //        match => Unwrap(match.Value),
+            //        System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+            //}
+
+            /// <summary>
+            /// Unwraps all O365 Safe Links redirects found in anchor tags in an HTML document.
+            /// </summary>
+            public static string UnwrapAllInHtml(string html)
+            {
+                if (string.IsNullOrWhiteSpace(html))
+                    return html;
+
+                var document = new HtmlDocument();
+                document.LoadHtml(html);
+
+                var anchors = document.DocumentNode
+                    .SelectNodes("//a[@href]");
+
+                if (anchors is null)
+                    return html;
+
+                foreach (var anchor in anchors)
+                {
+                    var href = anchor.GetAttributeValue("href", string.Empty);
+                    var unwrapped = Unwrap(href);
+
+                    if (unwrapped != href)
+                        anchor.SetAttributeValue("href", unwrapped);
+                }
+
+                return document.DocumentNode.OuterHtml;
             }
         }
     }
