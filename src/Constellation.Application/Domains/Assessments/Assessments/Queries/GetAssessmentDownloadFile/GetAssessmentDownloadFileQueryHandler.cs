@@ -85,17 +85,20 @@ internal sealed class GetAssessmentDownloadFileQueryHandler
             return Result.Failure<AttachmentResponse>(AuthErrors.UserNotFound(Guid.Empty));
         }
 
-        bool hasStaffPermission = await _authService.UserHasPermission(user, AuthPermission.Subjects_Assessments_ViewRestrictedDocuments, cancellationToken);
-        bool hasSchoolPermission = await _authService.UserHasPermission(user, AuthPermission.SchoolsPortal_Assessments_ViewRestrictedDocuments, cancellationToken);
-
-        if (!hasStaffPermission && !hasSchoolPermission)
+        if (download.IsRestricted)
         {
-            _logger
-                .ForContext(nameof(GetAssessmentDownloadFileQuery), request, true)
-                .ForContext(nameof(Error), AuthErrors.NotAuthorised, true)
-                .Warning("Failed to retrieve Assessment Download File");
+            bool hasStaffPermission = await _authService.UserHasPermission(user, AuthPermission.Subjects_Assessments_ViewRestrictedDocuments, cancellationToken);
+            bool hasSchoolPermission = await _authService.UserHasPermission(user, AuthPermission.SchoolsPortal_Assessments_ViewRestrictedDocuments, cancellationToken);
 
-            return Result.Failure<AttachmentResponse>(AuthErrors.NotAuthorised);
+            if (!hasStaffPermission && !hasSchoolPermission)
+            {
+                _logger
+                    .ForContext(nameof(GetAssessmentDownloadFileQuery), request, true)
+                    .ForContext(nameof(Error), AuthErrors.NotAuthorised, true)
+                    .Warning("Failed to retrieve Assessment Download File");
+
+                return Result.Failure<AttachmentResponse>(AuthErrors.NotAuthorised);
+            }
         }
 
         Result<AttachmentResponse> file = await _attachmentService.GetAttachmentFile(AttachmentType.AssessmentDownload, request.DownloadId.ToString(), cancellationToken);
