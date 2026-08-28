@@ -662,3 +662,65 @@ public sealed class UniversalAchieverNomination : Nomination
     public override string ToString() => $"{AwardType.ToString()}";
     public override string GetDescription(bool showGrade = true, bool showClass = true) => $"Universal Achiever Award";
 }
+
+public sealed class CitizenshipNomination : Nomination
+{
+    private CitizenshipNomination(
+        AwardNominationPeriodId periodId,
+        StudentId studentId)
+    {
+        Id = new();
+        PeriodId = periodId;
+        StudentId = studentId;
+        AwardType = AwardType.Citizenship;
+    }
+
+    public static Result<Nomination> Create(
+        AwardNominationPeriodId periodId,
+        StudentId studentId,
+        Grade studentGrade)
+    {
+        if (AwardType.Citizenship.Grades.Count > 0 && !AwardType.Citizenship.Grades.Contains(studentGrade))
+            return Result.Failure<Nomination>(AwardNominationErrors.InvalidGrade(AwardType.Citizenship, studentGrade));
+
+        return new CitizenshipNomination(
+            periodId,
+            studentId);
+    }
+
+    public override int SortOrder => 13;
+
+    public override string ToString() => $"{AwardType.ToString()}";
+    public override string GetDescription(bool showGrade = true, bool showClass = true) => "Citizenship Award";
+}
+
+public sealed class DeadlyDifferenceNomination : Nomination
+{
+    private DeadlyDifferenceNomination(
+        AwardNominationPeriodId periodId,
+        StudentId studentId)
+    {
+        Id = new();
+        PeriodId = periodId;
+        StudentId = studentId;
+        AwardType = AwardType.DeadlyDifference;
+    }
+
+    public static Result<Nomination> Create(
+        AwardNominationPeriodId periodId,
+        StudentId studentId,
+        Grade studentGrade)
+    {
+        if (AwardType.DeadlyDifference.Grades.Count > 0 && !AwardType.DeadlyDifference.Grades.Contains(studentGrade))
+            return Result.Failure<Nomination>(AwardNominationErrors.InvalidGrade(AwardType.DeadlyDifference, studentGrade));
+
+        return new DeadlyDifferenceNomination(
+            periodId,
+            studentId);
+    }
+
+    public override int SortOrder => 13;
+
+    public override string ToString() => $"{AwardType.ToString()}";
+    public override string GetDescription(bool showGrade = true, bool showClass = true) => "Deadly Difference Award";
+}

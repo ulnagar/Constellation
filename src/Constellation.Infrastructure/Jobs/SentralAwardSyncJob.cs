@@ -72,7 +72,7 @@ internal sealed class SentralAwardSyncJob : ISentralAwardSyncJob
             .ThenBy(student => student.Name.SortOrder)
             .ToList();
 
-        List<StaffMember> teachers = await _staffRepository.GetAllActive(cancellationToken);
+        List<StaffMember> teachers = await _staffRepository.GetAll(cancellationToken);
 
         _logger
             .Information("Found {count} students to process.", students.Count);
@@ -112,7 +112,7 @@ internal sealed class SentralAwardSyncJob : ISentralAwardSyncJob
             {
                 StudentAward? matchingAward = existingAwards.FirstOrDefault(award =>
                     award.Type == item.Type &&
-                    new DateTime(award.AwardedOn.Year, award.AwardedOn.Month, award.AwardedOn.Day, award.AwardedOn.Hour, award.AwardedOn.Minute, 0) == item.AwardCreated);
+                    award.AwardedOn == item.AwardCreated);
 
                 if (matchingAward is null)
                 {
@@ -145,8 +145,10 @@ internal sealed class SentralAwardSyncJob : ISentralAwardSyncJob
 
                                 awardIncidents = awardIncidentsRequest.Value;
                             }
-                            
-                            AwardIncidentResponse? matchingIncident = awardIncidents.FirstOrDefault(incident => incident.AwardedAt == entry.AwardedOn);
+
+                            var truncated = entry.AwardedOn.AddTicks(-(entry.AwardedOn.Ticks % TimeSpan.TicksPerMinute));
+
+                            AwardIncidentResponse? matchingIncident = awardIncidents.FirstOrDefault(incident => incident.AwardedAt == truncated);
 
                             if (matchingIncident is not null)
                                 ProcessAward(matchingIncident, entry, student, teachers);

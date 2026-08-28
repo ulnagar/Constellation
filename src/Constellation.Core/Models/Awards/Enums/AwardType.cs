@@ -19,6 +19,8 @@ public sealed class AwardType : StringEnumeration<AwardType>
     public static readonly AwardType PrincipalsAward = new("Principals Award");
     public static readonly AwardType GalaxyMedal = new("Galaxy Medal");
     public static readonly AwardType UniversalAchiever = new("Universal Achiever");
+    public static readonly AwardType Citizenship = new("Citizenship", [Grade.Y05, Grade.Y06]);
+    public static readonly AwardType DeadlyDifference = new("Deadly Difference", [Grade.Y05, Grade.Y06]);
 
     public static new AwardType FromValue(string value)
     {

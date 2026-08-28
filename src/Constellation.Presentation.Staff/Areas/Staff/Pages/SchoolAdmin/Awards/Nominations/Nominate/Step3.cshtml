@@ -58,7 +58,7 @@
         $('#Type').on('change', function (e) {
             var type = $(this).val();
 
-            if (type == '@AwardType.GalaxyMedal.Value' || type == '@AwardType.PrincipalsAward.Value' || type == '@AwardType.UniversalAchiever.Value') {
+            if (type == '@AwardType.GalaxyMedal.Value' || type == '@AwardType.PrincipalsAward.Value' || type == '@AwardType.UniversalAchiever.Value' || type == '@AwardType.Citizenship.Value' || type == '@AwardType.DeadlyDifference.Value') {
                 $('.spinner-overlay').removeClass('d-none');
                 $('#step4')
                     .append('<input type="text" name="Type" value="' + type + '" />')

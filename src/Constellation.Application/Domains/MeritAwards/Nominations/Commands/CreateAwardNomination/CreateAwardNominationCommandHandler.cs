@@ -53,7 +53,7 @@ internal sealed class CreateAwardNominationCommandHandler
 
     public async Task<Result> Handle(CreateAwardNominationCommand request, CancellationToken cancellationToken)
     {
-        NominationPeriod period = await _nominationRepository.GetById(request.PeriodId, cancellationToken);
+        NominationPeriod? period = await _nominationRepository.GetById(request.PeriodId, cancellationToken);
 
         if (period is null)
         {
@@ -91,7 +91,9 @@ internal sealed class CreateAwardNominationCommandHandler
         {
             if (request.AwardType != AwardType.PrincipalsAward &&
                 request.AwardType != AwardType.GalaxyMedal &&
-                request.AwardType != AwardType.UniversalAchiever)
+                request.AwardType != AwardType.UniversalAchiever &&
+                request.AwardType != AwardType.Citizenship &&
+                request.AwardType != AwardType.DeadlyDifference)
                 return Result.Failure(AwardNominationErrors.InvalidCourseId);
         }
 
@@ -102,7 +104,9 @@ internal sealed class CreateAwardNominationCommandHandler
                 request.AwardType != AwardType.FirstInSubjectScienceTechnology &&
                 request.AwardType != AwardType.PrincipalsAward &&
                 request.AwardType != AwardType.GalaxyMedal &&
-                request.AwardType != AwardType.UniversalAchiever)
+                request.AwardType != AwardType.UniversalAchiever &&
+                request.AwardType != AwardType.Citizenship &&
+                request.AwardType != AwardType.DeadlyDifference)
                 return Result.Failure(AwardNominationErrors.InvalidOfferingId);
         }
 
@@ -120,6 +124,8 @@ internal sealed class CreateAwardNominationCommandHandler
             _ when request.AwardType == AwardType.PrincipalsAward => PrincipalsAwardNomination.Create(request.PeriodId, request.StudentId, student.CurrentEnrolment!.Grade),
             _ when request.AwardType == AwardType.GalaxyMedal => GalaxyMedalNomination.Create(request.PeriodId, request.StudentId, student.CurrentEnrolment!.Grade),
             _ when request.AwardType == AwardType.UniversalAchiever => UniversalAchieverNomination.Create(request.PeriodId, request.StudentId, student.CurrentEnrolment!.Grade),
+            _ when request.AwardType == AwardType.Citizenship => CitizenshipNomination.Create(request.PeriodId, request.StudentId, student.CurrentEnrolment!.Grade),
+            _ when request.AwardType == AwardType.DeadlyDifference => DeadlyDifferenceNomination.Create(request.PeriodId, request.StudentId, student.CurrentEnrolment!.Grade),
             _ => Result.Failure<Nomination>(AwardNominationErrors.NotRecognised)
         };
         

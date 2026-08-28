@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 public interface IAwardNominationRepository
 {
     Task<List<NominationPeriod>> GetAll(CancellationToken cancellationToken = default);
+    Task<List<NominationPeriod>> GetSummaries(CancellationToken cancellationToken = default);
     Task<List<NominationPeriod>> GetCurrentAndFuture(CancellationToken cancellationToken = default);
     Task<NominationPeriod?> GetById(AwardNominationPeriodId periodId, CancellationToken cancellationToken = default);
     Task<NominationNotification?> GetNotificationById(NominationNotificationId notificationId, CancellationToken cancellationToken = default);

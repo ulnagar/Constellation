@@ -29,7 +29,7 @@ internal sealed class GetAllNominationPeriodsQueryHandler
     {
         List<NominationPeriodResponse> responses = new();
 
-        List<NominationPeriod> periods = await _nominationRepository.GetAll(cancellationToken);
+        List<NominationPeriod> periods = await _nominationRepository.GetSummaries(cancellationToken);
 
         foreach (NominationPeriod period in periods)
         {

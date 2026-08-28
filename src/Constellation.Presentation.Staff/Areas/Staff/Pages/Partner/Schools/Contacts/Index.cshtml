@@ -96,19 +96,19 @@
             <td>
                 @if (authorised.Succeeded)
                 {
-                    <div class="btn-group" role="group">
-                        <button id="btnGroupDrop1" type="button" class="btn btn-warning dropdown-toggle btn-show-hover" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> Actions</button>
-                        <div class="dropdown-menu" aria-labelledby="btnGroupDrop1">
-                            <a asp-page="/Partner/Schools/Contacts/Update" asp-area="Staff" asp-route-id="@item.Id" class="dropdown-item">Edit Contact</a>
-                            <button class="dropdown-item create-assignment-button" data-contact-id="@item.Id.Value" data-name="@item.Name">Add Role</button>
+                    <div class="dropdown">
+                        <button type="button" class="btn btn-warning dropdown-toggle btn-show-hover" data-bs-toggle="dropdown"> Actions</button>
+                        <ul class="dropdown-menu">
+                            <li><a asp-page="/Partner/Schools/Contacts/Update" asp-area="Staff" asp-route-id="@item.Id" class="dropdown-item">Edit Contact</a></li>
+                            <li><a class="dropdown-item create-assignment-button" data-contact-id="@item.Id.Value" data-name="@item.Name">Add Role</a></li>
                             @if (item.Role != Position.Empty)
                             {
-                                <button data-contact-id="@item.Id" data-role-id="@item.AssignmentId" data-note="@item.Note" class="dropdown-item update-note-button">Update Note</button>
-                                <button data-contact-id="@item.Id" data-role-id="@item.AssignmentId" data-name="@item.Name" data-role="@item.Role" data-school="@item.SchoolName" class="dropdown-item delete-role-button">Remove Role</button>
+                                <li><a data-contact-id="@item.Id" data-role-id="@item.AssignmentId" data-note="@item.Note" class="dropdown-item update-note-button">Update Note</a></li>
+                                <li><a data-contact-id="@item.Id" data-role-id="@item.AssignmentId" data-name="@item.Name" data-role="@item.Role" data-school="@item.SchoolName" class="dropdown-item delete-role-button">Remove Role</a></li>
                             }
-                            <div class="dropdown-divider"></div>
-                            <a asp-page-handler="RepairUser" asp-route-id="@item.Id" class="dropdown-item">Repair Account</a>
-                        </div>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a asp-page-handler="RepairUser" asp-route-id="@item.Id" class="dropdown-item">Repair Account</a></li>
+                        </ul>
                     </div>
                 }
             </td>
@@ -118,13 +118,6 @@
 </table>
 
 @Html.AntiForgeryToken()
-
-<div class="modal fade" id="page-modal" tabindex="-1">
-    <div class="modal-dialog">
-        <div class="modal-content">
-        </div>
-    </div>
-</div>
 
 @section scripts {
     <script>
@@ -191,17 +184,24 @@
                 $('#page-modal .modal-content').html(data);
                 $('#page-modal').modal('show');
 
+                console.log('combo count:', $("#page-modal .combo").length);
+                console.log('combo-with-tag count:', $("#page-modal .combo-with-tag").length);
+
                 // Activate any comboboxes
-                $("#page-modal .combo").select2({
-                    theme: 'bootstrap',
-                    dropdownParent: $("#page-modal .combo").parent()
+                $("#page-modal .combo").each(function() {
+                    $(this).select2({
+                        theme: 'bootstrap-5',
+                        dropdownParent: $("#page-modal .combo").parent()
+                    });
                 });
 
                 // Activate any comboboxes with free-text entry
-                $("#page-modal .combo-with-tag").select2({
-                    theme: 'bootstrap',
-                    tags: true,
-                    dropdownParent: $("#page-modal .combo-with-tag").parent()
+                $("#page-modal .combo-with-tag").each(function() {
+                    $(this).select2({
+                        theme: 'bootstrap-5',
+                        tags: true,
+                        dropdownParent: $("#page-modal .combo-with-tag").parent()
+                    });
                 });
             });
         });

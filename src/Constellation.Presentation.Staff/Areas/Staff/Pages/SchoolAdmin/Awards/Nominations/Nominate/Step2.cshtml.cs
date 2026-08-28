@@ -61,7 +61,7 @@ public class Step2Model : BasePageModel
 
     public async Task<IActionResult> OnPost()
     {
-        if (Type == AwardType.GalaxyMedal || Type == AwardType.PrincipalsAward || Type == AwardType.UniversalAchiever)
+        if (Type == AwardType.GalaxyMedal || Type == AwardType.PrincipalsAward || Type == AwardType.UniversalAchiever || Type == AwardType.Citizenship || Type == AwardType.DeadlyDifference)
             return RedirectToPage("/SchoolAdmin/Awards/Nominations/Nominate/Step4", new { area = "Staff", PeriodId, Type });
 
         _logger.Information("Requested to create new Award Nomination by user {User}", _currentUserService.UserName);

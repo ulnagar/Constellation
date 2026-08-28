@@ -69,7 +69,7 @@ public class Step3Model : BasePageModel
 
     public async Task<IActionResult> OnPost()
     {
-        if (Type == AwardType.GalaxyMedal || Type == AwardType.PrincipalsAward || Type == AwardType.UniversalAchiever)
+        if (Type == AwardType.GalaxyMedal || Type == AwardType.PrincipalsAward || Type == AwardType.UniversalAchiever || Type == AwardType.Citizenship || Type == AwardType.DeadlyDifference)
             return RedirectToPage("/SchoolAdmin/Awards/Nominations/Nominate/Step4", new { area = "Staff", PeriodId, Type });
 
         if (Type == AwardType.FirstInSubject || Type == AwardType.FirstInSubjectMathematics || Type == AwardType.FirstInSubjectScienceTechnology)

@@ -27,12 +27,12 @@ internal sealed class AwardNominationRepository
             .Set<NominationPeriod>()
             .ToListAsync(cancellationToken);
 
-    public async Task<NominationPeriod?> GetById(
-        AwardNominationPeriodId periodId,
+    public async Task<List<NominationPeriod>> GetSummaries(
         CancellationToken cancellationToken = default) =>
         await _context
             .Set<NominationPeriod>()
-            .FirstOrDefaultAsync(period => period.Id == periodId, cancellationToken);
+            .IgnoreAutoIncludes()
+            .ToListAsync(cancellationToken);
 
     public async Task<List<NominationPeriod>> GetCurrentAndFuture(
         CancellationToken cancellationToken = default)
@@ -44,6 +44,13 @@ internal sealed class AwardNominationRepository
             .Where(period => period.LockoutDate >= currentDate)
             .ToListAsync(cancellationToken);
     }
+
+    public async Task<NominationPeriod?> GetById(
+        AwardNominationPeriodId periodId,
+        CancellationToken cancellationToken = default) =>
+        await _context
+            .Set<NominationPeriod>()
+            .FirstOrDefaultAsync(period => period.Id == periodId, cancellationToken);
 
     public async Task<NominationNotification?> GetNotificationById(
         NominationNotificationId notificationId,

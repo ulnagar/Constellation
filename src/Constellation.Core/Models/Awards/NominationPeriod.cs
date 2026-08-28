@@ -144,6 +144,20 @@ public sealed class NominationPeriod
                         entry.OfferingId == aast.OfferingId &&
                         !entry.IsDeleted),
 
+            CitizenshipNomination cn =>
+                Nominations
+                    .OfType<CitizenshipNomination>()
+                    .Any(entry =>
+                        entry.StudentId == cn.StudentId &&
+                        !entry.IsDeleted),
+
+            DeadlyDifferenceNomination ddn =>
+                Nominations
+                    .OfType<DeadlyDifferenceNomination>()
+                    .Any(entry => 
+                        entry.StudentId == ddn.StudentId &&
+                        !entry.IsDeleted),
+
             // There is no reason that this award cannot be given twice to the same person
             PrincipalsAwardNomination pa => false,
             GalaxyMedalNomination ga => false,

@@ -49,6 +49,8 @@ internal sealed class NominationConfiguration
             .HasValue<AcademicAchievementScienceTechnologyNomination>(AwardType.AcademicAchievementScienceTechnology)
             .HasValue<PrincipalsAwardNomination>(AwardType.PrincipalsAward)
             .HasValue<GalaxyMedalNomination>(AwardType.GalaxyMedal)
-            .HasValue<UniversalAchieverNomination>(AwardType.UniversalAchiever);
+            .HasValue<UniversalAchieverNomination>(AwardType.UniversalAchiever)
+            .HasValue<CitizenshipNomination>(AwardType.Citizenship)
+            .HasValue<DeadlyDifferenceNomination>(AwardType.DeadlyDifference);
     }
 }
