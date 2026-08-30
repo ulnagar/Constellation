@@ -115,7 +115,7 @@ internal sealed class AwardMatchedToIncidentDomainEvent_DownloadAwardCertificate
 
         _attachmentRepository.Insert(attachment);
 
-        //award.CertificateDownloaded();
+        award.CertificateDownloaded();
 
         await _unitOfWork.CompleteAsync(cancellationToken);
     }
