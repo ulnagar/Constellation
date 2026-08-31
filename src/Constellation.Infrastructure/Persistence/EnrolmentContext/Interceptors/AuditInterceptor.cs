@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -15,14 +16,14 @@ using System.Globalization;
 
 public sealed class AuditInterceptor : SaveChangesInterceptor
 {
-    private readonly ICurrentUserService _currentUser;
+    private readonly IServiceScopeFactory _scopeFactory;
     private readonly IHttpContextAccessor _http;
     private List<PendingAuditEntry> _pending = [];
     private bool _auditSaveInProgress;
 
-    public AuditInterceptor(ICurrentUserService currentUser, IHttpContextAccessor http)
+    public AuditInterceptor(IServiceScopeFactory scopeFactory, IHttpContextAccessor http)
     {
-        _currentUser = currentUser;
+        _scopeFactory = scopeFactory;
         _http = http;
     }
 
@@ -67,10 +68,13 @@ public sealed class AuditInterceptor : SaveChangesInterceptor
     // ── Capture (runs before the save) ───────────────────────────────────────
     private List<PendingAuditEntry> Capture(DbContext? context)
     {
+        using IServiceScope scope = _scopeFactory.CreateScope();
+        ICurrentUserService currentUser = scope.ServiceProvider.GetRequiredService<ICurrentUserService>();
+
         if (context is null) return [];
 
         string? correlationId = _http.HttpContext?.TraceIdentifier;
-        string changedBy = _currentUser.UserName;
+        string changedBy = currentUser.UserName;
         DateTimeOffset timestamp = DateTimeOffset.UtcNow;
         List<PendingAuditEntry> entries = [];
 

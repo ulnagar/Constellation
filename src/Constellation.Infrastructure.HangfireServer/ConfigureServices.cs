@@ -2,6 +2,7 @@
 
 using Constellation.Application.Models.Identity;
 using Constellation.Infrastructure.HangfireServer.Services;
+using Constellation.Infrastructure.Jobs;
 using Constellation.Infrastructure.Persistence.ConstellationContext;
 using Core.Abstractions.Services;
 using Core.Models.Auth;
@@ -46,5 +47,4 @@ public static class DependencyInjection
 
         return services;
     }
-
 }

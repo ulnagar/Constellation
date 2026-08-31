@@ -3,20 +3,21 @@
 using Constellation.Core.Abstractions.Clock;
 using Constellation.Core.Primitives;
 using Core.Abstractions.Services;
+using Microsoft.AspNetCore.Components.Server;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Diagnostics;
+using Microsoft.Extensions.DependencyInjection;
 
 public sealed class UpdateAuditableEntitiesInterceptor 
     : SaveChangesInterceptor
 {
-    private readonly ICurrentUserService _currentUserService;
-    private readonly IDateTimeProvider _dateTimeProvider;
+    private readonly IServiceScopeFactory _scopeFactory;
 
-    public UpdateAuditableEntitiesInterceptor(ICurrentUserService currentUserService, IDateTimeProvider dateTimeProvider)
+
+    public UpdateAuditableEntitiesInterceptor(IServiceScopeFactory scopeFactory)
     {
-        _currentUserService = currentUserService;
-        _dateTimeProvider = dateTimeProvider;
+        _scopeFactory = scopeFactory;
     }
 
     public override ValueTask<InterceptionResult<int>> SavingChangesAsync(
@@ -24,6 +25,10 @@ public sealed class UpdateAuditableEntitiesInterceptor
         InterceptionResult<int> result, 
         CancellationToken cancellationToken = default)
     {
+        using IServiceScope scope = _scopeFactory.CreateScope();
+        ICurrentUserService currentUserService = scope.ServiceProvider.GetRequiredService<ICurrentUserService>();
+        IDateTimeProvider dateTimeProvider = scope.ServiceProvider.GetRequiredService<IDateTimeProvider>();
+
         DbContext? dbContext = eventData.Context;
 
         if (dbContext is null)
@@ -44,17 +49,17 @@ public sealed class UpdateAuditableEntitiesInterceptor
             switch (entityEntry.State)
             {
                 case EntityState.Added:
-                    entityEntry.Entity.CreatedBy = _currentUserService.UserName;
-                    entityEntry.Entity.CreatedAt = _dateTimeProvider.Now;
+                    entityEntry.Entity.CreatedBy = currentUserService.UserName;
+                    entityEntry.Entity.CreatedAt = dateTimeProvider.Now;
                     break;
                 case EntityState.Modified:
                     if (entityEntry.Entity.IsDeleted)
                     {
-                        entityEntry.Entity.DeletedBy = _currentUserService.UserName;
-                        entityEntry.Entity.DeletedAt = _dateTimeProvider.Now;
+                        entityEntry.Entity.DeletedBy = currentUserService.UserName;
+                        entityEntry.Entity.DeletedAt = dateTimeProvider.Now;
                     }
-                    entityEntry.Entity.ModifiedBy = _currentUserService.UserName;
-                    entityEntry.Entity.ModifiedAt = _dateTimeProvider.Now;
+                    entityEntry.Entity.ModifiedBy = currentUserService.UserName;
+                    entityEntry.Entity.ModifiedAt = dateTimeProvider.Now;
                     break;
             }
         }

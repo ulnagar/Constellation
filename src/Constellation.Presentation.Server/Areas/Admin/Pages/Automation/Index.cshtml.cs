@@ -37,7 +37,7 @@ public class IndexModel : BasePageModel
         JobDefinitions.Add(new(typeof(ISentralFamilyDetailsSyncJob), nameof(ISentralFamilyDetailsSyncJob), "0 9 * * 1-6"));
         JobDefinitions.Add(new(typeof(IAttendanceReportJob), nameof(IAttendanceReportJob), "0 12 29 2 1"));
         JobDefinitions.Add(new(typeof(ISentralAttendancePercentageSyncJob), nameof(ISentralAttendancePercentageSyncJob), "0 5 * * 1"));
-        JobDefinitions.Add(new(typeof(ISentralPhotoSyncJob), nameof(ISentralPhotoSyncJob), "15 9 * * 1-6"));
+        JobDefinitions.Add(new(typeof(ISentralDetailsSyncJob), nameof(ISentralDetailsSyncJob), "15 9 * * 1-6"));
         JobDefinitions.Add(new(typeof(ISentralReportSyncJob), nameof(ISentralReportSyncJob), "* 18 * * 1-6"));
         JobDefinitions.Add(new(typeof(ISentralAwardSyncJob), nameof(ISentralAwardSyncJob), "15 5 * * 1-6"));
         JobDefinitions.Add(new(typeof(IMandatoryTrainingScanJob), nameof(IMandatoryTrainingScanJob), "0 12 * * 1"));

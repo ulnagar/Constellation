@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 
-public abstract class IntEnumeration<TEnum> : IEquatable<IntEnumeration<TEnum>>
+public abstract class IntEnumeration<TEnum> : IEquatable<IntEnumeration<TEnum>>, IComparable
     where TEnum : IntEnumeration<TEnum>
 {
     protected static readonly Dictionary<int, TEnum> Enumerations = CreateEnumerations();
@@ -72,6 +72,57 @@ public abstract class IntEnumeration<TEnum> : IEquatable<IntEnumeration<TEnum>>
                 (TEnum)fieldInfo.GetValue(default)!);
 
         return fieldsForType.ToDictionary(x => x.Value);
+    }
+
+    public int CompareTo(object? obj)
+    {
+        if (obj is null)
+            return 1;
+
+        if (obj is not TEnum incomingObject)
+            throw new ArgumentException($"Object must be of type {nameof(TEnum)}", nameof(obj));
+
+        return Value.CompareTo(incomingObject.Value);
+    }
+
+    public IEnumerable<object> GetAtomicValues()
+    {
+        yield return Value;
+    }
+
+    private bool ValuesAreEqual(IntEnumeration<TEnum> other)
+    {
+        return GetType() == other.GetType() &&
+            GetAtomicValues().SequenceEqual(other.GetAtomicValues());
+    }
+
+    protected static bool EqualOperator(IntEnumeration<TEnum>? left, IntEnumeration<TEnum>? right)
+    {
+        if (left is null ^ right is null)
+            return false;
+
+        if (left is null & right is null)
+            return true;
+
+        if (left is null || right is null)
+            return false;
+
+        return left.ValuesAreEqual(right);
+    }
+
+    protected static bool NotEqualOperator(IntEnumeration<TEnum>? left, IntEnumeration<TEnum>? right)
+    {
+        return !(EqualOperator(left, right));
+    }
+
+    public static bool operator ==(IntEnumeration<TEnum>? left, IntEnumeration<TEnum>? right)
+    {
+        return EqualOperator(left, right);
+    }
+
+    public static bool operator !=(IntEnumeration<TEnum>? left, IntEnumeration<TEnum>? right)
+    {
+        return NotEqualOperator(left, right);
     }
 }
 

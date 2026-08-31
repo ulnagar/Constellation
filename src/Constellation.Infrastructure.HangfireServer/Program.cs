@@ -24,4 +24,6 @@ builder.Host.UseWindowsService();
 
 var app = builder.Build();
 
+await app.RegisterSystemJobsWithHangfire();
+
 app.Run();

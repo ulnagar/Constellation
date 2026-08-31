@@ -9,6 +9,7 @@ using Constellation.Application.Interfaces.Jobs;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Interfaces.Services;
 using Constellation.Core.Abstractions.Clock;
+using Constellation.Infrastructure.Caches.AuthenticatorMetadata;
 using Constellation.Infrastructure.ExternalServices.Teams;
 using Constellation.Infrastructure.Idempotence;
 using Constellation.Infrastructure.Identity.Authorization;
@@ -134,7 +135,7 @@ public static class ServicesRegistration
         services.AddScoped<ISentralAttendancePercentageSyncJob, SentralAttendancePercentageSyncJob>();
         services.AddScoped<ISentralAwardSyncJob, SentralAwardSyncJob>();
         services.AddScoped<ISentralFamilyDetailsSyncJob, SentralFamilyDetailsSyncJob>();
-        services.AddScoped<ISentralPhotoSyncJob, SentralPhotoSyncJob>();
+        services.AddScoped<ISentralDetailsSyncJob, SentralDetailsSyncJob>();
         services.AddScoped<ISentralReportSyncJob, SentralReportSyncJob>();
         services.AddScoped<ITeamsAccessAuditJob, TeamsAccessAuditJob>();
         services.AddScoped<ITrackItSyncJob, TrackItSyncJob>();
@@ -165,6 +166,10 @@ public static class ServicesRegistration
             options.SizeLimit = 50_000;
         });
         services.AddSingleton<IImportStagingCache, ImportStagingCache>();
+
+        // Add Passkey Provider Metadata Cache
+        services.AddSingleton<IAuthenticatorMetadataCache, AuthenticatorMetadataCache>();
+        services.AddScoped<MdsRefreshJob>();
 
         // Add Constellation repositories
 

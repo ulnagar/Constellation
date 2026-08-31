@@ -67,6 +67,7 @@ internal sealed class GetUserDetailsQueryHandler
         {
             passkeys.Add(new(
                 passkey.Name,
+                passkey.AaGuid,
                 passkey.CreatedAt,
                 passkey.CredentialId));
         }

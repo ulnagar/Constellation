@@ -23,6 +23,7 @@ public sealed record UserResponse(
 
     public sealed record Passkey(
         string Name,
+        Guid aaGuid,
         DateTimeOffset CreatedAt,
         byte[] CredentialId);
 }

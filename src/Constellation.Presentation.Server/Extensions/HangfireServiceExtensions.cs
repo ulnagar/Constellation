@@ -1,5 +1,6 @@
 ﻿namespace Constellation.Presentation.Server.Extensions;
 
+using Constellation.Infrastructure.Jobs;
 using Constellation.Presentation.Server.Infrastructure;
 using Hangfire;
 using Hangfire.SqlServer;
@@ -32,5 +33,18 @@ public static class HangfireServiceExtensions
         services.AddTransient<HangfireAuthorizationFilter>();
 
         return services;
+    }
+    public static async Task RegisterSystemJobsWithHangfire(this WebApplication app)
+    {
+        //RecurringJob.AddOrUpdate<MdsRefreshJob>(
+        //    recurringJobId: "mds-refresh",
+        //    methodCall: job => job.RefreshAsync(JobCancellationToken.Null),
+        //    cronExpression: Cron.Weekly());
+
+        using (var scope = app.Services.CreateScope())
+        {
+            var job = scope.ServiceProvider.GetRequiredService<MdsRefreshJob>();
+            await job.InitialiseAsync();
+        }
     }
 }

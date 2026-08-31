@@ -8,17 +8,16 @@ using Core.Abstractions.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Diagnostics;
+using Microsoft.Extensions.DependencyInjection;
 
 public sealed class CreateAuditLogEntitiesInterceptor 
     : SaveChangesInterceptor
 {
-    private readonly ICurrentUserService _currentUserService;
-    private readonly IDateTimeProvider _dateTimeProvider;
+    private readonly IServiceScopeFactory _scopeFactory;
 
-    public CreateAuditLogEntitiesInterceptor(ICurrentUserService currentUserService, IDateTimeProvider dateTimeProvider)
+    public CreateAuditLogEntitiesInterceptor(IServiceScopeFactory scopeFactory)
     {
-        _currentUserService = currentUserService;
-        _dateTimeProvider = dateTimeProvider;
+        _scopeFactory = scopeFactory;
     }
 
     public override ValueTask<InterceptionResult<int>> SavingChangesAsync(
@@ -26,6 +25,9 @@ public sealed class CreateAuditLogEntitiesInterceptor
         InterceptionResult<int> result, 
         CancellationToken cancellationToken = default)
     {
+        using IServiceScope scope = _scopeFactory.CreateScope();
+        ICurrentUserService currentUserService = scope.ServiceProvider.GetRequiredService<ICurrentUserService>();
+
         DbContext? dbContext = eventData.Context;
 
         if (dbContext is null)
@@ -50,7 +52,7 @@ public sealed class CreateAuditLogEntitiesInterceptor
 
             var auditEntry = new AuditEntry(entry);
             auditEntry.TypeName = entry.Entity.GetType().Name;
-            auditEntry.UserId = _currentUserService.UserName;
+            auditEntry.UserId = currentUserService.UserName;
             auditEntries.Add(auditEntry);
 
             foreach (var property in entry.Properties)

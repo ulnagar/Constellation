@@ -56,7 +56,7 @@ public interface ISentralComplianceScanJob : IHangfireJob { }
 
 public interface ISentralFamilyDetailsSyncJob : IHangfireJob { }
 
-public interface ISentralPhotoSyncJob : IHangfireJob { }
+public interface ISentralDetailsSyncJob : IHangfireJob { }
 
 public interface ISentralReportSyncJob : IHangfireJob { }
 
