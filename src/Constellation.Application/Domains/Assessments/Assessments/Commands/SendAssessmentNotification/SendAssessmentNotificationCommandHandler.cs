@@ -75,11 +75,11 @@ internal sealed class SendAssessmentNotificationCommandHandler
         List<EmailRecipient> recipients = [];
 
         List<StudentId> studentIds = request.IncludeStudents || request.IncludeParents
-            ? assessment.Students.Select(entry => entry.StudentId).Distinct().ToList()
+            ? assessment.Students.Where(entry => !entry.IsDeleted).Select(entry => entry.StudentId).Distinct().ToList()
             : [];
 
         List<SchoolCode> schoolCodes = request.IncludeSchoolContacts
-            ? assessment.Students.Select(entry => entry.SchoolCode).Distinct().ToList()
+            ? assessment.Students.Where(entry => !entry.IsDeleted).Select(entry => entry.SchoolCode).Distinct().ToList()
             : [];
 
         List<Offering> classes = request.IncludeClassroomTeachers

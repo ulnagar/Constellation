@@ -472,10 +472,11 @@
 
                         const term = params.term.trim().toLowerCase();
                         const optionText = data.text.toLowerCase();
-                        const groupText = (data.element && data.element.parentElement
+
+                        const groupLabel = data.element && data.element.parentElement
                             ? data.element.parentElement.label
-                            : ''
-                        ).toLowerCase();
+                            : '';
+                        const groupText = (groupLabel || '').toLowerCase();
 
                         // Match on either the option text or the group label
                         if (optionText.includes(term) || groupText.includes(term)) {

@@ -1,5 +1,6 @@
 ﻿namespace Constellation.Infrastructure.HangfireServer;
 
+using Constellation.Infrastructure.Caches.AuthenticatorMetadata;
 using Hangfire;
 using Hangfire.Storage;
 using Jobs;
@@ -12,16 +13,12 @@ public static class HangfireJobRegistrationExtensions
 
         if (app.Environment.IsDevelopment())
             ClearAllJobs();
-        
-        RecurringJob.AddOrUpdate<MdsRefreshJob>(
-            recurringJobId: "mds-refresh",
-            methodCall: job => job.RefreshAsync(JobCancellationToken.Null),
-            cronExpression: Cron.Weekly());
 
         using (var scope = app.Services.CreateScope())
         {
-            var job = scope.ServiceProvider.GetRequiredService<MdsRefreshJob>();
-            await job.InitialiseAsync();
+            scope.ServiceProvider
+                .GetRequiredService<IAuthenticatorMetadataLoader>()
+                .Load();
         }
     }
 

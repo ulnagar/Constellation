@@ -1,7 +1,7 @@
 using Constellation.Application.Models.Auth;
 using Constellation.Core.Abstractions.Services;
+using Constellation.Infrastructure.Caches.AuthenticatorMetadata;
 using Constellation.Infrastructure.DependencyInjection;
-using Constellation.Infrastructure.Jobs;
 using Constellation.Infrastructure.Middleware;
 using Constellation.Presentation.Server.Areas.API.Endpoints;
 using Constellation.Presentation.Server.DebugTools;
@@ -65,7 +65,12 @@ else
 app.UseStatusCodePagesWithReExecute("/Error", "?statusCode={0}");
 
 await app.SeedIdentityAsync();
-await app.RegisterSystemJobsWithHangfire();
+using (var scope = app.Services.CreateScope())
+{
+    scope.ServiceProvider
+        .GetRequiredService<IAuthenticatorMetadataLoader>()
+        .Load();
+}
 
 app.UseSerilogRequestLogging();
 app.UseHttpsRedirection();

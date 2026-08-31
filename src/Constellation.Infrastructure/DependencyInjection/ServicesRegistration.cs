@@ -169,7 +169,7 @@ public static class ServicesRegistration
 
         // Add Passkey Provider Metadata Cache
         services.AddSingleton<IAuthenticatorMetadataCache, AuthenticatorMetadataCache>();
-        services.AddScoped<MdsRefreshJob>();
+        services.AddScoped<IAuthenticatorMetadataLoader, AuthenticatorMetadataLoader>();
 
         // Add Constellation repositories
 
