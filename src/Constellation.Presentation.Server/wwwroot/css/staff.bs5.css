@@ -574,3 +574,9 @@ a.Senior-5:focus, a.Senior-5.focus {
     width: 1%;
     white-space: nowrap;
 }
+
+/* format display digits on the widgets for the Staff Dashboard */
+.card-title-large {
+    text-align: center;
+    font-size: 40pt;
+}

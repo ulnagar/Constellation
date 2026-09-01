@@ -1,0 +1,43 @@
+@using System.Text.Json
+@using Constellation.Presentation.Staff.Areas.Staff.Pages.Shared.PartialViews.DashboardWidget
+@model Constellation.Presentation.Staff.Areas.Staff.Pages.Shared.PartialViews.DashboardWidget.DashboardWidgetModel
+
+<div class="sortable-item" data-id="card-@Model.Id"
+     style="grid-column: span @Model.ColSpan; grid-row: span @Model.RowSpan;">
+    <div class="card h-100 @(Model.Variant switch
+       {
+           WidgetVariant.Danger => "text-white bg-danger",
+           WidgetVariant.Success => "text-white bg-success",
+           _ => ""
+       })">
+        <div class="card-header">@Model.Title</div>
+        <div class="card-body" style="display: flex; height: 100%; flex-direction: column; overflow: hidden;">
+            @if (Model is CountWidgetModel count)
+            {
+                <h3 class="card-title card-title-large">
+                    @if (string.IsNullOrWhiteSpace(count.CountDisplay))
+                    {
+                        @count.Count
+                    }
+                    else
+                    {
+                        @count.CountDisplay
+                    }
+                </h3>
+                <p class="card-text">@count.Description</p>
+                <a asp-page="@count.Page" asp-area="@count.Area" asp-all-route-data="count.RouteValues" class="stretched-link"></a>
+
+            }
+            else if (Model is ChartWidgetModel chart)
+            {
+                <h4 class="card-title">@chart.ChartTitle</h4>
+                <div style="position: relative; flex: 1; min-height: 0; width: 100%;">
+                    <canvas id="chart-@chart.Id" class="dashboard-chart"
+                            data-chart-type="@chart.ChartType"
+                            data-labels="@JsonSerializer.Serialize(chart.Labels)"
+                            data-values="@JsonSerializer.Serialize(chart.Values)"></canvas>
+                </div>
+            }
+        </div>
+    </div>
+</div>

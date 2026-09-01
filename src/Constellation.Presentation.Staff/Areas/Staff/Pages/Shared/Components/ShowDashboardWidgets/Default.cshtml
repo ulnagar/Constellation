@@ -1,195 +1,39 @@
-﻿@model Constellation.Presentation.Staff.Areas.Staff.Pages.Shared.Components.ShowDashboardWidgets.ShowDashboardWidgetsViewComponentModel
+﻿@model List<DashboardWidgetModel>
+@using Constellation.Presentation.Staff.Areas.Staff.Pages.Shared.PartialViews.DashboardWidget
 
-@using Constellation.Application.Domains.MeritAwards.Awards.Enums
-
-<div class="col mb-4 sortable" data-id="card-workflow-actions">
-    <div class="card h-100 @(Model.ActiveWorkFlowActions > 0 ? "text-white bg-danger" : "text-white bg-success")">
-        <div class="card-header">WorkFlow Actions</div>
-        <div class="card-body">
-            <h3 class="card-title card-title-large">@Model.ActiveWorkFlowActions</h3>
-            <p class="card-text">active assigned WorkFlow Actions</p>
-            <a asp-page="/SchoolAdmin/WorkFlows/Index" asp-area="Staff" class="stretched-link"></a>
-        </div>
-    </div>
-</div>
-
-@if (Model.ShowStocktakeWidget)
+@foreach (DashboardWidgetModel card in Model)
 {
-    <div class="col mb-4 sortable" data-id="card-stocktake-percentage">
-        <div class="card h-100 @(Model.StocktakePercentage > 0 ? "text-white bg-warning" : "text-white bg-success")">
-            <div class="card-header">Stocktake</div>
-            <div class="card-body">
-                <h3 class="card-title card-title-large">@Model.StocktakePercentage.ToString("F")%</h3>
-                <p class="card-text">devices remaining to be sighted</p>
-                <a asp-page="/Equipment/Stocktake/Details" asp-area="Staff" asp-route-id="@Model.StocktakeEventId" class="stretched-link"></a>
-            </div>
-        </div>
-    </div>
+    <partial name="Shared/PartialViews/DashboardWidget/DashboardWidget" model="card" />
 }
 
-@if (Model.ShowSentralIdWidgets)
-{
-    <div class="col mb-4 sortable" data-id="card-student-sentralid">
-        <div class="card h-100 @(Model.StudentsWithoutSentralId > 0 ? "text-white bg-danger" : "text-white bg-success")">
-            <div class="card-header">Student Configuration</div>
-            <div class="card-body">
-                <h3 class="card-title card-title-large">@Model.StudentsWithoutSentralId</h3>
-                <p class="card-text">students without a linked Sentral Student Id</p>
-                <a asp-page="/Partner/Students/Reports/WithoutSentralId" asp-area="Staff" class="stretched-link"></a>
-            </div>
-        </div>
-    </div>
-}
+<script>
+    document.querySelectorAll('.dashboard-chart').forEach(function (canvas) {
+        const labels = JSON.parse(canvas.dataset.labels);   // ["Preparing","Awaiting Response",...]
+        const values = JSON.parse(canvas.dataset.values);    // [27, 2, 2, 1]
+        const colors = ['#0d6efd', '#6c757d', '#ffc107', '#198754', '#dc3545'];
 
-@if (Model.ShowTrainingWidgets)
-{
-    <div class="col mb-4 sortable" data-id="card-training-withoutrole">
-        <div class="card h-100 @(Model.WithoutRole > 0 ? "text-white bg-danger" : "text-white bg-success")">
-            <div class="card-header">Mandatory Training</div>
-            <div class="card-body">
-                <h3 class="card-title card-title-large">@Model.WithoutRole</h3>
-                <p class="card-text">staff members without an assigned Training Role</p>
-                <a asp-page="/SchoolAdmin/Training/Staff/WithoutModule" asp-area="Staff" class="stretched-link"></a>
-            </div>
-        </div>
-    </div>
-}
-
-@if (Model.ShowAbsenceWidgets)
-{
-    <div class="col mb-4 sortable" data-id="card-absences-partialdisabled">
-        <div class="card h-100 @(Model.PartialScanDisabled > 0 ? "text-white bg-danger" : "text-white bg-success")">
-            <div class="card-header">Absence Scanning</div>
-            <div class="card-body">
-                <h3 class="card-title card-title-large">@Model.PartialScanDisabled</h3>
-                <p class="card-text">students with Partial Absence Scanning disabled</p>
-                <a asp-page="/StudentAdmin/Attendance/Configuration" asp-area="Staff" class="stretched-link"></a>
-            </div>
-        </div>
-    </div>
-
-    <div class="col mb-4 sortable" data-id="card-absences-wholedisabled">
-        <div class="card h-100 @(Model.WholeScanDisabled > 0 ? "text-white bg-danger" : "text-white bg-success")">
-            <div class="card-header">Absence Scanning</div>
-            <div class="card-body">
-                <h3 class="card-title card-title-large">@Model.WholeScanDisabled</h3>
-                <p class="card-text">students with Whole Absence Scanning disabled</p>
-                <a asp-page="/StudentAdmin/Attendance/Configuration" asp-area="Staff" class="stretched-link"></a>
-            </div>
-        </div>
-    </div>
-
-    <div class="col mb-4 sortable" data-id="card-absences-edval-differences">
-        <div class="card h-100 @(Model.EdvalDifferences > 0 ? "text-white bg-danger" : "text-white bg-success")">
-            <div class="card-header">Edval Differences</div>
-            <div class="card-body">
-                <h3 class="card-title card-title-large">@Model.EdvalDifferences</h3>
-                <p class="card-text">differences between Edval data and Constellation</p>
-                <a asp-page="/Subject/Periods/Edval/Index" asp-area="Staff" class="stretched-link"></a>
-            </div>
-        </div>
-    </div>
-}
-
-@if (Model.ShowAttendancePlanWidgets)
-{
-    <div class="col mb-4 sortable" data-id="card-absences-plans-processing">
-        <div class="card h-100 @(Model.ProcessingAttendancePlans > 0 ? "text-white bg-danger" : "text-white bg-success")">
-            <div class="card-header">Attendance Plans</div>
-            <div class="card-body">
-                <h3 class="card-title card-title-large">@Model.ProcessingAttendancePlans</h3>
-                <p class="card-text">attendance plans to process</p>
-                <a asp-page="/StudentAdmin/Attendance/Plans/Index" asp-area="Staff" class="stretched-link"></a>
-            </div>
-        </div>
-    </div>
-
-    <div class="col mb-4 sortable" data-id="card-absences-plans-pending">
-        <div class="card h-100 @(Model.PendingAttendancePlans > 0 ? "text-white bg-danger" : "text-white bg-success")">
-            <div class="card-header">Attendance Plans</div>
-            <div class="card-body">
-                <h3 class="card-title card-title-large">@Model.PendingAttendancePlans</h3>
-                <p class="card-text">attendance plans awaiting ACC entry</p>
-                <a asp-page="/StudentAdmin/Attendance/Plans/Index" asp-area="Staff" class="stretched-link"></a>
-            </div>
-        </div>
-    </div>
-}
-
-@if (Model.ShowAwardsWidgets)
-{
-    <div class="col mb-4 sortable" data-id="card-awards-additions">
-        <div class="card h-100 @(Model.AwardAdditions > 0 ? "text-white bg-danger" : "text-white bg-success")">
-            <div class="card-header">Awards</div>
-            <div class="card-body">
-                <h3 class="card-title card-title-large">@Model.AwardAdditions</h3>
-                <p class="card-text">students with Pending Award Additions</p>
-                <a asp-page="/StudentAdmin/Awards/Changes" asp-area="Staff" asp-route-filter="@AwardsFilter.Additions" class="stretched-link"></a>
-            </div>
-        </div>
-    </div>
-
-    <div class="col mb-4 sortable" data-id="card-awards-overage">
-        <div class="card h-100 @(Model.AwardOverages > 0 ? "text-white bg-danger" : "text-white bg-success")">
-            <div class="card-header">Awards</div>
-            <div class="card-body">
-                <h3 class="card-title card-title-large">@Model.AwardOverages</h3>
-                <p class="card-text">students with Award Overages</p>
-                <a asp-page="/StudentAdmin/Awards/Changes" asp-area="Staff" asp-route-filter="@AwardsFilter.Overages" class="stretched-link"></a>
-            </div>
-        </div>
-    </div>
-}
-
-@if (Model.ShowTutorialRequestsWidget)
-{
-    <div class="col mb-4 sortable" data-id="card-tutorials-approval">
-        <div class="card h-100 @(Model.TutorialRequestsPendingApproval > 0 ? "text-white bg-danger" : "text-white bg-success")">
-            <div class="card-header">Tutorial Requests</div>
-            <div class="card-body">
-                <h3 class="card-title card-title-large">@Model.TutorialRequestsPendingApproval</h3>
-                <p class="card-text">Tutorial Requests pending approval</p>
-                <a asp-page="/Subject/Tutorials/Requests/Index" asp-area="Staff" class="stretched-link"></a>
-            </div>
-        </div>
-    </div>
-
-    <div class="col mb-4 sortable" data-id="card-tutorials-scheduling">
-        <div class="card h-100 @(Model.TutorialRequestsPendingScheduling > 0 ? "text-white bg-danger" : "text-white bg-success")">
-            <div class="card-header">Tutorial Requests</div>
-            <div class="card-body">
-                <h3 class="card-title card-title-large">@Model.TutorialRequestsPendingScheduling</h3>
-                <p class="card-text">Tutorial Requests pending scheduling</p>
-                <a asp-page="/Subject/Tutorials/Requests/Index" asp-area="Staff" class="stretched-link"></a>
-            </div>
-        </div>
-    </div>
-}
-
-@if (Model.ShowEnrolmentOffersNeedingReview)
-{
-    <div class="col mb-4 sortable" data-id="card-enrolment-forReview">
-        <div class="card h-100 @(Model.EnrolmentOffersNeedingReview > 0 ? "text-white bg-primary" : "text-white bg-success")">
-            <div class="card-header">Enrolment Responses</div>
-            <div class="card-body">
-                <h3 class="card-title card-title-large">@Model.EnrolmentOffersNeedingReview</h3>
-                <p class="card-text">pending review</p>
-                <a asp-page="/Partner/Enrolments/Offers" asp-area="Staff" class="stretched-link"></a>
-            </div>
-        </div>
-    </div>
-}
-
-@if (Model.ShowEnrolmentOffersNeedingApproval)
-{
-    <div class="col mb-4 sortable" data-id="card-enrolment-forApproval">
-        <div class="card h-100 @(Model.EnrolmentOffersNeedingApproval > 0 ? "text-white bg-primary" : "text-white bg-success")">
-            <div class="card-header">Enrolment Responses</div>
-            <div class="card-body">
-                <h3 class="card-title card-title-large">@Model.EnrolmentOffersNeedingApproval</h3>
-                <p class="card-text">pending approval</p>
-                <a asp-page="/Partner/Enrolments/Offers" asp-area="Staff"class="stretched-link"></a>
-            </div>
-        </div>
-    </div>
-}
+        new Chart(canvas.getContext('2d'), {
+            type: 'bar',
+            data: {
+                labels: [''],               // one category = one bar/row
+                datasets: labels.map((label, i) => ({
+                    label: label,
+                    data: [values[i]],       // this dataset contributes one value to the single bar
+                    backgroundColor: colors[i % colors.length]
+                }))
+            },
+            options: {
+                indexAxis: 'y',
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    x: { stacked: true },
+                    y: { stacked: true, display: false } // hide the empty category label on the axis
+                },
+                plugins: {
+                    legend: { position: 'bottom' }
+                }
+            }
+        });
+    });
+</script>

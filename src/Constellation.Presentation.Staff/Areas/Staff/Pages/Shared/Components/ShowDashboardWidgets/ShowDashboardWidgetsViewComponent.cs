@@ -5,6 +5,8 @@ using Application.Domains.Attendance.Plans.Queries.CountAttendancePlansWithStatu
 using Application.Domains.Edval.Queries.CountEdvalDifferences;
 using Application.Domains.EnrolmentContext.Offers.Queries.CountOffersInPendingAcceptanceStatus;
 using Application.Domains.EnrolmentContext.Offers.Queries.CountOffersInReviewingResponseStatus;
+using Application.Domains.EnrolmentContext.Offers.Queries.GetChartDataForEnrolmentStatus;
+using Application.Domains.MeritAwards.Awards.Enums;
 using Application.Domains.Students.Queries.CountStudentsWithAbsenceScanDisabled;
 using Application.Domains.Students.Queries.CountStudentsWithAwardOverages;
 using Application.Domains.Students.Queries.CountStudentsWithoutSentralId;
@@ -21,6 +23,9 @@ using Core.Models.Stocktake.Identifiers;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Routing;
+using PartialViews.DashboardWidget;
+using System.Globalization;
 using System.Security.Claims;
 
 public class ShowDashboardWidgetsViewComponent : ViewComponent
@@ -41,6 +46,8 @@ public class ShowDashboardWidgetsViewComponent : ViewComponent
 
     public async Task<IViewComponentResult> InvokeAsync(ClaimsPrincipal user, CancellationToken cancellationToken = default)
     {
+        List<DashboardWidgetModel> widgets = [];
+
         var adminTest = await _authService.AuthorizeAsync(user, AuthPolicies.IsSiteAdmin);
         var trainingTest = await _authService.AuthorizeAsync(user, AuthPermission.SchoolAdmin_Training_Edit_Value);
         var absencesTest = await _authService.AuthorizeAsync(user, AuthPermission.StudentAdmin_AttendanceSettings_Edit_Value);
@@ -52,126 +59,224 @@ public class ShowDashboardWidgetsViewComponent : ViewComponent
 
         StaffId staffId = _currentUserService.StaffId;
 
-        ShowDashboardWidgetsViewComponentModel viewModel = new();
 
         if (staffId != StaffId.Empty)
         {
             Result<int> countOfActiveActions = await _mediator.Send(new CountActiveActionsForUserQuery(staffId), cancellationToken);
             if (countOfActiveActions.IsSuccess)
-                viewModel.ActiveWorkFlowActions = countOfActiveActions.Value;
+            {
+                widgets.Add(new CountWidgetModel(
+                    "workflow-actions",
+                    "WorkFlow Actions",
+                    countOfActiveActions.Value,
+                    "active assigned WorkFlow Actions",
+                    "/SchoolAdmin/WorkFlows/Index"));
+            }
         }
 
         if (trainingTest.Succeeded || adminTest.Succeeded)
         {
-            viewModel.ShowTrainingWidgets = true;
-
             Result<int> countOfStaffWithoutRoles = await _mediator.Send(new CountStaffWithoutModuleQuery(), cancellationToken);
             if (countOfStaffWithoutRoles.IsSuccess)
-                viewModel.WithoutRole = countOfStaffWithoutRoles.Value;
+            {
+                widgets.Add(new CountWidgetModel(
+                    "training-withoutrole",
+                    "Mandatory Training",
+                    countOfStaffWithoutRoles.Value,
+                    "staff members without an assigned Training Role",
+                    "/SchoolAdmin/Training/Staff/WithoutModule"));
+            }
         }
 
         if (absencesTest.Succeeded || adminTest.Succeeded)
         {
-            viewModel.ShowAbsenceWidgets = true;
-
             Result<(int Whole, int Partial)> absenceScanRequest = await _mediator.Send(new CountStudentsWithAbsenceScanDisabledQuery(), cancellationToken);
 
             if (absenceScanRequest.IsSuccess)
             {
-                viewModel.WholeScanDisabled = absenceScanRequest.Value.Whole;
-                viewModel.PartialScanDisabled = absenceScanRequest.Value.Partial;
+                widgets.Add(new CountWidgetModel(
+                    "absences-partialdisabled",
+                    "Absence Scanning",
+                    absenceScanRequest.Value.Partial,
+                    "students with Partial Absence Scanning disabled",
+                    "/StudentAdmin/Attendance/Configuration"));
+
+                widgets.Add(new CountWidgetModel(
+                    "absences-wholedisabled",
+                    "Absence Scanning",
+                    absenceScanRequest.Value.Whole,
+                    "students with Whole Absence Scanning disabled",
+                    "/StudentAdmin/Attendance/Configuration"));
             }
 
             Result<(int Active, int Ignored)> edvalDifferencesRequest = await _mediator.Send(new CountEdvalDifferencesQuery(), cancellationToken);
 
             if (edvalDifferencesRequest.IsSuccess)
             {
-                viewModel.EdvalDifferences = edvalDifferencesRequest.Value.Active;
+                widgets.Add(new CountWidgetModel(
+                    "absences-edval-differences",
+                    "Edval Differences",
+                    edvalDifferencesRequest.Value.Active,
+                    "differences between Edval data and Constellation",
+                    "/Subject/Periods/Edval/Index"));
             }
         }
 
         if (attendancePlanTest.Succeeded || adminTest.Succeeded)
         {
-            viewModel.ShowAttendancePlanWidgets = true;
-
             Result<(int Pending, int Processing)> attendancePlanRequest = await _mediator.Send(new CountAttendancePlansWithStatusQuery(), cancellationToken);
 
             if (attendancePlanRequest.IsSuccess)
             {
-                viewModel.PendingAttendancePlans = attendancePlanRequest.Value.Pending;
-                viewModel.ProcessingAttendancePlans = attendancePlanRequest.Value.Processing;
+                widgets.Add(new CountWidgetModel(
+                    "absences-plans-processing",
+                    "Attendance Plans",
+                    attendancePlanRequest.Value.Processing,
+                    "attendance plans to process",
+                    "/StudentAdmin/Attendance/Plans/Index"));
+
+                widgets.Add(new CountWidgetModel(
+                    "absences-plans-pending",
+                    "Attendance Plans",
+                    attendancePlanRequest.Value.Pending,
+                    "attendance plans awaiting ACC entry",
+                    "/StudentAdmin/Attendance/Plans/Index"));
             }
         }
 
         if (awardsTest.Succeeded || adminTest.Succeeded)
         {
-            viewModel.ShowAwardsWidgets = true;
-
             Result<int> overages = await _mediator.Send(new CountStudentsWithAwardOveragesQuery(), cancellationToken);
 
             if (overages.IsSuccess)
-                viewModel.AwardOverages = overages.Value;
+            {
+                widgets.Add(new CountWidgetModel(
+                    "awards-overage",
+                    "Awards",
+                    overages.Value,
+                    "students with Award overages",
+                    "/StudentAdmin/Awards/Changes",
+                    RouteValues: new Dictionary<string, string> { ["Filter"] = AwardsFilter.Overages.ToString() }));
+            }
 
             Result<int> pending = await _mediator.Send(new CountStudentsWithPendingAwardsQuery(), cancellationToken);
 
             if (pending.IsSuccess)
-                viewModel.AwardAdditions = pending.Value;
+            {
+                widgets.Add(new CountWidgetModel(
+                    "awards-additions",
+                    "Awards",
+                    pending.Value,
+                    "students with pending Award additions",
+                    "/StudentAdmin/Awards/Changes",
+                    RouteValues: new Dictionary<string, string> { ["Filter"] = AwardsFilter.Additions.ToString() }));
+            }
         }
 
         if (tutorialsTest.Succeeded || adminTest.Succeeded)
         {
-            viewModel.ShowTutorialRequestsWidget = true;
-
             Result<int> requestsForApproval = await _mediator.Send(new CountRequestsPendingApprovalQuery(), cancellationToken);
 
             if (requestsForApproval.IsSuccess)
-                viewModel.TutorialRequestsPendingApproval = requestsForApproval.Value;
+            {
+                widgets.Add(new CountWidgetModel(
+                    "tutorials-approval",
+                    "Tutorial Requests",
+                    requestsForApproval.Value,
+                    "Tutorial Requests pending approval",
+                    "/Subject/Tutorials/Requests/Index"));
+            }
 
             Result<int> requestsForScheduling = await _mediator.Send(new CountRequestsPendingSchedulingQuery(), cancellationToken);
 
             if (requestsForScheduling.IsSuccess)
-                viewModel.TutorialRequestsPendingScheduling = requestsForScheduling.Value;
+            {
+                widgets.Add(new CountWidgetModel(
+                    "tutorials-scheduling",
+                    "Tutorial Requests",
+                    requestsForScheduling.Value,
+                    "Tutorial Requests pending scheduling",
+                    "/Subject/Tutorials/Requests/Index"));
+            }
         }
 
         if (adminTest.Succeeded)
         {
-            viewModel.ShowSentralIdWidgets = true;
-
             Result<int> sentralIdRequest = await _mediator.Send(new CountStudentsWithoutSentralIdQuery(), cancellationToken);
 
             if (sentralIdRequest.IsSuccess)
-                viewModel.StudentsWithoutSentralId = sentralIdRequest.Value;
+            {
+                widgets.Add(new CountWidgetModel(
+                    "student-sentralid",
+                    "Student Configuration",
+                    sentralIdRequest.Value,
+                    "students without a linked Sentral Student Id",
+                    "/Partner/Students/Reports/WithoutSentralId"));
+            }
 
             Result<(StocktakeEventId EventId, double Percentage)> stocktakeRequest = await _mediator.Send(new CountStocktakeItemsOutstandingQuery(), cancellationToken);
 
             if (stocktakeRequest.IsSuccess)
             {
-                viewModel.ShowStocktakeWidget = true;
-                viewModel.StocktakePercentage = stocktakeRequest.Value.Percentage;
-                viewModel.StocktakeEventId = stocktakeRequest.Value.EventId;
+                widgets.Add(new CountWidgetModel(
+                    "stocktake-percentage",
+                    "Stocktake",
+                    (int)stocktakeRequest.Value.Percentage,
+                    "devices remaining to be sighted",
+                    "/Equipment/Stocktake/Details",
+                    CountDisplay:$"{stocktakeRequest.Value.Percentage.ToString("F", CultureInfo.InvariantCulture)}%",
+                    RouteValues: new Dictionary<string, string> { ["id"] = stocktakeRequest.Value.EventId.ToString() }));
             }
         }
 
         if (enrolmentOfferReviewer.Succeeded)
         {
-            viewModel.ShowEnrolmentOffersNeedingReview = true;
-
             Result<int> reviewingResponse = await _mediator.Send(new CountOffersInReviewingResponseStatusQuery(), cancellationToken);
 
             if (reviewingResponse.IsSuccess)
-                viewModel.EnrolmentOffersNeedingReview = reviewingResponse.Value;
+            {
+                widgets.Add(new CountWidgetModel(
+                    "enrolment-forReview",
+                    "Enrolment Responses",
+                    reviewingResponse.Value,
+                    "pending review",
+                    "/Partner/Enrolments/Offers"));
+            }
         }
 
         if (enrolmentOfferApprover.Succeeded)
         {
-            viewModel.ShowEnrolmentOffersNeedingApproval = true;
-
             Result<int> pendingAcceptance = await _mediator.Send(new CountOffersInPendingAcceptanceStatusQuery(), cancellationToken);
 
             if (pendingAcceptance.IsSuccess)
-                viewModel.EnrolmentOffersNeedingApproval = pendingAcceptance.Value;
+            {
+                widgets.Add(new CountWidgetModel(
+                    "enrolment-forApproval",
+                    "Enrolment Responses",
+                    pendingAcceptance.Value,
+                    "pending approval",
+                    "/Partner/Enrolments/Offers"));
+            }
         }
 
-        return View(viewModel);
+        if (enrolmentOfferApprover.Succeeded || enrolmentOfferReviewer.Succeeded)
+        {
+            Result<List<ChartResponse>> enrolmentsCharts = await _mediator.Send(new GetChartDataForEnrolmentStatusQuery(), cancellationToken);
+
+            if (enrolmentsCharts.IsSuccess)
+            {
+                foreach (var chart in enrolmentsCharts.Value)
+                {
+                    widgets.Add(new ChartWidgetModel(
+                        $"enrolments-{chart.PeriodId}",
+                        "Enrolment Responses",
+                        chart.PeriodName,
+                        chart.ChartData.Keys.ToList(),
+                        chart.ChartData.Values.ToList()));
+                }
+            }
+        }
+
+        return View(widgets);
     }
 }

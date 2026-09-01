@@ -5,6 +5,8 @@
     Layout = "/Areas/Staff/Pages/Shared/_StaffLayout.bs5.cshtml";
 }
 
+<script src="~/lib/Chart.js/chart.min.js"></script>
+
 <div class="main-content">
     <div class="page-heading">
         <h2 class="text-center m-2">Welcome, <a asp-page="/Profile/Index" asp-area="Staff" class="link-underline link-underline-opacity-0 link-dark">@Model.UserName</a></h2>
@@ -29,7 +31,7 @@
         </div>
     }
 
-    <div class="row" id="sortable-cards">
+    <div id="sortable-cards">
         <vc:show-dashboard-widgets user="@Model.User"/>
     </div>
 </div>

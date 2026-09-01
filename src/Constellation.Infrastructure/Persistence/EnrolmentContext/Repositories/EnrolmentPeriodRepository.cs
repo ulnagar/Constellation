@@ -35,6 +35,15 @@ internal sealed class EnrolmentPeriodRepository
                 && _dateTime.Now < period.ClosedAt)
             .ToListAsync(cancellationToken);
 
+    public async Task<List<EnrolmentPeriod>> GetCurrentYearEnrolmentPeriods(
+        CancellationToken cancellationToken = default) =>
+        await _context
+            .Set<EnrolmentPeriod>()
+            .Where(period =>
+                EF.Functions.DateDiffYear(period.OpenAt, _dateTime.Now) == 0 ||
+                EF.Functions.DateDiffYear(period.ClosedAt, _dateTime.Now) == 0)
+            .ToListAsync(cancellationToken);
+    
     public async Task<EnrolmentPeriod?> GetEnrolmentPeriodById(
         EnrolmentPeriodId id,
         CancellationToken cancellationToken = default) =>
