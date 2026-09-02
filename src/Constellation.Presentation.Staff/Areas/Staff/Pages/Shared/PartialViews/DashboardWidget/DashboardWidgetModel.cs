@@ -36,9 +36,10 @@ public sealed record ChartWidgetModel(
     string Id,
     string Title,
     string ChartTitle,
-    IReadOnlyList<string> Labels,
-    IReadOnlyList<int> Values,
+    IReadOnlyList<ChartSegment> Segments,
     string ChartType = "bar",
     int ColSpan = 2, 
     int RowSpan = 1)
     : DashboardWidgetModel(Id, Title, ColSpan, RowSpan);
+
+public sealed record ChartSegment(string Label, int Value, string Colour);

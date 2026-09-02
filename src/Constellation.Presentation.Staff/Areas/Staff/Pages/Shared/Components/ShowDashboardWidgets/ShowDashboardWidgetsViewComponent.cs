@@ -18,12 +18,12 @@ using Application.Domains.WorkFlows.Queries.CountActiveActionsForUser;
 using Constellation.Application.Models.Auth;
 using Constellation.Core.Shared;
 using Core.Abstractions.Services;
+using Core.Models.EnrolmentContext.Offer.Extensions;
 using Core.Models.StaffMembers.Identifiers;
 using Core.Models.Stocktake.Identifiers;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Routing;
 using PartialViews.DashboardWidget;
 using System.Globalization;
 using System.Security.Claims;
@@ -265,14 +265,18 @@ public class ShowDashboardWidgetsViewComponent : ViewComponent
 
             if (enrolmentsCharts.IsSuccess)
             {
-                foreach (var chart in enrolmentsCharts.Value)
+                foreach (ChartResponse chart in enrolmentsCharts.Value)
                 {
+                    List<ChartSegment> segments = chart.ChartData
+                        .OrderBy(entry => entry.Key.Order)
+                        .Select(kvp => new ChartSegment(kvp.Key.ToString(), kvp.Value, kvp.Key.GetColour()))
+                        .ToList();
+
                     widgets.Add(new ChartWidgetModel(
                         $"enrolments-{chart.PeriodId}",
                         "Enrolment Responses",
                         chart.PeriodName,
-                        chart.ChartData.Keys.ToList(),
-                        chart.ChartData.Values.ToList()));
+                        segments));
                 }
             }
         }

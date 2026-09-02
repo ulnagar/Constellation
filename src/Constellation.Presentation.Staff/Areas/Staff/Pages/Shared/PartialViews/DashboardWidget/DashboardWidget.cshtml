@@ -34,8 +34,9 @@
                 <div style="position: relative; flex: 1; min-height: 0; width: 100%;">
                     <canvas id="chart-@chart.Id" class="dashboard-chart"
                             data-chart-type="@chart.ChartType"
-                            data-labels="@JsonSerializer.Serialize(chart.Labels)"
-                            data-values="@JsonSerializer.Serialize(chart.Values)"></canvas>
+                            data-labels="@JsonSerializer.Serialize(chart.Segments.Select(s => s.Label))"
+                            data-values="@JsonSerializer.Serialize(chart.Segments.Select(s => s.Value))"
+                            data-colours="@JsonSerializer.Serialize(chart.Segments.Select(s => s.Colour))"></canvas>
                 </div>
             }
         </div>

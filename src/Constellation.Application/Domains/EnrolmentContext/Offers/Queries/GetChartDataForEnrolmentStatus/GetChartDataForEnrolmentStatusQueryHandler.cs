@@ -5,6 +5,7 @@ using Constellation.Core.Models.EnrolmentContext.Offer.Repositories;
 using Core.Models.EnrolmentContext.EnrolmentPeriod;
 using Core.Models.EnrolmentContext.EnrolmentPeriod.Repositories;
 using Core.Models.EnrolmentContext.Offer;
+using Core.Models.EnrolmentContext.Offer.Enums;
 using Core.Shared;
 
 internal sealed class GetChartDataForEnrolmentStatusQueryHandler
@@ -31,9 +32,9 @@ internal sealed class GetChartDataForEnrolmentStatusQueryHandler
         {
             List<Offer> offers = await _offerRepository.GetForPeriod(period.Id, cancellationToken);
 
-            Dictionary<string, int> countByStatus = offers.GroupBy(entry => entry.Status)
+            Dictionary<OfferStatus, int> countByStatus = offers.GroupBy(entry => entry.Status)
                 .ToDictionary(
-                    entry => entry.Key.ToString(), 
+                    entry => entry.Key, 
                     entry => entry.Count());
 
             if (countByStatus.Count == 0)
