@@ -16,7 +16,7 @@ public sealed class StudentReferenceNumber : ValueObject<StudentReferenceNumber,
         Value = value;
     }
 
-    public static Result<StudentReferenceNumber> Create(string srn)
+    public static Result<StudentReferenceNumber> Create(string? srn)
     {
         if (string.IsNullOrWhiteSpace(srn))
             return Result.Failure<StudentReferenceNumber>(StudentReferenceNumberErrors.EmptyValue);

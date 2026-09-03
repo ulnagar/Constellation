@@ -21,7 +21,7 @@ public sealed class MailingAddress : ValueObject
         Postcode = postcode;
     }
 
-    public static Result<MailingAddress> Create(string street, string town, string state, string postcode)
+    public static Result<MailingAddress> Create(string? street, string? town, string? state, string? postcode)
     {
         if (string.IsNullOrWhiteSpace(street))
             return Result.Failure<MailingAddress>(MailingAddressErrors.StreetEmpty);

@@ -16,7 +16,7 @@ public sealed class EmailAddress : ValueObject<EmailAddress, string>, IValueObje
         Value = email;
     }
 
-    public static Result<EmailAddress> Create(string email)
+    public static Result<EmailAddress> Create(string? email)
     {
         if (string.IsNullOrWhiteSpace(email))
             return Result.Failure<EmailAddress>(DomainErrors.ValueObjects.EmailAddress.EmailEmpty);

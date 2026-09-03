@@ -153,8 +153,13 @@ public abstract class StringEnumeration<TEnum> : IEquatable<StringEnumeration<TE
     public string Name { get; protected init; }
     public int Order { get; protected init; }
 
-    public static TEnum? FromValue(string value) =>
-        Enumerations.GetValueOrDefault(value);
+    public static TEnum? FromValue(string? value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+            return null;
+
+        return Enumerations.GetValueOrDefault(value);
+    }
 
     public static TEnum? FromName(string name) =>
         Enumerations

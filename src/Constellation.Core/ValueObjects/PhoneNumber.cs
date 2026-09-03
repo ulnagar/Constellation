@@ -17,7 +17,7 @@ public sealed class PhoneNumber : ValueObject<PhoneNumber, string>, IValueObject
         Value = value;
     }
 
-    public static Result<PhoneNumber> Create(string number)
+    public static Result<PhoneNumber> Create(string? number)
     {
         if (string.IsNullOrWhiteSpace(number))
         {

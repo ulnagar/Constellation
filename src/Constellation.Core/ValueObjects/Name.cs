@@ -34,7 +34,7 @@ public sealed class Name : ValueObject, IComparable, IEquatable<Name>
             lastName.Trim());
     }
 
-    public static Result<Name> Create(string firstName, string preferredName, string lastName)
+    public static Result<Name> Create(string? firstName, string? preferredName, string? lastName)
     {
         if (string.IsNullOrEmpty(firstName))
         {

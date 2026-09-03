@@ -36,4 +36,9 @@ public static class ImportErrors
     public static readonly Error StagedImportExpired = new(
         "Import.Staging.StagedImportExpired",
         "The provided import staging key has expired and the data is no longer available");
+
+    public static readonly Func<string, Error> IncompleteFieldGroup = group => new(
+        "Import.Mapping.IncompleteFieldGroup",
+        $"The group {group} is missing some required fields");
 }
+

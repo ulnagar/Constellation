@@ -221,4 +221,138 @@ public sealed class Application
 
         return Result.Success();
     }
+
+    public Result UpdateGrade(Grade grade)
+    {
+        if (Status == ApplicationStatus.Archived)
+            return Result.Failure(EnrolmentApplicationErrors.CannotUpdateArchivedApplication);
+
+        if (!IsValidProgramGradeCombination(Program, grade))
+            return Result.Failure<Application>(EnrolmentApplicationErrors.InvalidProgramGradeCombination(Program, grade));
+
+        Grade = grade;
+
+        return Result.Success();
+    }
+
+    public Result UpdateStudentName(Name studentName)
+    {
+        if (Status == ApplicationStatus.Archived)
+            return Result.Failure(EnrolmentApplicationErrors.CannotUpdateArchivedApplication);
+
+        StudentName = studentName;
+
+        return Result.Success();
+    }
+
+    public Result UpdateSRN(StudentReferenceNumber srn)
+    {
+        if (Status == ApplicationStatus.Archived)
+            return Result.Failure(EnrolmentApplicationErrors.CannotUpdateArchivedApplication);
+
+        StudentReferenceNumber = srn;
+
+        return Result.Success();
+    }
+
+    public Result UpdateParentName(Name parentName)
+    {
+        if (Status == ApplicationStatus.Archived)
+            return Result.Failure(EnrolmentApplicationErrors.CannotUpdateArchivedApplication);
+
+        ParentName = parentName;
+
+        return Result.Success();
+    }
+
+    public Result UpdateDateOfBirth(DateOnly dateOfBirth)
+    {
+        if (Status == ApplicationStatus.Archived)
+            return Result.Failure(EnrolmentApplicationErrors.CannotUpdateArchivedApplication);
+
+        DateOfBirth = dateOfBirth;
+
+        return Result.Success();
+    }
+
+    public Result UpdateGender(Gender gender)
+    {
+        if (Status == ApplicationStatus.Archived)
+            return Result.Failure(EnrolmentApplicationErrors.CannotUpdateArchivedApplication);
+
+        StudentGender = gender;
+
+        return Result.Success();
+    }
+
+    public Result UpdateStudentEmail(EmailAddress studentEmail)
+    {
+        if (Status == ApplicationStatus.Archived)
+            return Result.Failure(EnrolmentApplicationErrors.CannotUpdateArchivedApplication);
+
+        StudentEmailAddress = studentEmail;
+
+        return Result.Success();
+    }
+
+    public Result UpdateParentEmail(EmailAddress parentEmail)
+    {
+        if (Status == ApplicationStatus.Archived)
+            return Result.Failure(EnrolmentApplicationErrors.CannotUpdateArchivedApplication);
+
+        ParentEmailAddress = parentEmail;
+
+        return Result.Success();
+    }
+
+    public Result UpdateParentPhone(PhoneNumber parentPhone)
+    {
+        if (Status == ApplicationStatus.Archived)
+            return Result.Failure(EnrolmentApplicationErrors.CannotUpdateArchivedApplication);
+
+        ParentPhoneNumber = parentPhone;
+
+        return Result.Success();
+    }
+
+    public Result UpdateMailingAddress(MailingAddress address)
+    {
+        if (Status == ApplicationStatus.Archived)
+            return Result.Failure(EnrolmentApplicationErrors.CannotUpdateArchivedApplication);
+
+        MailingAddress = address;
+
+        return Result.Success();
+    }
+
+    public Result UpdateCurrentSchool(SchoolCode? code, string? name)
+    {
+        if (Status == ApplicationStatus.Archived)
+            return Result.Failure(EnrolmentApplicationErrors.CannotUpdateArchivedApplication);
+
+        CurrentSchoolCode = code;
+        CurrentSchool = name;
+
+        return Result.Success();
+    }
+
+    public Result UpdateDestinationSchool(SchoolCode code, string name)
+    {
+        if (Status == ApplicationStatus.Archived)
+            return Result.Failure(EnrolmentApplicationErrors.CannotUpdateArchivedApplication);
+
+        DestinationSchoolCode = code;
+        DestinationSchool = name;
+
+        return Result.Success();
+    }
+    public Result UpdateApplicationReference(string? applicationReference)
+    {
+        if (Status == ApplicationStatus.Archived)
+            return Result.Failure(EnrolmentApplicationErrors.CannotUpdateArchivedApplication);
+
+        ApplicationReference = applicationReference;
+
+        return Result.Success();
+    }
 }

@@ -19,6 +19,7 @@ public sealed record EnrolmentOfferExport(
     string PeriodName,
     StudentReferenceNumber? StudentReferenceNumber,
     Name StudentName,
+    EmailAddress? StudentEmail,
     Gender StudentGender,
     Name? ParentName,
     EmailAddress? ParentEmailAddress,

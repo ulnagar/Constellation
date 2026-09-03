@@ -1,5 +1,6 @@
 ﻿namespace Constellation.Infrastructure.Persistence.EnrolmentContext.Repositories;
 
+using Constellation.Core.Models.Students.ValueObjects;
 using Core.Models.EnrolmentContext.Application;
 using Core.Models.EnrolmentContext.Application.Repositories;
 using Core.Models.EnrolmentContext.EnrolmentPeriod.Identifiers;
@@ -31,6 +32,42 @@ internal sealed class EnrolmentApplicationRepository
             .FirstOrDefaultAsync(
                 application => application.Id == id,
                 cancellationToken);
+
+
+    public async Task<Application?> GetApplicationByReference(
+        EnrolmentPeriodId periodId,
+        string reference,
+        CancellationToken cancellationToken = default) =>
+        await _context
+            .Set<Application>()
+            .FirstOrDefaultAsync(entry =>
+                    entry.PeriodId == periodId &&
+                    entry.ApplicationReference == reference,
+                cancellationToken);
+
+    public async Task<Application?> GetApplicationBySRN(
+        EnrolmentPeriodId periodId,
+        StudentReferenceNumber studentReferenceNumber,
+        CancellationToken cancellationToken = default) =>
+        await _context
+            .Set<Application>()
+            .FirstOrDefaultAsync(entry =>
+                    entry.PeriodId == periodId &&
+                    entry.StudentReferenceNumber == studentReferenceNumber,
+                cancellationToken);
+
+    public async Task<List<Application>> GetApplicationByStudentName(
+        EnrolmentPeriodId periodId,
+        string firstName,
+        string lastName,
+        CancellationToken cancellationToken = default) =>
+        await _context
+            .Set<Application>()
+            .Where(entry =>
+                    entry.PeriodId == periodId &&
+                    entry.StudentName.FirstName == firstName &&
+                    entry.StudentName.LastName == lastName)
+            .ToListAsync(cancellationToken);
 
     public async Task<List<Application>> GetApplicationsByPeriod(
         EnrolmentPeriodId id,

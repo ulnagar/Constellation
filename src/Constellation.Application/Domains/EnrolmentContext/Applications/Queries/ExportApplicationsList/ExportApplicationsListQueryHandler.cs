@@ -16,18 +16,15 @@ using System.Globalization;
 internal sealed class ExportApplicationsListQueryHandler
 : IQueryHandler<ExportApplicationsListQuery, byte[]>
 {
-    private readonly IEnrolmentPeriodRepository _periodRepository;
     private readonly IEnrolmentApplicationRepository _applicationRepository;
     private readonly IExcelWriter _writer;
     private readonly ILogger _logger;
 
     public ExportApplicationsListQueryHandler(
-        IEnrolmentPeriodRepository periodRepository,
         IEnrolmentApplicationRepository applicationRepository,
         IExcelWriter writer,
         ILogger logger)
     {
-        _periodRepository = periodRepository;
         _applicationRepository = applicationRepository;
         _writer = writer;
         _logger = logger
@@ -46,10 +43,12 @@ internal sealed class ExportApplicationsListQueryHandler
 
         _writer.WriteRange(sheet, 2, applications,
             new("Application Reference", a => a.ApplicationReference),
+            new("SRN", a => a.StudentReferenceNumber?.Value ?? ""),
             new("Student Family Name", a => a.StudentName.LastName),
             new("Student Given Names", a => a.StudentName.FirstName),
             new("Student Preferred Name", a => a.StudentName.PreferredName),
             new("Full Name", a => a.StudentName.DisplayName),
+            new("Student Email", a => a.StudentEmailAddress?.Email ?? ""),
             new("DoB", a => a.DateOfBirth, ExcelColumnFormat.Date),
             new("Gender", a => a.StudentGender?.Name ?? "Unknown"),
             new("Cohort", a => a.Grade.AsNumber(), ExcelColumnFormat.Text),
@@ -65,7 +64,7 @@ internal sealed class ExportApplicationsListQueryHandler
             new("State", a => a.MailingAddress?.State),
             new("PostCode", a => a.MailingAddress?.Postcode, ExcelColumnFormat.Text),
             new("Phone Number", a => a.ParentPhoneNumber),
-            new("Email", a => a.ParentEmailAddress),
+            new("Parent Email", a => a.ParentEmailAddress),
             new("Status", a => a.Status.ToString()));
 
         _writer.ApplyHeaderStyle(sheet, 1);
