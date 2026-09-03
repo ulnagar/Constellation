@@ -7,7 +7,11 @@
             <span class="w-100">Quick Links</span>
         </h4>
         <ul id="links" class="collapse show nav flex-column">
-
+            
+            <li class="nav-item">
+                <a class="nav-link" asp-page="/Profile/Index" asp-area="Staff">Profile</a>
+            </li>
+            
             <li class="nav-item">
                 <a class="nav-link" asp-page="/SchoolAdmin/Training/Staff/Index" asp-route-staffId="@Model.StaffId" asp-area="Staff">
                     Mandatory Training

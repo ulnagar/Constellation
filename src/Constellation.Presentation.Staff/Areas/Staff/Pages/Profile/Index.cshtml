@@ -1,158 +1,181 @@
 ﻿@page
 @model Constellation.Presentation.Staff.Areas.Staff.Pages.Profile.IndexModel
 
+@using Constellation.Core.Models.Auth
 @using Constellation.Core.Models.Auth.Enums
-@using Microsoft.AspNetCore.WebUtilities
+@using Constellation.Core.Models.StaffMembers.Identifiers
+@using Constellation.Presentation.Staff.Areas.Staff.Pages.Shared.PartialViews.AddPhoneNumberToStaffMember
 
 @{
 }
 
 <h2>User Profile</h2>
 
-<div class="page-menu"></div>
+<div class="page-menu">
+    <a href="javascript:history.go(-1)" class="btn btn-danger btn-pull-right">Go Back</a>
+</div>
 
 <hr />
 
-<div class="row">
-    <div class="col">
-        <dl>
-            <dt>Name</dt>
-            <dd>@Model.CurrentUser.Name.DisplayName</dd>
-            
-            <dt>Email Address</dt>
-            <dd>@Model.CurrentUser.Email</dd>
-            
-            <dt>Profiles</dt>
-            @foreach (var link in Model.CurrentUser.Links.OrderBy(link => link.Type))
-            {
-                <dd>
-                    @if (link.Type == LinkType.Staff)
+<ul class="nav nav-tabs" id="page-tabs" role="tablist">
+    <li class="nav-item" role="presentation">
+        <button class="nav-link active" id="profile-tab" data-bs-toggle="tab" data-bs-target="#profile" type="button" role="tab">User Profile</button>
+    </li>
+    <li class="nav-item">
+        <button class="nav-link" id="security-tab" data-bs-toggle="tab" data-bs-target="#security" type="button" role="tab">Security</button>
+    </li>
+    <li class="nav-item">
+        <button class="nav-link" id="permissions-tab" data-bs-toggle="tab" data-bs-target="#authorisation" type="button" role="tab">Permissions</button>
+    </li>
+</ul>
+
+<hr />
+
+<div class="tab-content">
+    <div class="tab-pane fade show active" id="profile" role="tabpanel">
+        <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#phone-number-modal">Update Mobile Number</button>
+        <div class="row">
+            <div class="col">
+                <dl>
+                    <dt>Name</dt>
+                    <dd>@Model.CurrentUser.Name.DisplayName</dd>
+
+                    <dt>Email Address</dt>
+                    <dd>@Model.CurrentUser.Email</dd>
+
+                    <dt>Mobile Number</dt>
+                    <dd>@Model.CurrentUser.PhoneNumber</dd>
+
+                    <dt>Profiles</dt>
+                    @foreach (var link in Model.CurrentUser.Links.OrderBy(link => link.Type))
                     {
-                        <a asp-page="/Partner/Staff/Details" asp-area="Staff" asp-route-id="@link.LinkId" class="badge bg-primary link-underline link-underline-opacity-0" tooltip="Id: @link.LinkId">Staff</a>
+                        <dd>
+                            @if (link.Type == LinkType.Staff)
+                            {
+                                <a asp-page="/Partner/Staff/Details" asp-area="Staff" asp-route-id="@link.LinkId" class="badge bg-primary link-underline link-underline-opacity-0" tooltip="Id: @link.LinkId">Staff</a>
+                            }
+
+                            @if (link.Type == LinkType.Student)
+                            {
+                                <a asp-page="/Partner/Students/Details" asp-area="Staff" asp-route-id="@link.LinkId" class="badge bg-primary link-underline link-underline-opacity-0" tooltip="Id: @link.LinkId">Student</a>
+                            }
+
+                            @if (link.Type == LinkType.Contact)
+                            {
+                                <a asp-page="/Partner/Schools/Contacts/Details" asp-area="Staff" asp-route-id="@link.LinkId" class="badge bg-primary link-underline link-underline-opacity-0" tooltip="Id: @link.LinkId">Contact</a>
+                            }
+
+                            @if (link.Type == LinkType.Family)
+                            {
+                                <a asp-page="/Partner/Students/Families/Details" asp-area="Staff" asp-route-id="@link.LinkId" class="badge bg-primary link-underline link-underline-opacity-0" tooltip="Id: @link.LinkId">Family</a>
+                            }
+
+                            @if (link.Type == LinkType.Parent)
+                            {
+                                <span class="badge bg-primary" tooltip="Id: @link.LinkId">Parent</span>
+                            }
+                        </dd>
+                    }
+                </dl>
+            </div>
+        </div>
+
+        <div class="modal" id="phone-number-modal" tabindex="-1">
+            <div class="modal-dialog modal-dialog-scrollable">
+                <div class="modal-content">
+                    @{
+                        AppUserLink? staffLink = Model.CurrentUser.Links.FirstOrDefault(entry => entry.Type == LinkType.Staff);
+                        StaffId staffId = StaffId.FromValue(staffLink!.LinkId);
+
+                        AddPhoneNumberToStaffMemberViewModel phoneModel = new(Model.CurrentUser.PhoneNumber, staffId);
                     }
 
-                    @if (link.Type == LinkType.Student)
-                    {
-                        <a asp-page="/Partner/Students/Details" asp-area="Staff" asp-route-id="@link.LinkId" class="badge bg-primary link-underline link-underline-opacity-0" tooltip="Id: @link.LinkId">Student</a>
-                    }
-
-                    @if (link.Type == LinkType.Contact)
-                    {
-                        <a asp-page="/Partner/Schools/Contacts/Details" asp-area="Staff" asp-route-id="@link.LinkId" class="badge bg-primary link-underline link-underline-opacity-0" tooltip="Id: @link.LinkId">Contact</a>
-                    }
-
-                    @if (link.Type == LinkType.Family)
-                    {
-                        <a asp-page="/Partner/Students/Families/Details" asp-area="Staff" asp-route-id="@link.LinkId" class="badge bg-primary link-underline link-underline-opacity-0" tooltip="Id: @link.LinkId">Family</a>
-                    }
-
-                    @if (link.Type == LinkType.Parent)
-                    {
-                        <span class="badge bg-primary" tooltip="Id: @link.LinkId">Parent</span>
-                    }
-                </dd>
-            }
-        </dl>
+                    <partial name="AddPhoneNumberToStaffMember" model="phoneModel"/>
+                </div>
+            </div>
+        </div>
     </div>
-</div>
 
-<div>
-    <h4>Passkeys</h4>
+    <div class="tab-pane fade" id="security" role="tabpanel">
+        <h4>Passkeys</h4>
     
-    <div class="mb-2"><a href="https://www.cyber.gov.au/protect-yourself/secure-your-accounts/passkeys" target="_blank">Australian Government advice on Passkeys</a></div>
+        <div class="mb-2"><a href="https://www.cyber.gov.au/protect-yourself/secure-your-accounts/passkeys" target="_blank">Australian Government advice on Passkeys</a></div>
 
-    <div class="row row-cols row-cols-lg-2 row-cols-xl-3">
-        @foreach (var passkey in Model.Passkeys)
-        {
-            <div class="col">
-                <div class="card mb-3">
-                    <div class="card-header d-flex align-items-center gap-2">
-                        @if (passkey.IconUrl is not null)
-                        {
-                            <img src="@passkey.IconUrl" alt="@passkey.AuthenticatorName" 
-                                 style="width: 24px; height: 24px;" />
-                        }
-                        <h5 class="card-title mb-0">@passkey.Name</h5>
-                    </div>
-                    <div class="card-body">
-                        <p class="card-text text-muted">@passkey.AuthenticatorName</p>
-                        <p class="card-text">Registered: @passkey.CreatedAt.ToLocalTime().ToString("f")</p>
-                    </div>
-                    <div class="card-footer">
-                        <button class="btn btn-danger delete-passkey-btn"
-                                data-credential-id="@passkey.CredentialId"
-                                data-name="@passkey.Name">
-                            Remove
-                        </button>
+        <div class="row row-cols row-cols-lg-2 row-cols-xl-3">
+            @foreach (var passkey in Model.Passkeys)
+            {
+                <div class="col">
+                    <div class="card mb-3">
+                        <div class="card-header d-flex align-items-center gap-2">
+                            @if (passkey.IconUrl is not null)
+                            {
+                                <img src="@passkey.IconUrl" alt="@passkey.AuthenticatorName" 
+                                     style="width: 24px; height: 24px;" />
+                            }
+                            <h5 class="card-title mb-0">@passkey.AuthenticatorName</h5>
+                        </div>
+                        <div class="card-body">
+                            <p class="card-text">Name: @passkey.Name</p>
+                            <p class="card-text">Registered: @passkey.CreatedAt.ToLocalTime().ToString("f")</p>
+                        </div>
+                        <div class="card-footer">
+                            <button class="btn btn-danger delete-passkey-btn"
+                                    data-credential-id="@passkey.CredentialId"
+                                    data-name="@passkey.Name">
+                                Remove
+                            </button>
+                        </div>
                     </div>
                 </div>
-            </div>
-        }
-        @foreach (var passkey in @Model.CurrentUser.Passkeys)
-        {
+            }
+
+            <div class="w-100"></div>
+
             <div class="col">
-                <div class="card mb-3">
+                <div class="card">
                     <div class="card-header">
-                        <h5 class="card-title">@passkey.Name</h5>
+                        <h5 class="card-title">New Passkey</h5>
                     </div>
                     <div class="card-body">
-                        <p class="card-text">Registered: @passkey.CreatedAt.ToLocalTime().ToString("f")</p>
+                        <label for="passkey-name" class="form-label">Passkey name</label>
+                        <input type="text" class="form-control" id="passkey-name" placeholder="e.g. Work laptop, iPhone, etc"
+                               maxlength="50" value="My Passkey"/>
                     </div>
                     <div class="card-footer">
-                        <button class="btn btn-danger delete-passkey-btn"
-                                data-credential-id="@WebEncoders.Base64UrlEncode(passkey.CredentialId)"
-                                data-name="@passkey.Name">
-                            Remove
-                        </button>
+                        <button class="btn btn-primary" id="register-passkey-btn">Register</button>
                     </div>
                 </div>
             </div>
-        }
+        </div>
+    </div>
 
-        <div class="w-100"></div>
-
-        <div class="col">
-            <div class="card">
-                <div class="card-header">
-                    <h5 class="card-title">New Passkey</h5>
-                </div>
-                <div class="card-body">
-                    <label for="passkey-name" class="form-label">Passkey name</label>
-                    <input type="text" class="form-control" id="passkey-name" placeholder="e.g. Work laptop, iPhone, etc"
-                           maxlength="50" value="My Passkey"/>
-                </div>
-                <div class="card-footer">
-                    <button class="btn btn-primary" id="register-passkey-btn">Register</button>
+    <div class="tab-pane fade" id="authorisation" role="tabpane">
+        <div class="card mt-3">
+            <div class="card-header" data-bs-toggle="collapse" data-bs-target="#roles">
+                <h4>Roles <span class="badge text-bg-secondary">@Model.CurrentUser.Roles.Count</span></h4>
+            </div>
+            <div class="collapse card-body" id="roles">
+                <div class="row row-cols-1 row-cols-lg-2 row-cols-xl-3 g-2">
+                    @foreach (var role in Model.CurrentUser.Roles)
+                    {
+                        <div class="col"><div class="p-2 border border-primary rounded text-bg-light">@role.Name</div></div>
+                    }
                 </div>
             </div>
         </div>
-    </div>
-</div>
 
-<div class="card mt-3">
-    <div class="card-header" data-bs-toggle="collapse" data-bs-target="#roles">
-        <h4>Roles <span class="badge text-bg-secondary">@Model.CurrentUser.Roles.Count</span></h4>
-    </div>
-    <div class="collapse card-body" id="roles">
-        <div class="row row-cols-1 row-cols-lg-2 row-cols-xl-3 g-2">
-            @foreach (var role in Model.CurrentUser.Roles)
-            {
-                <div class="col"><div class="p-2 border border-primary rounded text-bg-light">@role.Name</div></div>
-            }
-        </div>
-    </div>
-</div>
-
-<div class="card mt-3">
-    <div class="card-header" data-bs-toggle="collapse" data-bs-target="#permissions">
-        <h4>Permissions <span class="badge text-bg-secondary">@Model.CurrentUser.Claims.Count</span></h4>
-    </div>
-    <div class="collapse card-body" id="permissions">
-        <div class="row row-cols-1 row-cols-lg-2 row-cols-xl-3 g-2">
-            @foreach (var permission in Model.CurrentUser.Claims.OrderBy(entry => entry.Value))
-            {
-                <div class="col"><div class="p-2 border border-primary rounded text-bg-light">@permission.Value</div></div>
-            }
+        <div class="card mt-3">
+            <div class="card-header" data-bs-toggle="collapse" data-bs-target="#permissions">
+                <h4>Permissions <span class="badge text-bg-secondary">@Model.CurrentUser.Claims.Count</span></h4>
+            </div>
+            <div class="collapse card-body" id="permissions">
+                <div class="row row-cols-1 row-cols-lg-2 row-cols-xl-3 g-2">
+                    @foreach (var permission in Model.CurrentUser.Claims.OrderBy(entry => entry.Value))
+                    {
+                        <div class="col"><div class="p-2 border border-primary rounded text-bg-light">@permission.Value</div></div>
+                    }
+                </div>
+            </div>
         </div>
     </div>
 </div>

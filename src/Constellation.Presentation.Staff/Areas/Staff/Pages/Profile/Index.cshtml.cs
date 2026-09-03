@@ -1,12 +1,16 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Profile;
 
-using Application.Domains.Auth.Models;
-using Application.Domains.Auth.Queries.GetRoleDetails;
 using Application.Domains.Auth.Queries.GetUserDetails;
+using Application.Domains.Messaging.EmergencyConsole.Commands.UpdateEmergencyConsoleMessageTemplate;
 using Constellation.Application.Common.PresentationModels;
+using Constellation.Application.Domains.StaffMembers.Commands.UpdateStaffMemberPhoneNumber;
+using Constellation.Core.Models.StaffMembers.Identifiers;
 using Constellation.Core.Shared;
+using Constellation.Presentation.Shared.Helpers.ModelBinders;
 using Core.Abstractions.Services;
+using Core.Errors;
 using Core.Models.Auth;
+using Core.ValueObjects;
 using Infrastructure.Caches.AuthenticatorMetadata;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -52,6 +56,35 @@ public class IndexModel : BasePageModel
 
     public async Task OnGet()
     {
+        await PreparePage();
+    }
+
+    public async Task<IActionResult> OnPostStaffPhoneUpdate(StaffId staffId, [ModelBinder(typeof(FromValueBinder))] PhoneNumber phoneNumber)
+    {
+        if (phoneNumber == PhoneNumber.Empty)
+        {
+            ModalContent = ErrorDisplay.Create(
+                DomainErrors.ValueObjects.PhoneNumber.NumberEmpty);
+
+            await PreparePage();
+            return Page();
+        }
+
+        Result update = await _mediator.Send(new UpdateStaffMemberPhoneNumberCommand(staffId, phoneNumber));
+
+        if (update.IsFailure)
+        {
+            ModalContent = ErrorDisplay.Create(update.Error);
+
+            await PreparePage();
+            return Page();
+        }
+
+        return RedirectToPage();
+    }
+
+    private async Task PreparePage()
+    {
         Result<UserResponse> user = await _mediator.Send(new GetUserDetailsQuery(User.GetUserId()));
 
         if (user.IsFailure)
@@ -64,11 +97,11 @@ public class IndexModel : BasePageModel
         CurrentUser = user.Value;
 
         Passkeys = CurrentUser.Passkeys.Select(passkey => new PasskeyDisplay(
-            passkey.CredentialId.ToString(),
-            passkey.Name,
-            _metadata?.Get(passkey.aaGuid)?.Name ?? "Unknown Authenticator",
-            _metadata?.Get(passkey.aaGuid)?.IconUrl,
-            passkey.CreatedAt.ToLocalTime().DateTime))
+                passkey.CredentialId.ToString(),
+                passkey.Name,
+                _metadata?.Get(passkey.aaGuid)?.Name ?? "Unknown Authenticator",
+                _metadata?.Get(passkey.aaGuid)?.IconUrl,
+                passkey.CreatedAt.ToLocalTime().DateTime))
             .ToList();
     }
 

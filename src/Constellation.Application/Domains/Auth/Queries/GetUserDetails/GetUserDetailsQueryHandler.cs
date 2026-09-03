@@ -6,7 +6,12 @@ using Application.Models.Identity;
 using Application.Models.Identity.Errors;
 using Application.Models.Identity.Repositories;
 using Core.Models.Auth;
+using Core.Models.Auth.Enums;
+using Core.Models.StaffMembers;
+using Core.Models.StaffMembers.Identifiers;
+using Core.Models.StaffMembers.Repositories;
 using Core.Shared;
+using Core.ValueObjects;
 using Serilog;
 using System.Security.Claims;
 using System.Threading.Tasks;
@@ -15,13 +20,16 @@ internal sealed class GetUserDetailsQueryHandler
 : IQueryHandler<GetUserDetailsQuery, UserResponse>
 {
     private readonly IIdentityRepository _identityRepository;
+    private readonly IStaffRepository _staffRepository;
     private readonly ILogger _logger;
 
     public GetUserDetailsQueryHandler(
         IIdentityRepository identityRepository,
+        IStaffRepository staffRepository,
         ILogger logger)
     {
         _identityRepository = identityRepository;
+        _staffRepository = staffRepository;
         _logger = logger
             .ForContext<GetUserDetailsQuery>();
     }
@@ -72,10 +80,24 @@ internal sealed class GetUserDetailsQueryHandler
                 passkey.CredentialId));
         }
 
+        AppUserLink? staffLink = user.Links.FirstOrDefault(entry => !entry.IsDeleted && entry.Type == LinkType.Staff);
+
+        PhoneNumber mobile = PhoneNumber.Empty;
+        if (staffLink is not null)
+        {
+            StaffId staffId = StaffId.FromValue(staffLink.LinkId);
+
+            StaffMember? member = await _staffRepository.GetById(staffId, cancellationToken);
+
+            if (member is not null)
+                mobile = member.PhoneNumber;
+        }
+
         UserResponse response = new(
             user.Id,
             user.Name,
             user.Email,
+            mobile,
             user.Logins.ToList(),
             user.Links.Where(link => !link.IsDeleted).ToList(),
             roles,

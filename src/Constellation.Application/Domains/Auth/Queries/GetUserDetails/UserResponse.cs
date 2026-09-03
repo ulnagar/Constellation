@@ -10,6 +10,7 @@ public sealed record UserResponse(
     Guid Id,
     Name Name,
     string Email,
+    PhoneNumber PhoneNumber,
     List<AppUserLoginAttempt> Logins,
     List<AppUserLink> Links,
     List<AppRole> Roles,
