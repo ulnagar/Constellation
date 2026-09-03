@@ -1,9 +1,16 @@
 ﻿namespace Constellation.Application.Domains.Assessments.Assessments.Queries.GetAssessmentDetailsById;
 
 using Abstractions.Messaging;
+using Application.Models.Identity.Repositories;
 using Constellation.Core.Models.Assessments;
 using Constellation.Core.Models.Assessments.Errors;
 using Core.Models.Assessments.Repositories;
+using Core.Models.Auth;
+using Core.Models.Auth.Enums;
+using Core.Models.Identifiers;
+using Core.Models.SchoolContacts;
+using Core.Models.SchoolContacts.Identifiers;
+using Core.Models.SchoolContacts.Repositories;
 using Core.Shared;
 using Models;
 using Serilog;
@@ -12,13 +19,19 @@ internal sealed class GetAssessmentDetailsByIdQueryHandler
 : IQueryHandler<GetAssessmentDetailsByIdQuery, AssessmentDetailsResponse>
 {
     private readonly IAssessmentRepository _assessmentRepository;
+    private readonly IIdentityRepository _identityRepository;
+    private readonly ISchoolContactRepository _contactRepository;
     private readonly ILogger _logger;
 
     public GetAssessmentDetailsByIdQueryHandler(
         IAssessmentRepository assessmentRepository,
+        IIdentityRepository identityRepository,
+        ISchoolContactRepository contactRepository,
         ILogger logger)
     {
         _assessmentRepository = assessmentRepository;
+        _identityRepository = identityRepository;
+        _contactRepository = contactRepository;
         _logger = logger;
     }
 
@@ -69,9 +82,12 @@ internal sealed class GetAssessmentDetailsByIdQueryHandler
 
             foreach (AssessmentDownloadEvent downloadEvent in download.DownloadEvents)
             {
+                string location = await GetDownloadLocation(downloadEvent, assessment, cancellationToken);
+
                 downloadEvents.Add(new(
                     downloadEvent.DownloadedBy,
                     downloadEvent.DownloadedByEmail.ToString(),
+                    location,
                     downloadEvent.DownloadedAt));
             }
 
@@ -118,5 +134,37 @@ internal sealed class GetAssessmentDetailsByIdQueryHandler
             submissions, 
             downloads,
             instructions);
+    }
+
+    private async Task<string> GetDownloadLocation(
+        AssessmentDownloadEvent downloadEvent,
+        Assessment assessment,
+        CancellationToken cancellationToken)
+    {
+        AppUser? user = await _identityRepository.GetUser(downloadEvent.UserId, cancellationToken);
+
+        if (user is null || !user.IsSchoolContact)
+            return string.Empty;
+
+        AppUserLink? link = user.Links.FirstOrDefault(link => !link.IsDeleted && link.Type == LinkType.Contact);
+
+        if (link is null)
+            return string.Empty;
+
+        SchoolContactId contactId = SchoolContactId.FromValue(link.LinkId);
+        SchoolContact? contact = await _contactRepository.GetById(contactId, cancellationToken);
+
+        if (contact is null)
+            return string.Empty;
+
+        List<SchoolCode> linkedSchoolCodes = assessment.Students.Select(entry => entry.SchoolCode).ToList();
+
+        foreach (SchoolContactRole assignment in contact.Assignments.Where(entry => !entry.IsDeleted))
+        {
+            if (linkedSchoolCodes.Contains(assignment.SchoolCode))
+                return assignment.SchoolName;
+        }
+
+        return string.Empty;
     }
 }

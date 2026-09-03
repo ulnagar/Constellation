@@ -61,6 +61,7 @@ public sealed record AssessmentDetailsResponse(
     public sealed record DownloadEvent(
         string User,
         string Email,
+        string School,
         DateTimeOffset DownloadedOn);
 
     public sealed record Instruction(
