@@ -56,6 +56,7 @@ public class ShowDashboardWidgetsViewComponent : ViewComponent
         var tutorialsTest = await _authService.AuthorizeAsync(user, AuthPermission.Subjects_Tutorials_Edit_Value);
         var enrolmentOfferReviewer = await _authService.AuthorizeAsync(user, AuthPermission.Partners_Enrolments_Offers_Reviewer_Value);
         var enrolmentOfferApprover = await _authService.AuthorizeAsync(user, AuthPermission.Partners_Enrolments_Offers_Approver_Value);
+        var enrolmentDocumentCollector = await _authService.AuthorizeAsync(user, AuthPermission.Partners_Enrolments_Offers_DocumentCollector_Value);
 
         StaffId staffId = _currentUserService.StaffId;
 
@@ -259,7 +260,7 @@ public class ShowDashboardWidgetsViewComponent : ViewComponent
             }
         }
 
-        if (enrolmentOfferApprover.Succeeded || enrolmentOfferReviewer.Succeeded)
+        if (enrolmentOfferApprover.Succeeded || enrolmentOfferReviewer.Succeeded || enrolmentDocumentCollector.Succeeded)
         {
             Result<List<ChartResponse>> enrolmentsCharts = await _mediator.Send(new GetChartDataForEnrolmentStatusQuery(), cancellationToken);
 
