@@ -1,6 +1,7 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Partner.Staff.Faculties;
 
 using Application.Domains.StaffMembers.Commands.RemoveStaffFromFaculty;
+using Application.Domains.StaffMembers.Queries.GetStaffMemberNameById;
 using Constellation.Application.Domains.Faculties.Queries.GetFacultyDetails;
 using Constellation.Application.Models.Auth;
 using Constellation.Core.Shared;
@@ -13,6 +14,7 @@ using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Presentation.Shared.Extensions;
 using Serilog;
+using Shared.PartialViews.ConfirmRemoveStaffFromFacultyModal;
 
 [HasPermission(AuthPermission.Partners_Faculties_View_Value)]
 public class DetailsModel : BasePageModel
@@ -37,7 +39,7 @@ public class DetailsModel : BasePageModel
     [ViewData] public string PageTitle { get; set; } = "Faculty Details";
 
     [BindProperty(SupportsGet = true)]
-    public Guid FacultyId { get; set; }
+    public FacultyId FacultyId { get; set; }
 
     public FacultyDetailsResponse Faculty { get; set; }
 
@@ -46,19 +48,31 @@ public class DetailsModel : BasePageModel
         _logger
             .Information("Requested to retrieve details of Faculty with id {FacultyId} by user {User}", FacultyId, _currentUserService.UserName);
 
-        FacultyId facultyId = Core.Models.Faculties.Identifiers.FacultyId.FromValue(FacultyId);
-
-        Result<FacultyDetailsResponse> facultyRequest = await _mediator.Send(new GetFacultyDetailsQuery(facultyId));
+        Result<FacultyDetailsResponse> facultyRequest = await _mediator.Send(new GetFacultyDetailsQuery(FacultyId));
 
         if (facultyRequest.IsSuccess)
             Faculty = facultyRequest.Value;
     }
 
-    public async Task<IActionResult> OnPostRemoveMember([FromQuery]StaffId staffId)
+    public async Task<IActionResult> OnPostAjaxRemoveMember(StaffId staffId)
     {
-        FacultyId facultyId = Core.Models.Faculties.Identifiers.FacultyId.FromValue(FacultyId);
+        Result<string> staffName = await _mediator.Send(new GetStaffMemberNameByIdQuery(staffId));
 
-        RemoveStaffFromFacultyCommand command = new(staffId, facultyId);
+        if (staffName.IsFailure)
+            return BadRequest();
+
+        ConfirmRemoveStaffFromFacultyModalViewModel viewModel = new()
+        {
+            StaffName = staffName.Value, 
+            StaffId = staffId
+        };
+
+        return Partial("ConfirmRemoveStaffFromFacultyModal", viewModel);
+    }
+
+    public async Task<IActionResult> OnPostRemoveMember(StaffId staffId)
+    {
+        RemoveStaffFromFacultyCommand command = new(staffId, FacultyId);
 
         _logger
             .ForContext(nameof(RemoveStaffFromFacultyCommand), command, true)

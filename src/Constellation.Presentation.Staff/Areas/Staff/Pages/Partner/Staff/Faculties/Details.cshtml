@@ -1,7 +1,6 @@
-﻿@page
-@model DetailsModel
+﻿@page "{facultyId}"
+@model Constellation.Presentation.Staff.Areas.Staff.Pages.Partner.Staff.Faculties.DetailsModel
 
-@using Constellation.Presentation.Staff.Areas.Staff.Pages.Partner.Staff.Faculties
 @inject IAuthorizationService AuthorizationService
 
 @{
@@ -61,32 +60,57 @@
     <div id="expiring" class="tab-pane active" role="tabpanel">
         <table class="table table-striped table-hover data-table">
             <thead>
-                <tr>
-                    <th></th>
-                    <th>Name</th>
-                    <th>Member Type</th>
-                    <th></th>
-                </tr>
+            <tr>
+                <th>Name</th>
+                <th>Member Type</th>
+                <th></th>
+            </tr>
             </thead>
             <tbody>
-                @foreach (var item in Model.Faculty.Members)
-                {
-                    <tr>
-                        <td></td>
-                        <td>@item.StaffName.DisplayName</td>
-                        <td>@item.Role</td>
-                        <td>
-                            @if (canEditTest.Succeeded)
-                            {
-                                <form asp-page-handler="RemoveMember" asp-route-staffId="@item.StaffId">
-                                    <input type="hidden" asp-for="FacultyId" />
-                                    <button type="submit" class="btn btn-sm btn-danger btn-show-hover">Remove</button>
-                                </form>
-                            }
-                        </td>
-                    </tr>
-                }
+            @foreach (var item in Model.Faculty.Members)
+            {
+                <tr>
+                    <td data-order="@item.StaffName.SortOrder" data-search="@item.StaffName.DisplayName @item.StaffName.FirstName">@item.StaffName.DisplayName</td>
+                    <td>@item.Role</td>
+                    <td>
+                        @if (canEditTest.Succeeded)
+                        {
+                            <button class="btn btn-sm btn-danger btn-show-hover remove-button" data-staff-id="@item.StaffId">Remove</button>
+                        }
+                    </td>
+                </tr>
+            }
             </tbody>
         </table>
     </div>
 </div>
+
+@section scripts
+{
+    <script>
+        $(document).ready(function (){
+            $('.data-table').DataTable({
+                "order": [
+                    [1, 'asc']
+                ]
+            });
+        });
+
+        $('.remove-button').click(function(event) {
+            var staffId = $(this).data("staffId");
+            var xsrfHeader = $('input:hidden[name="__RequestVerificationToken"]').val();
+
+            $.ajax({
+                url: "?handler=AjaxRemoveMember",
+                type: "POST",
+                data: {
+                    staffId: staffId,
+                    __RequestVerificationToken: xsrfHeader
+                }
+            }).done(function(data) {
+                $('#page-modal .modal-content').html(data);
+                $('#page-modal').modal('show');
+            });
+        });
+    </script>
+}
