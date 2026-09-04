@@ -10,6 +10,7 @@ public enum ExcelColumnFormat
     Default,
     Text,
     Date,
+    DateTime,
     List,
     Financial
 }

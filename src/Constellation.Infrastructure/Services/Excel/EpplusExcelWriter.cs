@@ -93,6 +93,12 @@ public sealed class EpplusExcelWriter : IExcelWriter
                             cell.Value = value;
                         break;
 
+                    case ExcelColumnFormat.DateTime:
+                        cell.Style.Numberformat.Format = "d/MM/yyyy h:mm";
+                        if (value is not null)
+                            cell.Value = value;
+                        break;
+
                     case ExcelColumnFormat.List:
                         cell.Style.WrapText = true;
                         int lines = value?.ToString()?.Count(c => c == '\n') + 1 ?? 1;
