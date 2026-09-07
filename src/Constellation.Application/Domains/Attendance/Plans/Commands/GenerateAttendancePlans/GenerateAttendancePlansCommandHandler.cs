@@ -125,8 +125,8 @@ internal sealed class GenerateAttendancePlansCommandHandler
                     continue;
 
                 // Skip all courses from Stage 6
-                if (course.Grade is Grade.Y11 or Grade.Y12)
-                    continue;
+                //if (course.Grade is Grade.Y11 or Grade.Y12)
+                //    continue;
 
                 List<PeriodId> periodIds = offering.Sessions
                     .Where(session => !session.IsDeleted)

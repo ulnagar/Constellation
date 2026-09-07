@@ -52,13 +52,12 @@
     }
 
     .Timetable-Day-Period.Active {
-        background-color: darkseagreen;
+        background-color: darkseagreen !important;
         font-weight: bold;
     }
 
     .Timetable-Day-Period.Break {
         background-color: lightyellow;
-        height: 6rem;
     }
 
     .Timetable-Day-Period.Offline {

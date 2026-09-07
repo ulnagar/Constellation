@@ -1,7 +1,6 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Profile;
 
 using Application.Domains.Auth.Queries.GetUserDetails;
-using Application.Domains.Messaging.EmergencyConsole.Commands.UpdateEmergencyConsoleMessageTemplate;
 using Constellation.Application.Common.PresentationModels;
 using Constellation.Application.Domains.StaffMembers.Commands.UpdateStaffMemberPhoneNumber;
 using Constellation.Core.Models.StaffMembers.Identifiers;
