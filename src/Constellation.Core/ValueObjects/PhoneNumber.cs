@@ -21,7 +21,7 @@ public sealed class PhoneNumber : ValueObject<PhoneNumber, string>, IValueObject
     {
         if (string.IsNullOrWhiteSpace(number))
         {
-            return Result.Failure<PhoneNumber>(DomainErrors.ValueObjects.PhoneNumber.NumberEmpty);
+            return Result.Failure<PhoneNumber>(PhoneNumberErrors.NumberEmpty);
         }
 
         string trimmedNumber = Regex.Replace(number, "[\\s+]", "");
@@ -39,12 +39,12 @@ public sealed class PhoneNumber : ValueObject<PhoneNumber, string>, IValueObject
 
         if (trimmedNumber.Length != 10)
         {
-            return Result.Failure<PhoneNumber>(DomainErrors.ValueObjects.PhoneNumber.NumberInvalid);
+            return Result.Failure<PhoneNumber>(PhoneNumberErrors.NumberInvalid);
         }
 
         if (!RegularExpressions.PhoneNumber().IsMatch(trimmedNumber))
         {
-            return Result.Failure<PhoneNumber>(DomainErrors.ValueObjects.PhoneNumber.NumberInvalid);
+            return Result.Failure<PhoneNumber>(PhoneNumberErrors.NumberInvalid);
         }
 
         return new PhoneNumber(trimmedNumber);

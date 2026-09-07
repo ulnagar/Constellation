@@ -132,7 +132,7 @@ internal sealed class AddStudentsToMicrosoftTeamResource
             {
                 _logger
                     .ForContext(nameof(ResourceAddedToOfferingDomainEvent), notification, true)
-                    .ForContext(nameof(Error), DomainErrors.ValueObjects.EmailAddress.EmailEmpty)
+                    .ForContext(nameof(Error), EmailAddressErrors.EmailEmpty)
                     .Error("Failed to add Student to Team");
 
                 continue;

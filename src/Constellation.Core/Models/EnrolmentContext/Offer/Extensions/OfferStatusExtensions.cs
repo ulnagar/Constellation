@@ -1,6 +1,6 @@
-﻿using Constellation.Core.Models.EnrolmentContext.Offer.Enums;
+﻿namespace Constellation.Core.Models.EnrolmentContext.Offer.Extensions;
 
-namespace Constellation.Core.Models.EnrolmentContext.Offer.Extensions;
+using Enums;
 
 public static class OfferStatusExtensions
 {

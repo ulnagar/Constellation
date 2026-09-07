@@ -18,8 +18,8 @@ using ValueObjects;
 
 public sealed class StaffMember : AggregateRoot, IAuditableEntity
 {
-    private readonly List<SchoolAssignment> _schoolAssignments = new();
-    private readonly List<StaffMemberSystemLink> _systemLinks = new();
+    private readonly List<SchoolAssignment> _schoolAssignments = [];
+    private readonly List<StaffMemberSystemLink> _systemLinks = [];
 
     private StaffMember() { }
 
@@ -73,7 +73,7 @@ public sealed class StaffMember : AggregateRoot, IAuditableEntity
         bool isShared)
     {
         StaffMember entry = new(
-            null,
+            EmployeeId.Empty,
             name,
             EmailAddress.None,
             gender,
@@ -163,7 +163,7 @@ public sealed class StaffMember : AggregateRoot, IAuditableEntity
         return Result.Success();
     }
 
-    public void RemoveSchoolAssignment(SchoolAssignment assignment, IDateTimeProvider dateTime)
+    public static void RemoveSchoolAssignment(SchoolAssignment assignment, IDateTimeProvider dateTime)
     {
         assignment.Delete(dateTime.Today, dateTime);
     }
@@ -172,7 +172,7 @@ public sealed class StaffMember : AggregateRoot, IAuditableEntity
         PhoneNumber phoneNumber)
     {
         if (!phoneNumber.IsMobile())
-            return Result.Failure(DomainErrors.ValueObjects.PhoneNumber.NumberInvalid);
+            return Result.Failure(PhoneNumberErrors.NumberInvalid);
 
         PhoneNumber = phoneNumber;
         return Result.Success();
@@ -182,7 +182,7 @@ public sealed class StaffMember : AggregateRoot, IAuditableEntity
         SystemType type,
         string value)
     {
-        StaffMemberSystemLink existingEntry = _systemLinks.FirstOrDefault(entry => entry.System == type);
+        StaffMemberSystemLink? existingEntry = _systemLinks.FirstOrDefault(entry => entry.System == type);
 
         Result<StaffMemberSystemLink> entry = StaffMemberSystemLink.Create(Id, type, value);
 
@@ -200,7 +200,7 @@ public sealed class StaffMember : AggregateRoot, IAuditableEntity
     public Result RemoveSystemLink(
         SystemType type)
     {
-        StaffMemberSystemLink existingEntry = _systemLinks.FirstOrDefault(entry => entry.System == type);
+        StaffMemberSystemLink? existingEntry = _systemLinks.FirstOrDefault(entry => entry.System == type);
 
         if (existingEntry is null)
             return Result.Failure(SystemLinkErrors.NotFound(type));
@@ -215,8 +215,7 @@ public sealed class StaffMember : AggregateRoot, IAuditableEntity
     {
         IsDeleted = true;
 
-        if (CurrentAssignment is not null)
-            CurrentAssignment.Delete(dateTime.Today, dateTime);
+        CurrentAssignment?.Delete(dateTime.Today, dateTime);
 
         RaiseDomainEvent(new StaffMemberResignedDomainEvent(new(), Id));
     }

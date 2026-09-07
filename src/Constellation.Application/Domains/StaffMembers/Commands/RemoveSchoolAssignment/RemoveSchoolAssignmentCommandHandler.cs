@@ -34,7 +34,7 @@ internal sealed class RemoveSchoolAssignmentCommandHandler
 
     public async Task<Result> Handle(RemoveSchoolAssignmentCommand request, CancellationToken cancellationToken)
     {
-        StaffMember staffMember = await _staffRepository.GetById(request.StaffId, cancellationToken);
+        StaffMember? staffMember = await _staffRepository.GetById(request.StaffId, cancellationToken);
 
         if (staffMember is null)
         {
@@ -46,7 +46,7 @@ internal sealed class RemoveSchoolAssignmentCommandHandler
             return Result.Failure(StaffMemberErrors.NotFound(request.StaffId));
         }
 
-        SchoolAssignment assignment = staffMember.SchoolAssignments.FirstOrDefault(entry => entry.Id == request.AssignmentId);
+        SchoolAssignment? assignment = staffMember.SchoolAssignments.FirstOrDefault(entry => entry.Id == request.AssignmentId);
 
         if (assignment is null)
         {
@@ -58,7 +58,7 @@ internal sealed class RemoveSchoolAssignmentCommandHandler
             return Result.Failure(SchoolAssignmentErrors.NotFound(request.AssignmentId));
         }
 
-        staffMember.RemoveSchoolAssignment(assignment, _dateTime);
+        StaffMember.RemoveSchoolAssignment(assignment, _dateTime);
 
         await _unitOfWork.CompleteAsync(cancellationToken);
 

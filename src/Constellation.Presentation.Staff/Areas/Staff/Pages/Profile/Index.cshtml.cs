@@ -63,8 +63,7 @@ public class IndexModel : BasePageModel
     {
         if (phoneNumber == PhoneNumber.Empty)
         {
-            ModalContent = ErrorDisplay.Create(
-                DomainErrors.ValueObjects.PhoneNumber.NumberEmpty);
+            ModalContent = ErrorDisplay.Create(PhoneNumberErrors.NumberEmpty);
 
             await PreparePage();
             return Page();

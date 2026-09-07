@@ -19,10 +19,10 @@ public sealed class EmailAddress : ValueObject<EmailAddress, string>, IValueObje
     public static Result<EmailAddress> Create(string? email)
     {
         if (string.IsNullOrWhiteSpace(email))
-            return Result.Failure<EmailAddress>(DomainErrors.ValueObjects.EmailAddress.EmailEmpty);
+            return Result.Failure<EmailAddress>(EmailAddressErrors.EmailEmpty);
 
         if (!RegularExpressions.EmailAddress().IsMatch(email))
-            return Result.Failure<EmailAddress>(DomainErrors.ValueObjects.EmailAddress.EmailInvalid);
+            return Result.Failure<EmailAddress>(EmailAddressErrors.EmailInvalid);
 
         return new EmailAddress(email);
     }

@@ -1,7 +1,6 @@
 ﻿namespace Constellation.Application.Domains.StaffMembers.Events.StaffMemberCreatedDomainEvent;
 
 using Abstractions.Messaging;
-using Application.Models.Identity.Enums;
 using Constellation.Application.Models.Identity;
 using Constellation.Core.Errors;
 using Core.Models.Auth;
@@ -14,7 +13,6 @@ using Core.Shared;
 using Core.ValueObjects;
 using Microsoft.AspNetCore.Identity;
 using Serilog;
-using System.Data;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -52,7 +50,7 @@ internal sealed class AddUserAccount
         {
             _logger
                 .ForContext(nameof(StaffMemberCreatedDomainEvent), notification, true)
-                .ForContext(nameof(Error), DomainErrors.ValueObjects.EmailAddress.EmailInvalid, true)
+                .ForContext(nameof(Error), EmailAddressErrors.EmailInvalid, true)
                 .Warning("Failed to create new Staff Member AppUser");
             return;
         }

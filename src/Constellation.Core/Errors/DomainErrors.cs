@@ -1,12 +1,10 @@
-﻿using Constellation.Core.Models.Students.Identifiers;
+﻿namespace Constellation.Core.Errors;
 
-namespace Constellation.Core.Errors;
-
-using Constellation.Core.Enums;
-using Constellation.Core.Models.Absences.Identifiers;
-using Constellation.Core.Models.Identifiers;
-using Constellation.Core.Models.Offerings.Identifiers;
-using Constellation.Core.Shared;
+using Models.Absences.Identifiers;
+using Models.Identifiers;
+using Models.Offerings.Identifiers;
+using Models.Students.Identifiers;
+using Shared;
 using System;
 
 public static class DomainErrors
@@ -267,71 +265,11 @@ public static class DomainErrors
         }
     }
 
-
-
     public static class Permissions
     {
         public static readonly Error Unauthorised = new(
             "Permissions.Unauthorised",
             "You do not have the required permissions to perform this action");
-    }
-
-    public static class ValueObjects
-    {
-        public static class EmailAddress
-        {
-            public static readonly Error EmailEmpty = new(
-                "ValueObjects.EmailAddress.EmailEmpty",
-                "Email Address must not be empty.");
-
-            public static readonly Error EmailInvalid = new(
-                "ValueObjects.EmailAddress.EmailInvalid",
-                "Email Address is not valid.");
-        }
-
-        public static class EmailRecipient
-        {
-            public static readonly Error NameEmpty = new(
-                "ValueObjects.EmailRecipient.NameEmpty",
-                "Email Recipient must have a valid name.");
-        }
-
-        public static class Name
-        {
-            public static readonly Error FirstNameEmpty = new(
-                "ValueObjects.Name.FirstNameEmpty",
-                "First Name must not be empty.");
-
-            public static readonly Error LastNameEmpty = new(
-                "ValueObjects.Name.LastNameEmpty",
-                "Last Name must not be empty.");
-        }
-
-        public static class OfferingName
-        {
-            public static readonly Func<Grade, Error> InvalidGrade = grade => new(
-                "ValueObjects.OfferingName.InvalidGrade",
-                $"Invalid grade supplied: {grade}");
-
-            public static readonly Func<string, Error> InvalidCourseCode = code => new(
-                "ValueObjects.OfferingName.InvalidCourseCode",
-                $"Invalid course code supplied: {code}");
-
-            public static readonly Func<string, Error> InvalidTutorialInitials = initials => new(
-                "ValueObjects.OfferingName.InvalidTutorialInitials",
-                $"Invalid initals supplied for tutorial class: {initials}");
-        }
-
-        public static class PhoneNumber
-        {
-            public static readonly Error NumberEmpty = new(
-                "ValueObjects.PhoneNumber.NumberEmpty",
-                "Phone Number must not be empty");
-
-            public static readonly Error NumberInvalid = new(
-                "ValueObjects.PhoneNumber.NumberInvalid",
-                "Phone Number is not valid");
-        }
     }
 
     public static class Operations

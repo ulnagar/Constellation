@@ -32,7 +32,7 @@ public sealed class EmailRecipient : ValueObject<EmailRecipient, string>, IValue
             return Result.Failure<EmailRecipient>(address.Error);
 
         if (string.IsNullOrWhiteSpace(name))
-            return Result.Failure<EmailRecipient>(DomainErrors.ValueObjects.EmailRecipient.NameEmpty);
+            return Result.Failure<EmailRecipient>(EmailRecipientErrors.NameEmpty);
 
         return new EmailRecipient(name, email);
     }

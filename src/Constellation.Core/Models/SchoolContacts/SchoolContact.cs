@@ -166,7 +166,7 @@ public sealed class SchoolContact : AggregateRoot, IAuditableEntity
         PhoneNumber phoneNumber)
     {
         if (!phoneNumber.IsMobile())
-            return Result.Failure(DomainErrors.ValueObjects.PhoneNumber.NumberInvalid);
+            return Result.Failure(PhoneNumberErrors.NumberInvalid);
 
         PhoneNumber = phoneNumber;
         return Result.Success();

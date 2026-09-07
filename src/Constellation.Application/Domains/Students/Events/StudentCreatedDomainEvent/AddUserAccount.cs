@@ -2,7 +2,6 @@ namespace Constellation.Application.Domains.Students.Events.StudentCreatedDomain
 
 using Abstractions.Messaging;
 using Constellation.Application.Models.Identity;
-using Constellation.Application.Models.Identity.Enums;
 using Constellation.Core.Models.Students.Events;
 using Core.Errors;
 using Core.Models.Auth;
@@ -52,7 +51,7 @@ internal sealed class AddUserAccount
         {
             _logger
                 .ForContext(nameof(StudentCreatedDomainEvent), notification, true)
-                .ForContext(nameof(Error), DomainErrors.ValueObjects.EmailAddress.EmailInvalid, true)
+                .ForContext(nameof(Error), EmailAddressErrors.EmailInvalid, true)
                 .Warning("Failed to create new Student AppUser");
 
             return;

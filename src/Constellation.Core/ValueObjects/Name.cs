@@ -20,7 +20,7 @@ public sealed class Name : ValueObject, IComparable, IEquatable<Name>
     {
         if (string.IsNullOrEmpty(mononym))
         {
-            return Result.Failure<Name>(DomainErrors.ValueObjects.Name.FirstNameEmpty);
+            return Result.Failure<Name>(NameErrors.FirstNameEmpty);
         }
 
         string[] tokens = mononym.Split(' ');
@@ -38,12 +38,12 @@ public sealed class Name : ValueObject, IComparable, IEquatable<Name>
     {
         if (string.IsNullOrEmpty(firstName))
         {
-            return Result.Failure<Name>(DomainErrors.ValueObjects.Name.FirstNameEmpty);
+            return Result.Failure<Name>(NameErrors.FirstNameEmpty);
         }
 
         if (string.IsNullOrEmpty(lastName))
         {
-            return Result.Failure<Name>(DomainErrors.ValueObjects.Name.LastNameEmpty);
+            return Result.Failure<Name>(NameErrors.LastNameEmpty);
         }
 
         if (string.IsNullOrEmpty(preferredName))

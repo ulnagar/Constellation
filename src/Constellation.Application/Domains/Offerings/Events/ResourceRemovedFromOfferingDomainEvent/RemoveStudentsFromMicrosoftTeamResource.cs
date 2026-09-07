@@ -120,7 +120,7 @@ internal sealed class RemoveStudentsFromMicrosoftTeamResource
             {
                 _logger
                     .ForContext(nameof(ResourceRemovedFromOfferingDomainEvent), notification, true)
-                    .ForContext(nameof(Error), DomainErrors.ValueObjects.EmailAddress.EmailEmpty)
+                    .ForContext(nameof(Error), EmailAddressErrors.EmailEmpty)
                     .Error("Failed to add Student to Team");
 
                 continue;
