@@ -9,5 +9,5 @@ public sealed record CourseSelectListItemResponse(
     string Name,
     Grade Grade,
     FacultyId FacultyId,
-    string FacultyName,
+    string? FacultyName,
     string DisplayName);

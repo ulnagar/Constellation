@@ -10,5 +10,6 @@ public sealed record CreateCourseCommand(
     Grade Grade,
     FacultyId FacultyId,
     decimal FTEValue,
-    double Target)
+    double Target,
+    bool RequiresSciencePracLesson)
     : ICommand;

@@ -6,10 +6,10 @@
 @using Constellation.Core.Models.Attendance.Enums
 @using Constellation.Core.Models.Timetables.Enums
 
-@inject IAuthorizationService authorizationService
+@inject IAuthorizationService AuthorizationService
 
 @{
-    var canManageTest = await authorizationService.AuthorizeAsync(User, AuthPermission.StudentAdmin_AttendancePlans_Approve_Value);
+    var canManageTest = await AuthorizationService.AuthorizeAsync(User, AuthPermission.StudentAdmin_AttendancePlans_Approve_Value);
 }
 
 <h2>Attendance Plan</h2>
@@ -19,15 +19,15 @@
     {
         if (Model.Plan.Status == AttendancePlanStatus.Processing)
         {
-            <button type="button" data-toggle="modal" data-target="#approve-modal" class="btn btn-success">Approve Plan</button>
+            <button type="button" data-bs-toggle="modal" data-bs-target="#approve-modal" class="btn btn-success">Approve Plan</button>
         }
 
         if (Model.Plan.Status == AttendancePlanStatus.Pending || Model.Plan.Status == AttendancePlanStatus.Processing)
         {
-            <button type="button" data-toggle="modal" data-target="#reject-modal" class="btn btn-danger">Reject Plan</button>
+            <button type="button" data-bs-toggle="modal" data-bs-target="#reject-modal" class="btn btn-danger">Reject Plan</button>
         }
 
-        <button type="button" data-toggle="modal" data-target="#add-note-modal" class="btn btn-warning">Add Note</button>
+        <button type="button" data-bs-toggle="modal" data-bs-target="#add-note-modal" class="btn btn-warning">Add Note</button>
 
         // Edit pending or processing plan
         @if (Model.Plan.Status == AttendancePlanStatus.Pending || Model.Plan.Status == AttendancePlanStatus.Processing)
@@ -77,18 +77,18 @@
         <div>
             <ul class="nav nav-pills">
                 <li class="nav-item">
-                    <a class="nav-link active" href="#listView" data-toggle="tab" role="tab">
+                    <a class="nav-link active" href="#listView" data-bs-toggle="tab" role="tab">
                         List View
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="#timetableView" data-toggle="tab" role="tab">
+                    <a class="nav-link" href="#timetableView" data-bs-toggle="tab" role="tab">
                         Timetable View
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="#alternateView" data-toggle="tab" role="tab">
-                        Alternate Class View
+                    <a class="nav-link" href="#alternateView" data-bs-toggle="tab" role="tab">
+                        Class Percentage View
                     </a>
                 </li>
             </ul>
@@ -256,55 +256,94 @@
                         }
                     </div>}
                 </div>
+                
+                
+                @if (Model.Plan.Grade != Grade.Y11 && Model.Plan.Grade != Grade.Y12)
+                {
+                    <div id="alternateView" class="tab-pane">
+                        <div class="mb-3 col mt-3">
+                            <h4>Alternate Class View</h4>
+                        </div>
+                        @{
+                            var lineGroup = Model.Plan.AlternatePercentages.GroupBy(entry => entry.Class[^2..]);
+                            var subjectOptions = Model.Plan.AlternatePercentages.Select(entry => entry.Course).Distinct().OrderBy(entry => entry).ToList();
+                        }
 
-                <div id="alternateView" class="tab-pane">
-                    <div class="mb-3 col mt-3">
-                        <h4>Alternate Class View</h4>
-                    </div>
-                    @{
-                        var lineGroup = Model.Plan.AlternatePercentages.GroupBy(entry => entry.Class[^2..]);
-                        var subjectOptions = Model.Plan.AlternatePercentages.Select(entry => entry.Course).Distinct().OrderBy(entry => entry).ToList();
-                    }
-
-                    <table class="table data-table">
-                        <thead>
-                        <tr>
-                            <th>Line</th>
-                            @foreach (var subject in subjectOptions)
-                            {
-                                <th>@subject</th>
-                            }
-                        </tr>
-                        </thead>
-                        <tbody>
-                        @foreach (var group in lineGroup)
-                        {
-                            var selected = Model.Plan.Periods
-                                .Where(period => !string.IsNullOrWhiteSpace(period.OfferingName))
-                                .Any(period => period.OfferingName[^2..] == group.Key)
-                                ? "current"
-                                : "";
-
-                            <tr class="@selected">
-                                <td>@group.Key</td>
+                        <table class="table data-table">
+                            <thead>
+                            <tr>
+                                <th>Line</th>
                                 @foreach (var subject in subjectOptions)
                                 {
-                                    var item = group.FirstOrDefault(entry => entry.Course == subject);
-
-                                    if (item is not null)
-                                    {
-                                        <td>@item.Class - @item.MinutesPresent - @item.Percentage.ToString("P0")</td>
-                                    }
-                                    else
-                                    {
-                                        <td></td>
-                                    }
+                                    <th>@subject</th>
                                 }
                             </tr>
+                            </thead>
+                            <tbody>
+                            @foreach (var group in lineGroup)
+                            {
+                                var selected = Model.Plan.Periods
+                                    .Where(period => !string.IsNullOrWhiteSpace(period.OfferingName))
+                                    .Any(period => period.OfferingName[^2..] == group.Key)
+                                    ? "current"
+                                    : "";
+
+                                <tr class="@selected">
+                                    <td>@group.Key</td>
+                                    @foreach (var subject in subjectOptions)
+                                    {
+                                        var item = group.FirstOrDefault(entry => entry.Course == subject);
+
+                                        if (item is not null)
+                                        {
+                                            <td>@item.Class - @item.MinutesPresent - @item.Percentage.ToString("P0")</td>
+                                        }
+                                        else
+                                        {
+                                            <td></td>
+                                        }
+                                    }
+                                </tr>
+                            }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+                else
+                {
+                    <div id="alternateView" class="tab-pane">
+                        <div class="mb-3 col mt-3">
+                            <h4>Class Attendance View</h4>
+                        </div>
+                        @{
+                            var enrolledClasses = Model.Plan.Periods.Select(entry => entry.OfferingName).Distinct().ToList();
+                            var classGroup = Model.Plan.AlternatePercentages.GroupBy(entry => entry.Class).ToList();
                         }
-                        </tbody>
-                    </table>
-                </div>
+
+                        <table class="table data-table">
+                            <thead>
+                                <tr>
+                                    <th>Subject</th>
+                                    <th>Percentage</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var enrolledClass in enrolledClasses)
+                                {
+                                    if (string.IsNullOrWhiteSpace(enrolledClass))
+                                        continue;
+
+                                    var item = classGroup.FirstOrDefault(entry => entry.Key == enrolledClass);
+
+                                    <tr>
+                                        <td>@enrolledClass - @item?.First().Course</td>
+                                        <td>@item?.First().MinutesPresent - @item?.First().Percentage.ToString("P0")</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
             </div>
         </div>
     </div>

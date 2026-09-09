@@ -21,7 +21,8 @@ public sealed class Course : AggregateRoot
         Grade grade,
         FacultyId facultyId,
         decimal fteValue,
-        double targetMinutesPerCycle)
+        double targetMinutesPerCycle,
+        bool requiresSciencePracLesson)
     {
         Id = new();
         Name = name;
@@ -30,6 +31,7 @@ public sealed class Course : AggregateRoot
         FacultyId = facultyId;
         FullTimeEquivalentValue = fteValue;
         TargetMinutesPerCycle = targetMinutesPerCycle;
+        RequiresSciencePracLesson = requiresSciencePracLesson;
     }
 
     public CourseId Id { get; private set; }
@@ -39,6 +41,7 @@ public sealed class Course : AggregateRoot
     public FacultyId FacultyId { get; private set; }
     public decimal FullTimeEquivalentValue { get; private set; }
     public double TargetMinutesPerCycle { get; private set; }
+    public bool RequiresSciencePracLesson { get; private set; }
     public IReadOnlyList<Offering> Offerings => _offerings;
 
     public static Result<Course> Create(
@@ -47,7 +50,8 @@ public sealed class Course : AggregateRoot
         Grade grade,
         FacultyId facultyId,
         decimal fteValue,
-        double targetMinutesPerCycle)
+        double targetMinutesPerCycle,
+        bool requiresSciencePracLesson)
     {
         if (string.IsNullOrWhiteSpace(code))
             return Result.Failure<Course>(CourseErrors.CodeEmpty);
@@ -61,7 +65,8 @@ public sealed class Course : AggregateRoot
             grade,
             facultyId,
             fteValue,
-            targetMinutesPerCycle);
+            targetMinutesPerCycle,
+            requiresSciencePracLesson);
     }
 
     public Result Update(
@@ -70,7 +75,8 @@ public sealed class Course : AggregateRoot
         Grade grade,
         FacultyId facultyId,
         decimal fteValue,
-        double targetMinutesPerCycle)
+        double targetMinutesPerCycle,
+        bool requiresSciencePracLesson)
     {
         if (string.IsNullOrWhiteSpace(code))
             return Result.Failure<Course>(CourseErrors.CodeEmpty);
@@ -84,6 +90,7 @@ public sealed class Course : AggregateRoot
         FacultyId = facultyId;
         FullTimeEquivalentValue = fteValue;
         TargetMinutesPerCycle = targetMinutesPerCycle;
+        RequiresSciencePracLesson = requiresSciencePracLesson;
 
         return Result.Success();
     }

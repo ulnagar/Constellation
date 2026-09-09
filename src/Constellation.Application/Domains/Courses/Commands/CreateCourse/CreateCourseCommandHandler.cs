@@ -34,7 +34,8 @@ internal class CreateCourseCommandHandler
             request.Grade,
             request.FacultyId,
             request.FTEValue,
-            request.Target);
+            request.Target,
+            request.RequiresSciencePracLesson);
 
         if (createRequest.IsFailure)
         {

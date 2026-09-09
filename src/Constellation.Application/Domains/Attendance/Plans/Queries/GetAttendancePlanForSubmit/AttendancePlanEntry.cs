@@ -21,8 +21,10 @@ public sealed record AttendancePlanEntry(
     string School,
     List<AttendancePlanEntry.PlanPeriod> Periods,
     List<AttendancePlanEntry.FreePeriod> FreePeriods,
+    bool AnyMissedPeriods,
     List<AttendancePlanEntry.MissedPeriod> MissedPeriods,
-    AttendancePlanEntry.SciencePracLesson SciencePrac)
+    bool HasSciencePracRequirement,
+    AttendancePlanEntry.SciencePracLesson? SciencePrac)
 {
 
     public sealed record PlanPeriod(
@@ -56,4 +58,9 @@ public sealed record AttendancePlanEntry(
         PeriodWeek Week,
         PeriodDay Day,
         string Period);
+
+    public sealed record Comment(
+        DateTimeOffset SubmittedAt,
+        string SubmittedBy,
+        string Message);
 }

@@ -2,6 +2,7 @@
 
 using Abstractions.Messaging;
 using Core.Abstractions.Services;
+using Core.Enums;
 using Core.Models.Attendance;
 using Core.Models.Attendance.Enums;
 using Core.Models.Attendance.Errors;
@@ -65,7 +66,7 @@ internal sealed class GetAttendancePlanForSubmitQueryHandler
 
         List<Period> timetablePeriods = await _periodRepository.GetAllFromTimetable([plan.Periods.First().Timetable], cancellationToken);
 
-        List<AttendancePlanEntry.PlanPeriod> periods = new();
+        List<AttendancePlanEntry.PlanPeriod> periods = [];
 
         foreach (var period in timetablePeriods)
         {
@@ -105,7 +106,7 @@ internal sealed class GetAttendancePlanForSubmitQueryHandler
             }
         }
 
-        List<AttendancePlanEntry.FreePeriod> freePeriods = new();
+        List<AttendancePlanEntry.FreePeriod> freePeriods = [];
 
         foreach (var period in plan.FreePeriods)
         {
@@ -117,7 +118,7 @@ internal sealed class GetAttendancePlanForSubmitQueryHandler
                 period.Activity));
         }
 
-        List<AttendancePlanEntry.MissedPeriod> missedPeriods = new();
+        List<AttendancePlanEntry.MissedPeriod> missedPeriods = [];
 
         foreach (var period in plan.MissedLessons)
         {
@@ -145,7 +146,9 @@ internal sealed class GetAttendancePlanForSubmitQueryHandler
             plan.School,
             periods,
             freePeriods,
+            missedPeriods.Any(),
             missedPeriods,
+            plan.Periods.Any(entry => entry.RequiresSciencePracLesson),
             scienceLesson);
 
         return response;

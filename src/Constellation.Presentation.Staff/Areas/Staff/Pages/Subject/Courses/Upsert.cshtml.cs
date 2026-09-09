@@ -18,6 +18,7 @@ using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Presentation.Shared.Extensions;
 using Serilog;
+using System.ComponentModel.DataAnnotations;
 
 [HasPermission(AuthPermission.Subjects_Courses_Edit_Value)]
 public class UpsertModel : BasePageModel
@@ -56,7 +57,10 @@ public class UpsertModel : BasePageModel
     [BindProperty]
     public decimal FTEValue { get; set; }
     [BindProperty]
+    [DisplayFormat(DataFormatString = "{0:0.000}", ApplyFormatInEditMode = true)]
     public double TargetPerCycle { get; set; }
+    [BindProperty]
+    public bool RequiresSciencePracLesson { get; set; }
 
     public List<FacultySummaryResponse> Faculties { get; set; } = new();
 
@@ -107,7 +111,8 @@ public class UpsertModel : BasePageModel
             Grade,
             FacultyId,
             FTEValue,
-            TargetPerCycle);
+            TargetPerCycle,
+            RequiresSciencePracLesson);
 
         _logger
             .ForContext(nameof(CreateCourseCommand), command, true)
@@ -147,7 +152,8 @@ public class UpsertModel : BasePageModel
             Grade,
             FacultyId,
             FTEValue,
-            TargetPerCycle);
+            TargetPerCycle,
+            RequiresSciencePracLesson);
 
         _logger
             .ForContext(nameof(UpdateCourseCommand), command, true)

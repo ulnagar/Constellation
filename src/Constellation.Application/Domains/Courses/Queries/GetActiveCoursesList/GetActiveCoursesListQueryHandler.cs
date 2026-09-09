@@ -54,7 +54,7 @@ internal sealed class GetActiveCoursesListQueryHandler
 
         foreach (Course course in courses)
         {
-            Faculty faculty = await _facultyRepository.GetById(course.FacultyId, cancellationToken);
+            Faculty? faculty = await _facultyRepository.GetById(course.FacultyId, cancellationToken);
 
             if (faculty is null)
                 _logger

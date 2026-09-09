@@ -29,7 +29,7 @@ internal class UpdateCourseCommandHandler
 
     public async Task<Result> Handle(UpdateCourseCommand request, CancellationToken cancellationToken)
     {
-        Course course = await _courseRepository.GetById(request.CourseId, cancellationToken);
+        Course? course = await _courseRepository.GetById(request.CourseId, cancellationToken);
         
         if (course is null)
         {
@@ -47,7 +47,8 @@ internal class UpdateCourseCommandHandler
             request.Grade,
             request.FacultyId,
             request.FTEValue,
-            request.Target);
+            request.Target,
+            request.RequiresSciencePracLesson);
 
         if (updateRequest.IsFailure)
         {

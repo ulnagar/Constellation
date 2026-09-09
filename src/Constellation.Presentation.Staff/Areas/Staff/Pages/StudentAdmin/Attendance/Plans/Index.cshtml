@@ -4,10 +4,10 @@
 @using Constellation.Application.Domains.Attendance.Plans.Queries.GetAttendancePlansSummary
 @using Constellation.Core.Extensions
 
-@inject IAuthorizationService authorizationService
+@inject IAuthorizationService AuthorizationService
 
 @{
-    var canManageTest = await authorizationService.AuthorizeAsync(User, AuthPermission.StudentAdmin_AttendancePlans_Edit_Value);
+    var canManageTest = await AuthorizationService.AuthorizeAsync(User, AuthPermission.StudentAdmin_AttendancePlans_Edit_Value);
 }
 
 <h2>Attendance Plans</h2>

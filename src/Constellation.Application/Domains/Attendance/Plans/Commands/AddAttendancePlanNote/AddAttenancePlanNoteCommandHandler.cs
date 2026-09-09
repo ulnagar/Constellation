@@ -30,7 +30,7 @@ internal sealed class AddAttendancePlanNoteCommandHandler
 
     public async Task<Result> Handle(AddAttendancePlanNoteCommand request, CancellationToken cancellationToken)
     {
-        AttendancePlan plan = await _planRepository.GetById(request.PlanId, cancellationToken);
+        AttendancePlan? plan = await _planRepository.GetById(request.PlanId, cancellationToken);
 
         if (plan is null)
         {

@@ -6,6 +6,7 @@ using Constellation.Core.Models.Offerings.Repositories;
 using Constellation.Core.Models.Subjects.Repositories;
 using Constellation.Core.Models.Timetables;
 using Constellation.Core.Models.Timetables.Repositories;
+using Core.Enums;
 using Core.Models.Attendance;
 using Core.Models.Attendance.Errors;
 using Core.Models.Attendance.Repositories;
@@ -144,39 +145,81 @@ internal sealed class GetAttendancePlanDetailsQueryHandler
 
         List<AttendancePlanDetailsResponse.AlternatePercentage> alternatePercentages = new();
 
-        OfferingId offeringId = plan.Periods
-            .GroupBy(entry => entry.OfferingId)
-            .OrderByDescending(group => group.Count())
-            .First()
-            .Key;
-
-        List<Offering> offerings = await _offeringRepository.GetOfferingsFromSameGroup(offeringId, cancellationToken);
-
-        foreach (Offering offering in offerings.OrderBy(offering => offering.Name))
+        if (plan.Grade != Grade.Y11 && plan.Grade != Grade.Y12)
         {
-            Course? course = await _courseRepository.GetById(offering.CourseId, cancellationToken);
+            OfferingId offeringId = plan.Periods
+                .GroupBy(entry => entry.OfferingId)
+                .OrderByDescending(group => group.Count())
+                .First()
+                .Key;
 
-            IEnumerable<PeriodId> periodIds = offering.Sessions
-                .Where(session => !session.IsDeleted)
-                .Select(session => session.PeriodId);
+            List<Offering> offerings =
+                await _offeringRepository.GetOfferingsFromSameGroup(offeringId, cancellationToken);
 
-            double total = 0;
-
-            foreach (PeriodId periodId in periodIds)
+            foreach (Offering offering in offerings.OrderBy(offering => offering.Name))
             {
-                AttendancePlanPeriod? matchingPeriod = plan.Periods.FirstOrDefault(period => period.PeriodId == periodId);
+                Course? course = await _courseRepository.GetById(offering.CourseId, cancellationToken);
 
-                if (matchingPeriod is null)
-                    continue;
+                IEnumerable<PeriodId> periodIds = offering.Sessions
+                    .Where(session => !session.IsDeleted)
+                    .Select(session => session.PeriodId);
 
-                total += matchingPeriod.MinutesPresent;
+                double total = 0;
+
+                foreach (PeriodId periodId in periodIds)
+                {
+                    AttendancePlanPeriod? matchingPeriod =
+                        plan.Periods.FirstOrDefault(period => period.PeriodId == periodId);
+
+                    if (matchingPeriod is null)
+                        continue;
+
+                    total += matchingPeriod.MinutesPresent;
+                }
+
+                alternatePercentages.Add(new(
+                    course.Name,
+                    offering.Name,
+                    total,
+                    total / course.TargetMinutesPerCycle));
             }
+        }
+        else
+        {
+            List<OfferingId> offeringIds = plan.Periods
+                .Select(entry => entry.OfferingId)
+                .Distinct()
+                .ToList();
 
-            alternatePercentages.Add(new(
-                course.Name,
-                offering.Name,
-                total,
-                total / course.TargetMinutesPerCycle));
+            List<Offering> offerings = await _offeringRepository.GetListFromIds(offeringIds, cancellationToken);
+
+            foreach (Offering offering in offerings.OrderBy(offering => offering.Name))
+            {
+                Course? course = await _courseRepository.GetById(offering.CourseId, cancellationToken);
+
+                IEnumerable<PeriodId> periodIds = offering.Sessions
+                    .Where(session => !session.IsDeleted)
+                    .Select(session => session.PeriodId);
+
+                double total = 0;
+
+                foreach (PeriodId periodId in periodIds)
+                {
+                    AttendancePlanPeriod? matchingPeriod =
+                        plan.Periods.FirstOrDefault(period => period.PeriodId == periodId);
+
+                    if (matchingPeriod is null)
+                        continue;
+
+                    total += matchingPeriod.MinutesPresent;
+                }
+
+                alternatePercentages.Add(new(
+                    course.Name,
+                    offering.Name,
+                    total,
+                    total / course.TargetMinutesPerCycle));
+            }
         }
 
         AttendancePlanDetailsResponse response = new(

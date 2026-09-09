@@ -6,10 +6,10 @@
 @using Constellation.Core.Models.Attendance.Enums
 @using Constellation.Core.Models.Timetables.Enums
 @using Constellation.Presentation.Schools.Areas.Schools.Pages.Absences.Plans
-@inject IAuthorizationService authorizationService
+@inject IAuthorizationService AuthorizationService
 
 @{
-    var editPermissions = await authorizationService.AuthorizeAsync(User, AuthPermission.SchoolsPortal_Absences_Edit_Value);
+    var editPermissions = await AuthorizationService.AuthorizeAsync(User, AuthPermission.SchoolsPortal_Absences_Edit_Value);
 
     var viewMode = Model.Mode == DetailsModel.PageMode.View;
     var allowEdit = editPermissions.Succeeded && (Model.Plan.Status == AttendancePlanStatus.Pending || Model.Plan.Status == AttendancePlanStatus.Processing);
@@ -69,7 +69,6 @@
         </div>
 
         @{
-            var fieldIndex = 0;
             var weeks = Model.Plan.Periods.Where(p => p.PeriodType != PeriodType.Offline).OrderBy(p => p.Week.Value).GroupBy(p => p.Week);
 
             <div>
@@ -158,45 +157,49 @@
     {
         <hr class="my-3" />
 
-        <div class="row">
-            <div class="col-8">
-                <div class="mb-3 row mt-3">
-                    <div class="col"><h3>Science Practical Lesson</h3></div>
-                </div>
-
-                <div class="mb-3 row mt-3">
-                    <div class="col-3"><label class="form-label">Week</label></div>
-                    <div class="col font-weight-bold">
-                        @if (Model.Plan.SciencePrac is not null)
-                        {
-                            <span>@Model.Plan.SciencePrac.Week.Name</span>
-                        }
+        if (Model.Plan.HasSciencePracRequirement)
+        {
+            <div class="row">
+                <div class="col-8">
+                    <div class="mb-3 row mt-3">
+                        <div class="col">
+                            <h3>Science Practical Lesson</h3></div>
                     </div>
-                </div>
 
-                <div class="mb-3 row mt-3">
-                    <div class="col-3"><label class="form-label">Day</label></div>
-                    <div class="col font-weight-bold">
-                        @if (Model.Plan.SciencePrac is not null)
-                        {
-                            <span>@Model.Plan.SciencePrac.Day.Name</span>
-                        }
+                    <div class="mb-3 row mt-3">
+                        <div class="col-3"><label class="form-label">Week</label></div>
+                        <div class="col font-weight-bold">
+                            @if (Model.Plan.SciencePrac is not null)
+                            {
+                                <span>@Model.Plan.SciencePrac.Week.Name</span>
+                            }
+                        </div>
                     </div>
-                </div>
 
-                <div class="mb-3 row mt-3">
-                    <div class="col-3"><label class="form-label">Period</label></div>
-                    <div class="col font-weight-bold">
-                        @if (Model.Plan.SciencePrac is not null)
-                        {
-                            <span>@Model.Plan.SciencePrac.Period</span>
-                        }
+                    <div class="mb-3 row mt-3">
+                        <div class="col-3"><label class="form-label">Day</label></div>
+                        <div class="col font-weight-bold">
+                            @if (Model.Plan.SciencePrac is not null)
+                            {
+                                <span>@Model.Plan.SciencePrac.Day.Name</span>
+                            }
+                        </div>
+                    </div>
+
+                    <div class="mb-3 row mt-3">
+                        <div class="col-3"><label class="form-label">Period</label></div>
+                        <div class="col font-weight-bold">
+                            @if (Model.Plan.SciencePrac is not null)
+                            {
+                                <span>@Model.Plan.SciencePrac.Period</span>
+                            }
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
 
-        <hr class="my-3" />
+            <hr class="my-3"/>
+        }
 
         <div class="row">
             <div class="col-8">
@@ -413,91 +416,116 @@
         @if (Model.Plan.Grade != Grade.Y05 && Model.Plan.Grade != Grade.Y06)
         {
             <hr class="my-3" />
-
-            <div class="row">
-                <div class="col-8">
-                    <div class="mb-3 row mt-3">
-                        <div class="col"><h3>Science Practical Lesson</h3></div>
-                    </div>
-
-                    <div class="mb-3 row mt-3">
-                        <div class="col-3"><label class="form-label">Week</label></div>
-                        <div class="col font-weight-bold">
-                            <select name="ScienceLessonWeek" class="form-control" required>
-                                <option value=""> ---- </option>
-                                @foreach (var item in Model.Weeks)
-                                {
-                                    if (Model.Plan.SciencePrac?.Week.Value.ToString() == item.Value)
-                                    {
-                                        <option value="@item.Value" selected="selected">@item.Text</option>
-                                    }
-                                    else
-                                    {
-                                        <option value="@item.Value">@item.Text</option>
-                                    }
-                                }
-                            </select>
+            
+            if (Model.Plan.HasSciencePracRequirement)
+            {
+                <div class="row">
+                    <div class="col-8">
+                        <div class="mb-3 row mt-3">
+                            <div class="col">
+                                <h3>Science Practical Lesson</h3></div>
                         </div>
-                    </div>
 
-                    <div class="mb-3 row mt-3">
-                        <div class="col-3"><label class="form-label">Day</label></div>
-                        <div class="col font-weight-bold">
-                            <select name="ScienceLessonDay" class="form-control" required>
-                                <option value=""> ---- </option>
-                                @foreach (var item in Model.Days)
-                                {
-                                    if (Model.Plan.SciencePrac?.Day.Value.ToString() == item.Value)
+                        <div class="mb-3 row mt-3">
+                            <div class="col-3"><label class="form-label">Week</label></div>
+                            <div class="col font-weight-bold">
+                                <select name="ScienceLessonWeek" class="form-control" required>
+                                    <option value=""> ---- </option>
+                                    @foreach (var item in Model.Weeks)
                                     {
-                                        <option value="@item.Value" selected="selected">@item.Text</option>
+                                        if (Model.Plan.SciencePrac?.Week.Value.ToString() == item.Value)
+                                        {
+                                            <option value="@item.Value" selected="selected">@item.Text</option>
+                                        }
+                                        else
+                                        {
+                                            <option value="@item.Value">@item.Text</option>
+                                        }
                                     }
-                                    else
-                                    {
-                                        <option value="@item.Value">@item.Text</option>
-                                    }
-                                }
-                            </select>
+                                </select>
+                            </div>
                         </div>
-                    </div>
 
-                    <div class="mb-3 row mt-3">
-                        <div class="col-3"><label class="form-label">Period</label></div>
-                        <div class="col font-weight-bold">
-                            <input name="ScienceLessonPeriod" value="@Model.Plan.SciencePrac?.Period" class="form-control" required />
+                        <div class="mb-3 row mt-3">
+                            <div class="col-3"><label class="form-label">Day</label></div>
+                            <div class="col font-weight-bold">
+                                <select name="ScienceLessonDay" class="form-control" required>
+                                    <option value=""> ---- </option>
+                                    @foreach (var item in Model.Days)
+                                    {
+                                        if (Model.Plan.SciencePrac?.Day.Value.ToString() == item.Value)
+                                        {
+                                            <option value="@item.Value" selected="selected">@item.Text</option>
+                                        }
+                                        else
+                                        {
+                                            <option value="@item.Value">@item.Text</option>
+                                        }
+                                    }
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="mb-3 row mt-3">
+                            <div class="col-3"><label class="form-label">Period</label></div>
+                            <div class="col font-weight-bold">
+                                <input name="ScienceLessonPeriod" value="@Model.Plan.SciencePrac?.Period" class="form-control" required/>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
 
-            <hr class="my-3" />
+                <hr class="my-3"/>
+            }
 
             <div class="row">
                 <div class="col-8">
                     <div class="mb-3 row mt-3">
                         <div class="col"><h3>Missed Home School Lessons</h3></div>
                     </div>
+                    
+                    @{
+                        var hasMissedLessons = Model.Plan.MissedPeriods.Any();
+                    }
 
                     <div class="mb-3 row mt-3">
-                        <div class="col">If the student is not able to attend 100% of home school lessons, enter the details of the missed lessons here.</div>
-                    </div>
-
-                    <div class="mb-3 row mt-3">
-                        <div class="col">
-                            <button type="button" class="btn btn-warning" onclick="showModal('missed')">Add Missed Lesson</button>
+                        <div class="row">
+                            <div class="col">Are there any lessons in the home school the student is not able to attend fully?</div>
+                        </div>
+                        <div class="row mt-3">
+                            <div class="col">
+                                <div class="btn-group" role="group">
+                                    <input type="radio" class="btn-check" name="btn-check" id="btn-check-no" checked="@(!hasMissedLessons)" />
+                                    <label class="btn btn-lg btn-outline-success" for="btn-check-no">No</label>
+                                    <input type="radio" class="btn-check" name="btn-check" id="btn-check-yes" checked="@(hasMissedLessons)" />
+                                    <label class="btn btn-lg btn-outline-danger" for="btn-check-yes">Yes</label>
+                                </div>
+                            </div>
                         </div>
                     </div>
+                    
+                    <div id="missed-lessons" class="@(hasMissedLessons ? "" : "d-none")">
+                        <div class="mb-3 row mt-3">
+                            <div class="col">Enter the details of the missed lessons here.</div>
+                        </div>
 
-                    <div class="mb-3 row mt-3">
-                        <table class="table">
-                            <thead>
+                        <div class="mb-3 row mt-3">
+                            <div class="col">
+                                <button type="button" class="btn btn-warning" onclick="showModal('missed')">Add Missed Lesson</button>
+                            </div>
+                        </div>
+
+                        <div class="mb-3 row mt-3">
+                            <table class="table">
+                                <thead>
                                 <tr>
                                     <th>Subject</th>
                                     <th>Total Timetabled Minutes</th>
                                     <th>Missed Minutes</th>
                                     <th></th>
                                 </tr>
-                            </thead>
-                            <tbody id="missed-lessons-table">
+                                </thead>
+                                <tbody id="missed-lessons-table">
                                 @{
                                     var missedPeriodIndex = 0;
 
@@ -513,20 +541,21 @@
                                         missedPeriodIndex++;
                                     }
                                 }
-                            </tbody>
-                        </table>
+                                </tbody>
+                            </table>
 
-                        <div id="missed-lessons-list">
-                            @{
-                                foreach (var entry in Model.Plan.MissedPeriods)
-                                {
-                                    <input type="hidden" name="MissedLessons[@missedLessonFieldIndex].Subject" value="@entry.Subject" />
-                                    <input type="hidden" name="MissedLessons[@missedLessonFieldIndex].TotalMinutesPerCycle" value="@entry.TotalMinutesPerCycle" />
-                                    <input type="hidden" name="MissedLessons[@missedLessonFieldIndex].MinutesMissedPerCycle" value="@entry.MinutesMissedPerCycle" />
+                            <div id="missed-lessons-list">
+                                @{
+                                    foreach (var entry in Model.Plan.MissedPeriods)
+                                    {
+                                        <input type="hidden" name="MissedLessons[@missedLessonFieldIndex].Subject" value="@entry.Subject" />
+                                        <input type="hidden" name="MissedLessons[@missedLessonFieldIndex].TotalMinutesPerCycle" value="@entry.TotalMinutesPerCycle" />
+                                        <input type="hidden" name="MissedLessons[@missedLessonFieldIndex].MinutesMissedPerCycle" value="@entry.MinutesMissedPerCycle" />
 
-                                    missedLessonFieldIndex++;
+                                        missedLessonFieldIndex++;
+                                    }
                                 }
-                            }
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -825,6 +854,18 @@
                 $('#copy-student-modal').modal('show');
             }
         }
+
+        $('#btn-check-yes').on('change', function() {
+            $('#missed-lessons').removeClass('d-none');
+        });
+
+        $('#btn-check-no').on('change', function() {
+            $('#missed-lessons').addClass('d-none');
+
+            $('#missed-lessons-table').empty();
+            $('#missed-lessons-list').empty();
+            missedLessonIndex = @missedLessonFieldIndex;
+        });
 
         function submitMissedLessonForm()
         {

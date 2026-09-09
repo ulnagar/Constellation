@@ -42,6 +42,7 @@ public sealed class AttendancePlanPeriod
         CourseId = course.Id;
         CourseName = course.Name;
         TargetMinutesPerCycle = course.TargetMinutesPerCycle;
+        RequiresSciencePracLesson = course.RequiresSciencePracLesson;
     }
 
     public AttendancePlanPeriodId Id { get; private set; }
@@ -63,6 +64,7 @@ public sealed class AttendancePlanPeriod
     public CourseId CourseId { get; private set; }
     public string CourseName { get; private set; }
     public double TargetMinutesPerCycle { get; private set; }
+    public bool RequiresSciencePracLesson { get; private set; }
 
     // Local Details
     public TimeOnly EntryTime { get; private set; } = TimeOnly.MinValue;

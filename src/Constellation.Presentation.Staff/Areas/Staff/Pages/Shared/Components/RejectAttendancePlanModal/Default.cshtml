@@ -8,21 +8,23 @@
                     <h5 class="modal-title">Reject Attendance Plan</h5>
                 </div>
                 <div class="modal-body">
-                    <div class="form-group row">
+                    <div class="mb-3 row">
                         <div class="col">
                             By marking this plan as rejected, a new blank plan will automatically be created for the student.
                         </div>
                     </div>
-                    <div class="form-group row">
+                    <div class="mb-3 row">
                         <label class="col-md-3">Comment</label>
                         <div class="col-md-9">
                             <textarea asp-for="Comment" class="form-control"></textarea>
                         </div>
                     </div>
-                    <div class="form-group row">
+                    <div class="mb-3 row">
                         <label asp-for="SendEmailUpdate" class="col-md-3">Send Email</label>
                         <div class="col-md-9">
-                            <input asp-for="SendEmailUpdate" class="form-control" />
+                            <div class="form-check form-switch">
+                                <input asp-for="SendEmailUpdate" role="switch" class="form-check-input"/>
+                            </div>
                         </div>
                         <div class="col">
                             <span class="text-danger">Selecting this option will send a notification to all registered ACCs at the school that includes the Comment text above. Please ensure that no sensitive content is included in the Comment box.</span>

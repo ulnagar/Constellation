@@ -58,7 +58,7 @@
 
     .Plan-Timetable-Day-Period.Break {
         background-color: lightyellow;
-        height: 6rem;
+        /*height: 6rem;*/
     }
 
     .Plan-Timetable-Day-Period.Offline {

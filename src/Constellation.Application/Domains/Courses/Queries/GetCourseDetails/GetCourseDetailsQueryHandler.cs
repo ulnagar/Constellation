@@ -54,7 +54,7 @@ internal sealed class GetCourseDetailsQueryHandler
 
     public async Task<Result<CourseDetailsResponse>> Handle(GetCourseDetailsQuery request, CancellationToken cancellationToken)
     {
-        Course course = await _courseRepository.GetById(request.CourseId, cancellationToken);
+        Course? course = await _courseRepository.GetById(request.CourseId, cancellationToken);
 
         if (course is null)
         {
@@ -66,7 +66,7 @@ internal sealed class GetCourseDetailsQueryHandler
             return Result.Failure<CourseDetailsResponse>(CourseErrors.NotFound(request.CourseId));
         }
 
-        Faculty faculty = await _facultyRepository.GetById(course.FacultyId, cancellationToken);
+        Faculty? faculty = await _facultyRepository.GetById(course.FacultyId, cancellationToken);
 
         if (faculty is null)
         {

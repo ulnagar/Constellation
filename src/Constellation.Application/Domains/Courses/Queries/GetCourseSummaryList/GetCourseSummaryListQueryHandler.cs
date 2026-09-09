@@ -46,7 +46,7 @@ internal sealed class GetCourseSummaryListQueryHandler
 
         foreach (Course course in courses)
         {
-            Faculty faculty = faculties.FirstOrDefault(faculty => faculty.Id == course.FacultyId);
+            Faculty? faculty = faculties.FirstOrDefault(faculty => faculty.Id == course.FacultyId);
 
             if (faculty is null)
             {
@@ -83,6 +83,7 @@ internal sealed class GetCourseSummaryListQueryHandler
                 responseFaculty,
                 course.FullTimeEquivalentValue,
                 course.TargetMinutesPerCycle,
+                course.RequiresSciencePracLesson,
                 responseOfferings));
         }
 

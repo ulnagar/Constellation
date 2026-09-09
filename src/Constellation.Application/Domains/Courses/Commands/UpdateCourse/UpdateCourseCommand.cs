@@ -12,5 +12,6 @@ public sealed record UpdateCourseCommand(
     Grade Grade,
     FacultyId FacultyId,
     decimal FTEValue,
-    double Target)
+    double Target,
+    bool RequiresSciencePracLesson)
     : ICommand;
