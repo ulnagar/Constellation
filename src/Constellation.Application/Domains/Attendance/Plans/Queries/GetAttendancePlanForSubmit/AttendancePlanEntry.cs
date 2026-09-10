@@ -24,7 +24,8 @@ public sealed record AttendancePlanEntry(
     bool AnyMissedPeriods,
     List<AttendancePlanEntry.MissedPeriod> MissedPeriods,
     bool HasSciencePracRequirement,
-    AttendancePlanEntry.SciencePracLesson? SciencePrac)
+    AttendancePlanEntry.SciencePracLesson? SciencePrac,
+    List<AttendancePlanEntry.Comment> Notes)
 {
 
     public sealed record PlanPeriod(

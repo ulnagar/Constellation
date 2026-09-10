@@ -136,6 +136,16 @@ internal sealed class GetAttendancePlanForSubmitQueryHandler
                 plan.SciencePracLesson.Period)
             : null;
 
+        List<AttendancePlanEntry.Comment> notes = [];
+
+        foreach (var note in plan.Notes)
+        {
+            notes.Add(new(
+                note.CreatedAt,
+                note.CreatedBy,
+                note.Message));
+        }
+
         AttendancePlanEntry response = new(
             plan.Id,
             plan.Status,
@@ -149,7 +159,8 @@ internal sealed class GetAttendancePlanForSubmitQueryHandler
             missedPeriods.Any(),
             missedPeriods,
             plan.Periods.Any(entry => entry.RequiresSciencePracLesson),
-            scienceLesson);
+            scienceLesson,
+            notes);
 
         return response;
     }

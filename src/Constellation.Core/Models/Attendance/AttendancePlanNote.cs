@@ -44,4 +44,23 @@ public sealed class AttendancePlanNote : IAuditableEntity
 
         return note;
     }
+
+    public static Result<AttendancePlanNote> Create(
+        AttendancePlanId planId,
+        DateTimeOffset timestamp,
+        string createdBy,
+        string message)
+    {
+        if (string.IsNullOrWhiteSpace(message))
+            return Result.Failure<AttendancePlanNote>(AttendancePlanNoteErrors.MessageEmpty);
+
+        AttendancePlanNote note = new(
+            planId,
+            message);
+
+        note.CreatedBy = createdBy;
+        note.CreatedAt = timestamp.LocalDateTime;
+
+        return note;
+    }
 }

@@ -1,12 +1,14 @@
 ﻿@page "{id}"
 @model Constellation.Presentation.Schools.Areas.Schools.Pages.Absences.Plans.DetailsModel
 
+@using Constellation.Core.Abstractions.Services
 @using Constellation.Core.Enums
 @using Constellation.Core.Extensions
 @using Constellation.Core.Models.Attendance.Enums
 @using Constellation.Core.Models.Timetables.Enums
 @using Constellation.Presentation.Schools.Areas.Schools.Pages.Absences.Plans
 @inject IAuthorizationService AuthorizationService
+@inject ICurrentUserService CurrentUserService
 
 @{
     var editPermissions = await AuthorizationService.AuthorizeAsync(User, AuthPermission.SchoolsPortal_Absences_Edit_Value);
@@ -16,6 +18,7 @@
     var allowVersioning = Model.Plan.Status == AttendancePlanStatus.Accepted;
     var missedLessonFieldIndex = 0;
     var freePeriodFieldIndex = 0;
+    var notesFieldIndex = 0;
 }
 
 <h2>Attendance Plan - @Model.Plan.Status.Name</h2>
@@ -277,6 +280,41 @@
     }
 
     <hr class="my-3" />
+
+    <div class="row">
+        <div class="col-8">
+            <div class="mb-3 row mt-3">
+                <div class="col"><h3>Notes</h3></div>
+            </div>
+
+            <div class="mb-3 row mt-3">
+                <table class="table">
+                    <thead>
+                    <tr>
+                        <th>Time</th>
+                        <th>From</th>
+                        <th>Note</th>
+                        <th></th>
+                    </tr>
+                    </thead>
+                    <tbody id="notes-table">
+                    @foreach (var entry in Model.Plan.Notes.OrderBy(entry => entry.SubmittedAt))
+                    {
+                        <tr>
+                            <td>@entry.SubmittedAt.ToLocalTime().ToString("f")</td>
+                            <td>@entry.SubmittedBy</td>
+                            <td>@entry.Message</td>
+                            <td></td>
+                        </tr>
+                    }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    
+    <hr class="my-3" />
+
 }
 
 @if (!viewMode)
@@ -627,6 +665,50 @@
                 </div>
             </div>
         }
+        
+        <hr class="my-3" />
+
+        <div class="row">
+            <div class="col-8">
+                <div class="mb-3 row mt-3">
+                    <div class="col"><h3>Notes</h3></div>
+                </div>
+
+                <div class="mb-3 row mt-3">
+                    <div class="col">
+                        <button type="button" class="btn btn-warning" onclick="showModal('note')">Add Note</button>
+                    </div>
+                </div>
+
+                <div class="mb-3 row mt-3">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Time</th>
+                                <th>From</th>
+                                <th>Note</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody id="notes-table">
+                            @foreach (var entry in Model.Plan.Notes.OrderBy(entry => entry.SubmittedAt))
+                            {
+                                <tr>
+                                    <td>@entry.SubmittedAt.ToLocalTime().ToString("f")</td>
+                                    <td>@entry.SubmittedBy</td>
+                                    <td>@entry.Message</td>
+                                    <td></td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+
+                    <div id="notes-list">
+                       
+                    </div>
+                </div>
+            </div>
+        </div>
 
         <hr class="my-3" />
 
@@ -799,6 +881,30 @@
             </div>
         </div>
     </div>
+
+    <div class="modal fade" tabindex="-1" id="add-note-modal">
+        <form id="add-note-modal-form" onsubmit="submitNoteForm()">
+            <div class="modal-dialog" style="max-width: 600px;">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Add Note</h5>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-3 row">
+                            <label class="col-md-3">Note</label>
+                            <div class="col-md-9">
+                                <textarea id="note-modal-comment" class="form-control"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-primary me-3">Add</button>
+                        <button type="button" class="btn btn-secondary" onclick="hideModal('note')">Cancel</button>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
 }
 
 @section scripts
@@ -806,6 +912,7 @@
     <script>
         let missedLessonIndex = @missedLessonFieldIndex;
         let freePeriodIndex = @freePeriodFieldIndex;
+        let noteIndex = @notesFieldIndex;
 
         function confirmSubmit()
         {
@@ -835,6 +942,11 @@
                 $('#copy-student-modal').modal('hide');
                 $('#copy-student-modal-form')[0].reset();
             }
+
+            if (selection == 'note'){
+                $('#add-note-modal').modal('hide');
+                $('#add-note-modal-form')[0].reset();
+            }
         }
 
         function showModal(selection) 
@@ -853,6 +965,10 @@
             {
                 $('#copy-student-modal').modal('show');
             }
+
+            if (selection == 'note'){
+                $('#add-note-modal').modal('show');
+            }
         }
 
         $('#btn-check-yes').on('change', function() {
@@ -866,6 +982,64 @@
             $('#missed-lessons-list').empty();
             missedLessonIndex = @missedLessonFieldIndex;
         });
+
+        function toIsoWithOffset(date) {
+            const pad = (num, len = 2) => String(num).padStart(len, '0');
+
+            const offsetMinutes = -date.getTimezoneOffset(); // JS returns inverted sign
+            const sign = offsetMinutes >= 0 ? '+' : '-';
+            const absOffset = Math.abs(offsetMinutes);
+
+            return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}` +
+                   `T${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}` +
+                   `.${pad(date.getMilliseconds(), 3)}` +
+                   `${sign}${pad(Math.floor(absOffset / 60))}:${pad(absOffset % 60)}`;
+        }
+
+        function formatDisplayDate(date) {
+            const parts = new Intl.DateTimeFormat('en-AU', {
+                weekday: 'long', day: 'numeric', month: 'long', year: 'numeric',
+                hour: 'numeric', minute: '2-digit', hour12: true
+            }).formatToParts(date);
+
+            const get = type => parts.find(p => p.type === type)?.value ?? '';
+
+            return `${get('weekday')}, ${get('day')} ${get('month')} ${get('year')} ` +
+                `${get('hour')}:${get('minute')} ${get('dayPeriod').toUpperCase()}`;
+        }
+
+        function submitNoteForm()
+        {
+            event.preventDefault();
+
+            const now = new Date();
+
+            var note = $('#note-modal-comment').val();
+            var createdBy = "@CurrentUserService.UserName";
+            var timestamp = toIsoWithOffset(now);
+            var timestampDisplay = formatDisplayDate(now);
+
+            var tableEntry = '<tr name="Notes[' + noteIndex + ']"><td>';
+            tableEntry += timestampDisplay; // Timestamp
+            tableEntry += '</td><td>';
+            tableEntry += createdBy; // CreatedBy
+            tableEntry += '</td><td>';
+            tableEntry += note; // Comment
+            tableEntry += '</td><td>';
+            tableEntry += '<button type="button" class="btn btn-danger" onclick="removeNote(' + noteIndex + ')">Remove</button>';
+            tableEntry += '</td><td>';
+            $('#notes-table').append(tableEntry);
+
+            var fields = '<input type="hidden" name="Notes[' + noteIndex + '].Timestamp" value="' + timestamp + '" />';
+            fields += '<input type="hidden" name="Notes[' + noteIndex + '].CreatedBy" value="' + createdBy + '" />';
+            fields += '<input type="hidden" name="Notes[' + noteIndex + '].Comment" value="' + note + '" />';
+            $('#notes-list').append(fields);
+
+            hideModal('note');
+            noteIndex++;
+
+            return false;
+        }
 
         function submitMissedLessonForm()
         {

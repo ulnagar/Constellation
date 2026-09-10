@@ -9,9 +9,10 @@ using System.Collections.Generic;
 public sealed record SaveDraftAttendancePlanCommand(
     AttendancePlanId PlanId,
     List<SaveDraftAttendancePlanCommand.PlanPeriod> Periods,
-    SaveDraftAttendancePlanCommand.ScienceLesson SciencePracLesson,
+    SaveDraftAttendancePlanCommand.ScienceLesson? SciencePracLesson,
     List<SaveDraftAttendancePlanCommand.MissedLesson> MissedLessons,
-    List<SaveDraftAttendancePlanCommand.FreePeriod> FreePeriods)
+    List<SaveDraftAttendancePlanCommand.FreePeriod> FreePeriods,
+    List<SaveDraftAttendancePlanCommand.Note> Notes)
 : ICommand
 {
     public sealed record PlanPeriod(
@@ -35,4 +36,9 @@ public sealed record SaveDraftAttendancePlanCommand(
         string Period,
         double Minutes,
         string Activity);
+
+    public sealed record Note(
+        DateTimeOffset Timestamp,
+        string CreatedBy,
+        string Comment);
 }

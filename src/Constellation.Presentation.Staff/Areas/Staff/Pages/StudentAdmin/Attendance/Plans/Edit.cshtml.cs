@@ -239,7 +239,8 @@ public class EditModel : BasePageModel
             periodList,
             scienceLesson,
             missedLessons,
-            freePeriods);
+            freePeriods,
+            []);
 
         _logger
             .ForContext(nameof(SubmitAttendancePlanCommand), command, true)

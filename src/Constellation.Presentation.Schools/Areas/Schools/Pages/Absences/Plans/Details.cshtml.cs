@@ -215,9 +215,11 @@ public class DetailsModel : BasePageModel
             return;
         }
 
-        List<CompletedPlansResponse> completedPlansList = completedPlans.Value
-            .OrderBy(entry => entry.DisplayName)
-            .ToList();
+        List<CompletedPlansResponse> completedPlansList =
+        [
+            .. completedPlans.Value
+                .OrderBy(entry => entry.DisplayName)
+        ];
 
         Weeks = new(PeriodWeek.GetOptions, nameof(PeriodWeek.Value), nameof(PeriodWeek.Name));
         Days = new(PeriodDay.GetOptions, nameof(PeriodDay.Value), nameof(PeriodWeek.Name));
@@ -242,7 +244,7 @@ public class DetailsModel : BasePageModel
 
     private async Task<Result> SaveDraft(FormData formData)
     {
-        List<SaveDraftAttendancePlanCommand.PlanPeriod> periodList = new();
+        List<SaveDraftAttendancePlanCommand.PlanPeriod> periodList = [];
         foreach (FormPeriod period in formData.Periods)
         {
             periodList.Add(new(period.PlanPeriodId, period.EntryTime, period.ExitTime));
@@ -252,7 +254,7 @@ public class DetailsModel : BasePageModel
             ? new SaveDraftAttendancePlanCommand.ScienceLesson(formData.ScienceLessonWeek, formData.ScienceLessonDay, formData.ScienceLessonPeriod)
             : null;
 
-        List<SaveDraftAttendancePlanCommand.FreePeriod> freePeriods = new();
+        List<SaveDraftAttendancePlanCommand.FreePeriod> freePeriods = [];
         foreach (FormFreePeriods period in formData.FreePeriods)
         {
             freePeriods.Add(new(
@@ -263,7 +265,7 @@ public class DetailsModel : BasePageModel
                 period.Activity));
         }
 
-        List<SaveDraftAttendancePlanCommand.MissedLesson> missedLessons = new();
+        List<SaveDraftAttendancePlanCommand.MissedLesson> missedLessons = [];
         foreach (FormMissedLesson missedLesson in formData.MissedLessons)
         {
             missedLessons.Add(new(
@@ -272,12 +274,22 @@ public class DetailsModel : BasePageModel
                 missedLesson.MinutesMissedPerCycle));
         }
 
+        List<SaveDraftAttendancePlanCommand.Note> notes = [];
+        foreach (FormNote note in formData.Notes)
+        {
+            notes.Add(new(
+                note.Timestamp,
+                note.CreatedBy,
+                note.Comment));
+        }
+
         SaveDraftAttendancePlanCommand command = new(
             Id,
             periodList,
             scienceLesson,
             missedLessons,
-            freePeriods);
+            freePeriods,
+            notes);
 
         _logger
             .ForContext(nameof(SubmitAttendancePlanCommand), command, true)
@@ -290,15 +302,16 @@ public class DetailsModel : BasePageModel
 
     public sealed class FormData
     {
-        public List<FormPeriod> Periods { get; set; } = new();
+        public List<FormPeriod> Periods { get; set; } = [];
 
         [ModelBinder(typeof(IntEnumBinder))]
         public PeriodWeek? ScienceLessonWeek { get; set; }
         [ModelBinder(typeof(IntEnumBinder))]
         public PeriodDay? ScienceLessonDay { get; set; }
         public string ScienceLessonPeriod { get; set; } = string.Empty;
-        public List<FormMissedLesson> MissedLessons { get; set; } = new();
-        public List<FormFreePeriods> FreePeriods { get; set; } = new();
+        public List<FormMissedLesson> MissedLessons { get; set; } = [];
+        public List<FormFreePeriods> FreePeriods { get; set; } = [];
+        public List<FormNote> Notes { get; set; } = [];
     }
 
     public sealed class FormPeriod
@@ -325,6 +338,13 @@ public class DetailsModel : BasePageModel
         public string Period { get; set; } = string.Empty;
         public double Minutes { get; set; }
         public string Activity { get; set; } = string.Empty;
+    }
+
+    public sealed class FormNote
+    {
+        public DateTimeOffset Timestamp { get; set; }
+        public string CreatedBy { get; set; }
+        public string Comment { get; set; }
     }
 
     public enum PageMode

@@ -43,7 +43,7 @@ internal sealed class SaveDraftAttendancePlanCommandHandler
 
     public async Task<Result> Handle(SaveDraftAttendancePlanCommand request, CancellationToken cancellationToken)
     {
-        AttendancePlan plan = await _planRepository.GetById(request.PlanId, cancellationToken);
+        AttendancePlan? plan = await _planRepository.GetById(request.PlanId, cancellationToken);
 
         if (plan is null)
         {
@@ -59,7 +59,7 @@ internal sealed class SaveDraftAttendancePlanCommandHandler
 
         foreach (SaveDraftAttendancePlanCommand.PlanPeriod periodDetails in request.Periods)
         {
-            AttendancePlanPeriod period = plan.Periods.FirstOrDefault(period => period.Id == periodDetails.PlanPeriodId);
+            AttendancePlanPeriod? period = plan.Periods.FirstOrDefault(period => period.Id == periodDetails.PlanPeriodId);
 
             if (period is null)
             {
@@ -120,6 +120,24 @@ internal sealed class SaveDraftAttendancePlanCommandHandler
             .ToList();
 
         plan.AddFreePeriods(freePeriods);
+
+        foreach (var note in request.Notes)
+        {
+            Result<AttendancePlanNote> planNote = AttendancePlanNote.Create(plan.Id, note.Timestamp, note.CreatedBy, note.Comment);
+
+            if (planNote.IsFailure)
+            {
+                _logger
+                    .ForContext(nameof(SaveDraftAttendancePlanCommand), request, true)
+                    .ForContext(nameof(AttendancePlan), plan, true)
+                    .ForContext(nameof(Error), planNote.Error, true)
+                    .Warning("Failed to update Attendance Plan with supplied times");
+
+                continue;
+            }
+
+            plan.AddNote(planNote.Value);
+        }
 
         await _unitOfWork.CompleteAsync(cancellationToken);
 
