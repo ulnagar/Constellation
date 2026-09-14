@@ -69,7 +69,9 @@
                                     <div class="Plan-Timetable-Day-Title"></div>
                                     @foreach (var period in periods)
                                     {
-                                        var noCollapse = week.Any(p => p.StartTime == period.StartTime && !string.IsNullOrWhiteSpace(p.OfferingName));
+                                        var noCollapse = week.Any(p => p.PeriodName == period.PeriodName && !string.IsNullOrWhiteSpace(p.OfferingName));
+
+                                        var timespans = week.Where(p => p.PeriodName == period.PeriodName).ToDictionary(k => k.StartTime, v => v.Day);
 
                                         <div class="Plan-Timetable-Day-Period @period.PeriodType.Name align-middle @(noCollapse ? "" : "collapsed")">
                                             <span class="w-100">
@@ -103,7 +105,7 @@
                                         style += " Break";
                                     }
 
-                                    var noCollapse = week.Any(p => p.StartTime == period.StartTime && !string.IsNullOrWhiteSpace(p.OfferingName));
+                                    var noCollapse = week.Any(p => p.PeriodName == period.PeriodName && !string.IsNullOrWhiteSpace(p.OfferingName));
 
                                     <div class="Plan-Timetable-Day-Period @style @(noCollapse ? "" : "collapsed")">
                                         @if (!string.IsNullOrWhiteSpace(period.OfferingName))
