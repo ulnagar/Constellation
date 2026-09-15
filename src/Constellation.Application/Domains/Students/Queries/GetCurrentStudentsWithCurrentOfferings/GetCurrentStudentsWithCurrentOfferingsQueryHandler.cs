@@ -63,7 +63,7 @@ internal sealed class GetCurrentStudentsWithCurrentOfferingsQueryHandler
                 {
                     case OfferingEnrolment offeringEnrolment:
                         {
-                            Offering offering = offerings.FirstOrDefault(offering => offering.Id == offeringEnrolment.OfferingId);
+                            Offering? offering = offerings.FirstOrDefault(offering => offering.Id == offeringEnrolment.OfferingId);
 
                             if (offering is null)
                                 continue;
@@ -78,7 +78,7 @@ internal sealed class GetCurrentStudentsWithCurrentOfferingsQueryHandler
 
                     case TutorialEnrolment tutorialEnrolment:
                         {
-                            Tutorial tutorial = tutorials.FirstOrDefault(tutorial => tutorial.Id == tutorialEnrolment.TutorialId);
+                            Tutorial? tutorial = tutorials.FirstOrDefault(tutorial => tutorial.Id == tutorialEnrolment.TutorialId);
 
                             if (tutorial is null)
                                 continue;
@@ -93,7 +93,7 @@ internal sealed class GetCurrentStudentsWithCurrentOfferingsQueryHandler
                 }
             }
 
-            SchoolEnrolment schoolEnrolment = student.CurrentEnrolment;
+            SchoolEnrolment? schoolEnrolment = student.CurrentEnrolment;
             bool currentEnrolment = true;
 
             if (schoolEnrolment is null)
@@ -105,11 +105,11 @@ internal sealed class GetCurrentStudentsWithCurrentOfferingsQueryHandler
                 {
                     int maxYear = student.SchoolEnrolments.Max(item => item.Year);
 
-                    SchoolEnrolmentId enrolmentId = student.SchoolEnrolments
+                    SchoolEnrolmentId? enrolmentId = student.SchoolEnrolments
                         .Where(entry => entry.Year == maxYear)
                         .Select(entry => new { entry.Id, Date = entry.EndDate ?? DateOnly.MaxValue })
                         .MaxBy(entry => entry.Date)
-                        .Id;
+                        ?.Id;
 
                     schoolEnrolment = student.SchoolEnrolments.FirstOrDefault(entry => entry.Id == enrolmentId);
                 }
@@ -120,7 +120,7 @@ internal sealed class GetCurrentStudentsWithCurrentOfferingsQueryHandler
                 student.StudentReferenceNumber,
                 student.Name,
                 student.PreferredGender,
-                schoolEnrolment?.SchoolName,
+                schoolEnrolment?.SchoolName ?? string.Empty,
                 schoolEnrolment?.Grade,
                 studentOfferings,
                 currentEnrolment));
