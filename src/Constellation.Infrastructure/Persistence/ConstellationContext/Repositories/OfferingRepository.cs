@@ -312,14 +312,14 @@ internal sealed class OfferingRepository : IOfferingRepository
         OfferingId offeringId,
         CancellationToken cancellationToken = default)
     {
-        OfferingName offeringName = await _context
+        OfferingName? offeringName = await _context
             .Set<Offering>()
             .Where(offering => offering.Id == offeringId)
             .Select(offering => offering.Name)
             .SingleOrDefaultAsync(cancellationToken);
 
-        string grade = offeringName.Value[..2];
-        string line = offeringName.Value[^2..^1];
+        string grade = offeringName?.Value[..2] ?? "00";
+        string line = offeringName?.Value[^2..^1] ?? "0";
         string searchTerm = $"{grade}%{line}_";
 
         List<Offering> offerings = await _context

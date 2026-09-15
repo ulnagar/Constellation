@@ -1,6 +1,7 @@
 ﻿@page "{id}"
 @model Constellation.Presentation.Staff.Areas.Staff.Pages.StudentAdmin.Attendance.Plans.EditModel
 
+@using Constellation.Application.Helpers
 @using Constellation.Core.Enums
 @using Constellation.Core.Extensions
 @using Constellation.Core.Models.Timetables.Enums
@@ -71,12 +72,29 @@
                                     {
                                         var noCollapse = week.Any(p => p.PeriodName == period.PeriodName && !string.IsNullOrWhiteSpace(p.OfferingName));
 
-                                        var timespans = week.Where(p => p.PeriodName == period.PeriodName).ToDictionary(k => k.StartTime, v => v.Day);
+                                        var timespans = week
+                                            .Where(p => p.PeriodName == period.PeriodName)
+                                            .GroupBy(p => (p.StartTime, p.EndTime))
+                                            .Select(g => new
+                                            {
+                                                g.Key.StartTime,
+                                                g.Key.EndTime,
+                                                TimeRangeDisplay = $"{g.Key.StartTime:h:mm tt} - {g.Key.EndTime:h:mm tt}",
+                                                FirstDay = g.Select(p => p.Day).MinBy(d => d.Value),
+                                                DaysDisplay = ListHelpers.FormatDayRanges(g.Select(p => p.Day).ToList())
+                                            })
+                                            .OrderBy(g => g.FirstDay?.Value ?? 100)
+                                            .ToList();
 
                                         <div class="Plan-Timetable-Day-Period @period.PeriodType.Name align-middle @(noCollapse ? "" : "collapsed")">
                                             <span class="w-100">
                                                 @period.PeriodName<br />
-                                                @period.StartTime.ToString("h:mm tt") - @period.EndTime.ToString("h:mm tt")
+                                                
+                                                @foreach (var timespan in timespans)
+                                                {
+                                                    <span class="d-block my-2">@timespan.DaysDisplay<br />
+                                                    @timespan.TimeRangeDisplay</span>
+                                                }
                                             </span>
                                         </div>
                                     }

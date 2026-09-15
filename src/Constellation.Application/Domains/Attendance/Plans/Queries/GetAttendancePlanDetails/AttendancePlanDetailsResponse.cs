@@ -22,6 +22,7 @@ public sealed record AttendancePlanDetailsResponse(
     List<AttendancePlanDetailsResponse.PlanPeriod> Periods,
     List<AttendancePlanDetailsResponse.FreePeriod> FreePeriods,
     List<AttendancePlanDetailsResponse.MissedPeriod> MissedPeriods,
+    bool HasSciencePracRequirement,
     AttendancePlanDetailsResponse.SciencePracLesson? SciencePrac,
     List<AttendancePlanDetailsResponse.AlternatePercentage> AlternatePercentages)
 {
@@ -64,8 +65,10 @@ public sealed record AttendancePlanDetailsResponse(
         DateTime CreatedAt);
 
     public sealed record AlternatePercentage(
+        Timetable Timetable,
         string Course,
         string Class,
         double MinutesPresent,
+        double TotalMinutes,
         double Percentage);
 }

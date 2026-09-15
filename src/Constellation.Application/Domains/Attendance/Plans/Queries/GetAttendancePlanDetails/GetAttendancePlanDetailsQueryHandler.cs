@@ -14,6 +14,7 @@ using Core.Models.Offerings;
 using Core.Models.Offerings.Identifiers;
 using Core.Models.Subjects;
 using Core.Models.Timetables.Identifiers;
+using Core.Models.Timetables.ValueObjects;
 using Core.Shared;
 using Serilog;
 using System;
@@ -145,53 +146,22 @@ internal sealed class GetAttendancePlanDetailsQueryHandler
 
         List<AttendancePlanDetailsResponse.AlternatePercentage> alternatePercentages = new();
 
-        if (plan.Grade != Grade.Y11 && plan.Grade != Grade.Y12)
+        foreach (Timetable timetable in Timetable.GetEnumerable)
         {
-            OfferingId offeringId = plan.Periods
-                .GroupBy(entry => entry.OfferingId)
-                .OrderByDescending(group => group.Count())
-                .First()
-                .Key;
+            List<Offering> offerings = [];
 
-            List<Offering> offerings =
-                await _offeringRepository.GetOfferingsFromSameGroup(offeringId, cancellationToken);
-
-            foreach (Offering offering in offerings.OrderBy(offering => offering.Name))
-            {
-                Course? course = await _courseRepository.GetById(offering.CourseId, cancellationToken);
-
-                IEnumerable<PeriodId> periodIds = offering.Sessions
-                    .Where(session => !session.IsDeleted)
-                    .Select(session => session.PeriodId);
-
-                double total = 0;
-
-                foreach (PeriodId periodId in periodIds)
-                {
-                    AttendancePlanPeriod? matchingPeriod =
-                        plan.Periods.FirstOrDefault(period => period.PeriodId == periodId);
-
-                    if (matchingPeriod is null)
-                        continue;
-
-                    total += matchingPeriod.MinutesPresent;
-                }
-
-                alternatePercentages.Add(new(
-                    course.Name,
-                    offering.Name,
-                    total,
-                    total / course.TargetMinutesPerCycle));
-            }
-        }
-        else
-        {
-            List<OfferingId> offeringIds = plan.Periods
+            List <OfferingId> offeringIds = plan.Periods
+                .Where(entry => entry.Timetable == timetable)
                 .Select(entry => entry.OfferingId)
                 .Distinct()
                 .ToList();
 
-            List<Offering> offerings = await _offeringRepository.GetListFromIds(offeringIds, cancellationToken);
+            if (offeringIds.Count == 0)
+                continue;
+
+            offerings = timetable == Timetable.Senior
+             ? await _offeringRepository.GetListFromIds(offeringIds, cancellationToken)
+             : await _offeringRepository.GetOfferingsFromSameGroup(offeringIds.First(), cancellationToken);
 
             foreach (Offering offering in offerings.OrderBy(offering => offering.Name))
             {
@@ -215,10 +185,12 @@ internal sealed class GetAttendancePlanDetailsQueryHandler
                 }
 
                 alternatePercentages.Add(new(
-                    course.Name,
+                    timetable,
+                    course?.Name ?? string.Empty,
                     offering.Name,
                     total,
-                    total / course.TargetMinutesPerCycle));
+                    course?.TargetMinutesPerCycle ?? 0,
+                    total / course?.TargetMinutesPerCycle ?? 0));
             }
         }
 
@@ -234,6 +206,7 @@ internal sealed class GetAttendancePlanDetailsQueryHandler
             periods,
             freePeriods,
             missedPeriods,
+            plan.Periods.Any(entry => entry.RequiresSciencePracLesson),
             scienceLesson,
             alternatePercentages);
 
