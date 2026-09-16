@@ -421,122 +421,134 @@ table.grouped-data-table th {
 }
 
 /* Custom badge colouring */
-.Primary-B {
-    background-color: #9de3fd;
-    color: #000;
+/* =========================================================
+   Hover/focus palette (edit here only)
+   ========================================================= */
+:root {
+    --hover-dark-bg: #1d2124;
+    --hover-dark-fg: #fff;
+    --hover-dark-shadow: rgba(52, 58, 64, 0.5);
+    --hover-light-bg: #dae0e5;
+    --hover-light-fg: #212529;
+    --hover-light-shadow: rgba(248, 249, 250, 0.5);
+}
+
+/* =========================================================
+   Generic badge behaviour — reads two flags set per-badge below:
+     --fg     0%   = black text   100%   = white text
+     --hover  0%   = dark hover   100%   = light hover (rare)
+   Both default to 0% if a badge class doesn't set them, so a
+   new badge with no flags is safe (black text, dark hover)
+   instead of silently broken.
+   ========================================================= */
+.badge {
     text-decoration: none;
+    color: color-mix(in srgb, #000 calc(100% - var(--fg, 0%)), #fff var(--fg, 0%));
+}
+
+a.badge:is(:hover, :focus) {
+    background-color: color-mix(in srgb, var(--hover-dark-bg) calc(100% - var(--hover, 0%)), var(--hover-light-bg) var(--hover, 0%));
+    color: color-mix(in srgb, var(--hover-dark-fg) calc(100% - var(--hover, 0%)), var(--hover-light-fg) var(--hover, 0%));
+}
+
+a.badge:is(:focus, .focus) {
+    outline: 0;
+    box-shadow: 0 0 0 0.2rem color-mix(in srgb, var(--hover-dark-shadow) calc(100% - var(--hover, 0%)), var(--hover-light-shadow) var(--hover, 0%));
+}
+
+/* =========================================================
+   Badge colours — background + its own flags, all in one place.
+   Nothing to keep in sync elsewhere.
+   ========================================================= */
+.Unknown-Unknown {
+    --fg: 0%;
+    background-color: #ccc;
+}
+
+.Unknown-Invalid {
+    --fg: 0%;
+    background-color: lightgray;
+}
+
+.Primary-B {
+    --fg: 0%;
+    background-color: #96e3ff;
 }
 
 .Primary-P {
-    background-color: #fcdbfa;
-    color: #000;
-    text-decoration: none;
+    --fg: 0%;
+    background-color: #fddafa;
 }
 
 .Primary-R {
-    background-color: #f66a68;
-    text-decoration: none;
+    --fg: 0%;
+    background-color: #fb6363;
 }
 
 .Secondary-G {
-    background-color: #c6e5af;
-    color: #000;
-    text-decoration: none;
+    --fg: 0%;
+    background-color: #c4e7ac;
 }
 
 .Secondary-N {
-    background-color: #146197;
-    text-decoration: none;
+    --fg: 100%;
+    background-color: #00629a;
 }
 
 .Alternate-V {
-    background-color: #e4c7ee;
-    color: #000;
-    text-decoration: none;
+    --fg: 0%;
+    background-color: #e7c6f0;
 }
 
 .Alternate-Y {
-    background-color: #f5e28a;
-    color: #000;
-    text-decoration: none;
+    --fg: 0%;
+    background-color: #f6e282;
+}
+
+.Senior-0 {
+    --fg: 0%;
+    background-color: #f8ebab;
 }
 
 .Senior-1 {
-    background-color: #007bff;
-    color: #fff;
-    text-decoration: none;
+    --fg: 100%;
+    background-color: #867109;
 }
 
 .Senior-2 {
-    background-color: #6f42c1;
-    color: #fff;
-    text-decoration: none;
+    --fg: 100%;
+    background-color: #1f4f69;
 }
 
 .Senior-3 {
-    background-color: #dc3545;
-    color: #fff;
-    text-decoration: none;
+    --fg: 100%;
+    background-color: #501762;
 }
 
 .Senior-4 {
-    background-color: #28a745;
-    color: #fff;
-    text-decoration: none;
+    --fg: 100%;
+    background-color: #c00000;
 }
 
 .Senior-5 {
-    background-color: #ffc107;
-    color: #212529;
-    text-decoration: none;
+    --fg: 100%;
+    --hover: 100%;
+    background-color: #375f1c;
 }
 
 .Senior-6 {
-    background-color: #17a2b8;
-    color: #fff;
-    text-decoration: none;
+    --fg: 0%;
+    background-color: #ccff99;
 }
 
-a.Primary-B:hover, a.Primary-B:focus,
-a.Primary-P:hover, a.Primary-P:focus,
-a.Primary-R:hover, a.Primary-R:focus,
-a.Secondary-G:hover, a.Secondary-G:focus,
-a.Secondary-N:hover, a.Secondary-N:focus,
-a.Alternate-V:hover, a.Alternate-V:focus,
-a.Alternate-Y:hover, a.Alternate-Y:focus,
-a.Senior-1:hover, a.Senior-1:focus,
-a.Senior-2:hover, a.Senior-2:focus,
-a.Senior-3:hover, a.Senior-3:focus,
-a.Senior-4:hover, a.Senior-4:focus,
-a.Senior-6:hover, a.Senior-6:focus {
-    color: #fff;
-    background-color: #1d2124;
+.Senior-7 {
+    --fg: 0%;
+    background-color: #66ffff;
 }
 
-a.Primary-B:focus, a.Primary-B.focus,
-a.Primary-P:focus, a.Primary-P.focus,
-a.Primary-R:focus, a.Primary-R.focus,
-a.Secondary-G:focus, a.Secondary-G.focus,
-a.Secondary-N:focus, a.Secondary-N.focus,
-a.Alternate-V:hover, a.Alternate-V:focus,
-a.Alternate-Y:hover, a.Alternate-Y:focus,
-a.Senior-1:focus, a.Senior-1.focus,
-a.Senior-2:focus, a.Senior-2.focus,
-a.Senior-3:focus, a.Senior-3.focus,
-a.Senior-4:focus, a.Senior-4.focus,
-a.Senior-6:focus, a.Senior-6.focus {
-    outline: 0;
-    box-shadow: 0 0 0 0.2rem rgba(52, 58, 64, 0.5);
-}
-
-a.Senior-5:hover, a.Senior-5:focus {
-    color: #212529;
-    background-color: #dae0e5;
-}
-
-a.Senior-5:focus, a.Senior-5.focus {
-    outline: 0;
-    box-shadow: 0 0 0 0.2rem rgba(248, 249, 250, 0.5);
+.Senior-8 {
+    --fg: 0%;
+    background-color: #ffccff;
 }
 
 /* Consent Upsert Dynamic Select2 Style */

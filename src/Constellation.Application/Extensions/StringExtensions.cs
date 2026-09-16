@@ -32,12 +32,16 @@ public static class StringExtensions
                 "P" => ("Primary", "P"),
                 "R" => ("Primary", "R"),
 
+                "0" => ("Senior", "0"),
                 "1" => ("Senior", "1"),
                 "2" => ("Senior", "2"),
                 "3" => ("Senior", "3"),
                 "4" => ("Senior", "4"),
                 "5" => ("Senior", "5"),
+
                 "6" => ("Senior", "6"),
+                "7" => ("Senior", "7"),
+                "8" => ("Senior", "8"),
                 _ => ("Unknown", "Unknown")
             };
         }

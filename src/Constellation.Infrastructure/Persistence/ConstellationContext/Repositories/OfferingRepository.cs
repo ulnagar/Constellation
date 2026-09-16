@@ -239,7 +239,7 @@ internal sealed class OfferingRepository : IOfferingRepository
             .Set<Offering>()
             .Where(offering =>
                 offering.Sessions.Any(session => !session.IsDeleted) &&
-                offering.StartDate <= _dateTime.Today &&
+                //offering.StartDate <= _dateTime.Today &&
                 offering.EndDate >= _dateTime.Today &&
                 offering.Resources.Any(resource =>
                     resource.Type == ResourceType.MicrosoftTeam &&
