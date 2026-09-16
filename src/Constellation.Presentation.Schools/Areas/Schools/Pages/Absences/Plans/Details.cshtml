@@ -1,6 +1,7 @@
 ﻿@page "{id}"
 @model Constellation.Presentation.Schools.Areas.Schools.Pages.Absences.Plans.DetailsModel
 
+@using Constellation.Application.Helpers
 @using Constellation.Core.Abstractions.Services
 @using Constellation.Core.Enums
 @using Constellation.Core.Extensions
@@ -97,12 +98,40 @@
                                     <div class="Timetable-Day-Title"></div>
                                     @foreach (var period in periods)
                                     {
-                                        var noCollapse = week.Any(p => p.StartTime == period.StartTime && !string.IsNullOrWhiteSpace(p.OfferingName));
+                                        var noCollapse = week.Any(p => p.PeriodName == period.PeriodName && !string.IsNullOrWhiteSpace(p.OfferingName));
+
+                                        var timespans = week
+                                            .Where(p => p.PeriodName == period.PeriodName)
+                                            .GroupBy(p => (p.StartTime, p.EndTime))
+                                            .Select(g => new
+                                            {
+                                                g.Key.StartTime,
+                                                g.Key.EndTime,
+                                                TimeRangeDisplay = $"{g.Key.StartTime:h:mm tt} - {g.Key.EndTime:h:mm tt}",
+                                                FirstDay = g.Select(p => p.Day).MinBy(d => d.Value),
+                                                DaysDisplay = ListHelpers.FormatDayRanges(g.Select(p => p.Day).ToList())
+                                            })
+                                            .OrderBy(g => g.FirstDay?.Value ?? 100)
+                                            .ToList();
 
                                         <div class="Timetable-Day-Period @period.PeriodType.Name align-middle @(noCollapse ? "" : "collapsed")">
                                             <span class="w-100">
-                                                @period.PeriodName<br/>
-                                                @period.StartTime.ToString("h:mm tt") - @period.EndTime.ToString("h:mm tt")
+                                                <span class="d-block tooltip-line">@period.PeriodName</span>
+
+                                                @if (timespans.Count == 1)
+                                                {
+                                                    <span class="d-block my-2">@timespans.First().StartTime.ToString("h:mm tt") - @timespans.First().EndTime.ToString("h:mm tt")</span>
+                                                }
+                                                else
+                                                {
+                                                    foreach (var timespan in timespans)
+                                                    {
+                                                        <span class="d-block my-2 tooltip-line">
+                                                            @timespan.DaysDisplay<br />
+                                                            @timespan.TimeRangeDisplay
+                                                        </span>
+                                                    }
+                                                }
                                             </span>
                                         </div>
                                     }
@@ -131,7 +160,7 @@
                                         style += " Break";
                                     }
 
-                                    var noCollapse = week.Any(p => p.StartTime == period.StartTime && !string.IsNullOrWhiteSpace(p.OfferingName));
+                                    var noCollapse = week.Any(p => p.PeriodName == period.PeriodName && !string.IsNullOrWhiteSpace(p.OfferingName));
 
                                     <div class="Timetable-Day-Period @style @(noCollapse ? "" : "collapsed")">
                                         @if (!string.IsNullOrWhiteSpace(period.OfferingName))
@@ -368,12 +397,40 @@
                                         <div class="Timetable-Day-Title"></div>
                                         @foreach (var period in periods)
                                         {
-                                            var noCollapse = week.Any(p => p.StartTime == period.StartTime && !string.IsNullOrWhiteSpace(p.OfferingName));
+                                            var noCollapse = week.Any(p => p.PeriodName == period.PeriodName && !string.IsNullOrWhiteSpace(p.OfferingName));
+
+                                            var timespans = week
+                                                .Where(p => p.PeriodName == period.PeriodName)
+                                                .GroupBy(p => (p.StartTime, p.EndTime))
+                                                .Select(g => new
+                                                {
+                                                    g.Key.StartTime,
+                                                    g.Key.EndTime,
+                                                    TimeRangeDisplay = $"{g.Key.StartTime:h:mm tt} - {g.Key.EndTime:h:mm tt}",
+                                                    FirstDay = g.Select(p => p.Day).MinBy(d => d.Value),
+                                                    DaysDisplay = ListHelpers.FormatDayRanges(g.Select(p => p.Day).ToList())
+                                                })
+                                                .OrderBy(g => g.FirstDay?.Value ?? 100)
+                                                .ToList();
 
                                             <div class="Timetable-Day-Period @period.PeriodType.Name align-middle @(noCollapse ? "" : "collapsed")">
                                                 <span class="w-100">
-                                                    @period.PeriodName<br />
-                                                    @period.StartTime.ToString("h:mm tt") - @period.EndTime.ToString("h:mm tt")
+                                                    <span class="d-block tooltip-line">@period.PeriodName</span>
+
+                                                    @if (timespans.Count == 1)
+                                                    {
+                                                        <span class="d-block my-2">@timespans.First().StartTime.ToString("h:mm tt") - @timespans.First().EndTime.ToString("h:mm tt")</span>
+                                                    }
+                                                    else
+                                                    {
+                                                        foreach (var timespan in timespans)
+                                                        {
+                                                            <span class="d-block my-2 tooltip-line">
+                                                                @timespan.DaysDisplay<br />
+                                                                @timespan.TimeRangeDisplay
+                                                            </span>
+                                                        }
+                                                    }
                                                 </span>
                                             </div>
                                         }
@@ -402,7 +459,7 @@
                                             style += " Break";
                                         }
 
-                                        var noCollapse = week.Any(p => p.StartTime == period.StartTime && !string.IsNullOrWhiteSpace(p.OfferingName));
+                                        var noCollapse = week.Any(p => p.PeriodName == period.PeriodName && !string.IsNullOrWhiteSpace(p.OfferingName));
 
                                         <div class="Timetable-Day-Period @style @(noCollapse ? "" : "collapsed")">
                                             @if (!string.IsNullOrWhiteSpace(period.OfferingName))
@@ -1198,6 +1255,26 @@
             {
                  $('#submitButton').trigger('click');
             }
+        }
+
+        $(document).ready(function() {
+            checkOverflowTooltips($('.Timetable-Week'));
+        });
+
+        function checkOverflowTooltips($container) {
+            $container.find('.Timetable-Day-Period.align-middle').each(function() {
+                var $cell = $(this);
+                if (this.scrollHeight > this.clientHeight || this.scrollWidth > this.clientWidth) {
+                    $cell.attr('title', buildTooltipText($cell));
+                }
+            });
+        }
+
+        function buildTooltipText($cell) {
+            return $cell.find('.tooltip-line')
+                .map(function() { return $(this).text().replace(/\s+/g, ' ').trim(); })
+                .get()
+                .join('\n');
         }
     </script>
 }

@@ -214,12 +214,19 @@
 
                                                 <div class="Plan-Timetable-Day-Period @period.PeriodType.Name align-middle @(noCollapse ? "" : "collapsed")">
                                                     <span class="w-100">
-                                                        @period.PeriodName<br />
-                                                
-                                                        @foreach (var timespan in timespans)
+                                                        <span class="d-block tooltip-line">@period.PeriodName</span>
+                                                        
+                                                        @if (timespans.Count == 1)
                                                         {
-                                                            <span class="d-block my-2">@timespan.DaysDisplay<br />
-                                                                @timespan.TimeRangeDisplay</span>
+                                                            <span class="d-block my-2">@timespans.First().StartTime.ToString("h:mm tt") - @timespans.First().EndTime.ToString("h:mm tt")</span>
+                                                        }
+                                                        else
+                                                        {
+                                                            foreach (var timespan in timespans)
+                                                            {
+                                                                <span class="d-block my-2 tooltip-line">@timespan.DaysDisplay<br />
+                                                                    @timespan.TimeRangeDisplay</span>
+                                                            }
                                                         }
                                                     </span>
                                                 </div>
@@ -396,19 +403,26 @@
         
         <div>
             <ul class="nav nav-pills">
-                @if (Model.Plan.HasSciencePracRequirement)
-                {
+                @{
+                    var active = true;
+
+                    @if (Model.Plan.HasSciencePracRequirement)
+                    {
+                        <li class="nav-item">
+                            <a class="nav-link active" href="#sciencePrac" data-bs-toggle="tab" role="tab">
+                                Science Prac Lesson
+                            </a>
+                        </li>
+
+
+                        active = false;
+                    }
                     <li class="nav-item">
-                        <a class="nav-link active" href="#sciencePrac" data-bs-toggle="tab" role="tab">
-                            Science Prac Lesson
+                        <a class="nav-link @(active ? "active": "")" href="#missedLessons" data-bs-toggle="tab" role="tab">
+                            Missed Lessons
                         </a>
                     </li>
                 }
-                <li class="nav-item">
-                    <a class="nav-link" href="#missedLessons" data-bs-toggle="tab" role="tab">
-                        Missed Lessons
-                    </a>
-                </li>
                 <li class="nav-item">
                     <a class="nav-link" href="#freePeriods" data-bs-toggle="tab" role="tab">
                         Free Periods
@@ -424,22 +438,22 @@
                             <div class="mb-3 mt-3">
                                 <h4>Science Practical Lesson</h4>
                             </div>
-
+                            
                             <div class="mb-3 row mt-3">
                                 <div class="col-3"><label class="form-label">Week</label></div>
                                 <div class="col font-weight-bold">
                                     <span>@Model.Plan.SciencePrac?.Week.Name</span>
                                 </div>
-                            </div>
+                                
+                                <div class="w-100"></div>
 
-                            <div class="mb-3 row mt-3">
                                 <div class="col-3"><label class="form-label">Day</label></div>
                                 <div class="col font-weight-bold">
                                     <span>@Model.Plan.SciencePrac?.Day.Name</span>
                                 </div>
-                            </div>
+                            
+                                <div class="w-100"></div>
 
-                            <div class="mb-3 row mt-3">
                                 <div class="col-3"><label class="form-label">Period</label></div>
                                 <div class="col font-weight-bold">
                                     <span>@Model.Plan.SciencePrac?.Period</span>
@@ -449,7 +463,7 @@
                     </div>
                 }
 
-                <div id="missedLessons" class="tab-pane">
+                <div id="missedLessons" class="tab-pane @(active ? "active" : "")">
                     <div class="col">
                         <div class="mb-3 mt-3">
                             <h4>Missed Home School Lessons</h4>
@@ -564,6 +578,30 @@
                     [0, 'asc']
                 ] 
             });
-        })
+        });
+
+        $(document).ready(function() {
+            checkOverflowTooltips($('.tab-pane.active')); // or whichever pane is visible by default
+        });
+
+        $('a[data-bs-toggle="tab"]').on('shown.bs.tab', function(e) {
+            checkOverflowTooltips($(e.target.getAttribute('href')));
+        });
+
+        function checkOverflowTooltips($container) {
+            $container.find('.Plan-Timetable-Day-Period.align-middle').each(function() {
+                var $cell = $(this);
+                if (this.scrollHeight > this.clientHeight || this.scrollWidth > this.clientWidth) {
+                    $cell.attr('title', buildTooltipText($cell));
+                }
+            });
+        }
+
+        function buildTooltipText($cell) {
+            return $cell.find('.tooltip-line')
+                .map(function() { return $(this).text().replace(/\s+/g, ' ').trim(); })
+                .get()
+                .join('\n');
+        }
     </script>
 }

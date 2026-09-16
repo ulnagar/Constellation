@@ -88,12 +88,19 @@
 
                                         <div class="Plan-Timetable-Day-Period @period.PeriodType.Name align-middle @(noCollapse ? "" : "collapsed")">
                                             <span class="w-100">
-                                                @period.PeriodName<br />
-                                                
-                                                @foreach (var timespan in timespans)
+                                                <span class="d-block tooltip-line">@period.PeriodName</span>
+                                                        
+                                                @if (timespans.Count == 1)
                                                 {
-                                                    <span class="d-block my-2">@timespan.DaysDisplay<br />
-                                                    @timespan.TimeRangeDisplay</span>
+                                                    <span class="d-block my-2">@timespans.First().StartTime.ToString("h:mm tt") - @timespans.First().EndTime.ToString("h:mm tt")</span>
+                                                }
+                                                else
+                                                {
+                                                    foreach (var timespan in timespans)
+                                                    {
+                                                        <span class="d-block my-2 tooltip-line">@timespan.DaysDisplay<br />
+                                                            @timespan.TimeRangeDisplay</span>
+                                                    }
                                                 }
                                             </span>
                                         </div>
@@ -185,78 +192,79 @@
             </div>
         }
     </div>
+    
+    <hr class="my-3" />
 
-    @if (Model.Plan.Grade != Grade.Y05 && Model.Plan.Grade != Grade.Y06)
+    @if (Model.Plan.HasSciencePracRequirement)
     {
-        <hr class="my-3" />
-
-        if (Model.Plan.HasSciencePracRequirement)
-        {
-            <div class="row">
-                <div class="col-8">
-                    <div class="mb-3 row mt-3">
-                        <div class="col">
-                            <h3>Science Practical Lesson</h3></div>
-                    </div>
-
-                    <div class="mb-3 row mt-3">
-                        <div class="col-3"><label class="form-label">Week</label></div>
-                        <div class="col font-weight-bold">
-                            <select name="ScienceLessonWeek" class="form-control" required>
-                                <option value=""> ---- </option>
-                                @foreach (var item in Model.Weeks)
-                                {
-                                    if (Model.Plan.SciencePrac?.Week.Value.ToString() == item.Value)
-                                    {
-                                        <option value="@item.Value" selected="selected">@item.Text</option>
-                                    }
-                                    else
-                                    {
-                                        <option value="@item.Value">@item.Text</option>
-                                    }
-                                }
-                            </select>
-                        </div>
-                    </div>
-
-                    <div class="mb-3 row mt-3">
-                        <div class="col-3"><label class="form-label">Day</label></div>
-                        <div class="col font-weight-bold">
-                            <select name="ScienceLessonDay" class="form-control" required>
-                                <option value=""> ---- </option>
-                                @foreach (var item in Model.Days)
-                                {
-                                    if (Model.Plan.SciencePrac?.Day.Value.ToString() == item.Value)
-                                    {
-                                        <option value="@item.Value" selected="selected">@item.Text</option>
-                                    }
-                                    else
-                                    {
-                                        <option value="@item.Value">@item.Text</option>
-                                    }
-                                }
-                            </select>
-                        </div>
-                    </div>
-
-                    <div class="mb-3 row mt-3">
-                        <div class="col-3"><label class="form-label">Period</label></div>
-                        <div class="col font-weight-bold">
-                            <input name="ScienceLessonPeriod" value="@Model.Plan.SciencePrac?.Period" class="form-control" required/>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <hr class="my-3"/>
-        }
-
         <div class="row">
             <div class="col-8">
                 <div class="mb-3 row mt-3">
-                    <div class="col"><h3>Missed Home School Lessons</h3></div>
+                    <div class="col">
+                        <h3>Science Practical Lesson</h3></div>
                 </div>
-                
+
+                <div class="mb-3 row mt-3">
+                    <div class="col-3"><label class="form-label">Week</label></div>
+                    <div class="col font-weight-bold">
+                        <select name="ScienceLessonWeek" class="form-control" required>
+                            <option value=""> ---- </option>
+                            @foreach (var item in Model.Weeks)
+                            {
+                                if (Model.Plan.SciencePrac?.Week.Value.ToString() == item.Value)
+                                {
+                                    <option value="@item.Value" selected="selected">@item.Text</option>
+                                }
+                                else
+                                {
+                                    <option value="@item.Value">@item.Text</option>
+                                }
+                            }
+                        </select>
+                    </div>
+                </div>
+
+                <div class="mb-3 row mt-3">
+                    <div class="col-3"><label class="form-label">Day</label></div>
+                    <div class="col font-weight-bold">
+                        <select name="ScienceLessonDay" class="form-control" required>
+                            <option value=""> ---- </option>
+                            @foreach (var item in Model.Days)
+                            {
+                                if (Model.Plan.SciencePrac?.Day.Value.ToString() == item.Value)
+                                {
+                                    <option value="@item.Value" selected="selected">@item.Text</option>
+                                }
+                                else
+                                {
+                                    <option value="@item.Value">@item.Text</option>
+                                }
+                            }
+                        </select>
+                    </div>
+                </div>
+
+                <div class="mb-3 row mt-3">
+                    <div class="col-3"><label class="form-label">Period</label></div>
+                    <div class="col font-weight-bold">
+                        <input name="ScienceLessonPeriod" value="@Model.Plan.SciencePrac?.Period" class="form-control" required/>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <hr class="my-3"/>
+    }
+            
+    @if (Model.Plan.Grade != Grade.Y05 && Model.Plan.Grade != Grade.Y06)
+    {
+        <div class="row">
+            <div class="col-8">
+                <div class="mb-3 row mt-3">
+                    <div class="col">
+                        <h3>Missed Home School Lessons</h3></div>
+                </div>
+
                 @{
                     var hasMissedLessons = Model.Plan.MissedPeriods.Any();
                 }
@@ -268,15 +276,15 @@
                     <div class="row mt-3">
                         <div class="col">
                             <div class="btn-group" role="group">
-                                <input type="radio" class="btn-check" name="btn-check" id="btn-check-no" checked="@(!hasMissedLessons)" />
+                                <input type="radio" class="btn-check" name="btn-check" id="btn-check-no" checked="@(!hasMissedLessons)"/>
                                 <label class="btn btn-lg btn-outline-success" for="btn-check-no">No</label>
-                                <input type="radio" class="btn-check" name="btn-check" id="btn-check-yes" checked="@(hasMissedLessons)" />
+                                <input type="radio" class="btn-check" name="btn-check" id="btn-check-yes" checked="@(hasMissedLessons)"/>
                                 <label class="btn btn-lg btn-outline-danger" for="btn-check-yes">Yes</label>
                             </div>
                         </div>
                     </div>
                 </div>
-                    
+
                 <div id="missed-lessons" class="@(hasMissedLessons ? "" : "d-none")">
                     <div class="mb-3 row mt-3">
                         <div class="col">Enter the details of the missed lessons here.</div>
@@ -322,9 +330,9 @@
 
                                 foreach (var entry in Model.Plan.MissedPeriods)
                                 {
-                                    <input type="hidden" name="MissedLessons[@missedLessonFieldIndex].Subject" value="@entry.Subject" />
-                                    <input type="hidden" name="MissedLessons[@missedLessonFieldIndex].TotalMinutesPerCycle" value="@entry.TotalMinutesPerCycle" />
-                                    <input type="hidden" name="MissedLessons[@missedLessonFieldIndex].MinutesMissedPerCycle" value="@entry.MinutesMissedPerCycle" />
+                                    <input type="hidden" name="MissedLessons[@missedLessonFieldIndex].Subject" value="@entry.Subject"/>
+                                    <input type="hidden" name="MissedLessons[@missedLessonFieldIndex].TotalMinutesPerCycle" value="@entry.TotalMinutesPerCycle"/>
+                                    <input type="hidden" name="MissedLessons[@missedLessonFieldIndex].MinutesMissedPerCycle" value="@entry.MinutesMissedPerCycle"/>
 
                                     missedLessonFieldIndex++;
                                 }
@@ -335,12 +343,13 @@
             </div>
         </div>
 
-        <hr class="my-3" />
+        <hr class="my-3"/>
 
         <div class="row">
             <div class="col-8">
                 <div class="mb-3 row mt-3">
-                    <div class="col"><h3>Free Periods</h3></div>
+                    <div class="col">
+                        <h3>Free Periods</h3></div>
                 </div>
 
                 <div class="mb-3 row mt-3">
@@ -356,29 +365,29 @@
                 <div class="mb-3 row mt-3">
                     <table class="table">
                         <thead>
-                            <tr>
-                                <th>Period</th>
-                                <th>Length</th>
-                                <th>Activity</th>
-                                <th></th>
-                            </tr>
+                        <tr>
+                            <th>Period</th>
+                            <th>Length</th>
+                            <th>Activity</th>
+                            <th></th>
+                        </tr>
                         </thead>
                         <tbody id="free-periods-table">
-                            @{
-                                var freePeriodIndex = 0;
+                        @{
+                            var freePeriodIndex = 0;
 
-                                foreach (var entry in Model.Plan.FreePeriods)
-                                {
-                                    <tr name="FreePeriods[@freePeriodIndex]">
-                                        <td>@entry.Week.Name @entry.Day.Name @entry.Period</td>
-                                        <td>@entry.Minutes</td>
-                                        <td>@entry.Activity</td>
-                                        <td><button type="button" class="btn btn-danger" onclick="removePeriod(@freePeriodIndex)">Remove</button></td>
-                                    </tr>
+                            foreach (var entry in Model.Plan.FreePeriods)
+                            {
+                                <tr name="FreePeriods[@freePeriodIndex]">
+                                    <td>@entry.Week.Name @entry.Day.Name @entry.Period</td>
+                                    <td>@entry.Minutes</td>
+                                    <td>@entry.Activity</td>
+                                    <td><button type="button" class="btn btn-danger" onclick="removePeriod(@freePeriodIndex)">Remove</button></td>
+                                </tr>
 
-                                    freePeriodIndex++;
-                                }
+                                freePeriodIndex++;
                             }
+                        }
                         </tbody>
                     </table>
 
@@ -387,11 +396,11 @@
 
                             foreach (var entry in Model.Plan.FreePeriods)
                             {
-                                <input type="hidden" name="FreePeriods[@freePeriodFieldIndex].Week" value="@entry.Week.Value" />
-                                <input type="hidden" name="FreePeriods[@freePeriodFieldIndex].Day" value="@entry.Day.Value" />
-                                <input type="hidden" name="FreePeriods[@freePeriodFieldIndex].Period" value="@entry.Period" />
-                                <input type="hidden" name="FreePeriods[@freePeriodFieldIndex].Minutes" value="@entry.Minutes" />
-                                <input type="hidden" name="FreePeriods[@freePeriodFieldIndex].Activity" value="@entry.Activity" />
+                                <input type="hidden" name="FreePeriods[@freePeriodFieldIndex].Week" value="@entry.Week.Value"/>
+                                <input type="hidden" name="FreePeriods[@freePeriodFieldIndex].Day" value="@entry.Day.Value"/>
+                                <input type="hidden" name="FreePeriods[@freePeriodFieldIndex].Period" value="@entry.Period"/>
+                                <input type="hidden" name="FreePeriods[@freePeriodFieldIndex].Minutes" value="@entry.Minutes"/>
+                                <input type="hidden" name="FreePeriods[@freePeriodFieldIndex].Activity" value="@entry.Activity"/>
 
                                 freePeriodFieldIndex++;
                             }
@@ -400,10 +409,10 @@
                 </div>
             </div>
         </div>
+
+        <hr class="my-3" />
     }
-
-    <hr class="my-3" />
-
+    
     <div class="row">
         <div class="col-4 mb-3 mt-3">
             <button type="button" class="btn btn-warning btn-lg py-3 me-3" onclick="submitForm('draft')">Save Draft</button>
@@ -780,6 +789,26 @@
             {
                  $('#submitButton').trigger('click');
             }
+        }
+
+        $(document).ready(function() {
+            checkOverflowTooltips($('.Plan-Timetable-Week')); 
+        });
+
+        function checkOverflowTooltips($container) {
+            $container.find('.Plan-Timetable-Day-Period.align-middle').each(function() {
+                var $cell = $(this);
+                if (this.scrollHeight > this.clientHeight || this.scrollWidth > this.clientWidth) {
+                    $cell.attr('title', buildTooltipText($cell));
+                }
+            });
+        }
+
+        function buildTooltipText($cell) {
+            return $cell.find('.tooltip-line')
+                .map(function() { return $(this).text().replace(/\s+/g, ' ').trim(); })
+                .get()
+                .join('\n');
         }
     </script>
 }

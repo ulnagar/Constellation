@@ -42,10 +42,12 @@
     height: 6rem;
 }
 
-.Timetable-Day-Period.align-middle {
-    align-items: center;
-    flex-direction: row;
-}
+    .Timetable-Day-Period.align-middle {
+        /*align-items: center;*/
+        align-items: safe center;
+        flex-direction: row;
+        overflow: hidden;
+    }
 
     .Timetable-Day-Period.Inactive {
         /*background-color: cornflowerblue;*/
