@@ -64,7 +64,7 @@ internal sealed class GetAttendancePlanForSubmitQueryHandler
             await _unitOfWork.CompleteAsync(cancellationToken);
         }
 
-        List<Period> timetablePeriods = await _periodRepository.GetAllFromTimetable([plan.Periods.First().Timetable], cancellationToken);
+        List<Period> timetablePeriods = await _periodRepository.GetAllFromTimetable(plan.Periods.Select(entry => entry.Timetable).Distinct().ToList(), cancellationToken);
 
         List<AttendancePlanEntry.PlanPeriod> periods = [];
 

@@ -77,9 +77,16 @@
                 For information on how Aurora College labels Weeks A and B, please see the documentation on our website: <a href="https://aurora.schools.nsw.gov.au/partner-schools/resources" target="_blank">https://aurora.schools.nsw.gov.au/partner-schools/resources</a>
             </div>
         </div>
-
+        
         @{
-            var weeks = Model.Plan.Periods.Where(p => p.PeriodType != PeriodType.Offline).OrderBy(p => p.Week.Value).GroupBy(p => p.Week);
+            var timetables = Model.Plan.Periods.Select(p => p.Timetable).Distinct().ToList();
+        }
+        
+        @foreach (var timetable in timetables)
+        {
+            <h4 class="mt-3">@timetable.DisplayName</h4>
+
+            var weeks = Model.Plan.Periods.Where(p => p.Timetable == timetable && p.PeriodType != PeriodType.Offline).OrderBy(p => p.Week.Value).GroupBy(p => p.Week);
 
             <div>
                 @foreach (var week in weeks)
@@ -378,147 +385,155 @@
 
             @{
                 var fieldIndex = 0;
-                var weeks = Model.Plan.Periods.Where(p => p.PeriodType != PeriodType.Offline).OrderBy(p => p.Week.Value).GroupBy(p => p.Week);
+                var timetables = Model.Plan.Periods.Select(entry => entry.Timetable).Distinct().ToList();
 
-                <div>
-                    @foreach (var week in weeks)
-                    {
-                        var days = week.OrderBy(p => p.Day.Value).GroupBy(p => p.Day);
-                        var firstDay = true;
+                foreach (var timetable in timetables)
+                {
 
-                        <div class="Timetable-Week">
-                            @foreach (var day in days)
-                            {
-                                var periods = day.OrderBy(p => p.StartTime).ToList();
+                    var weeks = Model.Plan.Periods.Where(p => p.Timetable == timetable && p.PeriodType != PeriodType.Offline).OrderBy(p => p.Week.Value).GroupBy(p => p.Week);
 
-                                if (firstDay)
+                    <h4 class="mt-3">@timetable.DisplayName</h4>
+
+                    <div>
+                        @foreach (var week in weeks)
+                        {
+                            var days = week.OrderBy(p => p.Day.Value).GroupBy(p => p.Day);
+                            var firstDay = true;
+
+                            <div class="Timetable-Week">
+                                @foreach (var day in days)
                                 {
-                                    <div class="Timetable-Day">
-                                        <div class="Timetable-Day-Title"></div>
-                                        @foreach (var period in periods)
-                                        {
-                                            var noCollapse = week.Any(p => p.PeriodName == period.PeriodName && !string.IsNullOrWhiteSpace(p.OfferingName));
+                                    var periods = day.OrderBy(p => p.StartTime).ToList();
 
-                                            var timespans = week
-                                                .Where(p => p.PeriodName == period.PeriodName)
-                                                .GroupBy(p => (p.StartTime, p.EndTime))
-                                                .Select(g => new
-                                                {
-                                                    g.Key.StartTime,
-                                                    g.Key.EndTime,
-                                                    TimeRangeDisplay = $"{g.Key.StartTime:h:mm tt} - {g.Key.EndTime:h:mm tt}",
-                                                    FirstDay = g.Select(p => p.Day).MinBy(d => d.Value),
-                                                    DaysDisplay = ListHelpers.FormatDayRanges(g.Select(p => p.Day).ToList())
-                                                })
-                                                .OrderBy(g => g.FirstDay?.Value ?? 100)
-                                                .ToList();
-
-                                            <div class="Timetable-Day-Period @period.PeriodType.Name align-middle @(noCollapse ? "" : "collapsed")">
-                                                <span class="w-100">
-                                                    <span class="d-block tooltip-line">@period.PeriodName</span>
-
-                                                    @if (timespans.Count == 1)
-                                                    {
-                                                        <span class="d-block my-2">@timespans.First().StartTime.ToString("h:mm tt") - @timespans.First().EndTime.ToString("h:mm tt")</span>
-                                                    }
-                                                    else
-                                                    {
-                                                        foreach (var timespan in timespans)
-                                                        {
-                                                            <span class="d-block my-2 tooltip-line">
-                                                                @timespan.DaysDisplay<br />
-                                                                @timespan.TimeRangeDisplay
-                                                            </span>
-                                                        }
-                                                    }
-                                                </span>
-                                            </div>
-                                        }
-                                    </div>
-                                }
-
-                                <div class="Timetable-Day">
-                                    <div class="Timetable-Day-Title">
-                                        @week.Key.Name - @day.Key.Name
-                                    </div>
-                                    @foreach (var period in periods)
+                                    if (firstDay)
                                     {
-                                        var style = "";
-
-                                        if (string.IsNullOrWhiteSpace(period.OfferingName))
-                                        {
-                                            style += " Inactive";
-                                        }
-                                        else
-                                        {
-                                            style += " Active";
-                                        }
-
-                                        if (period.PeriodType == PeriodType.Break)
-                                        {
-                                            style += " Break";
-                                        }
-
-                                        var noCollapse = week.Any(p => p.PeriodName == period.PeriodName && !string.IsNullOrWhiteSpace(p.OfferingName));
-
-                                        <div class="Timetable-Day-Period @style @(noCollapse ? "" : "collapsed")">
-                                            @if (!string.IsNullOrWhiteSpace(period.OfferingName))
+                                        <div class="Timetable-Day">
+                                            <div class="Timetable-Day-Title"></div>
+                                            @foreach (var period in periods)
                                             {
-                                                var options = Model.CalculateOptions(period.StartTime, period.EndTime);
+                                                var noCollapse = week.Any(p => p.PeriodName == period.PeriodName && !string.IsNullOrWhiteSpace(p.OfferingName));
 
-                                                <div>
-                                                    <span>@period.OfferingName</span>
-                                                    <input type="hidden" name="Periods[@fieldIndex].PlanPeriodId" id="Periods[@fieldIndex].PlanPeriodId" value="@period.PlanPeriodId" />
-                                                </div>
+                                                var timespans = week
+                                                    .Where(p => p.PeriodName == period.PeriodName)
+                                                    .GroupBy(p => (p.StartTime, p.EndTime))
+                                                    .Select(g => new
+                                                    {
+                                                        g.Key.StartTime,
+                                                        g.Key.EndTime,
+                                                        TimeRangeDisplay = $"{g.Key.StartTime:h:mm tt} - {g.Key.EndTime:h:mm tt}",
+                                                        FirstDay = g.Select(p => p.Day).MinBy(d => d.Value),
+                                                        DaysDisplay = ListHelpers.FormatDayRanges(g.Select(p => p.Day).ToList())
+                                                    })
+                                                    .OrderBy(g => g.FirstDay?.Value ?? 100)
+                                                    .ToList();
 
-                                                <div class="mt-2">
-                                                    <span>Entry Time</span>
-                                                    <select name="Periods[@fieldIndex].EntryTime" id="Periods[@fieldIndex].EntryTime" class="form-control" required>
-                                                        <option value=""> ---- </option>
-                                                        @foreach (var minute in options)
+                                                <div class="Timetable-Day-Period @period.PeriodType.Name align-middle @(noCollapse ? "" : "collapsed")">
+                                                    <span class="w-100">
+                                                        <span class="d-block tooltip-line">@period.PeriodName</span>
+
+                                                        @if (timespans.Count == 1)
                                                         {
-                                                            if (period.EntryTime == minute)
+                                                            <span class="d-block my-2">@timespans.First().StartTime.ToString("h:mm tt") - @timespans.First().EndTime.ToString("h:mm tt")</span>
+                                                        }
+                                                        else
+                                                        {
+                                                            foreach (var timespan in timespans)
                                                             {
-                                                                <option value="@minute" selected="selected">@minute.ToString("h:mm tt")</option>
-                                                            }
-                                                            else
-                                                            {
-                                                                <option value="@minute">@minute.ToString("h:mm tt")</option>
+                                                                <span class="d-block my-2 tooltip-line">
+                                                                    @timespan.DaysDisplay<br/>
+                                                                    @timespan.TimeRangeDisplay
+                                                                </span>
                                                             }
                                                         }
-                                                    </select>
+                                                    </span>
                                                 </div>
-
-                                                options.Reverse();
-                                                <div class="mt-2">
-                                                    <span>Exit Time</span>
-                                                    <select name="Periods[@fieldIndex].ExitTime" id="Periods[@fieldIndex].ExitTime" class="form-control" required>
-                                                        <option value=""> ---- </option>
-                                                        @foreach (var minute in options)
-                                                        {
-                                                            if (period.ExitTime == minute)
-                                                            {
-                                                                <option value="@minute" selected="selected">@minute.ToString("h:mm tt")</option>
-                                                            }
-                                                            else
-                                                            {
-                                                                <option value="@minute">@minute.ToString("h:mm tt")</option>
-                                                            }
-                                                        }
-                                                    </select>
-                                                </div>
-
-                                                fieldIndex++;
                                             }
                                         </div>
                                     }
-                                </div>
 
-                                firstDay = false;
-                            }
-                        </div>
-                    }
-                </div>
+                                    <div class="Timetable-Day">
+                                        <div class="Timetable-Day-Title">
+                                            @week.Key.Name - @day.Key.Name
+                                        </div>
+                                        @foreach (var period in periods)
+                                        {
+                                            var style = "";
+
+                                            if (string.IsNullOrWhiteSpace(period.OfferingName))
+                                            {
+                                                style += " Inactive";
+                                            }
+                                            else
+                                            {
+                                                style += " Active";
+                                            }
+
+                                            if (period.PeriodType == PeriodType.Break)
+                                            {
+                                                style += " Break";
+                                            }
+
+                                            var noCollapse = week.Any(p => p.PeriodName == period.PeriodName && !string.IsNullOrWhiteSpace(p.OfferingName));
+
+                                            <div class="Timetable-Day-Period @style @(noCollapse ? "" : "collapsed")">
+                                                @if (!string.IsNullOrWhiteSpace(period.OfferingName))
+                                                {
+                                                    var options = Model.CalculateOptions(period.StartTime, period.EndTime);
+
+                                                    <div>
+                                                        <span>@period.OfferingName</span>
+                                                        <input type="hidden" name="Periods[@fieldIndex].PlanPeriodId" id="Periods[@fieldIndex].PlanPeriodId" value="@period.PlanPeriodId"/>
+                                                    </div>
+
+                                                    <div class="mt-2">
+                                                        <span>Entry Time</span>
+                                                        <select name="Periods[@fieldIndex].EntryTime" id="Periods[@fieldIndex].EntryTime" class="form-control" required>
+                                                            <option value=""> ---- </option>
+                                                            @foreach (var minute in options)
+                                                            {
+                                                                if (period.EntryTime == minute)
+                                                                {
+                                                                    <option value="@minute" selected="selected">@minute.ToString("h:mm tt")</option>
+                                                                }
+                                                                else
+                                                                {
+                                                                    <option value="@minute">@minute.ToString("h:mm tt")</option>
+                                                                }
+                                                            }
+                                                        </select>
+                                                    </div>
+
+                                                    options.Reverse();
+                                                    <div class="mt-2">
+                                                        <span>Exit Time</span>
+                                                        <select name="Periods[@fieldIndex].ExitTime" id="Periods[@fieldIndex].ExitTime" class="form-control" required>
+                                                            <option value=""> ---- </option>
+                                                            @foreach (var minute in options)
+                                                            {
+                                                                if (period.ExitTime == minute)
+                                                                {
+                                                                    <option value="@minute" selected="selected">@minute.ToString("h:mm tt")</option>
+                                                                }
+                                                                else
+                                                                {
+                                                                    <option value="@minute">@minute.ToString("h:mm tt")</option>
+                                                                }
+                                                            }
+                                                        </select>
+                                                    </div>
+
+                                                    fieldIndex++;
+                                                }
+                                            </div>
+                                        }
+                                    </div>
+
+                                    firstDay = false;
+                                }
+                            </div>
+                        }
+                    </div>
+                }
             }
         </div>
         
