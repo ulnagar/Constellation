@@ -2,6 +2,7 @@
 @model Constellation.Presentation.Students.Areas.Students.Pages.Timetables.IndexModel
 
 @using Constellation.Application.DTOs
+@using Constellation.Application.Helpers
 @using Constellation.Core.Models.Timetables.Enums
 @using Constellation.Core.Models.Timetables.ValueObjects
 
@@ -63,16 +64,29 @@ else
                                     <div class="Timetable-Day-Title">&nbsp;</div>
                                     @foreach (var period in periods)
                                     {
-                                        var matchingPeriods = week.Where(p => p.StartTime == period.StartTime).ToList();
+                                        var matchingPeriods = week.Where(p => p.Name == period.Name).ToList();
 
                                         var collapseState = (matchingPeriods.Any(p => !string.IsNullOrWhiteSpace(p.ClassName)) ? "ClassDetails" : "");
-                                        collapseState = (matchingPeriods.Any(p => p.EntryTime != TimeOnly.FromTimeSpan(p.StartTime) && p.EntryTime != TimeOnly.MinValue) ? "SingleCustom" : collapseState);
-                                        collapseState = (matchingPeriods.Any(p => p.ExitTime != TimeOnly.FromTimeSpan(p.EndTime) && p.ExitTime != TimeOnly.MinValue) ? "SingleCustom" : collapseState);
-                                        collapseState = (matchingPeriods.Any(p => p.EntryTime != TimeOnly.FromTimeSpan(p.StartTime) && p.EntryTime != TimeOnly.MinValue && p.ExitTime != TimeOnly.FromTimeSpan(p.EndTime) && p.ExitTime != TimeOnly.MinValue) ? "DoubleCustom" : collapseState);
+                                        
+                                        var timespans = matchingPeriods
+                                            .GroupBy(p => (p.StartTime, p.EndTime))
+                                            .Select(g => new
+                                            {
+                                                g.Key.StartTime,
+                                                g.Key.EndTime,
+                                                TimeRangeDisplay = $"{g.Key.StartTime.As12HourTime()} - {g.Key.EndTime.As12HourTime()}",
+                                                FirstDay = g.Select(p => p.Day).MinBy(d => d.Value),
+                                                DaysDisplay = ListHelpers.FormatDayRanges(g.Select(p => p.Day).ToList())
+                                            })
+                                            .OrderBy(g => g.FirstDay?.Value ?? 100)
+                                            .ToList();
 
                                         <div class="Timetable-Day-Period @period.Type.Name @collapseState">
                                             @period.Name<br />
-                                            @period.StartTime.As12HourTime() - @period.EndTime.As12HourTime()
+                                            @if (timespans.Count == 1)
+                                            {
+                                                <span>@period.StartTime.As12HourTime() - @period.EndTime.As12HourTime()</span>
+                                            }
                                         </div>
                                     }
                                 </div>
@@ -100,36 +114,41 @@ else
                                         style += " Break";
                                     }
 
-                                    var matchingPeriods = week.Where(p => p.StartTime == period.StartTime).ToList();
+                                    var matchingPeriods = week.Where(p => p.Name == period.Name).ToList();
 
                                     var collapseState = (matchingPeriods.Any(p => !string.IsNullOrWhiteSpace(p.ClassName)) ? "ClassDetails" : "");
-                                    collapseState = (matchingPeriods.Any(p => p.EntryTime != TimeOnly.FromTimeSpan(p.StartTime) && p.EntryTime != TimeOnly.MinValue) ? "SingleCustom" : collapseState);
-                                    collapseState = (matchingPeriods.Any(p => p.ExitTime != TimeOnly.FromTimeSpan(p.EndTime) && p.ExitTime != TimeOnly.MinValue) ? "SingleCustom" : collapseState);
-                                    collapseState = (matchingPeriods.Any(p => p.EntryTime != TimeOnly.FromTimeSpan(p.StartTime) && p.EntryTime != TimeOnly.MinValue && p.ExitTime != TimeOnly.FromTimeSpan(p.EndTime) && p.ExitTime != TimeOnly.MinValue) ? "DoubleCustom" : collapseState);
 
                                     <div class="Timetable-Day-Period @style @collapseState">
-                                        @if (period.EntryTime != TimeOnly.FromTimeSpan(period.StartTime) && period.EntryTime != TimeOnly.MinValue)
-                                        {
-                                            <div class="custom-time">
-                                                Class Entry Time:<br />
-                                                @period.EntryTime.ToString("h:mm tt")
-                                            </div>
-                                        }
-
                                         @if (!string.IsNullOrWhiteSpace(period.ClassName))
                                         {
                                             <div class="class-details">
-                                            @period.ClassName
-                                            <br/>
-                                            @period.ClassTeacher
-                                            </div>
-                                        }
-                                        
-                                        @if (period.ExitTime != TimeOnly.FromTimeSpan(period.EndTime) && period.ExitTime != TimeOnly.MinValue)
-                                        {
-                                            <div class="custom-time">
-                                                Class Exit Time:<br />
-                                                @period.ExitTime.ToString("h:mm tt")
+                                                @period.ClassName
+                                                <br/>
+                                                @period.ClassTeacher
+                                                <br/>
+                                                <span class="class-time">
+                                                    @{
+                                                        if (period.EntryTime != TimeOnly.FromTimeSpan(period.StartTime) && period.EntryTime != TimeOnly.MinValue)
+                                                        {
+                                                            <span class="custom-time">@period.EntryTime.ToString("h:mm tt")</span>
+                                                        }
+                                                        else
+                                                        {
+                                                            <span>@period.StartTime.As12HourTime()</span>
+                                                        }
+                                                    }
+                                                    -
+                                                    @{
+                                                        if (period.ExitTime != TimeOnly.FromTimeSpan(period.EndTime) && period.ExitTime != TimeOnly.MinValue)
+                                                        {
+                                                            <span class="custom-time">@period.ExitTime.ToString("h:mm tt")</span>
+                                                        }
+                                                        else
+                                                        {
+                                                            <span>@period.EndTime.As12HourTime()</span>
+                                                        }
+                                                    }
+                                                </span>
                                             </div>
                                         }
                                     </div>

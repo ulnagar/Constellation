@@ -55,15 +55,7 @@
         }
 
         .Timetable-Day-Period.ClassDetails {
-            height: 5rem;
-        }
-
-        .Timetable-Day-Period.SingleCustom {
-            height: 7rem;
-        }
-
-        .Timetable-Day-Period.DoubleCustom {
-            height: 9rem;
+            height: 6rem;
         }
 
         .Timetable-Day-Period.Inactive {
@@ -84,10 +76,11 @@
         }
 
         .custom-time {
-            display: block;
             color: red;
-            margin-top: 5px;
-            margin-bottom: 5px;
+        }
+
+        .class-time {
+            font-weight: bold;
         }
 
         .class-details {
@@ -105,119 +98,128 @@
 <body>
 
     <div class="Page">
-    @{
-        IEnumerable<IGrouping<Timetable, TimetableDataDto.TimetableData>> timetables = new List<IGrouping<Timetable, TimetableDataDto.TimetableData>>();
-        if (Model.Timetables != null)
-        {
-            timetables = Model.Timetables.OrderBy(data => data.Timetable).GroupBy(data => data.Timetable);
-        }
+        @{
+            var timetables = Model.Timetables.OrderBy(data => data.Timetable).GroupBy(data => data.Timetable);
 
-        @foreach (var block in timetables)
-        {
-            var weeks = block.OrderBy(p => p.Week.Value).GroupBy(p => p.Week);
+            var firstPage = true;
 
-            <div>
-                @foreach (var week in weeks)
-                {
-                    var days = week.OrderBy(p => p.Day.Value).GroupBy(p => p.Day);
-                    var firstDay = true;
+            @foreach (var block in timetables)
+            {
+                var weeks = block.OrderBy(p => p.Week.Value).GroupBy(p => p.Week);
 
-                    if (week.Key.Value > 1)
+                <div>
+                    @foreach (var week in weeks)
                     {
-                        <div style="page-break-after: always; border: none;"></div>
-                    }
+                        var days = week.OrderBy(p => p.Day.Value).GroupBy(p => p.Day);
+                        var firstDay = true;
 
-                    <div class="Timetable-Week">
-                        @foreach (var day in days)
+                        if (!firstPage)
                         {
-                            var periods = day.OrderBy(p => p.StartTime).ToList();
+                            <div style="page-break-after: always; border: none;"></div>
+                        }
 
-                            if (firstDay)
+                        <div class="Timetable-Week">
+                            @foreach (var day in days)
                             {
-                                <div class="Timetable-Day">
-                                    <div class="Timetable-Day-Title"></div>
-                                    @foreach (var period in periods)
-                                    {
-                                        var matchingPeriods = week.Where(p => p.StartTime == period.StartTime).ToList();
+                                var periods = day.OrderBy(p => p.StartTime).ToList();
 
-                                        var collapseState = (matchingPeriods.Any(p => !string.IsNullOrWhiteSpace(p.ClassName)) ? "ClassDetails" : "");
-                                        collapseState = (matchingPeriods.Any(p => p.EntryTime != TimeOnly.FromTimeSpan(p.StartTime) && p.EntryTime != TimeOnly.MinValue) ? "SingleCustom" : collapseState);
-                                        collapseState = (matchingPeriods.Any(p => p.ExitTime != TimeOnly.FromTimeSpan(p.EndTime) && p.ExitTime != TimeOnly.MinValue) ? "SingleCustom" : collapseState);
-                                        collapseState = (matchingPeriods.Any(p => p.EntryTime != TimeOnly.FromTimeSpan(p.StartTime) && p.EntryTime != TimeOnly.MinValue && p.ExitTime != TimeOnly.FromTimeSpan(p.EndTime) && p.ExitTime != TimeOnly.MinValue) ? "DoubleCustom" : collapseState);
-
-                                        <div class="Timetable-Day-Period @period.Type.Name @collapseState">
-                                            @period.Name<br />
-                                            @period.StartTime.As12HourTime() - @period.EndTime.As12HourTime()
-                                        </div>
-                                    }
-                                </div>
-                            }
-
-                            <div class="Timetable-Day">
-                                <div class="Timetable-Day-Title">
-                                    @week.Key.Name - @day.Key.Name
-                                </div>
-                                @foreach (var period in periods)
+                                if (firstDay)
                                 {
-                                    var style = "";
-
-                                    if (string.IsNullOrWhiteSpace(period.ClassName))
-                                    {
-                                        style += " Inactive";
-                                    }
-                                    else
-                                    {
-                                        style += " Active";
-                                    }
-
-                                    if (period.Type == PeriodType.Break)
-                                    {
-                                        style += " Break";
-                                    }
-
-                                    var matchingPeriods = week.Where(p => p.StartTime == period.StartTime).ToList();
-
-                                    var collapseState = (matchingPeriods.Any(p => !string.IsNullOrWhiteSpace(p.ClassName)) ? "ClassDetails" : "");
-                                    collapseState = (matchingPeriods.Any(p => p.EntryTime != TimeOnly.FromTimeSpan(p.StartTime) && p.EntryTime != TimeOnly.MinValue) ? "SingleCustom" : collapseState);
-                                    collapseState = (matchingPeriods.Any(p => p.ExitTime != TimeOnly.FromTimeSpan(p.EndTime) && p.ExitTime != TimeOnly.MinValue) ? "SingleCustom" : collapseState);
-                                    collapseState = (matchingPeriods.Any(p => p.EntryTime != TimeOnly.FromTimeSpan(p.StartTime) && p.EntryTime != TimeOnly.MinValue && p.ExitTime != TimeOnly.FromTimeSpan(p.EndTime) && p.ExitTime != TimeOnly.MinValue) ? "DoubleCustom" : collapseState);
-
-                                    <div class="Timetable-Day-Period @style @collapseState">
-                                        @if (period.EntryTime != TimeOnly.FromTimeSpan(period.StartTime) && period.EntryTime != TimeOnly.MinValue)
+                                    <div class="Timetable-Day">
+                                        <div class="Timetable-Day-Title"></div>
+                                        @foreach (var period in periods)
                                         {
-                                            <div class="custom-time">
-                                                Class Entry Time:<br />
-                                                @period.EntryTime.ToString("h:mm tt")
-                                            </div>
-                                        }
+                                            var matchingPeriods = week.Where(p => p.Name == period.Name).ToList();
 
-                                        @if (!string.IsNullOrWhiteSpace(period.ClassName))
-                                        {
-                                            <div class="class-details">
-                                                @period.ClassName
-                                                <br/>
-                                                @period.ClassTeacher
-                                            </div>
-                                        }
-                                        
-                                        @if (period.ExitTime != TimeOnly.FromTimeSpan(period.EndTime) && period.ExitTime != TimeOnly.MinValue)
-                                        {
-                                            <div class="custom-time">
-                                                Class Exit Time:<br />
-                                                @period.ExitTime.ToString("h:mm tt")
+                                            var collapseState = (matchingPeriods.Any(p => !string.IsNullOrWhiteSpace(p.ClassName)) ? "ClassDetails" : "");
+
+                                            var timespans = matchingPeriods
+                                                .GroupBy(p => (p.StartTime, p.EndTime))
+                                                .Count();
+
+                                            <div class="Timetable-Day-Period @period.Type.Name @collapseState">
+                                                @period.Name<br/>
+                                                @if (timespans == 1)
+                                                {
+                                                    <span>@period.StartTime.As12HourTime() - @period.EndTime.As12HourTime()</span>
+                                                }
                                             </div>
                                         }
                                     </div>
                                 }
-                            </div>
 
-                            firstDay = false;
-                        }
-                    </div>
-                }
-            </div>
+                                <div class="Timetable-Day">
+                                    <div class="Timetable-Day-Title">
+                                        @week.Key.Name - @day.Key.Name
+                                    </div>
+                                    @foreach (var period in periods)
+                                    {
+                                        var style = "";
+
+                                        if (string.IsNullOrWhiteSpace(period.ClassName))
+                                        {
+                                            style += " Inactive";
+                                        }
+                                        else
+                                        {
+                                            style += " Active";
+                                        }
+
+                                        if (period.Type == PeriodType.Break)
+                                        {
+                                            style += " Break";
+                                        }
+
+                                        var matchingPeriods = week.Where(p => p.Name == period.Name).ToList();
+
+                                        var collapseState = (matchingPeriods.Any(p => !string.IsNullOrWhiteSpace(p.ClassName)) ? "ClassDetails" : "");
+
+                                        <div class="Timetable-Day-Period @style @collapseState">
+                                            @if (!string.IsNullOrWhiteSpace(period.ClassName))
+                                            {
+                                                <div class="class-details">
+                                                    @period.ClassName
+                                                    <br/>
+                                                    @period.ClassTeacher
+                                                    <br/>
+                                                    <span class="class-time">
+                                                        @{
+                                                            if (period.EntryTime != TimeOnly.FromTimeSpan(period.StartTime) && period.EntryTime != TimeOnly.MinValue)
+                                                            {
+                                                                <span class="custom-time">@period.EntryTime.ToString("h:mm tt")</span>
+                                                            }
+                                                            else
+                                                            {
+                                                                <span>@period.StartTime.As12HourTime()</span>
+                                                            }
+                                                        }
+                                                        -
+                                                        @{
+                                                            if (period.ExitTime != TimeOnly.FromTimeSpan(period.EndTime) && period.ExitTime != TimeOnly.MinValue)
+                                                            {
+                                                                <span class="custom-time">@period.ExitTime.ToString("h:mm tt")</span>
+                                                            }
+                                                            else
+                                                            {
+                                                                <span>@period.EndTime.As12HourTime()</span>
+                                                            }
+                                                        }
+                                                    </span>
+                                                </div>
+                                            }
+                                        </div>
+                                    }
+                                </div>
+
+                                firstDay = false;
+                            }
+                        </div>
+
+                        firstPage = false;
+                    }
+                </div>
+            }
         }
-    }
     </div>
 
 </body>

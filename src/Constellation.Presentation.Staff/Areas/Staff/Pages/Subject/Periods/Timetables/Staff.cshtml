@@ -2,6 +2,7 @@
 @model Constellation.Presentation.Staff.Areas.Staff.Pages.Subject.Periods.Timetables.StaffModel
 
 @using Constellation.Application.Domains.Timetables.Timetables.Queries.GetStaffIntegratedTimetableData
+@using Constellation.Application.Helpers
 @using Constellation.Core.Models.Offerings.ValueObjects
 @using Constellation.Core.Models.Timetables.Enums
 @using Constellation.Core.Models.Timetables.Identifiers
@@ -235,11 +236,30 @@
                                             <div class="Student-Timetable-Day-Title"></div>
                                             @foreach (var period in periods)
                                             {
-                                                var matchingPeriods = week.Where(p => p.StartTime == period.StartTime).ToList();
+                                                var timespans = week
+                                                    .Where(p => p.PeriodName == period.PeriodName)
+                                                    .GroupBy(p => (p.StartTime, p.EndTime))
+                                                    .Select(g => new
+                                                    {
+                                                        g.Key.StartTime,
+                                                        g.Key.EndTime,
+                                                        TimeRangeDisplay = $"{g.Key.StartTime.As12HourTime()} - {g.Key.EndTime.As12HourTime()}",
+                                                        FirstDay = g.Select(p => p.Day).MinBy(d => d.Value),
+                                                        DaysDisplay = ListHelpers.FormatDayRanges(g.Select(p => p.Day).ToList())
+                                                    })
+                                                    .OrderBy(g => g.FirstDay?.Value ?? 100)
+                                                    .ToList();
 
                                                 <div class="Student-Timetable-Day-Period @period.Type.Name">
-                                                    @period.PeriodName<br/>
-                                                    @period.StartTime.As12HourTime() - @period.EndTime.As12HourTime()
+                                                    <span class="w-100">
+                                                        <span class="d-block tooltip-line">@period.PeriodName</span>
+                                                        
+                                                        @if (timespans.Count == 1)
+                                                        {
+
+                                                            <span class="d-block my-2">@timespans.First().StartTime.As12HourTime() - @timespans.First().EndTime.As12HourTime()</span>
+                                                        }
+                                                    </span>
                                                 </div>
                                             }
                                         </div>
@@ -272,6 +292,7 @@
                                                 {
                                                     <div class="class-eventDetails">
                                                         @period.OfferingName
+                                                        <span class="d-block my-2">@period.StartTime.As12HourTime() - @period.EndTime.As12HourTime()</span>
                                                     </div>
                                                 }
                                             </div>

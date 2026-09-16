@@ -30,19 +30,11 @@
     margin: 2px;
     padding: 0.5rem;
     text-align: center;
-    width: 10vw;
+    width: 13vw;
     background-color: azure;
 }
     .Timetable-Day-Period.ClassDetails {
-        height: 7rem;
-    }
-
-    .Timetable-Day-Period.SingleCustom {
-        height: 8rem;
-    }
-
-    .Timetable-Day-Period.DoubleCustom {
-        height: 11rem;
+        height: 6rem;
     }
 
     .Timetable-Day-Period.Inactive {
@@ -62,15 +54,16 @@
         background-color: lightgray;
     }
 
-.custom-time {
-    display: block;
-    color: red;
-    margin-top: 5px;
-    margin-bottom: 5px;
-}
-
 .class-details {
     display: block;
     margin-top: 5px;
     margin-bottom: 5px;
+}
+
+.class-time {
+    font-weight: bold;
+}
+
+.custom-time {
+    color: red;
 }

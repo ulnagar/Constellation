@@ -11,6 +11,7 @@ using Constellation.Presentation.Shared.Helpers.Attributes;
 using Core.Abstractions.Services;
 using Core.Models.Students.Identifiers;
 using Core.Models.Timetables.Enums;
+using Core.Models.Timetables.ValueObjects;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
@@ -52,14 +53,19 @@ public class IndexModel : BasePageModel
 
     public StudentTimetableDataDto TimetableData { get; set; }
     public IEnumerable<PeriodWeek> Weeks { get; set; }
+    public IEnumerable<Timetable> Timetables { get; set; }
 
     [BindProperty(SupportsGet = true)]
-    [ModelBinder(typeof(IntEnumBinder))]
+    [ModelBinder(typeof(BaseFromNameBinder))]
     public PeriodDay? Day { get; set; }
 
     [BindProperty(SupportsGet = true)]
-    [ModelBinder(typeof(IntEnumBinder))]
+    [ModelBinder(typeof(BaseFromNameBinder))]
     public PeriodWeek? Week { get; set; }
+
+    [BindProperty(SupportsGet = true)]
+    [ModelBinder(typeof(FromValueBinder))]
+    public Timetable? Timetable { get; set; }
 
     public async Task OnGet() => await PreparePage();
 
@@ -120,12 +126,15 @@ public class IndexModel : BasePageModel
 
             TimetableData = timetableRequest.Value;
 
+            Timetables = TimetableData.Timetables.Select(entry => entry.Timetable).Distinct().ToList();
+
             Weeks = PeriodWeek.GetOptions;
 
-            if (Day is null && Week is null)
+            if (Day is null && Week is null && Timetable is null)
             {
                 Day = PeriodDay.Monday;
                 Week = Weeks.First();
+                Timetable = Timetables.First();
             }
 
             SelectedStudent = Students.FirstOrDefault(entry => entry.StudentId == StudentId);

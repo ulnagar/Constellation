@@ -73,7 +73,7 @@ internal sealed class GetStudentTimetableExportQueryHandler
     {
         StudentTimetableDataDto response = new();
 
-        Student student = await _studentRepository.GetById(request.StudentId, cancellationToken);
+        Student? student = await _studentRepository.GetById(request.StudentId, cancellationToken);
 
         if (student is null)
         {
@@ -166,7 +166,7 @@ internal sealed class GetStudentTimetableExportQueryHandler
 
             if (periodIds.Contains(period.Id))
             {
-                Offering offering = offerings
+                Offering? offering = offerings
                     .FirstOrDefault(offering =>
                         offering.Sessions.Any(session =>
                             !session.IsDeleted &&
@@ -186,7 +186,7 @@ internal sealed class GetStudentTimetableExportQueryHandler
 
                 foreach (TeacherAssignment assignment in assignments)
                 {
-                    StaffMember teacher = await _staffRepository.GetById(assignment.StaffId, cancellationToken);
+                    StaffMember? teacher = await _staffRepository.GetById(assignment.StaffId, cancellationToken);
 
                     if (teacher is null)
                         continue;
