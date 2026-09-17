@@ -50,7 +50,7 @@ internal sealed class GetStudentProvisionByIdQueryHandler
                 provision.ProvisionCode,
                 provision.ProvisionDescription,
                 provision.Student,
-                student?.CurrentEnrolment?.Grade ?? Grade.SpecialProgram,
+                student?.CurrentEnrolment?.Grade ?? Grade.Empty,
                 provision.Year,
                 provision.IsDeleted);
     }

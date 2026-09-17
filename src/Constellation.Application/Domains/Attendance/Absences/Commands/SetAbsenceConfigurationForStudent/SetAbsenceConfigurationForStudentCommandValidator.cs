@@ -1,6 +1,7 @@
 ﻿namespace Constellation.Application.Domains.Attendance.Absences.Commands.SetAbsenceConfigurationForStudent;
 
 using Constellation.Core.Models.Students.Identifiers;
+using Core.Enums;
 using Core.Models.Identifiers;
 using FluentValidation;
 
@@ -12,14 +13,14 @@ internal sealed class SetAbsenceConfigurationForStudentCommandValidator : Abstra
             .NotEmpty()
             .When(command => 
                 command.SchoolCode == SchoolCode.Empty &&
-                !command.GradeFilter.HasValue)
+                command.GradeFilter != Grade.Empty)
             .WithMessage("You must specify a Student, a Grade, or a School");
 
         RuleFor(command => command.SchoolCode)
             .NotEmpty()
             .When(command => 
                 command.StudentId == StudentId.Empty &&
-                !command.GradeFilter.HasValue)
+                command.GradeFilter != Grade.Empty)
             .WithMessage("You must specify a Student, a Grade, or a School");
 
         RuleFor(command => command.GradeFilter)

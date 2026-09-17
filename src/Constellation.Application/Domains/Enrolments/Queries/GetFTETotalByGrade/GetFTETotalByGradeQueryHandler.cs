@@ -38,11 +38,13 @@ internal sealed class GetFTETotalByGradeQueryHandler
     {
         List<GradeFTESummaryResponse> response = new();
 
-        foreach (Grade grade in Enum.GetValues<Grade>())
+        IEnumerable<Grade> grades = Grade.GetOptions
+            .Where(grade => grade.Order > 0);
+
+        foreach (Grade grade in grades)
         {
             decimal maleFteTotal = 0;
             decimal femaleFteTotal = 0;
-            decimal fteTotal = 0;
 
             List<Student> students = await _studentRepository.GetCurrentStudentFromGrade(grade, cancellationToken);
 
@@ -65,15 +67,13 @@ internal sealed class GetFTETotalByGradeQueryHandler
                 maleFteTotal += activeEnrolments.Count(enrol => maleStudentIds.Contains(enrol.StudentId)) * course.FullTimeEquivalentValue;
 
                 femaleFteTotal += activeEnrolments.Count(enrol => femaleStudentIds.Contains(enrol.StudentId)) * course.FullTimeEquivalentValue;
-
-                fteTotal += activeEnrolments.Count * course.FullTimeEquivalentValue;
             }
 
             response.Add(new(
                 grade,
-                maleStudentIds.Count(),
+                maleStudentIds.Count,
                 maleFteTotal,
-                femaleStudentIds.Count(),
+                femaleStudentIds.Count,
                 femaleFteTotal));
         }
 

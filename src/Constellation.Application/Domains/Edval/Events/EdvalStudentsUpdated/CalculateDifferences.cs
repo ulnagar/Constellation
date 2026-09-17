@@ -111,16 +111,30 @@ internal sealed class CalculateDifferences : IIntegrationEventHandler<EdvalStude
             }
 
             string edvalGradeString = Regex.Match(edvalStudent.Grade, @"\d+").Value;
-            Grade edvalGrade = (Grade)Int32.Parse(edvalGradeString);
+            Result<Grade> edvalGradeResult = Grade.FromNumber(Int32.Parse(edvalGradeString));
 
-            if (student.CurrentEnrolment?.Grade != edvalGrade)
+            if (edvalGradeResult.IsFailure)
             {
                 _edvalRepository.Insert(new Difference(
                     EdvalDifferenceType.EdvalStudent,
                     EdvalDifferenceSystem.EdvalDifference,
                     edvalStudent.StudentId,
-                    $"{student.Name} has a different Grade ({edvalStudent.Grade}) in Edval",
+                    $"{student.Name} has an Invalid Grade ({edvalStudent.Grade}) in Edval",
                     ignored));
+            }
+            else
+            {
+                Grade edvalGrade = edvalGradeResult.Value;
+
+                if (student.CurrentEnrolment?.Grade != edvalGrade)
+                {
+                    _edvalRepository.Insert(new Difference(
+                        EdvalDifferenceType.EdvalStudent,
+                        EdvalDifferenceSystem.EdvalDifference,
+                        edvalStudent.StudentId,
+                        $"{student.Name} has a different Grade ({edvalStudent.Grade}) in Edval",
+                        ignored));
+                }
             }
         }
 

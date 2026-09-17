@@ -191,8 +191,8 @@ public class IndexModel : BasePageModel
             {
                 // Must be at the start of the year.
                 SchoolCalendarWeek matchedWeek = new(string.Empty,
-                    _dateTime.FirstDayOfYear.ToDateTime(TimeOnly.MinValue),
-                    _dateTime.FirstDayOfYear.ToDateTime(TimeOnly.MinValue), "School Holidays");
+                    _dateTime.FirstDayOfCurrentYear.ToDateTime(TimeOnly.MinValue),
+                    _dateTime.FirstDayOfCurrentYear.ToDateTime(TimeOnly.MinValue), "School Holidays");
 
                 if (Assessments.TryGetValue(matchedWeek, out var entry))
                     entry.Add(assessment);
@@ -210,8 +210,8 @@ public class IndexModel : BasePageModel
             {
                 // Must be at the end of the year.
                 SchoolCalendarWeek matchedWeek = new(string.Empty,
-                    _dateTime.LastDayOfYear.ToDateTime(TimeOnly.MinValue),
-                    _dateTime.LastDayOfYear.ToDateTime(TimeOnly.MinValue), "School Holidays");
+                    _dateTime.LastDayOfCurrentYear.ToDateTime(TimeOnly.MinValue),
+                    _dateTime.LastDayOfCurrentYear.ToDateTime(TimeOnly.MinValue), "School Holidays");
 
                 if (Assessments.TryGetValue(matchedWeek, out var entry))
                     entry.Add(assessment);

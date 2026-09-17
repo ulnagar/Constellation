@@ -83,7 +83,7 @@ internal sealed class GetParentUserDetailsQueryHandler
 
             students.Add(new(
                 student.Name,
-                student.CurrentEnrolment?.Grade ?? Grade.SpecialProgram,
+                student.CurrentEnrolment?.Grade ?? Grade.Empty,
                 student.CurrentEnrolment?.SchoolName ?? string.Empty));
         }
         

@@ -255,9 +255,9 @@ internal sealed class GenerateHistoricalDailyAttendanceReportQueryHandler
             }
 
             Grade grade = student.SchoolEnrolments.Where(entry => entry.Year.ToString() == request.Year)
-                .MinBy(entry => entry.CreatedAt)?.Grade ?? Grade.SpecialProgram;
+                .MinBy(entry => entry.CreatedAt)?.Grade ?? Grade.Empty;
 
-            if (grade == Grade.SpecialProgram)
+            if (grade == Grade.Empty)
             {
                 grade = offerings.First().Name.Value[..2] switch
                 {
@@ -269,7 +269,7 @@ internal sealed class GenerateHistoricalDailyAttendanceReportQueryHandler
                     "10" => Grade.Y10,
                     "11" => Grade.Y11,
                     "12" => Grade.Y12,
-                    _ => Grade.SpecialProgram
+                    _ => Grade.Empty
                 };
             }
 

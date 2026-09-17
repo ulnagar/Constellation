@@ -449,7 +449,7 @@ public class StudentRepository : IStudentRepository
     public void Insert(Student student) => _context.Set<Student>().Add(student);
 
     public async Task<List<Student>> ForInterviewsExportAsync(
-        List<int> filterGrades,
+        List<Grade> filterGrades,
         List<OfferingId> filterClasses,
         CancellationToken cancellationToken = default)
     {
@@ -472,7 +472,7 @@ public class StudentRepository : IStudentRepository
                     !enrolment.IsDeleted &&
                     enrolment.StartDate <= today &&
                     (!enrolment.EndDate.HasValue || enrolment.EndDate >= today) &&
-                    filterGrades.Contains((int)enrolment.Grade)))
+                    filterGrades.Contains(enrolment.Grade)))
             .Select(student => student.Id)
             .ToListAsync(cancellationToken);
 

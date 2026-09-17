@@ -25,7 +25,7 @@ public interface IAbsenceRepository
     Task<List<Absence>> GetUnexplainedPartialAbsencesForStudentWithDelay(StudentId studentId, int ageInWeeks, CancellationToken cancellationToken = default);
     Task<List<Absence>> GetUnverifiedPartialAbsencesForStudentWithDelay(StudentId studentId, int ageInWeeks, CancellationToken cancellationToken = default);
     Task<List<Absence>> GetForStudentFromDateRange(StudentId studentId, DateOnly startDate, DateOnly endDate, CancellationToken cancellationToken = default);
-    Task<List<Absence>> GetForStudents(List<StudentId> studentIds, CancellationToken cancellationToken = default);
+    Task<List<Absence>> GetForStudents(IList<StudentId> studentIds, CancellationToken cancellationToken = default);
     Task<List<Absence>> GetStudentWholeAbsencesForDateRange(StudentId studentId, DateOnly startDate, DateOnly endDate, CancellationToken cancellationToken = default);
     void Insert(Absence absence);
 }

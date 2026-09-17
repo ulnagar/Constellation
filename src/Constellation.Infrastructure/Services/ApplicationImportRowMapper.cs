@@ -75,7 +75,7 @@ internal sealed class ApplicationImportRowMapper : IImportRowMapper<Application,
         if (studentNameResult.IsFailure)
             return Result.Failure<Application>(studentNameResult.Error);
 
-        bool gradeResult = Enum.TryParse(grade, out Grade gradeValue);
+        bool gradeResult = Grade.TryParse(grade, out Grade gradeValue);
 
         if (!gradeResult)
             return Result.Failure<Application>(ImportErrors.ValueParseError(typeof(Grade), "Grade"));
@@ -282,7 +282,7 @@ internal sealed class ApplicationImportRowMapper : IImportRowMapper<Application,
 
         if (IsMapped(EnrolmentApplicationImportFields.Grade))
         {
-            bool gradeResult = Enum.TryParse(Get(EnrolmentApplicationImportFields.Grade), out Grade gradeValue);
+            bool gradeResult = Grade.TryParse(Get(EnrolmentApplicationImportFields.Grade), out Grade gradeValue);
 
             if (!gradeResult)
                 return Result.Failure(ImportErrors.ValueParseError(typeof(Grade), "Grade"));
@@ -303,7 +303,7 @@ internal sealed class ApplicationImportRowMapper : IImportRowMapper<Application,
                 if (srnResult.IsFailure)
                     return srnResult;
 
-                Result updateResult = existing.UpdateSRN(srnResult.Value);
+                Result updateResult = existing.UpdateStudentReferenceNumber(srnResult.Value);
                 if (updateResult.IsFailure)
                     return updateResult;
             }

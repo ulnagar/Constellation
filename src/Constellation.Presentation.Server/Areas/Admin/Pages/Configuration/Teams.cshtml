@@ -1,7 +1,8 @@
 ﻿@page
 @model Constellation.Presentation.Server.Areas.Admin.Pages.Configuration.TeamsModel
+
 @using Constellation.Core.Enums
-@using Constellation.Core.Extensions
+
 @{
 }
 
@@ -55,12 +56,9 @@
                 </div>
             </div>
             <div class="card-footer">
-                @foreach (var grade in Enum.GetValues<Grade>().OrderBy(grade => grade))
+                @foreach (var grade in Grade.GetOptions.Where(grade => grade.Order > 0).OrderBy(grade => grade))
                 {
-                    if (grade == Grade.SpecialProgram)
-                        continue;
-
-                    <button type="button" class="btn btn-outline-secondary mb-1 grade-toggle-button" data-property-name="" data-key="" data-grade-name="@grade" data-grade-number="@((int)grade)">@grade.AsName()</button>
+                    <button type="button" class="btn btn-outline-secondary mb-1 grade-toggle-button" data-property-name="" data-key="" data-grade-name="@grade" data-grade-number="@grade">@grade.Name</button>
                 }
             </div>
         </div>

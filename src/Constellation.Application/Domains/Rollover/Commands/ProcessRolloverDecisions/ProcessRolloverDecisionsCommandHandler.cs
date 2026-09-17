@@ -53,7 +53,7 @@ internal sealed class ProcessRolloverDecisionsCommandHandler
                 results.Add(new(decision, Result.Failure(RolloverErrors.InvalidDecision)));
             }
 
-            Student student = await _studentRepository.GetById(decision.StudentId, cancellationToken);
+            Student? student = await _studentRepository.GetById(decision.StudentId, cancellationToken);
             
             if (student is null)
             {
@@ -108,10 +108,24 @@ internal sealed class ProcessRolloverDecisionsCommandHandler
                 }
                 else
                 {
+                    var newGrade = enrolment.Grade.Next();
+
+                    if (newGrade.IsFailure)
+                    {
+                        _logger
+                            .ForContext(nameof(RolloverDecision), decision, true)
+                            .ForContext(nameof(Error), newGrade.Error, true)
+                            .Warning("Could not process Rollover Decision for student");
+
+                        results.Add(new(decision, Result.Failure(newGrade.Error)));
+
+                        continue;
+                    }
+
                     Result newEnrolment = student.AddSchoolEnrolment(
                         enrolment.SchoolCode,
                         enrolment.SchoolName,
-                        enrolment.Grade + 1,
+                        newGrade.Value,
                         _dateTime);
 
                     if (newEnrolment.IsFailure)

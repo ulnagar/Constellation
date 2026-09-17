@@ -66,7 +66,7 @@ public class UpsertModel : BasePageModel
     public async Task OnGet()
     {
         StartDate = _dateTime.Today;
-        EndDate = _dateTime.LastDayOfYear;
+        EndDate = _dateTime.LastDayOfCurrentYear;
 
         if (Id == TutorialId.Empty)
             return;

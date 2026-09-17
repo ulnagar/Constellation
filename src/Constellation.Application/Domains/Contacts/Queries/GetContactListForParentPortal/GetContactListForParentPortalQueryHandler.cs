@@ -71,7 +71,7 @@ internal sealed class GetContactListForParentPortalQueryHandler
 
         foreach (var staffMember in counsellorConfiguration.Contacts)
         {
-            if (!staffMember.Value.Contains(student.CurrentEnrolment?.Grade ?? Grade.SpecialProgram))
+            if (!staffMember.Value.Contains(student.CurrentEnrolment?.Grade ?? Grade.Empty))
                 continue;
 
             response.Add(new(
@@ -96,7 +96,7 @@ internal sealed class GetContactListForParentPortalQueryHandler
 
         foreach (var staffMember in careersAdvisorConfiguration.Contacts)
         {
-            if (!staffMember.Value.Contains(student.CurrentEnrolment?.Grade ?? Grade.SpecialProgram))
+            if (!staffMember.Value.Contains(student.CurrentEnrolment?.Grade ?? Grade.Empty))
                 continue;
 
             response.Add(new(
@@ -121,7 +121,7 @@ internal sealed class GetContactListForParentPortalQueryHandler
 
         foreach (var staffMember in librarianConfiguration.Contacts)
         {
-            if (!staffMember.Value.Contains(student.CurrentEnrolment?.Grade ?? Grade.SpecialProgram))
+            if (!staffMember.Value.Contains(student.CurrentEnrolment?.Grade ?? Grade.Empty))
                 continue;
             
             response.Add(new(
@@ -178,7 +178,7 @@ internal sealed class GetContactListForParentPortalQueryHandler
 
         foreach (var staffMember in lastConfiguration.Contacts)
         {
-            if (!staffMember.Value.Contains(student.CurrentEnrolment?.Grade ?? Grade.SpecialProgram))
+            if (!staffMember.Value.Contains(student.CurrentEnrolment?.Grade ?? Grade.Empty))
                 continue;
 
             response.Add(new(

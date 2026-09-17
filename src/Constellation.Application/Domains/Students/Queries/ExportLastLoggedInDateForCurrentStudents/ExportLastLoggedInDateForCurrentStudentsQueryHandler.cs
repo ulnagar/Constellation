@@ -60,7 +60,7 @@ internal sealed class ExportLastLoggedInDateForCurrentStudentsQueryHandler
             loginData.Add(new(
                 student.StudentReferenceNumber,
                 student.Name,
-                student.CurrentEnrolment?.Grade ?? Grade.SpecialProgram,
+                student.CurrentEnrolment?.Grade ?? Grade.Empty,
                 student.EmailAddress,
                 student.CurrentEnrolment?.SchoolName ?? string.Empty,
                 loginTime?.LoginDateTime));

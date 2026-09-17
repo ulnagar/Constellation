@@ -1,6 +1,7 @@
 ﻿namespace Constellation.Core.Models.AppSettings.Enums;
 
 using Common;
+using Constellation.Core.Enums;
 
 public sealed class ContactPosition : StringEnumeration<ContactPosition>
 {
@@ -16,4 +17,6 @@ public sealed class ContactPosition : StringEnumeration<ContactPosition>
         : base(value, name)
     {
     }
+    
+    public static IEnumerable<ContactPosition> GetOptions => GetEnumerable;
 }

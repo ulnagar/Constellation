@@ -28,7 +28,7 @@ internal sealed class LessonUpdateJob : ILessonUpdateJob
 
         foreach (SciencePracLesson lesson in lessons)
         {
-            if (lesson.Grade != Grade.SpecialProgram)
+            if (lesson.Grade != Grade.Empty)
                 continue;
 
             await _mediator.Send(new UpdateLessonGradeCommand(lesson.Id), cancellationToken);

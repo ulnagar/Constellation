@@ -112,7 +112,7 @@
                     <tr>
                         <td>
                             @{
-                                if (contact.StudentGrade == Grade.SpecialProgram)
+                                if (contact.StudentGrade == Grade.Empty)
                                 {
                                     <span>@contact.Student.DisplayName</span>
                                 }

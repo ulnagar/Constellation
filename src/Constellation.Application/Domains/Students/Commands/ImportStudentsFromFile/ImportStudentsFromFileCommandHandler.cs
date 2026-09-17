@@ -120,7 +120,7 @@ internal sealed class ImportStudentsFromFileCommandHandler
                     continue;
                 }
                 
-                if (school is not null && grade != Grade.SpecialProgram)
+                if (school is not null && grade != Grade.Empty)
                 {
                     _logger
                         .ForContext(nameof(ImportStudentDto), entry, true)
@@ -195,7 +195,7 @@ internal sealed class ImportStudentsFromFileCommandHandler
                     continue;
                 }
 
-                if (school is not null && grade != Grade.SpecialProgram)
+                if (school is not null && grade != Grade.Empty)
                 {
                     _logger
                         .ForContext(nameof(ImportStudentDto), entry, true)
@@ -232,7 +232,7 @@ internal sealed class ImportStudentsFromFileCommandHandler
                         .ForContext(nameof(Student), existing, true)
                         .Information("Existing student is marked withdrawn, updating...");
 
-                    if (school is not null && grade != Grade.SpecialProgram)
+                    if (school is not null && grade != Grade.Empty)
                     {
                         existing.Reinstate(school, grade, _dateTime);
 
@@ -265,7 +265,7 @@ internal sealed class ImportStudentsFromFileCommandHandler
                     existing.RemoveSchoolEnrolment(enrolment, _dateTime);
                 }
 
-                if (school is not null && grade != Grade.SpecialProgram)
+                if (school is not null && grade != Grade.Empty)
                 {
                     if (enrolment is not null &&
                         (enrolment.SchoolCode != school.Code || enrolment.Grade != grade))
@@ -322,7 +322,7 @@ internal sealed class ImportStudentsFromFileCommandHandler
             "10" => Grade.Y10,
             "11" => Grade.Y11,
             "12" => Grade.Y12,
-            _ => Grade.SpecialProgram
+            _ => Grade.Empty
         };
 
     private static Gender DetermineGender(string gender) =>

@@ -126,12 +126,19 @@ internal sealed class GetCurrentTeamsWithMembershipQueryHandler
 
             string[] tokens = team.Description.Split(';');
 
-            Grade grade = Grade.SpecialProgram;
+            Grade grade = Grade.Empty;
 
             foreach (var token in tokens)
             {
-                if (grade == Grade.SpecialProgram)
-                    Enum.TryParse(token, true, out grade);
+                if (grade == Grade.Empty)
+                {
+                    Grade? attempt = Grade.FromName(token);
+
+                    if (attempt is null)
+                        continue;
+
+                    grade = attempt;
+                }
             }
             
             // Student Teams
@@ -416,7 +423,7 @@ internal sealed class GetCurrentTeamsWithMembershipQueryHandler
                     if (courseGrade is null)
                         continue;
 
-                    if (!teacher.Value.Contains(courseGrade.Value))
+                    if (!teacher.Value.Contains(courseGrade))
                         continue;
 
                     TeamWithMembership.Member teacherEntry = new(
@@ -475,7 +482,7 @@ internal sealed class GetCurrentTeamsWithMembershipQueryHandler
                 
                 foreach (var deputyPrincipal in deputyPrincipals.Contacts)
                 {
-                    if (!deputyPrincipal.Value.Contains(grade.Value))
+                    if (!deputyPrincipal.Value.Contains(grade))
                         continue;
 
                     TeamWithMembership.Member deputyEntry = new(
@@ -495,7 +502,7 @@ internal sealed class GetCurrentTeamsWithMembershipQueryHandler
                 
                 foreach (var learningSupportTeacher in learningSupport.Contacts)
                 {
-                    if (!learningSupportTeacher.Value.Contains(grade.Value))
+                    if (!learningSupportTeacher.Value.Contains(grade))
                         continue;
 
                     TeamWithMembership.Member lastEntry = new(
@@ -671,7 +678,7 @@ internal sealed class GetCurrentTeamsWithMembershipQueryHandler
 
                 foreach (var deputyPrincipal in deputyPrincipals.Contacts)
                 {
-                    if (!deputyPrincipal.Value.Contains(grade.Value))
+                    if (!deputyPrincipal.Value.Contains(grade))
                         continue;
 
                     TeamWithMembership.Member deputyEntry = new(
@@ -691,7 +698,7 @@ internal sealed class GetCurrentTeamsWithMembershipQueryHandler
 
                 foreach (var learningSupportTeacher in learningSupport.Contacts)
                 {
-                    if (!learningSupportTeacher.Value.Contains(grade.Value))
+                    if (!learningSupportTeacher.Value.Contains(grade))
                         continue;
 
                     TeamWithMembership.Member lastEntry = new(
@@ -726,7 +733,7 @@ internal sealed class GetCurrentTeamsWithMembershipQueryHandler
         {
             foreach (var mandatoryOwner in configuration.MandatoryOwners)
             {
-                if (grade != Grade.SpecialProgram && !mandatoryOwner.Value.Contains(grade))
+                if (grade != Grade.Empty && !mandatoryOwner.Value.Contains(grade))
                     continue;
 
                 TeamWithMembership.Member mandatoryOwnerEntry = new(
@@ -795,7 +802,9 @@ internal sealed class GetCurrentTeamsWithMembershipQueryHandler
             {
                 List<Grade> ownerGrades = configuration.StudentChannelOwners.First(entry => entry.Key.Id == staffMember.Id).Value;
 
-                foreach (Grade grade in Enum.GetValues<Grade>())
+                IEnumerable<Grade> grades = Grade.GetOptions.Where(entry => entry.Order > 0);
+
+                foreach (Grade grade in grades)
                 {
                     if (ownerGrades!.Contains(grade))
                         staffChannels.Add($"{_dateTime.CurrentYear} - {grade.AsName()}", TeamsMembershipLevel.Owner.Value);
@@ -805,7 +814,9 @@ internal sealed class GetCurrentTeamsWithMembershipQueryHandler
             }
             else
             {
-                foreach (Grade grade in Enum.GetValues<Grade>())
+                IEnumerable<Grade> grades = Grade.GetOptions.Where(entry => entry.Order > 0);
+
+                foreach (Grade grade in grades)
                     staffChannels.Add($"{_dateTime.CurrentYear} - {grade.AsName()}", TeamsMembershipLevel.Member.Value);
             }
 

@@ -61,7 +61,7 @@ internal sealed class GenerateAttendancePlansCommandHandler
 
     public async Task<Result> Handle(GenerateAttendancePlansCommand request, CancellationToken cancellationToken)
     {
-        List<Student> students = new();
+        List<Student> students = [];
 
         if (request.StudentId != StudentId.Empty)
         {
@@ -70,14 +70,14 @@ internal sealed class GenerateAttendancePlansCommandHandler
             if (student is not null)
                 students.Add(student);
         }
-        else if (request.SchoolCode != SchoolCode.Empty || request.Grade.HasValue)
+        else if (request.SchoolCode != SchoolCode.Empty || request.Grade != Grade.Empty)
         {
-            List<Grade> grades = new();
+            List<Grade> grades = [];
 
-            if (request.Grade.HasValue)
-                grades.Add(request.Grade.Value);
+            if (request.Grade != Grade.Empty)
+                grades.Add(request.Grade);
 
-            List<SchoolCode> schoolCodes = new();
+            List<SchoolCode> schoolCodes = [];
 
             if (request.SchoolCode != SchoolCode.Empty)
                 schoolCodes.Add(request.SchoolCode);
@@ -100,11 +100,14 @@ internal sealed class GenerateAttendancePlansCommandHandler
         {
             // Check for existing Pending or Processing plan for the student
             List<AttendancePlan> studentPlans = await _planRepository.GetForStudent(student.Id, cancellationToken);
-            List<AttendancePlan> inProgressPlans = studentPlans
-            .Where(entry =>
-                    entry.CreatedAt.Year == _dateTime.CurrentYear &&
-                    (entry.Status == AttendancePlanStatus.Pending || entry.Status == AttendancePlanStatus.Processing))
-                .ToList();
+            List<AttendancePlan> inProgressPlans =
+            [
+                .. studentPlans
+                    .Where(entry =>
+                        entry.CreatedAt.Year == _dateTime.CurrentYear &&
+                        (entry.Status == AttendancePlanStatus.Pending ||
+                         entry.Status == AttendancePlanStatus.Processing))
+            ];
 
             if (inProgressPlans.Count > 0)
                 continue;
@@ -128,16 +131,20 @@ internal sealed class GenerateAttendancePlansCommandHandler
                 //if (course.Grade is Grade.Y11 or Grade.Y12)
                 //    continue;
 
-                List<PeriodId> periodIds = offering.Sessions
-                    .Where(session => !session.IsDeleted)
-                    .Select(session => session.PeriodId)
-                    .ToList();
+                List<PeriodId> periodIds =
+                [
+                    .. offering.Sessions
+                        .Where(session => !session.IsDeleted)
+                        .Select(session => session.PeriodId)
+                ];
 
                 List<Period> periods = await _periodRepository.GetListFromIds(periodIds, cancellationToken);
 
-                periods = periods
-                    .Where(period => !period.Type.Equals(PeriodType.Offline))
-                    .ToList();
+                periods =
+                [
+                    .. periods
+                        .Where(period => !period.Type.Equals(PeriodType.Offline))
+                ];
 
                 Result addPeriodRequest = attendancePlan.AddPeriods(periods, offering, course);
 

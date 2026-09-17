@@ -79,7 +79,7 @@ internal class AssignmentRepository : IAssignmentRepository
     public async Task<List<CanvasAssignment>> GetFromCurrentYear(
         CancellationToken cancellationToken = default)
     {
-        DateTime Jan1 = _dateTime.FirstDayOfYear.ToDateTime(TimeOnly.MinValue);
+        DateTime Jan1 = _dateTime.FirstDayOfCurrentYear.ToDateTime(TimeOnly.MinValue);
 
         return await _context
             .Set<CanvasAssignment>()
@@ -92,7 +92,7 @@ internal class AssignmentRepository : IAssignmentRepository
     public async Task<List<CanvasAssignment>> GetExpiredFromCurrentYear(
         CancellationToken cancellationToken = default)
     {
-        DateTime jan1 = _dateTime.FirstDayOfYear.ToDateTime(TimeOnly.MinValue);
+        DateTime jan1 = _dateTime.FirstDayOfCurrentYear.ToDateTime(TimeOnly.MinValue);
 
         return await _context
             .Set<CanvasAssignment>()

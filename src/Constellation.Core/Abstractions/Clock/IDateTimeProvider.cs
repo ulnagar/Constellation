@@ -7,8 +7,8 @@ public interface IDateTimeProvider
     DateTime Now { get; }
     DateOnly Today { get; }
     DateOnly Yesterday { get; }
-    DateOnly LastDayOfYear { get; }
-    DateOnly FirstDayOfYear { get; }
+    DateOnly LastDayOfCurrentYear { get; }
+    DateOnly FirstDayOfCurrentYear { get; }
 
     int CurrentYear { get; }
     string CurrentYearAsString { get; }

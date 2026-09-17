@@ -142,10 +142,9 @@ internal sealed class GetTeamMembershipByIdQueryHandler
 
             foreach (StaffMember staffMember in staff)
             {
-                List<TeamMembershipResponse.TeamMembershipChannelResponse> staffChannels = new();
+                List<TeamMembershipResponse.TeamMembershipChannelResponse> staffChannels = [];
 
-                List<Grade> grades = Enum.GetValues<Grade>().ToList();
-                grades.Remove(Grade.SpecialProgram);
+                List<Grade> grades = Grade.GetOptions.Where(entry => entry.Order > 0).ToList();
 
                 bool channelOwnerExists = teamsConfiguration.StudentChannelOwners.Any(entry => entry.Key.Id == staffMember.Id);
                 
@@ -196,9 +195,8 @@ internal sealed class GetTeamMembershipByIdQueryHandler
             foreach (EmailAddress owner in TeamsConfiguration.FallbackMandatoryOwners)
             {
                 List<TeamMembershipResponse.TeamMembershipChannelResponse> masterChannels = new();
-
-                List<Grade> masterGrades = Enum.GetValues<Grade>().ToList();
-                masterGrades.Remove(Grade.SpecialProgram);
+                
+                List<Grade> masterGrades = Grade.GetOptions.Where(entry => entry.Order > 0).ToList();
 
                 foreach (Grade grade in masterGrades)
                     masterChannels.Add(new($"{_dateTime.CurrentYear} - {grade.AsName()}", TeamsMembershipLevel.Owner.Value));
@@ -517,7 +515,7 @@ internal sealed class GetTeamMembershipByIdQueryHandler
 
                 foreach (var deputyPrincipal in deputyPrincipals.Contacts)
                 {
-                    if (!deputyPrincipal.Value.Contains(grade.Value))
+                    if (!deputyPrincipal.Value.Contains(grade))
                         continue;
 
                     TeamMembershipResponse deputyEntry = new(
@@ -537,7 +535,7 @@ internal sealed class GetTeamMembershipByIdQueryHandler
 
                 foreach (var learningSupportTeacher in learningSupport.Contacts)
                 {
-                    if (!learningSupportTeacher.Value.Contains(grade.Value))
+                    if (!learningSupportTeacher.Value.Contains(grade))
                         continue;
 
                     TeamMembershipResponse lastEntry = new(
@@ -614,27 +612,29 @@ internal sealed class GetTeamMembershipByIdQueryHandler
         {
             string[] tokens = team.Description.Split(';');
 
-            Grade grade = Grade.SpecialProgram;
+            Grade grade = Grade.Empty;
 
             foreach (var token in tokens)
             {
-                if (grade == Grade.SpecialProgram)
+                if (grade == Grade.Empty)
                 {
                     if (token.Contains("Year", StringComparison.InvariantCultureIgnoreCase))
                     {
-                        var gradeNum = token.Split(' ')[1];
-                        bool success = Enum.TryParse(gradeNum, true, out grade);
-                        if (!success || !Enum.IsDefined(grade))
-                            grade = Grade.SpecialProgram;
+                        Grade? attempt = Grade.FromName(token);
+
+                        if (attempt is null)
+                            continue;
+
+                        grade = attempt;
                     }
                     else
-                        grade = Grade.SpecialProgram;
+                        grade = Grade.Empty;
                 }
             }
 
             foreach (var mandatoryOwner in teamsConfiguration.MandatoryOwners)
             {
-                if (grade != Grade.SpecialProgram && !mandatoryOwner.Value.Contains(grade))
+                if (grade != Grade.Empty && !mandatoryOwner.Value.Contains(grade))
                     continue;
 
                 TeamMembershipResponse mandatoryOwnerEntry = new(

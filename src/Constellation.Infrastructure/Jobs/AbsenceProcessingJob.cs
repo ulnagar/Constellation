@@ -148,7 +148,7 @@ internal sealed class AbsenceProcessingJob : IAbsenceProcessingJob
             string detectedId = await _sentralGateway
                 .GetSentralStudentIdFromSRN(
                     student.StudentReferenceNumber, 
-                    ((int)student.CurrentEnrolment?.Grade).ToString(NumberFormatInfo.InvariantInfo));
+                    student.CurrentEnrolment?.Grade.Order.ToString(NumberFormatInfo.InvariantInfo));
 
             if (string.IsNullOrWhiteSpace(detectedId))
             {

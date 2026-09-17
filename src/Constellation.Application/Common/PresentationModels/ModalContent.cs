@@ -8,29 +8,12 @@ public abstract class ModalContent
 {
     private readonly List<ModalContentButton> _buttons = [];
 
-    public string Title { get; protected set; }
-    public string Content { get; protected set; }
+    public string Title { get; protected init; } = string.Empty;
+    public string Content { get; protected init; } = string.Empty;
     public IReadOnlyList<ModalContentButton> Buttons => _buttons.AsReadOnly();
-    public bool ButtonHasLink { get; protected set; }
+    public bool ButtonHasLink { get; protected init; }
 
-    public sealed class ModalContentButton
-    {
-        public ModalContentButton(
-            string text,
-            string colour,
-            string link)
-        {
-            Text = text;
-            Colour = colour;
-            Link = link;
-        }
-
-        public string Text { get; private set; }
-        public string Colour { get; private set; }
-        public string Link { get; private set; }
-    }
-
-    public void AddButton(
+    protected void AddButton(
         string text,
         string colour,
         string link)
@@ -41,6 +24,25 @@ public abstract class ModalContent
             link));
     }
 }
+
+public sealed class ModalContentButton
+{
+    public ModalContentButton(
+        string text,
+        string colour,
+        string link)
+    {
+        Text = text;
+        Colour = colour;
+        Link = link;
+    }
+
+    public string Text { get; private set; }
+    public string Colour { get; private set; }
+    public string Link { get; private set; }
+}
+
+
 
 public sealed class ErrorDisplay : ModalContent
 {
@@ -73,7 +75,7 @@ public sealed class ExceptionDisplay : ModalContent
         ExceptionDisplay modal = new()
         {
             Title = "Exception",
-            Content = $@"<div>{ex.GetType()}</div><span>{ex.Message}</span>"
+            Content = $"<div>{ex.GetType()}</div><span>{ex.Message}</span>"
         };
 
         modal.AddButton("Ok", "btn-warning", link ?? string.Empty);

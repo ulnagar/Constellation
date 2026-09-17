@@ -1,10 +1,13 @@
 ﻿namespace Constellation.Core.Extensions;
 
 using Constellation.Core.Enums;
+using System.Globalization;
 
 public static class GradeExtensions
 {
-    public static string AsNumber(this Grade grade) => ((int)grade).ToString();
-
-    public static string AsName(this Grade grade) => $"Year {((int)grade).ToString().PadLeft(2, '0')}";
+    extension(Grade grade)
+    {
+        public string AsNumber() => grade.Order.ToString(CultureInfo.InvariantCulture).PadLeft(2, '0');
+        public string AsName() => grade.Name;
+    }
 }

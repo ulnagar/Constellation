@@ -87,7 +87,7 @@ public class AbsenceRepository : IAbsenceRepository
             .Set<Absence>()
             .Where(absence => 
                 absence.Type == AbsenceType.Partial &&
-                absence.Date > _dateTime.FirstDayOfYear &&
+                absence.Date > _dateTime.FirstDayOfCurrentYear &&
                 !absence.Explained)
             .ToListAsync(cancellationToken);
 
@@ -172,7 +172,7 @@ public class AbsenceRepository : IAbsenceRepository
             .Include(absence => absence.Responses)
             .Include(absence => absence.Notifications)
             .Where(absence =>
-                absence.Date > _dateTime.FirstDayOfYear && // Absence was this year
+                absence.Date > _dateTime.FirstDayOfCurrentYear && // Absence was this year
                 absence.StudentId == studentId && // Absence was for this student
                 !absence.Explained && // Absence has not been marked explained
                 absence.Type == AbsenceType.Whole && // Absence is a Whole absence
@@ -192,7 +192,7 @@ public class AbsenceRepository : IAbsenceRepository
         return await _context
             .Set<Absence>()
             .Where(absence =>
-                absence.Date > _dateTime.FirstDayOfYear &&
+                absence.Date > _dateTime.FirstDayOfCurrentYear &&
                 absence.StudentId == studentId &&
                 !absence.Explained &&
                 absence.Type == AbsenceType.Partial &&
@@ -214,7 +214,7 @@ public class AbsenceRepository : IAbsenceRepository
         return await _context
             .Set<Absence>()
             .Where(absence =>
-                absence.Date > _dateTime.FirstDayOfYear &&
+                absence.Date > _dateTime.FirstDayOfCurrentYear &&
                 absence.StudentId == studentId &&
                 !absence.Explained &&
                 absence.Type == AbsenceType.Partial &&
@@ -241,7 +241,7 @@ public class AbsenceRepository : IAbsenceRepository
             .ToListAsync(cancellationToken);
 
     public async Task<List<Absence>> GetForStudents(
-        List<StudentId> studentIds,
+        IList<StudentId> studentIds,
         CancellationToken cancellationToken = default)
     {
         DateOnly startOfYear = new(DateTime.Today.Year, 1, 1);

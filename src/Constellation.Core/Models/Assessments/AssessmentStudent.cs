@@ -3,7 +3,6 @@
 using Auth;
 using Core.Enums;
 using Core.ValueObjects;
-using Enums;
 using Identifiers;
 using Models.Identifiers;
 using Primitives;
@@ -30,7 +29,7 @@ public sealed class AssessmentStudent : IAuditableEntity
         StudentId = student.Id;
 
         Student = student.Name;
-        StudentGrade = student.CurrentEnrolment?.Grade ?? Grade.SpecialProgram;
+        StudentGrade = student.CurrentEnrolment?.Grade ?? Grade.Empty;
         SchoolCode = student.CurrentEnrolment?.SchoolCode ?? SchoolCode.Empty;
         SchoolName = student.CurrentEnrolment?.SchoolName ?? string.Empty;
     }

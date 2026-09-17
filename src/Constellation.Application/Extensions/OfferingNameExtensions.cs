@@ -9,11 +9,8 @@ public static class OfferingNameExtensions
     {
         string stringGrade = name.Value[..2];
 
-        bool success = Enum.TryParse($"Y{stringGrade}", true, out Grade grade);
+        Grade? success = Grade.FromValue($"Y{stringGrade}");
 
-        if (!success)
-            return null;
-
-        return grade;
+        return success;
     }
 }

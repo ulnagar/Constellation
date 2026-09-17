@@ -39,7 +39,7 @@ public class WorkflowModel : BasePageModel
     [ViewData]
     public string ActivePage => Models.ActivePage.Configuration;
 
-    [BindProperty(SupportsGet = true)] public WorkflowArea? Position { get; set; }
+    [BindProperty(SupportsGet = true)] public WorkflowArea Position { get; set; } = WorkflowArea.Compliance;
     [BindProperty] public Dictionary<StaffId, List<Grade>> Contacts { get; set; } = [];
 
     public List<WorkflowArea> Positions { get; set; } = [];
@@ -47,8 +47,6 @@ public class WorkflowModel : BasePageModel
 
     public async Task OnGet()
     {
-        Position ??= WorkflowArea.Compliance;
-
         WorkflowConfiguration? configuration = await _appSettings.Workflow(Position);
 
         if (configuration is not null)
@@ -68,7 +66,7 @@ public class WorkflowModel : BasePageModel
         }
 
         StaffMembers = staffMembers.Value;
-        Positions = WorkflowArea.GetEnumerable.ToList();
+        Positions = WorkflowArea.GetOptions.ToList();
     }
 
     public async Task<IActionResult> OnPostSave()
@@ -81,7 +79,7 @@ public class WorkflowModel : BasePageModel
 
             Result<List<StaffSelectionListResponse>> staffMembers = await _mediator.Send(new GetStaffForSelectionListQuery());
             StaffMembers = staffMembers.Value;
-            Positions = WorkflowArea.GetEnumerable.ToList();
+            Positions = WorkflowArea.GetOptions.ToList();
 
             return Page();
         }

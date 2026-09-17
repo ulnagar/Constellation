@@ -42,7 +42,7 @@ public class IndexModel : BasePageModel
 
     public ContactUserResponse CurrentUser { get; set; }
 
-    public List<NotificationType> NotificationTypes => NotificationType.GetEnumerable.ToList();
+    public List<NotificationType> NotificationTypes => NotificationType.GetOptions.ToList();
 
     public async Task OnGet()
     {

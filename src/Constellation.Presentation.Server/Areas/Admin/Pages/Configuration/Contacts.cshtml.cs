@@ -68,7 +68,7 @@ public class ContactsModel : BasePageModel
         }
 
         StaffMembers = staffMembers.Value;
-        Positions = ContactPosition.GetEnumerable.ToList();
+        Positions = ContactPosition.GetOptions.ToList();
     }
 
     public async Task<IActionResult> OnPostSave()
@@ -81,7 +81,7 @@ public class ContactsModel : BasePageModel
 
             Result<List<StaffSelectionListResponse>> staffMembers = await _mediator.Send(new GetStaffForSelectionListQuery());
             StaffMembers = staffMembers.Value;
-            Positions = ContactPosition.GetEnumerable.ToList();
+            Positions = ContactPosition.GetOptions.ToList();
 
             return Page();
         }

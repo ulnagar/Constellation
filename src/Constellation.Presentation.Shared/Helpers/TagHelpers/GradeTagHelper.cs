@@ -10,11 +10,11 @@ public class GradeTagHelper : TagHelper
 
     public override void Process(TagHelperContext context, TagHelperOutput output)
     {
-        if (!Grade.HasValue)
+        if (Grade is null)
             return;
 
         output.TagName = "span";
         output.TagMode = TagMode.StartTagAndEndTag;
-        output.Content.SetContent(Grade.Value.AsName());
+        output.Content.SetContent(Grade.Name);
     }
 }

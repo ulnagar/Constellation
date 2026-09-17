@@ -67,7 +67,7 @@ public class AbsencesModel : BasePageModel
                 .ToDictionary(item => item.Key.Id, item => item.Value);
         }
 
-        AbsenceReasons = AbsenceReason.GetEnumerable.ToList();
+        AbsenceReasons = AbsenceReason.GetOptions.ToList();
         Result<List<StaffSelectionListResponse>> staffMembers = await _mediator.Send(new GetStaffForSelectionListQuery());
 
         if (staffMembers.IsFailure)
@@ -88,7 +88,7 @@ public class AbsencesModel : BasePageModel
         {
             ModalContent = ErrorDisplay.Create(rollMarkingReportRecipients.Error);
 
-            AbsenceReasons = AbsenceReason.GetEnumerable.ToList();
+            AbsenceReasons = AbsenceReason.GetOptions.ToList();
             Result<List<StaffSelectionListResponse>> staffMembers = await _mediator.Send(new GetStaffForSelectionListQuery());
             StaffMembers = staffMembers.Value;
 

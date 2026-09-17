@@ -1,6 +1,5 @@
 ﻿@model Grade?
 
 @using Constellation.Core.Enums
-@using Constellation.Core.Extensions
 
-<span>@(Model.HasValue ? Model.Value.AsName() : string.Empty)</span>
+<span>@(Model is null ? string.Empty : Model.Name)</span>

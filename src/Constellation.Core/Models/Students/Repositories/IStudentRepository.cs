@@ -54,7 +54,7 @@ public interface IStudentRepository
     Task<StudentId> GetStudentIdFromNameFragments(string[] names, CancellationToken cancellationToken = default);
     Task<Dictionary<string, List<Student>>> GetCurrentEnrolmentsForCourseWithOfferingName(CourseId courseId, CancellationToken cancellationToken = default);
     Task<List<Student>> GetEnrolledForDates(DateOnly startDate, DateOnly endDate, CancellationToken cancellationToken = default);
-    Task<List<Student>> ForInterviewsExportAsync(List<int> filterGrades, List<OfferingId> filterClasses, CancellationToken cancellationToken = default);
+    Task<List<Student>> ForInterviewsExportAsync(List<Grade> filterGrades, List<OfferingId> filterClasses, CancellationToken cancellationToken = default);
 
     void Insert(Student student);
 }

@@ -123,7 +123,7 @@ internal sealed class SendLessonNotificationCommandHandler
 
         string description = $"{course.Grade} {lesson.Name}";
 
-        if (course.Grade is Grade.Y11 or Grade.Y12)
+        if (course.Grade is { Value: "Y11" or "Y12" })
             description = $"{course.Grade} {course.Name} {lesson.Name}";
 
         lessonItems.Add(

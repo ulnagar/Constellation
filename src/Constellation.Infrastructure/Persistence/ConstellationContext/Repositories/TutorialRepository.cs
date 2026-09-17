@@ -64,7 +64,7 @@ internal sealed class TutorialRepository : ITutorialRepository
     public async Task<List<Tutorial>> GetAll(
         CancellationToken cancellationToken = default)
     {
-        DateOnly startOfYear = _dateTime.FirstDayOfYear;
+        DateOnly startOfYear = _dateTime.FirstDayOfCurrentYear;
 
         return await _context
             .Set<Tutorial>()
@@ -91,7 +91,7 @@ internal sealed class TutorialRepository : ITutorialRepository
             .Set<Tutorial>()
             .Where(tutorial =>
                 !tutorial.IsDeleted &&
-                tutorial.StartDate >= _dateTime.FirstDayOfYear &&
+                tutorial.StartDate >= _dateTime.FirstDayOfCurrentYear &&
                  (tutorial.Sessions.Count == 0 ||
                  tutorial.Sessions.All(session => session.IsDeleted)))
             .ToListAsync(cancellationToken);
@@ -217,7 +217,7 @@ internal sealed class TutorialRepository : ITutorialRepository
         List<TutorialName> existing = await _context
             .Set<Tutorial>()
             .Where(tutorial =>
-                tutorial.StartDate > _dateTime.FirstDayOfYear &&
+                tutorial.StartDate > _dateTime.FirstDayOfCurrentYear &&
                 ((string)tutorial.Name).Contains(name.Value))
             .Select(tutorial => tutorial.Name)
             .ToListAsync(cancellationToken);

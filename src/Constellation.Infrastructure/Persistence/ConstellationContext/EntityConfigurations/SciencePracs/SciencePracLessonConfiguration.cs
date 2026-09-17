@@ -2,6 +2,7 @@
 
 using Constellation.Core.Models.Identifiers;
 using Constellation.Core.Models.SciencePracs;
+using Converters;
 using Core.Enums;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
@@ -28,7 +29,7 @@ public class SciencePracLessonConfiguration : IEntityTypeConfiguration<SciencePr
 
         builder
             .Property(lesson => lesson.Grade)
-            .HasDefaultValue(Grade.SpecialProgram);
+            .HasConversion<GradeConverter>();
 
         builder
             .HasMany(lesson => lesson.Rolls)

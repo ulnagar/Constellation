@@ -8,4 +8,6 @@ public sealed class TutorialPosition : StringEnumeration<TutorialPosition>
     public static readonly TutorialPosition Scheduler = new("Scheduler", "Tutorial Scheduler");
     private TutorialPosition(string value, string name)
         : base(value, name) { }
+
+    public static IEnumerable<TutorialPosition> GetOptions => GetEnumerable;
 }

@@ -32,7 +32,7 @@ public class LessonRepository : ILessonRepository
         CancellationToken cancellationToken = default) =>
         await _context
             .Set<SciencePracLesson>()
-            .Where(lesson => lesson.DueDate > _dateTime.FirstDayOfYear)
+            .Where(lesson => lesson.DueDate > _dateTime.FirstDayOfCurrentYear)
             .ToListAsync(cancellationToken);
         
     public async Task<List<SciencePracLesson>> GetAllCurrent(
@@ -40,7 +40,7 @@ public class LessonRepository : ILessonRepository
         await _context
             .Set<SciencePracLesson>()
             .Where(lesson => 
-                lesson.DueDate > _dateTime.FirstDayOfYear &&
+                lesson.DueDate > _dateTime.FirstDayOfCurrentYear &&
                 lesson.Rolls.Any(roll => roll.Status == LessonStatus.Active))
             .ToListAsync(cancellationToken);
 
@@ -50,7 +50,7 @@ public class LessonRepository : ILessonRepository
         await _context
             .Set<SciencePracLesson>()
             .Where(lesson =>
-                lesson.DueDate > _dateTime.FirstDayOfYear &&
+                lesson.DueDate > _dateTime.FirstDayOfCurrentYear &&
                 lesson.Rolls.Any(roll => roll.SchoolCode == SchoolCode))
             .ToListAsync(cancellationToken);
 
@@ -67,7 +67,7 @@ public class LessonRepository : ILessonRepository
         return await _context
             .Set<SciencePracLesson>()
             .Where(lesson => 
-                lesson.DueDate > _dateTime.FirstDayOfYear &&
+                lesson.DueDate > _dateTime.FirstDayOfCurrentYear &&
                 lesson.Offerings.Any(record => 
                     offeringIds.Contains(record.OfferingId)))
             .ToListAsync(cancellationToken);
@@ -79,7 +79,7 @@ public class LessonRepository : ILessonRepository
         await _context
             .Set<SciencePracLesson>()
             .Where(lesson => 
-                lesson.DueDate > _dateTime.FirstDayOfYear &&
+                lesson.DueDate > _dateTime.FirstDayOfCurrentYear &&
                 lesson.Offerings.Any(record => 
                     record.OfferingId == OfferingId))
             .ToListAsync(cancellationToken);
@@ -90,7 +90,7 @@ public class LessonRepository : ILessonRepository
         await _context
             .Set<SciencePracLesson>()
             .Where(lesson => 
-                lesson.DueDate > _dateTime.FirstDayOfYear &&
+                lesson.DueDate > _dateTime.FirstDayOfCurrentYear &&
                 lesson.Rolls.Any(roll => 
                     roll.Attendance.Any(attendance => 
                         attendance.StudentId == studentId)))
@@ -108,7 +108,7 @@ public class LessonRepository : ILessonRepository
         await _context
             .Set<SciencePracLesson>()
             .Where(lesson => 
-                lesson.DueDate > _dateTime.FirstDayOfYear &&
+                lesson.DueDate > _dateTime.FirstDayOfCurrentYear &&
                 lesson.DueDate < _dateTime.Today && 
                 lesson.Rolls.Any(roll => roll.Status == LessonStatus.Active))
             .ToListAsync(cancellationToken);
@@ -118,7 +118,7 @@ public class LessonRepository : ILessonRepository
         await _context
             .Set<SciencePracLesson>()
             .Where(lesson =>
-                lesson.DueDate >= _dateTime.FirstDayOfYear &&
+                lesson.DueDate >= _dateTime.FirstDayOfCurrentYear &&
                 lesson.Rolls.Any(roll =>
                     roll.Status == LessonStatus.Completed &&
                     roll.Attendance.All(entry => !entry.Present)))

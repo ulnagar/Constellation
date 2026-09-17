@@ -40,7 +40,7 @@ internal sealed class RequestValidationPipelineBehaviour<TRequest, TResponse>
             errors.AddRange(validationErrors);
         }
 
-        if (errors.Any())
+        if (errors.Count > 0)
         {
             return CreateValidationResult<TResponse>(errors.ToArray());
         }

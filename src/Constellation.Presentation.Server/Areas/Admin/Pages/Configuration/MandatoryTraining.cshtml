@@ -1,6 +1,5 @@
 ﻿@page
 @using Constellation.Core.Enums
-@using Constellation.Core.Extensions
 @model Constellation.Presentation.Server.Areas.Admin.Pages.Configuration.MandatoryTrainingModel
 @{
 }
@@ -42,23 +41,20 @@
                         </div>
                     </div>
                     <div class="card-footer">
-                        @foreach (var grade in Enum.GetValues<Grade>().OrderBy(grade => grade))
+                        @foreach (var grade in Grade.GetOptions.Where(grade => grade.Order > 0).OrderBy(grade => grade))
                         {
-                            if (grade == Grade.SpecialProgram)
-                                continue;
-
                             var selected = entry.Value.Contains(grade);
 
                             if (selected)
                             {
-                                <button type="button" class="btn btn-primary mb-1 grade-toggle-button" data-key="@entry.Key" data-grade-name="@grade" data-grade-number="@((int)grade)">@grade.AsName()</button>
+                                <button type="button" class="btn btn-primary mb-1 grade-toggle-button" data-key="@entry.Key" data-grade-name="@grade" data-grade-number="@grade">@grade.Name</button>
 
                                 <input type="hidden" name="Contacts[@entry.Key].Value.index" value="@grade" />
-                                <input type="hidden" name="Contacts[@entry.Key].Value[@grade]" value="@((int)grade)" />
+                                <input type="hidden" name="Contacts[@entry.Key].Value[@grade]" value="@grade" />
                             }
                             else
                             {
-                                <button type="button" class="btn btn-outline-secondary mb-1 grade-toggle-button" data-key="@entry.Key" data-grade-name="@grade" data-grade-number="@((int)grade)">@grade.AsName()</button>
+                                <button type="button" class="btn btn-outline-secondary mb-1 grade-toggle-button" data-key="@entry.Key" data-grade-name="@grade" data-grade-number="@grade">@grade.Name</button>
                             }
                         }
                     </div>
@@ -123,12 +119,9 @@
                 </div>
             </div>
             <div class="card-footer">
-                @foreach (var grade in Enum.GetValues<Grade>().OrderBy(grade => grade))
+                @foreach (var grade in Grade.GetOptions.Where(grade => grade.Order > 0).OrderBy(grade => grade))
                 {
-                    if (grade == Grade.SpecialProgram)
-                        continue;
-
-                    <button type="button" class="btn btn-outline-secondary mb-1 grade-toggle-button" data-key="" data-grade-name="@grade" data-grade-number="@((int)grade)">@grade.AsName()</button>
+                    <button type="button" class="btn btn-outline-secondary mb-1 grade-toggle-button" data-key="" data-grade-name="@grade" data-grade-number="@grade">@grade.Name</button>
                 }
             </div>
         </div>

@@ -31,6 +31,8 @@ public class AbsenceReason : StringEnumeration<AbsenceReason>, IEquatable<Absenc
 
     public override string ToString() => Value;
 
+    public static IEnumerable<AbsenceReason> GetOptions => GetEnumerable;
+
     public static implicit operator string(AbsenceReason reason) =>
         reason is null ? string.Empty : reason.Value;
 

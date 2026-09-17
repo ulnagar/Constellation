@@ -10,4 +10,6 @@ public sealed class WorkflowArea : StringEnumeration<WorkflowArea>
 
     private WorkflowArea(string value, string name)
         : base(value, name) { }
+    
+    public static IEnumerable<WorkflowArea> GetOptions => GetEnumerable;
 }

@@ -74,7 +74,7 @@ internal sealed class EmailSchoolAdmin
         List<Student> students = await _studentRepository.GetListFromIds(studentIds, cancellationToken);
 
         List<string> studentNames = [];
-        foreach (var student in students.OrderBy(entry => entry.CurrentEnrolment?.Grade ?? Grade.SpecialProgram))
+        foreach (var student in students.OrderBy(entry => entry.CurrentEnrolment?.Grade ?? Grade.Empty))
             studentNames.Add($"{student.StudentReferenceNumber} - {student.Name.DisplayName} - {student.CurrentEnrolment?.Grade.AsName()}");
 
         await _emailService.SendIncomingSmsAlert(message, studentNames, cancellationToken);

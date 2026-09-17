@@ -121,7 +121,7 @@ internal sealed class CreateAttendancePlanVersionCommandHandler
 
         foreach (Offering offering in offerings)
         {
-            Course course = await _courseRepository.GetByOfferingId(offering.Id, cancellationToken);
+            Course? course = await _courseRepository.GetByOfferingId(offering.Id, cancellationToken);
 
             if (course is null)
                 continue;
@@ -131,7 +131,7 @@ internal sealed class CreateAttendancePlanVersionCommandHandler
                 continue;
 
             // Skip all courses from Stage 6
-            if (course.Grade is Grade.Y11 or Grade.Y12)
+            if (course.Grade is { Value: "Y11" or "Y12"})
                 continue;
 
             List<PeriodId> periodIds = offering.Sessions

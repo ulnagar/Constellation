@@ -8,5 +8,5 @@ using Core.Models.Students.Identifiers;
 public sealed record GenerateAttendancePlansCommand(
     StudentId StudentId,
     SchoolCode SchoolCode,
-    Grade? Grade)
+    Grade Grade)
     : ICommand;

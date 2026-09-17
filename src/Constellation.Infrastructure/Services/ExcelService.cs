@@ -910,7 +910,7 @@ public class ExcelService : IExcelService
                 "10" => Grade.Y10,
                 "11" => Grade.Y11,
                 "12" => Grade.Y12,
-                _ => Grade.SpecialProgram
+                _ => Grade.Empty
             };
 
             string parent1Cell = worksheet.Cells[i, 39].Value as string;
@@ -1223,11 +1223,13 @@ public class ExcelService : IExcelService
             }
             else
             {
+                bool gradeSuccess = Grade.TryParse(line[4].FormatField, out var grade);
+
                 entry = new()
                 {
                     StudentReferenceNumber = studentReferenceNumber.Value,
                     Name = $"{line[1].FormatField} {line[0].FormatField}",
-                    Grade = (Grade)Convert.ToInt32(line[4].FormatField, null),
+                    Grade = gradeSuccess ? grade : Grade.Empty,
                     DayYTD = Convert.ToDecimal(line[11].FormatField, null)
                 };
 
@@ -1543,8 +1545,8 @@ public class ExcelService : IExcelService
 
             int severity = datesBetween.Count - 1;
 
-            int gradeNum = Convert.ToInt32(row[3], null);
-            Grade grade = (Grade)gradeNum;
+            bool gradeSuccess = Grade.TryParse(row[3].ToString(), out var gradeNum);
+            Grade grade = gradeSuccess ? gradeNum : Grade.Empty;
 
             DataRow? matchingRow = baseResult.Tables[0].Select($"Column5 = '{incidentId}'").FirstOrDefault();
 
@@ -2360,7 +2362,7 @@ public class ExcelService : IExcelService
     {
         ExcelPackage excel = new();
 
-        foreach (Grade grade in Enum.GetValues<Grade>())
+        foreach (Grade grade in Grade.GetOptions)
         {
             List<AttendanceRecord> filteredRecords = records
                 .Where(entry => entry.Grade == grade)

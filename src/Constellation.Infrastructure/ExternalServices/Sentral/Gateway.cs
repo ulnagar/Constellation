@@ -1907,7 +1907,7 @@ public class Gateway : ISentralGateway
             // year=2023
             new("year", year),
             // start_date=2023-01-01
-            new("start_date", _dateTime.FirstDayOfYear.ToString("yyyy-MM-dd", DateTimeFormatInfo.CurrentInfo)),
+            new("start_date", _dateTime.FirstDayOfCurrentYear.ToString("yyyy-MM-dd", DateTimeFormatInfo.CurrentInfo)),
             // end_date=2023-11-03
             new("end_date", endDate.ToString("yyyy-MM-dd", DateTimeFormatInfo.CurrentInfo)),
             // limit_sign=equal
@@ -1952,7 +1952,7 @@ public class Gateway : ISentralGateway
 
         HtmlDocument? perMinuteYearToDateDocument = await GetPageByPost(new($"{_settings.ServerUrl}/attendance/reports/percentage"), payload);
 
-        Stream perMinuteYearToDateCalculationFile = await GetStreamByGet($"{_settings.ServerUrl}/attendancepxp/period/administration/percentage_attendance_report?length=period&year={year}&start_date={_dateTime.FirstDayOfYear.ToString("yyyy-MM-dd", DateTimeFormatInfo.CurrentInfo)}&end_date={endDate.ToString("yyyy-MM-dd", DateTimeFormatInfo.CurrentInfo)}&attendance_source=attendance&enrolled_students=true&group=years&years%5B%5D=5&years%5B%5D=6&years%5B%5D=7&years%5B%5D=8&years%5B%5D=9&years%5B%5D=10&years%5B%5D=11&years%5B%5D=12&action=export");
+        Stream perMinuteYearToDateCalculationFile = await GetStreamByGet($"{_settings.ServerUrl}/attendancepxp/period/administration/percentage_attendance_report?length=period&year={year}&start_date={_dateTime.FirstDayOfCurrentYear.ToString("yyyy-MM-dd", DateTimeFormatInfo.CurrentInfo)}&end_date={endDate.ToString("yyyy-MM-dd", DateTimeFormatInfo.CurrentInfo)}&attendance_source=attendance&enrolled_students=true&group=years&years%5B%5D=5&years%5B%5D=6&years%5B%5D=7&years%5B%5D=8&years%5B%5D=9&years%5B%5D=10&years%5B%5D=11&years%5B%5D=12&action=export");
 
         payload =
         [

@@ -19,4 +19,6 @@ public sealed class SentralPath : StringEnumeration<SentralPath>
 
     private SentralPath(string name)
         : base (name, name) { }
+    
+    public static IEnumerable<SentralPath> GetOptions => GetEnumerable;
 }

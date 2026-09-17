@@ -82,7 +82,7 @@ internal sealed class GetConsentDetailsQueryHandler
             application.ConsentRequired,
             student.Id,
             student.Name,
-            student.CurrentEnrolment?.Grade ?? Grade.SpecialProgram,
+            student.CurrentEnrolment?.Grade ?? Grade.Empty,
             student.CurrentEnrolment?.SchoolName ?? string.Empty,
             consent.ConsentProvided,
             consent.ProvidedBy,

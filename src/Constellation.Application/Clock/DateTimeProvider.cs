@@ -10,9 +10,9 @@ public class DateTimeProvider : IDateTimeProvider
     public DateOnly Today => DateOnly.FromDateTime(DateTime.Today);
     public DateOnly Yesterday => DateOnly.FromDateTime(DateTime.Today.AddDays(-1));
 
-    public DateOnly LastDayOfYear => new DateOnly(CurrentYear, 12, 31);
+    public DateOnly LastDayOfCurrentYear => new DateOnly(CurrentYear, 12, 31);
 
-    public DateOnly FirstDayOfYear => new DateOnly(CurrentYear, 1, 1);
+    public DateOnly FirstDayOfCurrentYear => new DateOnly(CurrentYear, 1, 1);
 
     public int CurrentYear => Today.Year;
     public string CurrentYearAsString => Today.ToString("yyyy", CultureInfo.InvariantCulture);

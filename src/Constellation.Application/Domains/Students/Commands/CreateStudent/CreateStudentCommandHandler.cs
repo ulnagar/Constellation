@@ -73,7 +73,7 @@ internal sealed class CreateStudentCommandHandler
                 return Result.Failure(student.Error);
             }
 
-            if (request.SchoolCode != SchoolCode.Empty && request.Grade != Grade.SpecialProgram)
+            if (request.SchoolCode != SchoolCode.Empty && request.Grade != Grade.Empty)
             {
                 School? school = await _schoolRepository.GetById(request.SchoolCode, cancellationToken);
 

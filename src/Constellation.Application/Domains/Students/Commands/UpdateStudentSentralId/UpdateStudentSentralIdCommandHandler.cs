@@ -59,7 +59,7 @@ internal sealed class UpdateStudentSentralIdCommandHandler
             return Result.Failure(SchoolEnrolmentErrors.NotFound);
         }
 
-        string id = await _gateway.GetSentralStudentIdFromSRN(student.StudentReferenceNumber, ((int)enrolment.Grade).ToString(CultureInfo.InvariantCulture));
+        string id = await _gateway.GetSentralStudentIdFromSRN(student.StudentReferenceNumber, enrolment.Grade.Order.ToString(CultureInfo.InvariantCulture));
 
         if (string.IsNullOrWhiteSpace(id))
         {

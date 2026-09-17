@@ -1,6 +1,8 @@
 ﻿@page
-@using Constellation.Core.Models.AppSettings.Enums
 @model Constellation.Presentation.Server.Areas.Admin.Pages.Configuration.SentralModel
+
+@using Constellation.Core.Models.AppSettings.Enums
+
 @{
 }
 
@@ -12,7 +14,7 @@
 
 <hr />
 
-@foreach (var path in SentralPath.GetEnumerable)
+@foreach (var path in SentralPath.GetOptions)
 {
     var existingEntry = Model.Configurations.FirstOrDefault(entry => entry.Type == path);
 

@@ -58,9 +58,11 @@ internal sealed class GenerateYTDStatusReportCommandHandler
 
             List<Student> students = await _studentRepository.GetCurrentStudentsFromSchool(school.Code, cancellationToken);
 
-            foreach (Grade grade in Enum.GetValues<Grade>())
+            IEnumerable<Grade> grades = Grade.GetOptions.Where(entry => entry.Order > 0);
+
+            foreach (Grade grade in grades)
             {
-                if (grade is Grade.Y05 or Grade.Y06)
+                if (grade is { Value: "Y05" or "Y06" })
                     continue;
 
                 List<SciencePracRoll> rolls = lessons

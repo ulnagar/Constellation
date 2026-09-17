@@ -100,7 +100,7 @@ public class UpsertModel : BasePageModel
         else
         {
             StartDate = _dateTime.Today;
-            EndDate = _dateTime.LastDayOfYear;
+            EndDate = _dateTime.LastDayOfCurrentYear;
 
             await BuildCourseSelectList();
         }

@@ -10,7 +10,7 @@ public sealed class ScienceLessonRollSummary
     public SciencePracLessonId LessonId { get; set; }
     public string LessonName { get; set; }
     public Grade LessonGrade { get; set; }
-    public string Grade => $"Year {(int)LessonGrade:D2}";
+    public string Grade => LessonGrade.Name;
     public string LessonCourseName { get; set; }
     public DateTime LessonDueDate { get; set; }
     public bool IsSubmitted { get; set; }

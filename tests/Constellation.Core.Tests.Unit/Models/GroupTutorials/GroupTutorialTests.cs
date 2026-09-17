@@ -365,8 +365,8 @@ public class GroupTutorialTests
         var sut = GroupTutorial.Create(
             new GroupTutorialId(),
             "Stage 4 Mathematics",
-            _dateTimeProvider.FirstDayOfYear,
-            _dateTimeProvider.LastDayOfYear);
+            _dateTimeProvider.FirstDayOfCurrentYear,
+            _dateTimeProvider.LastDayOfCurrentYear);
 
         sut.Delete();
 

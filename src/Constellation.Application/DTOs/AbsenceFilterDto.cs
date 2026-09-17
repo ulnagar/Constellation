@@ -1,5 +1,6 @@
 ﻿namespace Constellation.Application.DTOs;
 
+using Core.Enums;
 using Core.Models.Identifiers;
 using Core.Models.Students.Identifiers;
 using Helpers;
@@ -20,7 +21,8 @@ public class AbsenceFilterDto
     [DataType(DataType.Date)]
     [DisplayFormat(DataFormatString = "{0:yyyy-MM-dd}", ApplyFormatInEditMode = true)]
     public DateTime? EndDate { get; set; }
-    public int? Grade { get; set; }
+
+    public Grade Grade { get; set; } = Grade.Empty;
     [Display(Name = DisplayNameDefaults.School)]
     public SchoolCode SchoolCode { get; set; }
 

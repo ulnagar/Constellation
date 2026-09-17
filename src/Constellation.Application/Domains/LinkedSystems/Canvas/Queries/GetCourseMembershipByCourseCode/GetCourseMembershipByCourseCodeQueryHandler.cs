@@ -128,7 +128,7 @@ internal sealed class GetCourseMembershipByCourseCodeQueryHandler
 
         foreach (var contact in configuration.Admins)
         {
-            if (!contact.Value.Contains(grade.Value))
+            if (!contact.Value.Contains(grade))
                 continue;
             
             response.Add(new(

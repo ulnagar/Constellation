@@ -69,7 +69,7 @@ public class TutorialsModel : BasePageModel
         }
 
         StaffMembers = staffMembers.Value;
-        Positions = TutorialPosition.GetEnumerable.ToList();
+        Positions = TutorialPosition.GetOptions.ToList();
 
         return Page();
     }
@@ -84,7 +84,7 @@ public class TutorialsModel : BasePageModel
 
             Result<List<StaffSelectionListResponse>> staffMembers = await _mediator.Send(new GetStaffForSelectionListQuery());
             StaffMembers = staffMembers.Value;
-            Positions = TutorialPosition.GetEnumerable.ToList();
+            Positions = TutorialPosition.GetOptions.ToList();
 
             return Page();
         }

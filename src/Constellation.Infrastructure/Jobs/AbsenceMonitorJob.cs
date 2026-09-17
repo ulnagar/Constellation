@@ -12,7 +12,6 @@ using Constellation.Core.Enums;
 using Constellation.Core.Models.Absences.Enums;
 using Constellation.Core.Models.Absences.Identifiers;
 using Constellation.Core.Models.Students.Repositories;
-using Constellation.Core.Primitives;
 using Core.Abstractions.Repositories;
 using Core.Models.Absences;
 using Core.Models.Offerings.Identifiers;
@@ -47,7 +46,9 @@ internal sealed class AbsenceMonitorJob : IAbsenceMonitorJob
     {
         _logger.Information("{id}: Starting Absence Monitor Scan.", jobId);
 
-        foreach (Grade grade in Enum.GetValues<Grade>())
+        IOrderedEnumerable<Grade> grades = Grade.GetOptions.Where(entry => entry.Order > 0).OrderBy(entry => entry.Order);
+
+        foreach (Grade grade in grades)
         {
             if (cancellationToken.IsCancellationRequested)
                 return;

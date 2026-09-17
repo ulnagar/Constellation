@@ -81,7 +81,7 @@ public sealed class Request : AggregateRoot, IAuditableEntity
         Request request = new(
             student.Id,
             student.Name,
-            student.CurrentEnrolment?.Grade ?? Core.Enums.Grade.SpecialProgram,
+            student.CurrentEnrolment?.Grade ?? Core.Enums.Grade.Empty,
             student.CurrentEnrolment?.SchoolName ?? string.Empty,
             type,
             subject,

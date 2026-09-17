@@ -1,9 +1,9 @@
 ﻿namespace Constellation.Core.Models.EnrolmentContext.Application;
 
-using Constellation.Core.Models.EnrolmentContext.Application.Enums;
 using Core.Enums;
 using EnrolmentPeriod.Enums;
 using EnrolmentPeriod.Identifiers;
+using Enums;
 using Errors;
 using Identifiers;
 using Models.Identifiers;
@@ -19,7 +19,9 @@ public sealed class Application
     /// <summary>
     /// DO NOT USE. EF CORE ONLY
     /// </summary>
+#pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
     private Application() { }
+#pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
 
     private Application(
         EnrolmentPeriodId periodId,
@@ -165,14 +167,14 @@ public sealed class Application
         return Result.Success();
     }
 
-    public static bool IsValidProgramGradeCombination(Program program, Grade grade) => 
+    public static bool IsValidProgramGradeCombination(Program program, Grade grade) =>
         (program, grade) switch
         {
-            ({ Value: "OC" }, Grade.Y05) => true,
-            ({ Value: "SHS" }, Grade.Y07 or Grade.Y08 or Grade.Y09 or Grade.Y10) => true,
-            ({ Value: "YDM" }, Grade.Y05 or Grade.Y06 or Grade.Y07 or Grade.Y08 or Grade.Y09 or Grade.Y10) => true,
-            ({ Value: "S6R" }, Grade.Y11 or Grade.Y12) => true,
-            ({ Value: "S6M" }, Grade.Y11 or Grade.Y12) => true,
+            ({ Value: "OC" }, { Value: "Y05" }) => true,
+            ({ Value: "SHS" }, { Value: "Y07" or "Y08" or "Y09" or "Y10" }) => true,
+            ({ Value: "YDM" }, { Value: "Y05" or "Y06" or "Y07" or "Y08" or "Y09" or "Y10" }) => true,
+            ({ Value: "S6R" }, { Value: "Y11" or "Y12" }) => true,
+            ({ Value: "S6M" }, { Value: "Y11" or "Y12" }) => true,
             _ => false
         };
 
@@ -245,7 +247,7 @@ public sealed class Application
         return Result.Success();
     }
 
-    public Result UpdateSRN(StudentReferenceNumber srn)
+    public Result UpdateStudentReferenceNumber(StudentReferenceNumber srn)
     {
         if (Status == ApplicationStatus.Archived)
             return Result.Failure(EnrolmentApplicationErrors.CannotUpdateArchivedApplication);

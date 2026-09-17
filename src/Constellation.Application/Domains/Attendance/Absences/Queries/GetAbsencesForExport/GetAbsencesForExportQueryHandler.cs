@@ -81,7 +81,7 @@ internal sealed class GetAbsencesForExportQueryHandler
             if (enrolment.SchoolCode != request.Filter.SchoolCode)
                 continue;
 
-            if (request.Filter.Grade.HasValue && enrolment.Grade != (Grade)request.Filter.Grade)
+            if (request.Filter.Grade != Grade.Empty && enrolment.Grade != (Grade)request.Filter.Grade)
                 continue;
 
             string activityName = string.Empty;

@@ -166,7 +166,7 @@ internal sealed class SetAbsenceConfigurationForStudentCommandHandler
         // If only a grade is selected, process that last
         if (request.GradeFilter is not null)
         {
-            Grade grade = (Grade)request.GradeFilter.Value;
+            Grade grade = request.GradeFilter;
 
             List<Student> students = await _studentRepository.GetCurrentStudentFromGrade(grade, cancellationToken);
 

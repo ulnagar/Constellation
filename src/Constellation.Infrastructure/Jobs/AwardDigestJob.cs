@@ -114,7 +114,7 @@ internal sealed class AwardDigestJob : IAwardDigestJob
 
                 schoolStudentAwards.Add(new(
                     student.Name,
-                    student.CurrentEnrolment?.Grade ?? Grade.SpecialProgram,
+                    student.CurrentEnrolment?.Grade ?? Grade.Empty,
                     astras,
                     stellars, 
                     galaxies, 

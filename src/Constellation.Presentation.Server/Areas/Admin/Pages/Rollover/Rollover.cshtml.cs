@@ -68,14 +68,14 @@ public class RolloverModel : BasePageModel
 
         return CurrentGrade switch
         {
-            Grade.Y12 => await GetStudents(Grade.Y11),
-            Grade.Y11 => await GetStudents(Grade.Y10),
-            Grade.Y10 => await GetStudents(Grade.Y09),
-            Grade.Y09 => await GetStudents(Grade.Y08),
-            Grade.Y08 => await GetStudents(Grade.Y07),
-            Grade.Y07 => await GetStudents(Grade.Y06),
-            Grade.Y06 => await GetStudents(Grade.Y05),
-            Grade.Y05 => await Finalise(),
+            { Value: "Y12" } => await GetStudents(Grade.Y11),
+            { Value: "Y11" } => await GetStudents(Grade.Y10),
+            { Value: "Y10" } => await GetStudents(Grade.Y09),
+            { Value: "Y09" } => await GetStudents(Grade.Y08),            
+            { Value: "Y08" } => await GetStudents(Grade.Y07),
+            { Value: "Y07" } => await GetStudents(Grade.Y06),
+            { Value: "Y06" } => await GetStudents(Grade.Y05),
+            { Value: "Y05" } => await Finalise(),
             _ => throw new ArgumentOutOfRangeException()
         };
     }

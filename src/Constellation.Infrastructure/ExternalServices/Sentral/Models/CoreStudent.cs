@@ -12,9 +12,10 @@ public sealed class CoreStudent
     public static Result<CoreStudent> ConvertFromJson(JsonElement jsonEntry)
     {
         bool typeExists = jsonEntry.TryGetProperty("type", out JsonElement type);
+        string typeString = typeExists ? type.GetString() ?? string.Empty : string.Empty;
 
-        if (!typeExists || type.GetString() != "coreStudent")
-            return Result.Failure<CoreStudent>(SentralJsonErrors.IncorrectObject("CoreStudent", typeExists ? type.GetString() : string.Empty));
+        if (!typeExists || typeString != "coreStudent")
+            return Result.Failure<CoreStudent>(SentralJsonErrors.IncorrectObject("CoreStudent", typeString));
 
         CoreStudent student = new();
 
@@ -35,9 +36,12 @@ public sealed class CoreStudent
             student.IsActive = attributes.ExtractBool("isActive") ?? false;
         }
 
-        string grade = attributes.ExtractString("schoolYear");
+        string? grade = attributes.ExtractString("schoolYear");
         if (!string.IsNullOrWhiteSpace(grade))
-            student.SchoolYear = Enum.Parse<Grade>(grade);
+        {
+            Result<Grade> gradeItem = Grade.FromNumber(Int32.Parse(grade));
+            student.SchoolYear = gradeItem.IsSuccess ? gradeItem.Value : Grade.Empty;
+        }
 
         bool relationshipsExists = jsonEntry.TryGetProperty("relationships", out JsonElement relationships);
         if (!relationshipsExists)
@@ -52,16 +56,16 @@ public sealed class CoreStudent
         return student;
     }
 
-    public string StudentId { get; private set; }
-    public string FamilyId { get; private set; }
-    public string FirstName { get; private set; }
-    public string LastName { get; private set; }
-    public string PreferredName { get; private set; }
-    public string Gender { get; private set; }
-    public Grade SchoolYear { get; private set; }
+    public string? StudentId { get; private set; }
+    public string? FamilyId { get; private set; }
+    public string? FirstName { get; private set; }
+    public string? LastName { get; private set; }
+    public string? PreferredName { get; private set; }
+    public string? Gender { get; private set; }
+    public Grade SchoolYear { get; private set; } = Grade.Empty;
     public DateOnly DateOfBirth { get; private set; }
-    public string StudentReferenceNumber { get; private set; }
-    public string EmailAddress { get; private set; }
+    public string? StudentReferenceNumber { get; private set; }
+    public string? EmailAddress { get; private set; }
     public Guid ExternalId { get; private set; }
     public DateOnly EnrolDate { get; private set; }
     public bool IsActive { get; private set; }

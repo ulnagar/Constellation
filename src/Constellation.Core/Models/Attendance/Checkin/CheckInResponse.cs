@@ -25,7 +25,7 @@ public sealed class CheckInResponse
     {
         StudentId = student.Id;
         Student = student.Name;
-        Grade = student.CurrentEnrolment?.Grade ?? Grade.SpecialProgram;
+        Grade = student.CurrentEnrolment?.Grade ?? Grade.Empty;
         SchoolCode = student.CurrentEnrolment?.SchoolCode ?? SchoolCode.Empty;
         School = student.CurrentEnrolment?.SchoolName ?? string.Empty;
 

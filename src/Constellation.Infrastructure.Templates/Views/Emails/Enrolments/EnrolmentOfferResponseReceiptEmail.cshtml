@@ -1,6 +1,5 @@
 @model Constellation.Infrastructure.Templates.Views.Emails.Enrolments.EnrolmentOfferResponseReceiptEmailViewModel
 
-@using Constellation.Core.Enums
 @using Constellation.Core.Extensions
 @using Constellation.Core.Models.EnrolmentContext.Offer.Enums
 
@@ -43,16 +42,16 @@ else
         <p>@Model.StudentName.PreferredName does not have any health concerns.</p>
     }
 
-    @if (Model is { Grade: >= Grade.Y11, LaptopRequested: true })
+    @if (Model is { Grade.Order: >= 11, LaptopRequested: true })
     {
         <p>@Model.StudentName.PreferredName has requested a student laptop on loan from Aurora College. A device will be shipped to the partner school before the start of classes.</p>
     }
-    else if (Model is { Grade: >= Grade.Y11, LaptopRequested: false })
+    else if (Model is { Grade.Order: >= 11, LaptopRequested: false })
     {
         <p>@Model.StudentName.PreferredName has will provide their own, suitable learning device for Aurora College lessons.</p>
     }
 
-    <p>Please note: Enrolment in Aurora College is contigent on the student being co-enrolled in an authorised host school. Students who do not meet this requirement are ineligible for enrolment at Aurora College.</p>
+    <p>Please note: Enrolment in Aurora College is contingent on the student being co-enrolled in an authorised host school. Students who do not meet this requirement are ineligible for enrolment at Aurora College.</p>
 }
 
-<p>If any of the information above is incorrect or you would like to change your responses, please contact Aurora College on 1300 287 629.</p>
+<p>If any of the information above is incorrect, or you would like to change your responses, please contact Aurora College on 1300 287 629.</p>

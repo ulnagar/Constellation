@@ -95,7 +95,7 @@ internal sealed class EmergencyRecipientService : IEmergencyRecipientService
                 ContactResponse recipient = new(
                     StudentReferenceNumber.Empty,
                     noStudentName.Value,
-                    Grade.SpecialProgram,
+                    Grade.Empty,
                     string.Empty,
                     ContactCategory.AuroraTeacher,
                     member.Id,
@@ -129,7 +129,7 @@ internal sealed class EmergencyRecipientService : IEmergencyRecipientService
                 ContactResponse recipient = new(
                     StudentReferenceNumber.Empty,
                     noStudentName.Value,
-                    Grade.SpecialProgram,
+                    Grade.Empty,
                     string.Empty,
                     ContactCategory.AuroraTeacher,
                     member.Id,
@@ -171,7 +171,7 @@ internal sealed class EmergencyRecipientService : IEmergencyRecipientService
                 ContactResponse recipient = new(
                     StudentReferenceNumber.Empty,
                     noStudentName.Value,
-                    Grade.SpecialProgram,
+                    Grade.Empty,
                     string.Empty,
                     ContactCategory.AuroraTeacher,
                     member.Id,
@@ -212,7 +212,7 @@ internal sealed class EmergencyRecipientService : IEmergencyRecipientService
                 ContactResponse recipient = new(
                     StudentReferenceNumber.Empty,
                     noStudentName.Value,
-                    Grade.SpecialProgram,
+                    Grade.Empty,
                     string.Empty,
                     ContactCategory.AuroraTeacher,
                     member.Id,
@@ -234,7 +234,7 @@ internal sealed class EmergencyRecipientService : IEmergencyRecipientService
                 ContactResponse recipient = new(
                     student.StudentReferenceNumber,
                     student.Name,
-                    enrolment?.Grade ?? Grade.SpecialProgram,
+                    enrolment?.Grade ?? Grade.Empty,
                     enrolment?.SchoolName ?? string.Empty,
                     ContactCategory.Student,
                     student.Id,
@@ -288,7 +288,7 @@ internal sealed class EmergencyRecipientService : IEmergencyRecipientService
                 ContactResponse recipient = new(
                     student.StudentReferenceNumber,
                     student.Name,
-                    enrolment?.Grade ?? Grade.SpecialProgram,
+                    enrolment?.Grade ?? Grade.Empty,
                     enrolment?.SchoolName ?? string.Empty,
                     ContactCategory.Student,
                     student.Id,
@@ -341,7 +341,7 @@ internal sealed class EmergencyRecipientService : IEmergencyRecipientService
                 ContactResponse recipient = new(
                     student.StudentReferenceNumber,
                     student.Name,
-                    enrolment?.Grade ?? Grade.SpecialProgram,
+                    enrolment?.Grade ?? Grade.Empty,
                     enrolment?.SchoolName ?? string.Empty,
                     ContactCategory.Student,
                     student.Id,
@@ -367,7 +367,7 @@ internal sealed class EmergencyRecipientService : IEmergencyRecipientService
                         ContactResponse recipient = new(
                             StudentReferenceNumber.Empty,
                             noStudentName.Value,
-                            Grade.SpecialProgram,
+                            Grade.Empty,
                             assignment.SchoolName,
                             ContactCategory.PartnerSchoolACC,
                             contact.Id,
@@ -383,7 +383,7 @@ internal sealed class EmergencyRecipientService : IEmergencyRecipientService
                         ContactResponse recipient = new(
                             StudentReferenceNumber.Empty,
                             schoolName.Value,
-                            Grade.SpecialProgram,
+                            Grade.Empty,
                             assignment.SchoolName,
                             ContactCategory.PartnerSchoolACC,
                             contact.Id,
@@ -456,7 +456,7 @@ internal sealed class EmergencyRecipientService : IEmergencyRecipientService
                         ContactResponse recipient = new(
                             StudentReferenceNumber.Empty,
                             noStudentName.Value,
-                            Grade.SpecialProgram,
+                            Grade.Empty,
                             assignment.SchoolName,
                             ContactCategory.PartnerSchoolACC,
                             contact.Id,
@@ -472,7 +472,7 @@ internal sealed class EmergencyRecipientService : IEmergencyRecipientService
                         ContactResponse recipient = new(
                             StudentReferenceNumber.Empty,
                             schoolName.Value,
-                            Grade.SpecialProgram,
+                            Grade.Empty,
                             assignment.SchoolName,
                             ContactCategory.PartnerSchoolACC,
                             contact.Id,
@@ -542,7 +542,7 @@ internal sealed class EmergencyRecipientService : IEmergencyRecipientService
                         ContactResponse recipient = new(
                             StudentReferenceNumber.Empty,
                             noStudentName.Value,
-                            Grade.SpecialProgram,
+                            Grade.Empty,
                             assignment.SchoolName,
                             ContactCategory.PartnerSchoolACC,
                             contact.Id,
@@ -558,7 +558,7 @@ internal sealed class EmergencyRecipientService : IEmergencyRecipientService
                         ContactResponse recipient = new(
                             StudentReferenceNumber.Empty,
                             schoolName.Value,
-                            Grade.SpecialProgram,
+                            Grade.Empty,
                             assignment.SchoolName,
                             ContactCategory.PartnerSchoolACC,
                             contact.Id,
@@ -595,7 +595,7 @@ internal sealed class EmergencyRecipientService : IEmergencyRecipientService
                         ContactResponse recipient = new(
                             student.StudentReferenceNumber,
                             student.Name,
-                            student.CurrentEnrolment?.Grade ?? Grade.SpecialProgram,
+                            student.CurrentEnrolment?.Grade ?? Grade.Empty,
                             student.CurrentEnrolment?.SchoolName ?? string.Empty,
                             ContactCategory.ResidentialFamily,
                             family.Id,
@@ -618,7 +618,7 @@ internal sealed class EmergencyRecipientService : IEmergencyRecipientService
                             recipients.Add(new(
                                 student.StudentReferenceNumber,
                                 student.Name,
-                                student.CurrentEnrolment?.Grade ?? Grade.SpecialProgram,
+                                student.CurrentEnrolment?.Grade ?? Grade.Empty,
                                 student.CurrentEnrolment?.SchoolName ?? string.Empty,
                                 category,
                                 parent.Id,
@@ -685,7 +685,7 @@ internal sealed class EmergencyRecipientService : IEmergencyRecipientService
                         ContactResponse recipient = new(
                             student.StudentReferenceNumber,
                             student.Name,
-                            student.CurrentEnrolment?.Grade ?? Grade.SpecialProgram,
+                            student.CurrentEnrolment?.Grade ?? Grade.Empty,
                             student.CurrentEnrolment?.SchoolName ?? string.Empty,
                             ContactCategory.ResidentialFamily,
                             family.Id,
@@ -708,7 +708,7 @@ internal sealed class EmergencyRecipientService : IEmergencyRecipientService
                             recipients.Add(new(
                                 student.StudentReferenceNumber,
                                 student.Name,
-                                student.CurrentEnrolment?.Grade ?? Grade.SpecialProgram,
+                                student.CurrentEnrolment?.Grade ?? Grade.Empty,
                                 student.CurrentEnrolment?.SchoolName ?? string.Empty,
                                 category,
                                 parent.Id,
@@ -775,7 +775,7 @@ internal sealed class EmergencyRecipientService : IEmergencyRecipientService
                         ContactResponse recipient = new(
                             student.StudentReferenceNumber,
                             student.Name,
-                            student.CurrentEnrolment?.Grade ?? Grade.SpecialProgram,
+                            student.CurrentEnrolment?.Grade ?? Grade.Empty,
                             student.CurrentEnrolment?.SchoolName ?? string.Empty,
                             ContactCategory.ResidentialFamily,
                             family.Id,
@@ -798,7 +798,7 @@ internal sealed class EmergencyRecipientService : IEmergencyRecipientService
                             recipients.Add(new(
                                 student.StudentReferenceNumber,
                                 student.Name,
-                                student.CurrentEnrolment?.Grade ?? Grade.SpecialProgram,
+                                student.CurrentEnrolment?.Grade ?? Grade.Empty,
                                 student.CurrentEnrolment?.SchoolName ?? string.Empty,
                                 category,
                                 parent.Id,

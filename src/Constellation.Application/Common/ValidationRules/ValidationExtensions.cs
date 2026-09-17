@@ -1,18 +1,24 @@
-﻿using FluentValidation;
+﻿namespace Constellation.Application.Common.ValidationRules;
 
-namespace Constellation.Application.Common.ValidationRules
+using FluentValidation;
+
+public static class ValidationExtensions
 {
-    public static class ValidationExtensions
+    public static IRuleBuilderOptions<T, TElement> MustBeValidPhoneNumber<T, TElement>(this IRuleBuilder<T, TElement> ruleBuilder)
     {
-        public static IRuleBuilderOptions<T, TElement> MustBeValidPhoneNumber<T, TElement>(this IRuleBuilder<T, TElement> ruleBuilder)
-        {
-            return ruleBuilder
-                .Must(number => number.ToString().StartsWith("0011") ||
-                        number.ToString().Length == 10 && (
-                             number.ToString().StartsWith("02") || number.ToString().StartsWith("03") ||
-                             number.ToString().StartsWith("04") || number.ToString().StartsWith("07") ||
-                             number.ToString().StartsWith("08") || number.ToString().StartsWith("13")))
-                .WithMessage($"The phone number is not valid.");
-        }
+        return ruleBuilder
+            .Must(number =>
+            {
+                var value = number?.ToString();
+                if (value is null)
+                    return false;
+
+                return value.StartsWith("0011") ||
+                       (value.Length == 10 && (
+                           value.StartsWith("02") || value.StartsWith("03") ||
+                           value.StartsWith("04") || value.StartsWith("07") ||
+                           value.StartsWith("08") || value.StartsWith("13")));
+            })
+            .WithMessage("The phone number is not valid.");
     }
 }

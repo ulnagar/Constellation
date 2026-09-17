@@ -203,7 +203,7 @@ internal sealed class CreateTransactionCommandHandler
         Transaction transaction = Transaction.Create(
             transactionId,
             student.Name,
-            student.CurrentEnrolment?.Grade ?? Grade.SpecialProgram,
+            student.CurrentEnrolment?.Grade ?? Grade.Empty,
             request.SubmittedBy,
             emailAddress.Value,
             submittedTime,

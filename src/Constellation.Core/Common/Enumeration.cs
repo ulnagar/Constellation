@@ -1,8 +1,8 @@
-﻿#nullable enable
-namespace Constellation.Core.Common;
+﻿namespace Constellation.Core.Common;
 
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Reflection;
 
@@ -22,8 +22,8 @@ public abstract class IntEnumeration<TEnum> : IEquatable<IntEnumeration<TEnum>>,
         Name = name;
     }
 
-    public int Value { get; protected init; }
-    public string Name { get; protected init; } = string.Empty;
+    public int Value { get; }
+    public string Name { get; } = string.Empty;
 
     public static TEnum? FromValue(int value) =>
         Enumerations.GetValueOrDefault(value);
@@ -33,7 +33,7 @@ public abstract class IntEnumeration<TEnum> : IEquatable<IntEnumeration<TEnum>>,
             .Values
             .SingleOrDefault(e => e.Name == name);
 
-    public static IEnumerable<TEnum> GetEnumerable = CreateEnumerations()
+    protected static readonly IEnumerable<TEnum> GetEnumerable = CreateEnumerations()
         .Select(entry => entry.Value)
         .AsEnumerable();
 
@@ -69,7 +69,7 @@ public abstract class IntEnumeration<TEnum> : IEquatable<IntEnumeration<TEnum>>,
             .Where(fieldInfo =>
                 enumerationType.IsAssignableFrom(fieldInfo.FieldType))
             .Select(fieldInfo =>
-                (TEnum)fieldInfo.GetValue(default)!);
+                (TEnum)fieldInfo.GetValue(null)!);
 
         return fieldsForType.ToDictionary(x => x.Value);
     }
@@ -85,7 +85,7 @@ public abstract class IntEnumeration<TEnum> : IEquatable<IntEnumeration<TEnum>>,
         return Value.CompareTo(incomingObject.Value);
     }
 
-    public IEnumerable<object> GetAtomicValues()
+    private IEnumerable<object> GetAtomicValues()
     {
         yield return Value;
     }
@@ -96,7 +96,7 @@ public abstract class IntEnumeration<TEnum> : IEquatable<IntEnumeration<TEnum>>,
             GetAtomicValues().SequenceEqual(other.GetAtomicValues());
     }
 
-    protected static bool EqualOperator(IntEnumeration<TEnum>? left, IntEnumeration<TEnum>? right)
+    private static bool EqualOperator(IntEnumeration<TEnum>? left, IntEnumeration<TEnum>? right)
     {
         if (left is null ^ right is null)
             return false;
@@ -110,7 +110,7 @@ public abstract class IntEnumeration<TEnum> : IEquatable<IntEnumeration<TEnum>>,
         return left.ValuesAreEqual(right);
     }
 
-    protected static bool NotEqualOperator(IntEnumeration<TEnum>? left, IntEnumeration<TEnum>? right)
+    private static bool NotEqualOperator(IntEnumeration<TEnum>? left, IntEnumeration<TEnum>? right)
     {
         return !(EqualOperator(left, right));
     }
@@ -124,12 +124,32 @@ public abstract class IntEnumeration<TEnum> : IEquatable<IntEnumeration<TEnum>>,
     {
         return NotEqualOperator(left, right);
     }
+
+    public static bool operator <(IntEnumeration<TEnum> left, IntEnumeration<TEnum> right)
+    {
+        return ReferenceEquals(left, null) ? !ReferenceEquals(right, null) : left.CompareTo(right) < 0;
+    }
+
+    public static bool operator <=(IntEnumeration<TEnum> left, IntEnumeration<TEnum> right)
+    {
+        return ReferenceEquals(left, null) || left.CompareTo(right) <= 0;
+    }
+
+    public static bool operator >(IntEnumeration<TEnum> left, IntEnumeration<TEnum> right)
+    {
+        return !ReferenceEquals(left, null) && left.CompareTo(right) > 0;
+    }
+
+    public static bool operator >=(IntEnumeration<TEnum> left, IntEnumeration<TEnum> right)
+    {
+        return ReferenceEquals(left, null) ? ReferenceEquals(right, null) : left.CompareTo(right) >= 0;
+    }
 }
 
 public abstract class StringEnumeration<TEnum> : IEquatable<StringEnumeration<TEnum>>, IComparable
     where TEnum : StringEnumeration<TEnum>
 {
-    private static readonly Dictionary<string, TEnum> Enumerations = CreateEnumerations();
+    private static readonly Dictionary<string, TEnum> _enumerations = CreateEnumerations();
     
     protected StringEnumeration(string value, string name)
     {
@@ -144,25 +164,25 @@ public abstract class StringEnumeration<TEnum> : IEquatable<StringEnumeration<TE
         Order = order;
     }
 
-    public static IEnumerable<TEnum> GetEnumerable = CreateEnumerations()
+    protected static readonly IEnumerable<TEnum> GetEnumerable = CreateEnumerations()
         .Select(entry => entry.Value)
         .Where(entry => !string.IsNullOrWhiteSpace(entry.Value))
         .AsEnumerable();
 
     public string Value { get; protected init; }
     public string Name { get; protected init; }
-    public int Order { get; protected init; }
+    public int Order { get; }
 
     public static TEnum? FromValue(string? value)
     {
         if (string.IsNullOrWhiteSpace(value))
             return null;
 
-        return Enumerations.GetValueOrDefault(value);
+        return _enumerations.GetValueOrDefault(value);
     }
 
     public static TEnum? FromName(string name) =>
-        Enumerations
+        _enumerations
             .Values
             .SingleOrDefault(e => e.Name == name);
 
@@ -182,7 +202,7 @@ public abstract class StringEnumeration<TEnum> : IEquatable<StringEnumeration<TE
                Equals(other);
     }
 
-    public override int GetHashCode() => Value.GetHashCode();
+    public override int GetHashCode() => Value.GetHashCode(StringComparison.InvariantCulture);
 
     public override string ToString() => Name;
 
@@ -191,9 +211,9 @@ public abstract class StringEnumeration<TEnum> : IEquatable<StringEnumeration<TE
         if (obj is not TEnum incomingObject)
             return -1;
 
-        return incomingObject?.Order == 0 
-            ? string.Compare(Value, incomingObject?.Value, StringComparison.OrdinalIgnoreCase) 
-            : string.CompareOrdinal(Order.ToString(), incomingObject?.Order.ToString());
+        return incomingObject.Order == 0 
+            ? string.Compare(Value, incomingObject.Value, StringComparison.OrdinalIgnoreCase) 
+            : string.CompareOrdinal(Order.ToString(CultureInfo.InvariantCulture), incomingObject.Order.ToString(CultureInfo.InvariantCulture));
     }
 
     private static Dictionary<string, TEnum> CreateEnumerations()
@@ -208,12 +228,12 @@ public abstract class StringEnumeration<TEnum> : IEquatable<StringEnumeration<TE
             .Where(fieldInfo =>
                 enumerationType.IsAssignableFrom(fieldInfo.FieldType))
             .Select(fieldInfo =>
-                (TEnum)fieldInfo.GetValue(default)!);
+                (TEnum)fieldInfo.GetValue(null)!);
 
         return fieldsForType.ToDictionary(x => x.Value);
     }
 
-    public IEnumerable<object> GetAtomicValues()
+    private IEnumerable<object> GetAtomicValues()
     {
         yield return Value;
     }
@@ -224,7 +244,7 @@ public abstract class StringEnumeration<TEnum> : IEquatable<StringEnumeration<TE
             .SequenceEqual(other.GetAtomicValues());
     }
 
-    protected static bool EqualOperator(StringEnumeration<TEnum>? left, StringEnumeration<TEnum>? right)
+    private static bool EqualOperator(StringEnumeration<TEnum>? left, StringEnumeration<TEnum>? right)
     {
         if (left is null ^ right is null)
             return false;
@@ -238,7 +258,7 @@ public abstract class StringEnumeration<TEnum> : IEquatable<StringEnumeration<TE
         return left.ValuesAreEqual(right);
     }
 
-    protected static bool NotEqualOperator(StringEnumeration<TEnum> left, StringEnumeration<TEnum> right)
+    private static bool NotEqualOperator(StringEnumeration<TEnum> left, StringEnumeration<TEnum> right)
     {
         return !(EqualOperator(left, right));
     }
@@ -253,4 +273,23 @@ public abstract class StringEnumeration<TEnum> : IEquatable<StringEnumeration<TE
         return NotEqualOperator(left, right);
     }
 
+    public static bool operator <(StringEnumeration<TEnum> left, StringEnumeration<TEnum> right)
+    {
+        return ReferenceEquals(left, null) ? !ReferenceEquals(right, null) : left.CompareTo(right) < 0;
+    }
+
+    public static bool operator <=(StringEnumeration<TEnum> left, StringEnumeration<TEnum> right)
+    {
+        return ReferenceEquals(left, null) || left.CompareTo(right) <= 0;
+    }
+
+    public static bool operator >(StringEnumeration<TEnum> left, StringEnumeration<TEnum> right)
+    {
+        return !ReferenceEquals(left, null) && left.CompareTo(right) > 0;
+    }
+
+    public static bool operator >=(StringEnumeration<TEnum> left, StringEnumeration<TEnum> right)
+    {
+        return ReferenceEquals(left, null) ? ReferenceEquals(right, null) : left.CompareTo(right) >= 0;
+    }
 }
