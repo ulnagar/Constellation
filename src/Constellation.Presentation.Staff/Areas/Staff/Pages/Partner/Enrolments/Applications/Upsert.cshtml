@@ -208,7 +208,7 @@
         <div class="mb-3 row">
             <label asp-for="Grade" class="col-md-2">Grade</label>
             <div class="col-md-3">
-                <select asp-for="Grade" asp-items="Html.GetEnumSelectList<Grade>()" class="form-control custom-select2">
+                <select asp-for="Grade" asp-items="@Model.GradeList" class="form-control custom-select2">
                     <option value=""> -- Select -- </option>
                 </select>
                 <span asp-validation-for="Grade" class="text-danger"></span>

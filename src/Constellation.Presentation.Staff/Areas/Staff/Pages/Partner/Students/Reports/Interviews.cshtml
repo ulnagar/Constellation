@@ -27,9 +27,9 @@
             <label asp-for="Grades" class="col-md-2">All Grades</label>
             <div class="col-md-3">
                 <select id="allGrades" multiple="multiple" name="allGrades" class="form-control">
-                    @foreach (var entry in Html.GetEnumSelectList<Grade>())
+                    @foreach (var entry in Grade.GetOptions.Where(grade => grade.Order > 0).OrderBy(grade => grade.Order))
                     {
-                        <option value="@entry.Value">@entry.Text</option>
+                        <option value="@entry.Value">@entry.Name</option>
                     }
                 </select>
                 <span asp-validation-for="Grades" class="text-danger"></span>

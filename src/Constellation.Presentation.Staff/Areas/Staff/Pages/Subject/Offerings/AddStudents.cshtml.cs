@@ -51,7 +51,7 @@ public class AddStudentsModel : BasePageModel
     public OfferingId Id { get; set; } = OfferingId.Empty;
 
     [BindProperty(SupportsGet = true)] 
-    public Grade? Grade { get; set; } = null;
+    public Grade Grade { get; set; } = Grade.Empty;
 
     public string CourseName { get; set; }
     public string OfferingName { get; set; }
@@ -133,7 +133,7 @@ public class AddStudentsModel : BasePageModel
         }
         else
         {
-            Result<List<StudentResponse>> studentsRequest = await _mediator.Send(new GetCurrentStudentsFromGradeQuery(Grade.Value));
+            Result<List<StudentResponse>> studentsRequest = await _mediator.Send(new GetCurrentStudentsFromGradeQuery(Grade));
 
             if (studentsRequest.IsFailure)
             {

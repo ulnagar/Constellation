@@ -82,6 +82,8 @@ public class UpsertModel : BasePageModel
 
     public SelectList GenderList { get; set; }
 
+    public SelectList GradeList { get; set; }
+
     public async Task OnGet()
     {
         await PreparePage();
@@ -115,7 +117,7 @@ public class UpsertModel : BasePageModel
         PreferredName = student.Value.Name.PreferredName;
         LastName = student.Value.Name.LastName;
         Gender = student.Value.Gender;
-        Grade = student.Value.Grade!.Value;
+        Grade = student.Value.Grade!;
         EmailAddress = student.Value.EmailAddress.Email;
         SchoolCode = student.Value.SchoolCode;
 
@@ -281,6 +283,8 @@ public class UpsertModel : BasePageModel
         IEnumerable<Gender> genders = Gender.GetOptions;
 
         GenderList = new(genders, "Value", "Value");
+
+        GradeList = new(Grade.GetOptions.Where(grade => grade.Order > 0), nameof(Grade.Value), nameof(Grade.Name));
 
         Result<List<SchoolSelectionListResponse>> schools = await _mediator.Send(new GetSchoolsForSelectionListQuery());
 

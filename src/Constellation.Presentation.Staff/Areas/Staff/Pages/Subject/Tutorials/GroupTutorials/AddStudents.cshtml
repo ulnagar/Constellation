@@ -14,12 +14,9 @@
 
 <h4>Select students to be enrolled in @Model.TutorialName</h4>
 
-@foreach (var grade in Enum.GetValues<Grade>())
+@foreach (var grade in Grade.GetOptions.Where(grade => grade.Order > 0))
 {
-    @if (grade != Grade.SpecialProgram)
-    {
-        <a asp-route-grade="@grade" class="btn @(Model.Grade == grade ? "btn-success" : "btn-info")">@grade.AsName()</a>
-    }
+    <a asp-route-grade="@grade" class="btn @(Model.Grade == grade ? "btn-success" : "btn-info")">@grade.Name</a>
 }
 
 <form method="post">

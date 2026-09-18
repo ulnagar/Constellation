@@ -16,6 +16,7 @@ using Constellation.Presentation.Staff.Areas;
 using Core.Abstractions.Services;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using Presentation.Shared.Extensions;
 using Serilog;
 using System.ComponentModel.DataAnnotations;
@@ -63,6 +64,7 @@ public class UpsertModel : BasePageModel
     public bool RequiresSciencePracLesson { get; set; }
 
     public List<FacultySummaryResponse> Faculties { get; set; } = new();
+    public SelectList GradeList { get; set; }
 
     public async Task OnGet()
     {
@@ -189,5 +191,8 @@ public class UpsertModel : BasePageModel
         }
 
         Faculties = facultyRequest.Value;
+
+        GradeList = new SelectList(Grade.GetOptions.Where(grade => grade.Order > 0), nameof(Grade.Value),
+            nameof(Grade.Name));
     }
 }

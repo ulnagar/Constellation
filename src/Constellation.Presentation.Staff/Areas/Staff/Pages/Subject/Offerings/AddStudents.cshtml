@@ -1,8 +1,7 @@
 ﻿@page "{id:guid}"
+@model Constellation.Presentation.Staff.Areas.Staff.Pages.Subject.Offerings.AddStudentsModel
 
 @using Constellation.Core.Enums
-@using Constellation.Core.Extensions
-@model Constellation.Presentation.Staff.Areas.Staff.Pages.Subject.Offerings.AddStudentsModel
 
 <h2>Enrol Students</h2>
 
@@ -14,18 +13,15 @@
 
 <h4>Select students to be enrolled in @Model.CourseName @Model.OfferingName</h4>
 
-@foreach (var grade in Enum.GetValues<Grade>())
+@foreach (var grade in Grade.GetOptions.Where(grade => grade.Order > 0))
 {
-    @if (grade != Grade.SpecialProgram)
-    {
-        <a asp-route-grade="@grade" class="btn btn-info">@grade.AsName()</a>
-    }
+    <a asp-route-grade="@grade" class="btn btn-info">@grade.Name</a>
 }
 
 <form method="post">
     <div class="row">
         <div class="col">
-            <label class="text-bold">Existing @(Model.Grade.HasValue ? Model.Grade.Value.AsName() : "") Enrolments:</label>
+            <label class="text-bold">Existing @(Model.Grade != Grade.Empty ? Model.Grade.Name : "") Enrolments:</label>
             <div>
                 @foreach (var entry in Model.ExistingEnrolments)
                 {

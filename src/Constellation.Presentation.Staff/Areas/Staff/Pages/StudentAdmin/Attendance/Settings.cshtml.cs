@@ -21,6 +21,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.Routing;
 using Presentation.Shared.Extensions;
 using Presentation.Shared.Helpers.Attributes;
+using Presentation.Shared.Helpers.ModelBinders;
 using Serilog;
 using System.ComponentModel.DataAnnotations;
 using System.Threading;
@@ -63,8 +64,10 @@ public class SettingsModel : BasePageModel
     [BindProperty]
     [ValidateNever]
     public SchoolCode SchoolCode { get; set; } = SchoolCode.Empty;
+
     [BindProperty]
-    public int? Grade { get; set; }
+    [ModelBinder(typeof(BaseFromValueBinder))]
+    public Grade Grade { get; set; } = Grade.Empty;
 
     [BindProperty]
     public string Type { get; set; }
@@ -77,7 +80,7 @@ public class SettingsModel : BasePageModel
 
     public async Task<IActionResult> OnPost(CancellationToken cancellationToken = default)
     {
-        if (StudentId == StudentId.Empty && SchoolCode == SchoolCode.Empty && !Grade.HasValue)
+        if (StudentId == StudentId.Empty && SchoolCode == SchoolCode.Empty && Grade != Grade.Empty)
         {
             Error error = new("Validation.Page.EmptyValues", "You must select a value for Student or Grade or School to continue");
 
@@ -221,6 +224,6 @@ public class SettingsModel : BasePageModel
 
         Schools = new SelectList(schools.Value, "Code", "Name");
 
-        Grades = new SelectList(Enum.GetValues(typeof(Grade)).Cast<Grade>().Select(v => new { Text = v.GetDisplayName(), Value = ((int)v).ToString() }).ToList(), "Value", "Text");
+        Grades = new SelectList(Grade.GetOptions.Where(grade => grade.Order > 0), nameof(Grade.Value), nameof(Grade.Name));
     }
 }

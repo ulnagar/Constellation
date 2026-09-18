@@ -3,6 +3,7 @@
 using Application.Domains.Schools.Models;
 using Core.Enums;
 using Core.Models.Identifiers;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using System.Collections.Generic;
 
 public sealed class BulkCancelSciencePracRollsSelection
@@ -12,4 +13,6 @@ public sealed class BulkCancelSciencePracRollsSelection
     public List<SchoolCode> SelectedSchoolCodes { get; set; } = new();
     public List<Grade> SelectedGrades { get; set; } = new();
     public string Comment { get; set; } = string.Empty;
+
+    public SelectList GradeList { get; set; }
 }

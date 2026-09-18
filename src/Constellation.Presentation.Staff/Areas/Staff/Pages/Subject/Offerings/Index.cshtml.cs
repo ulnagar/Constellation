@@ -72,7 +72,7 @@ public class IndexModel : BasePageModel
         Offerings = SelectedGrade switch
         {
             GradeDto.All => Offerings,
-            var g => Offerings.Where(offering => (int)offering.Grade == (int)g).ToList()
+            var g => Offerings.Where(offering => offering.Grade.Order == (int)g).ToList()
         };
 
         Offerings = SelectedFaculty switch

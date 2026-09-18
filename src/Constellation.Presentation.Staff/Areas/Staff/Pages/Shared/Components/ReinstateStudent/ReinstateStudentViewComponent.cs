@@ -2,6 +2,7 @@
 
 using Application.Domains.Schools.Models;
 using Application.Domains.Schools.Queries.GetSchoolsForSelectionList;
+using Core.Enums;
 using Core.Models.Students.Identifiers;
 using Core.Shared;
 using MediatR;
@@ -27,7 +28,8 @@ public sealed class ReinstateStudentViewComponent : ViewComponent
 
         ReinstateStudentSelection viewModel = new()
         {
-            SchoolList = new SelectList(schools.Value.OrderBy(entry => entry.Name), "Code", "Name")
+            SchoolList = new SelectList(schools.Value.OrderBy(entry => entry.Name), "Code", "Name"),
+            GradeList = new SelectList(Grade.GetOptions.Where(grade => grade.Order > 0), nameof(Grade.Value), nameof(Grade.Name))
         };
 
         return View(viewModel);

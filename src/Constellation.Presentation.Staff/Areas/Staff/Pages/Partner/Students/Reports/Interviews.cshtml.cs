@@ -10,6 +10,7 @@ using Constellation.Application.Domains.Offerings.Queries.GetOfferingsForSelecti
 using Constellation.Core.Models.Offerings.Identifiers;
 using Constellation.Presentation.Shared.Helpers.Attributes;
 using Core.Abstractions.Services;
+using Core.Enums;
 using Core.Shared;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
@@ -47,7 +48,7 @@ public class InterviewsModel : BasePageModel
     [ViewData] public string PageTitle => "PTO Setup";
 
     [BindProperty]
-    public List<int> Grades { get; set; }
+    public List<Grade> Grades { get; set; }
     
     [BindProperty]
     public List<OfferingId> ClassList { get; set; }

@@ -23,7 +23,7 @@
                     <div class="row">
                         <div class="form-group col">
                             <label asp-for="SelectedGrades">Grades</label>
-                            <select asp-for="SelectedGrades" asp-items="@Html.GetEnumSelectList<Grade>()" class="combo" data-select2-id="RemoveRolls.Grade" multiple="multiple">
+                            <select asp-for="SelectedGrades" asp-items="@Model.GradeList" class="combo" data-select2-id="RemoveRolls.Grade" multiple="multiple">
                                 <option value=""> -- Select Grade -- </option>
                             </select>
                         </div>

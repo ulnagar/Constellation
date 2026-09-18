@@ -13,4 +13,5 @@ public sealed class TransferStudentSelection
     public DateOnly StartDate { get; set; }
 
     public required SelectList SchoolList { get; set; }
+    public required SelectList GradeList { get; set; }
 }

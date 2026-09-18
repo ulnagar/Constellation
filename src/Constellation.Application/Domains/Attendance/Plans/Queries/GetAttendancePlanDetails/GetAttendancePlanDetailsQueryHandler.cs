@@ -146,7 +146,7 @@ internal sealed class GetAttendancePlanDetailsQueryHandler
 
         List<AttendancePlanDetailsResponse.AlternatePercentage> alternatePercentages = new();
 
-        foreach (Timetable timetable in Timetable.GetEnumerable)
+        foreach (Timetable timetable in Timetable.GetOptions)
         {
             List<Offering> offerings = [];
 

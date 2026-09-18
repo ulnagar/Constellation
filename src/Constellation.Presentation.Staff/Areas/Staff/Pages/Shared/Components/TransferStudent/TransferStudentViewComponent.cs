@@ -4,6 +4,7 @@ using Application.Domains.Schools.Models;
 using Application.Domains.Schools.Queries.GetSchoolsForSelectionList;
 using Constellation.Core.Shared;
 using Core.Abstractions.Clock;
+using Core.Enums;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
@@ -32,6 +33,7 @@ public sealed class TransferStudentViewComponent : ViewComponent
         TransferStudentSelection viewModel = new()
         {
             SchoolList = new SelectList(schools.Value.OrderBy(entry => entry.Name), "Code", "Name"),
+            GradeList = new SelectList(Grade.GetOptions.Where(grade => grade.Order > 0), nameof(Grade.Value), nameof(Grade.Name)),
             StartDate = _dateTime.Today
         };
 

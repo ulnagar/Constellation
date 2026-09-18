@@ -69,8 +69,8 @@ public class UpsertModel : BasePageModel
     {
         if (Id == PeriodId.Empty)
         {
-            Timetables = new SelectList(Timetable.GetEnumerable, nameof(Timetable.Code), nameof(Timetable.Name));
-            PeriodTypes = new SelectList(PeriodType.GetEnumerable, nameof(PeriodType.Value), nameof(PeriodType.Name));
+            Timetables = new SelectList(Timetable.GetOptions, nameof(Timetable.Code), nameof(Timetable.Name));
+            PeriodTypes = new SelectList(PeriodType.GetOptions, nameof(PeriodType.Value), nameof(PeriodType.Name));
 
             return;
         }
@@ -102,8 +102,8 @@ public class UpsertModel : BasePageModel
 
         PageTitle = $"Edit - {Name}";
 
-        Timetables = new SelectList(Timetable.GetEnumerable, nameof(Timetable.Code), nameof(Timetable.Name), TimetableCode);
-        PeriodTypes = new SelectList(PeriodType.GetEnumerable, nameof(PeriodType.Value), nameof(PeriodType.Name), PeriodTypeCode);
+        Timetables = new SelectList(Timetable.GetOptions, nameof(Timetable.Code), nameof(Timetable.Name), TimetableCode);
+        PeriodTypes = new SelectList(PeriodType.GetOptions, nameof(PeriodType.Value), nameof(PeriodType.Name), PeriodTypeCode);
     }
 
     public async Task<IActionResult> OnPost()

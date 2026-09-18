@@ -11,4 +11,7 @@ public class PeriodType : StringEnumeration<PeriodType>
     private PeriodType(string value, string name)
         : base(value, name)
     { }
+
+
+    public static IEnumerable<PeriodType> GetOptions => GetEnumerable;
 }

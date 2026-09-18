@@ -10,5 +10,5 @@ public sealed class ReinstateStudentSelection
     public Grade Grade { get; set; }
 
     public required SelectList SchoolList { get; set; }
-
+    public required SelectList GradeList { get; set; }
 }

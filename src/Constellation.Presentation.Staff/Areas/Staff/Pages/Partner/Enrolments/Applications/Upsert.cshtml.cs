@@ -109,6 +109,7 @@ public class UpsertModel : PeriodScopedPageModel
     [ModelBinder(typeof(BaseFromValueBinder))]
     public Program Program { get; set; } = Program.Empty;
     [BindProperty]
+    [ModelBinder(typeof(BaseFromValueBinder))]
     public Grade Grade { get; set; }
 
     [BindProperty]
@@ -117,6 +118,7 @@ public class UpsertModel : PeriodScopedPageModel
     public IEnumerable<SelectListItem> SchoolList { get; set; }
     public SelectList ProgramList { get; set; }
     public SelectList GenderList { get; set; }
+    public SelectList GradeList { get; set; }
     public IEnumerable<SelectListItem> CoursesList { get; set; }
 
     public async Task OnGet()
@@ -218,6 +220,12 @@ public class UpsertModel : PeriodScopedPageModel
             nameof(Gender.Value),
             nameof(Gender.Name),
             StudentGender?.Value);
+
+        GradeList = new SelectList(
+            Grade.GetOptions.Where(grade => grade.Order > 0),
+            nameof(Grade.Value),
+            nameof(Grade.Name),
+            Grade.Value);
 
         if (Period.AvailableCourses.Count > 0)
         {
@@ -349,7 +357,7 @@ public class UpsertModel : PeriodScopedPageModel
         if (Program == Program.Empty)
             ModelState.AddModelError(nameof(Program), "Program is required");
 
-        if (Grade == 0)
+        if (Grade == Grade.Empty)
         {
             ModelState.Remove(nameof(Grade));
             ModelState.AddModelError(nameof(Grade), "Grade is required");

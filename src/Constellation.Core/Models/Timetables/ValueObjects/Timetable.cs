@@ -46,7 +46,7 @@ public class Timetable : ValueObject<Timetable, string>, IValueObject<Timetable,
         return null;
     }
 
-    public static IEnumerable<Timetable> GetEnumerable = _enumerations
+    public static IEnumerable<Timetable> GetOptions = _enumerations
         .Select(entry => entry.Value)
         .AsEnumerable();
 
