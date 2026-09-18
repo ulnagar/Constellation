@@ -7,8 +7,8 @@ using Constellation.Core.Models.Students.Errors;
 using Constellation.Core.Models.Students.Identifiers;
 using Constellation.Core.Models.Students.Repositories;
 using Core.Abstractions.Repositories;
-using Core.Errors;
 using Core.Models.GroupTutorials;
+using Core.Models.GroupTutorials.Errors;
 using Core.Shared;
 using Serilog;
 using System.Threading;
@@ -37,21 +37,21 @@ internal sealed class AddMultipleStudentsToTutorialCommandHandler
 
     public async Task<Result> Handle(AddMultipleStudentsToTutorialCommand request, CancellationToken cancellationToken)
     {
-        GroupTutorial tutorial = await _tutorialRepository.GetById(request.TutorialId, cancellationToken);
+        GroupTutorial? tutorial = await _tutorialRepository.GetById(request.TutorialId, cancellationToken);
 
         if (tutorial is null)
         {
             _logger
                 .ForContext(nameof(AddMultipleStudentsToTutorialCommand), request, true)
-                .ForContext(nameof(Error), DomainErrors.GroupTutorials.GroupTutorial.NotFound(request.TutorialId), true)
+                .ForContext(nameof(Error), GroupTutorialErrors.NotFound(request.TutorialId), true)
                 .Warning("Could not create Enrolments for multiple Students");
 
-            return Result.Failure(DomainErrors.GroupTutorials.GroupTutorial.NotFound(request.TutorialId));
+            return Result.Failure(GroupTutorialErrors.NotFound(request.TutorialId));
         }
 
         foreach (StudentId studentId in request.StudentIds)
         {
-            Student student = await _studentRepository.GetById(studentId, cancellationToken);
+            Student? student = await _studentRepository.GetById(studentId, cancellationToken);
 
             if (student is null)
             {

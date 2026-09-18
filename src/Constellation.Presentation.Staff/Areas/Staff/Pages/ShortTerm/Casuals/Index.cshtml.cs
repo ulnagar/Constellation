@@ -7,6 +7,7 @@ using Application.Domains.Casuals.Models;
 using Application.Domains.Casuals.Queries.GetActiveCasuals;
 using Application.Domains.Casuals.Queries.GetAllCasuals;
 using Application.Domains.Casuals.Queries.GetInactiveCasuals;
+using Application.Models.Identity.Errors;
 using Constellation.Application.Models.Auth;
 using Constellation.Core.Models.Identifiers;
 using Core.Abstractions.Services;
@@ -56,7 +57,7 @@ public class IndexModel : BasePageModel
 
         if (!authorised.Succeeded)
         {
-            ModalContent = ErrorDisplay.Create(DomainErrors.Auth.NotAuthorised);
+            ModalContent = ErrorDisplay.Create(AuthErrors.NotAuthorised);
 
             await PreparePage(cancellationToken);
 
@@ -95,7 +96,7 @@ public class IndexModel : BasePageModel
 
         if (!authorised.Succeeded)
         {
-            ModalContent = ErrorDisplay.Create(DomainErrors.Auth.NotAuthorised);
+            ModalContent = ErrorDisplay.Create(AuthErrors.NotAuthorised);
 
             await PreparePage(cancellationToken);
 

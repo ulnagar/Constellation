@@ -3,12 +3,12 @@
 using Abstractions.Messaging;
 using AppSettings.Models;
 using Core.Abstractions.Repositories;
-using Core.Enums;
 using Core.Errors;
 using Core.Models;
 using Core.Models.SchoolContacts;
 using Core.Models.SchoolContacts.Enums;
 using Core.Models.SchoolContacts.Repositories;
+using Core.Models.Schools.Errors;
 using Core.Models.SciencePracs;
 using Core.Models.SciencePracs.Errors;
 using Core.Models.Subjects;
@@ -21,7 +21,6 @@ using DTOs.EmailRequests;
 using Extensions;
 using Interfaces.Repositories;
 using Interfaces.Services;
-using Microsoft.Extensions.Configuration;
 using Serilog;
 using System.Collections.Generic;
 using System.Linq;
@@ -86,7 +85,7 @@ internal sealed class SendLessonNotificationCommandHandler
         {
             _logger.Warning("Could not find School with Code {code}", roll.SchoolCode);
 
-            return Result.Failure(DomainErrors.Partners.School.NotFound(roll.SchoolCode));
+            return Result.Failure(SchoolErrors.NotFound(roll.SchoolCode));
         }
 
         List<LessonEmail.LessonItem> lessonItems = new();

@@ -1,11 +1,11 @@
-﻿namespace Constellation.Application.Domains.Attendance.Absences.Commands.VerifyStudenExplanation;
+﻿namespace Constellation.Application.Domains.Attendance.Absences.Commands.VerifyStudentExplanation;
 
 using Constellation.Application.Abstractions.Messaging;
-using Constellation.Application.Interfaces.Repositories;
 using Constellation.Core.Abstractions.Repositories;
-using Constellation.Core.Errors;
 using Constellation.Core.Models.Absences;
-using Constellation.Core.Shared;
+using Core.Models.Absences.Errors;
+using Core.Shared;
+using Interfaces.Repositories;
 using Serilog;
 using System.Linq;
 using System.Threading;
@@ -29,22 +29,22 @@ internal sealed class VerifyStudentExplanationCommandHandler
     }
     public async Task<Result> Handle(VerifyStudentExplanationCommand request, CancellationToken cancellationToken)
     {
-        Absence absence = await _absenceRepository.GetById(request.AbsenceId, cancellationToken);
+        Absence? absence = await _absenceRepository.GetById(request.AbsenceId, cancellationToken);
 
         if (absence is null)
         {
             _logger.Warning("Could not find absence with Id {id}", request.AbsenceId);
 
-            return Result.Failure(DomainErrors.Absences.Absence.NotFound(request.AbsenceId));
+            return Result.Failure(AbsenceErrors.NotFound(request.AbsenceId));
         }
 
-        Response response = absence.Responses.FirstOrDefault(response => response.Id == request.ResponseId);
+        Response? response = absence.Responses.FirstOrDefault(response => response.Id == request.ResponseId);
 
         if (response is null)
         {
             _logger.Warning("Could not find response with Id {response_id}", request.ResponseId);
 
-            return Result.Failure(DomainErrors.Absences.Response.NotFound(request.ResponseId));
+            return Result.Failure(AbsenceResponseErrors.NotFound(request.ResponseId));
         }
 
         response.VerifyResponse(request.UserEmail, request.Comment);

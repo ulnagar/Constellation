@@ -1,12 +1,12 @@
 ﻿namespace Constellation.Application.Domains.Training.Queries.GetListOfCertificatesForStaffMemberWithNotCompletedModules;
 
 using Abstractions.Messaging;
-using Core.Errors;
 using Core.Models;
 using Core.Models.Faculties;
 using Core.Models.Faculties.Enums;
 using Core.Models.Faculties.Repositories;
 using Core.Models.Identifiers;
+using Core.Models.Schools.Errors;
 using Core.Models.StaffMembers;
 using Core.Models.StaffMembers.Errors;
 using Core.Models.StaffMembers.Identifiers;
@@ -69,10 +69,10 @@ internal sealed class GetListOfCertificatesForStaffMemberWithNotCompletedModules
         {
             _logger
                 .ForContext(nameof(GetListOfCertificatesForStaffMemberWithNotCompletedModulesQuery), request, true)
-                .ForContext(nameof(Error), DomainErrors.Partners.School.NotFound(staff.CurrentAssignment?.SchoolCode ?? SchoolCode.Empty), true)
+                .ForContext(nameof(Error), SchoolErrors.NotFound(staff.CurrentAssignment?.SchoolCode ?? SchoolCode.Empty), true)
                 .Warning("Failed to retrieve list of Training Completions for staff member");
 
-            return Result.Failure<StaffCompletionListDto>(DomainErrors.Partners.School.NotFound(staff.CurrentAssignment?.SchoolCode ?? SchoolCode.Empty));
+            return Result.Failure<StaffCompletionListDto>(SchoolErrors.NotFound(staff.CurrentAssignment?.SchoolCode ?? SchoolCode.Empty));
         }
 
         List<Faculty> faculties = await _facultyRepository.GetCurrentForStaffMember(staff.Id, cancellationToken);

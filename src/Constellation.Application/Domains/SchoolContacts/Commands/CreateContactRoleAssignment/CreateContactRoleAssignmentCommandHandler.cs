@@ -1,11 +1,11 @@
 ﻿namespace Constellation.Application.Domains.SchoolContacts.Commands.CreateContactRoleAssignment;
 
 using Abstractions.Messaging;
-using Core.Errors;
 using Core.Models;
 using Core.Models.SchoolContacts;
 using Core.Models.SchoolContacts.Errors;
 using Core.Models.SchoolContacts.Repositories;
+using Core.Models.Schools.Errors;
 using Core.Shared;
 using Interfaces.Repositories;
 using Serilog;
@@ -41,10 +41,10 @@ internal sealed class CreateContactRoleAssignmentCommandHandler
         {
             _logger
                 .ForContext(nameof(CreateContactRoleAssignmentCommand), request, true)
-                .ForContext(nameof(Error), DomainErrors.Partners.School.NotFound(request.SchoolCode), true)
+                .ForContext(nameof(Error), SchoolErrors.NotFound(request.SchoolCode), true)
                 .Warning("Failed to create School Contact Role");
 
-            return Result.Failure(DomainErrors.Partners.School.NotFound(request.SchoolCode));
+            return Result.Failure(SchoolErrors.NotFound(request.SchoolCode));
         }
         
         SchoolContact? contact = await _contactRepository.GetById(request.ContactId, cancellationToken);

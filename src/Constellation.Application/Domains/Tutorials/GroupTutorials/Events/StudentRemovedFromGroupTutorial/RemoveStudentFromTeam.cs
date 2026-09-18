@@ -8,6 +8,7 @@ using Constellation.Core.Models.LinkedSystems.Errors;
 using Constellation.Core.Models.Operations;
 using Constellation.Core.Models.Operations.Enums;
 using Core.DomainEvents;
+using Core.Models.GroupTutorials.Errors;
 using Core.Models.LinkedSystems;
 using Core.Models.Operations.Repositories;
 using Core.Models.Students;
@@ -57,7 +58,7 @@ internal sealed class RemoveStudentFromTeam
         {
             _logger
                 .ForContext(nameof(StudentRemovedFromGroupTutorialDomainEvent), notification, true)
-                .ForContext(nameof(Error), DomainErrors.GroupTutorials.GroupTutorial.NotFound(notification.TutorialId), true)
+                .ForContext(nameof(Error), GroupTutorialErrors.NotFound(notification.TutorialId), true)
                 .Error("Failed to complete the event handler");
 
             return;
@@ -69,7 +70,7 @@ internal sealed class RemoveStudentFromTeam
         {
             _logger
                 .ForContext(nameof(StudentRemovedFromGroupTutorialDomainEvent), notification, true)
-                .ForContext(nameof(Error), DomainErrors.GroupTutorials.TutorialEnrolment.NotFound, true)
+                .ForContext(nameof(Error), GroupTutorialEnrolmentErrors.NotFound, true)
                 .Error("Failed to complete the event handler");
 
             return;

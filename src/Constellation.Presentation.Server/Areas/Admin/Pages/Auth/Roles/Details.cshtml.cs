@@ -4,6 +4,7 @@ using Application.Domains.Auth.Commands.AddPermissionToRole;
 using Application.Domains.Auth.Commands.RemovePermissionFromRole;
 using Application.Domains.Auth.Queries.GetRoleDetails;
 using Application.Models.Auth;
+using Application.Models.Identity.Errors;
 using BaseModels;
 using Constellation.Application.Common.PresentationModels;
 using Constellation.Application.Domains.Auth.Commands.AddUserToRole;
@@ -60,7 +61,7 @@ public class DetailsModel : BasePageModel
         if (userId == Guid.Empty)
         {
             ModalContent = ErrorDisplay.Create(
-                DomainErrors.Auth.UserNotFound,
+                AuthErrors.UserNotFound(userId),
                 _linkGenerator.GetPathByPage("/Auth/Roles/Details", values: new { area = "Admin", Id }));
 
             return Page();
@@ -85,7 +86,7 @@ public class DetailsModel : BasePageModel
         if (viewModel.UserId == Guid.Empty)
         {
             ModalContent = ErrorDisplay.Create(
-                DomainErrors.Auth.UserNotFound,
+                AuthErrors.UserNotFound(viewModel.UserId),
                 _linkGenerator.GetPathByPage("/Auth/Roles/Details", values: new { area = "Admin", Id }));
 
             return Page();

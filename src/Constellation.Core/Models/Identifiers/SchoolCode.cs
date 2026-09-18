@@ -2,6 +2,7 @@
 
 using Errors;
 using Primitives;
+using Schools.Errors;
 using Shared;
 
 public readonly record struct SchoolCode(string Value)
@@ -21,7 +22,7 @@ public readonly record struct SchoolCode(string Value)
     {
         string? validation = CheckValue(value);
         if (validation is not null)
-            return Result.Failure<SchoolCode>(DomainErrors.Partners.School.InvalidValue);
+            return Result.Failure<SchoolCode>(SchoolErrors.InvalidValue);
 
         return new SchoolCode(value);
     }

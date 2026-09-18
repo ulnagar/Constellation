@@ -8,7 +8,7 @@ using Application.Domains.Training.Commands.RetireTrainingModule;
 using Application.Domains.Training.Models;
 using Application.Domains.Training.Queries.GetModuleDetails;
 using Constellation.Application.Models.Auth;
-using Constellation.Core.Errors;
+using Constellation.Application.Models.Identity.Errors;
 using Constellation.Core.Models.Training.Identifiers;
 using Constellation.Core.Shared;
 using Core.Abstractions.Services;
@@ -66,7 +66,7 @@ public class DetailsModel : BasePageModel
         if (!isAuthorised.Succeeded)
         {
             ModalContent = ErrorDisplay.Create(
-                DomainErrors.Permissions.Unauthorised,
+                AuthErrors.NotAuthorised,
                 _linkGenerator.GetPathByPage("/SchoolAdmin/Training/Modules/Index", values: new { area = "Staff" }));
 
             await PreparePage();
@@ -103,7 +103,7 @@ public class DetailsModel : BasePageModel
         if (!isAuthorised.Succeeded)
         {
             ModalContent = ErrorDisplay.Create(
-                DomainErrors.Permissions.Unauthorised,
+                AuthErrors.NotAuthorised,
                 _linkGenerator.GetPathByPage("/SchoolAdmin/Training/Modules/Index", values: new { area = "Staff" }));
 
             await PreparePage();
@@ -153,7 +153,7 @@ public class DetailsModel : BasePageModel
         if (!isAuthorised.Succeeded)
         {
             ModalContent = ErrorDisplay.Create(
-                DomainErrors.Permissions.Unauthorised,
+                AuthErrors.NotAuthorised,
                 _linkGenerator.GetPathByPage("/SchoolAdmin/Training/Modules/Index", values: new { area = "Staff" }));
 
             await PreparePage();
@@ -194,7 +194,7 @@ public class DetailsModel : BasePageModel
         if (!isAuthorised.Succeeded)
         {
             ModalContent = ErrorDisplay.Create(
-                DomainErrors.Permissions.Unauthorised,
+                AuthErrors.NotAuthorised,
                 _linkGenerator.GetPathByPage("/SchoolAdmin/Training/Modules/Index", values: new { area = "Staff" }));
 
             await PreparePage();

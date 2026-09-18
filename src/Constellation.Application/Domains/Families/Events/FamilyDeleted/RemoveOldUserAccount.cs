@@ -3,6 +3,7 @@
 using Abstractions.Messaging;
 using Application.Models.Identity;
 using Application.Models.Identity.Enums;
+using Application.Models.Identity.Errors;
 using Application.Models.Identity.Repositories;
 using Core.Abstractions.Repositories;
 using Core.Errors;
@@ -60,7 +61,7 @@ internal sealed class RemoveUserAccount
         {
             _logger
                 .ForContext(nameof(FamilyDeletedDomainEvent), notification, true)
-                .ForContext(nameof(Error), DomainErrors.Auth.UserNotFound, true)
+                .ForContext(nameof(Error), AuthErrors.UserNotFoundByEmail(family.FamilyEmail), true)
                 .Warning("Failed to remove user account for deleted family");
 
             return;

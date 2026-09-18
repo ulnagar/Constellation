@@ -2,11 +2,11 @@
 
 using Abstractions.Clock;
 using Constellation.Core.Enums;
-using Constellation.Core.Errors;
 using Errors;
 using Identifiers;
 using Models.Identifiers;
 using Primitives;
+using Schools.Errors;
 using Shared;
 using System;
 
@@ -64,7 +64,7 @@ public sealed class SchoolEnrolment : IAuditableEntity
             return Result.Failure<SchoolEnrolment>(StudentErrors.InvalidId);
 
         if (schoolCode == SchoolCode.Empty)
-            return Result.Failure<SchoolEnrolment>(DomainErrors.Partners.School.NotFound(schoolCode));
+            return Result.Failure<SchoolEnrolment>(SchoolErrors.NotFound(schoolCode));
 
         startDate ??= dateTime.Today;
         

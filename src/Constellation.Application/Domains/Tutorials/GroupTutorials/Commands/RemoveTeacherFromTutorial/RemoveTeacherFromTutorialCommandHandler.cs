@@ -6,6 +6,7 @@ using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.Errors;
 using Constellation.Core.Models.GroupTutorials;
 using Constellation.Core.Shared;
+using Core.Models.GroupTutorials.Errors;
 using Core.Models.StaffMembers;
 using Core.Models.StaffMembers.Errors;
 using Core.Models.StaffMembers.Repositories;
@@ -32,17 +33,17 @@ internal sealed class RemoveTeacherFromTutorialCommandHandler
 
     public async Task<Result> Handle(RemoveTeacherFromTutorialCommand request, CancellationToken cancellationToken)
     {
-        GroupTutorial tutorial = await _groupTutorialRepository.GetById(request.TutorialId, cancellationToken);
+        GroupTutorial? tutorial = await _groupTutorialRepository.GetById(request.TutorialId, cancellationToken);
 
         if (tutorial is null)
-            return Result.Failure(DomainErrors.GroupTutorials.GroupTutorial.NotFound(request.TutorialId));
+            return Result.Failure(GroupTutorialErrors.NotFound(request.TutorialId));
 
-        TutorialTeacher teacherRecord = tutorial.Teachers.FirstOrDefault(teacher => teacher.Id == request.TeacherId);
+        TutorialTeacher? teacherRecord = tutorial.Teachers.FirstOrDefault(teacher => teacher.Id == request.TeacherId);
 
         if (teacherRecord is null)
-            return Result.Failure(DomainErrors.GroupTutorials.TutorialTeacher.NotFound);
+            return Result.Failure(GroupTutorialTeacherErrors.NotFound);
 
-        StaffMember staffEntity = await _staffRepository.GetById(teacherRecord.StaffId, cancellationToken);
+        StaffMember? staffEntity = await _staffRepository.GetById(teacherRecord.StaffId, cancellationToken);
 
         if (staffEntity is null)
             return Result.Failure(StaffMemberErrors.NotFound(teacherRecord.StaffId));

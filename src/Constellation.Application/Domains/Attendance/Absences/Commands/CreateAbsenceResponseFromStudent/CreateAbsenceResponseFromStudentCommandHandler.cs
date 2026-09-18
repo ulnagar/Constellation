@@ -1,12 +1,12 @@
 ﻿namespace Constellation.Application.Domains.Attendance.Absences.Commands.CreateAbsenceResponseFromStudent;
 
 using Constellation.Application.Abstractions.Messaging;
-using Constellation.Application.Interfaces.Repositories;
 using Constellation.Core.Abstractions.Repositories;
-using Constellation.Core.Errors;
 using Constellation.Core.Models.Absences;
 using Constellation.Core.Models.Absences.Enums;
-using Constellation.Core.Shared;
+using Core.Models.Absences.Errors;
+using Core.Shared;
+using Interfaces.Repositories;
 using Serilog;
 using System.Threading;
 using System.Threading.Tasks;
@@ -30,13 +30,13 @@ internal sealed class CreateAbsenceResponseFromStudentCommandHandler
 
     public async Task<Result> Handle(CreateAbsenceResponseFromStudentCommand request, CancellationToken cancellationToken)
     {
-        Absence absence = await _absenceRepository.GetById(request.AbsenceId, cancellationToken);
+        Absence? absence = await _absenceRepository.GetById(request.AbsenceId, cancellationToken);
 
         if (absence is null)
         {
             _logger.Warning("Could not find absence in database when looking with Id {id}", request.AbsenceId);
 
-            return Result.Failure(DomainErrors.Absences.Absence.NotFound(request.AbsenceId));
+            return Result.Failure(AbsenceErrors.NotFound(request.AbsenceId));
         }
 
         Result result = absence.AddResponse(

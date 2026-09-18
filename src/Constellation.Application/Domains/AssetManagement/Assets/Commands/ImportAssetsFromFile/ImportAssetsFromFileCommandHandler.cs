@@ -5,7 +5,6 @@ using Constellation.Application.Abstractions.Messaging;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Interfaces.Services;
 using Constellation.Core.Abstractions.Clock;
-using Constellation.Core.Errors;
 using Constellation.Core.Models;
 using Constellation.Core.Models.Assets;
 using Constellation.Core.Models.Assets.Enums;
@@ -16,6 +15,7 @@ using Constellation.Core.Models.Students;
 using Constellation.Core.Models.Students.Repositories;
 using Constellation.Core.Shared;
 using Core.Models.Identifiers;
+using Core.Models.Schools.Errors;
 using Core.Models.StaffMembers;
 using Serilog;
 using System;
@@ -167,10 +167,10 @@ internal sealed class ImportAssetsFromFileCommandHandler
                 {
                     _logger
                         .ForContext(nameof(ImportAssetDto), importAsset, true)
-                        .ForContext(nameof(Error), DomainErrors.Partners.School.NotFound(SchoolCode.Empty), true)
+                        .ForContext(nameof(Error), SchoolErrors.NotFound(SchoolCode.Empty), true)
                         .Warning("Failed to import Asset");
 
-                    response.Add(new(importAsset.RowNumber, false, DomainErrors.Partners.School.NotFound(SchoolCode.Empty)));
+                    response.Add(new(importAsset.RowNumber, false, SchoolErrors.NotFound(SchoolCode.Empty)));
 
                     continue;
                 }

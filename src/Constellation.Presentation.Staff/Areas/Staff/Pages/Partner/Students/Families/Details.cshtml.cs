@@ -11,11 +11,11 @@ using Constellation.Application.Domains.Families.Commands.RemoveStudentFromFamil
 using Constellation.Application.Domains.Families.Models;
 using Constellation.Application.Domains.Families.Queries.GetFamilyDetailsById;
 using Constellation.Application.Domains.Students.Models;
+using Constellation.Application.Models.Identity.Errors;
 using Constellation.Core.Models.Students.Errors;
 using Constellation.Core.Shared;
 using Constellation.Presentation.Shared.Helpers.Attributes;
 using Core.Abstractions.Services;
-using Core.Errors;
 using Core.Models.Identifiers;
 using Core.Models.Students.Identifiers;
 using MediatR;
@@ -92,7 +92,7 @@ public class DetailsModel : BasePageModel
         if (!authorised.Succeeded)
         {
             ModalContent = ErrorDisplay.Create(
-                DomainErrors.Permissions.Unauthorised,
+                AuthErrors.NotAuthorised,
                 _linkGenerator.GetPathByPage("/Partner/Students/Families/Index", values: new { area = "Staff" }));
 
             return Page();
@@ -160,7 +160,7 @@ public class DetailsModel : BasePageModel
         if (!authorised.Succeeded)
         {
             ModalContent = ErrorDisplay.Create(
-                DomainErrors.Permissions.Unauthorised,
+                AuthErrors.NotAuthorised,
                 _linkGenerator.GetPathByPage("/Partner/Students/Families/Index", values: new { area = "Staff" }));
 
             return Page();
@@ -197,7 +197,7 @@ public class DetailsModel : BasePageModel
         if (!authorised.Succeeded)
         {
             ModalContent = ErrorDisplay.Create(
-                DomainErrors.Permissions.Unauthorised,
+                AuthErrors.NotAuthorised,
                 _linkGenerator.GetPathByPage("/Partner/Students/Families/Index", values: new { area = "Staff" }));
 
             return Page();

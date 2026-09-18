@@ -4,8 +4,8 @@ using Abstractions.Messaging;
 using Constellation.Application.Domains.Students.Models;
 using Constellation.Core.Models.Students;
 using Core.Abstractions.Repositories;
-using Core.Errors;
 using Core.Models.GroupTutorials;
+using Core.Models.GroupTutorials.Errors;
 using Core.Models.Identifiers;
 using Core.Models.Students.Identifiers;
 using Core.Models.Students.Repositories;
@@ -44,10 +44,10 @@ internal sealed class GetCurrentStudentsInGroupTutorialQueryHandler
         {
             _logger
                 .ForContext(nameof(GetCurrentStudentsInGroupTutorialQuery), request, true)
-                .ForContext(nameof(Error), DomainErrors.GroupTutorials.GroupTutorial.NotFound(request.TutorialId), true)
+                .ForContext(nameof(Error), GroupTutorialErrors.NotFound(request.TutorialId), true)
                 .Warning("Failed to retrieve student enrolments in group tutorial");
 
-            return Result.Failure<List<StudentResponse>>(DomainErrors.GroupTutorials.GroupTutorial.NotFound(request.TutorialId));
+            return Result.Failure<List<StudentResponse>>(GroupTutorialErrors.NotFound(request.TutorialId));
         }
 
         List<StudentId> studentIds = tutorial.CurrentEnrolments

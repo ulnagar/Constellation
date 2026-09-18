@@ -5,7 +5,7 @@ using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.Models.GroupTutorials;
 using Constellation.Core.Models.Students;
 using Constellation.Core.Models.Students.Repositories;
-using Core.Errors;
+using Core.Models.GroupTutorials.Errors;
 using Core.Models.Students.Errors;
 using Core.Shared;
 using Interfaces.Repositories;
@@ -31,14 +31,14 @@ internal sealed class AddStudentToTutorialCommandHandler
 
     public async Task<Result> Handle(AddStudentToTutorialCommand request, CancellationToken cancellationToken)
     {
-        GroupTutorial tutorial = await _groupTutorialRepository.GetById(request.TutorialId, cancellationToken);
+        GroupTutorial? tutorial = await _groupTutorialRepository.GetById(request.TutorialId, cancellationToken);
 
         if (tutorial is null)
         {
-            return Result.Failure(DomainErrors.GroupTutorials.GroupTutorial.NotFound(request.TutorialId));
+            return Result.Failure(GroupTutorialErrors.NotFound(request.TutorialId));
         }
 
-        Student student = await _studentRepository.GetById(request.StudentId, cancellationToken);
+        Student? student = await _studentRepository.GetById(request.StudentId, cancellationToken);
 
         if (student is null)
         {

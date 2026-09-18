@@ -2,6 +2,7 @@
 
 using Abstractions.Messaging;
 using Application.Models.Identity;
+using Application.Models.Identity.Errors;
 using Constellation.Application.Models.Identity.Enums;
 using Core.Errors;
 using Core.Models.Auth;
@@ -55,7 +56,7 @@ internal sealed class RemoveAppUser
             _logger
                 .ForContext(nameof(SchoolContactDeletedDomainEvent), notification, true)
                 .ForContext(nameof(contact.EmailAddress), contact.EmailAddress)
-                .ForContext(nameof(Error), DomainErrors.Auth.UserNotFound, true)
+                .ForContext(nameof(Error), AuthErrors.UserNotFoundByEmail(contact.EmailAddress.Email), true)
                 .Warning("Failed to update AppUser for deleted School Contact");
 
             return;

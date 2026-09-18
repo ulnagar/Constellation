@@ -1,5 +1,6 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Equipment.Stocktake.Sighting;
 
+using Application.Models.Identity.Errors;
 using Constellation.Application.Common.PresentationModels;
 using Constellation.Application.Domains.AssetManagement.Stocktake.Commands.RegisterManualSighting;
 using Constellation.Application.Domains.Schools.Queries.GetCurrentPartnerSchoolCodes;
@@ -12,7 +13,6 @@ using Constellation.Application.Domains.Students.Queries.GetCurrentStudentsFromS
 using Constellation.Application.DTOs;
 using Constellation.Application.Models.Auth;
 using Constellation.Core.Abstractions.Services;
-using Constellation.Core.Errors;
 using Constellation.Core.Models.StaffMembers.Identifiers;
 using Constellation.Core.Models.Stocktake.Enums;
 using Constellation.Core.Models.Stocktake.Identifiers;
@@ -125,7 +125,7 @@ public class ManualModel : BasePageModel
         if (string.IsNullOrWhiteSpace(claimStaffId))
         {
             ModalContent = ErrorDisplay.Create(
-                DomainErrors.Auth.UserNotFound,
+                AuthErrors.StaffUserNotFound(claimStaffId),
                 _linkGenerator.GetPathByPage("/Equipment/Stocktake/Dashboard", values: new { area = "Staff" }));
             
             return;

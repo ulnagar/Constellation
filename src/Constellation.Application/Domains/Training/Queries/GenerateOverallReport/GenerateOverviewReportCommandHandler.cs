@@ -1,11 +1,11 @@
 ﻿namespace Constellation.Application.Domains.Training.Queries.GenerateOverallReport;
 
 using Abstractions.Messaging;
-using Core.Errors;
 using Core.Models;
 using Core.Models.Faculties;
 using Core.Models.Faculties.Repositories;
 using Core.Models.Identifiers;
+using Core.Models.Schools.Errors;
 using Core.Models.StaffMembers;
 using Core.Models.StaffMembers.Errors;
 using Core.Models.StaffMembers.Repositories;
@@ -55,7 +55,7 @@ internal sealed class GenerateOverviewReportCommandHandler
     {
         List<StaffMember> staff = await _staffRepository.GetAllActive(cancellationToken);
 
-        if (!staff.Any())
+        if (staff.Count == 0)
         {
             _logger
                 .ForContext(nameof(Error), StaffMemberErrors.NoneFound, true)
@@ -79,9 +79,9 @@ internal sealed class GenerateOverviewReportCommandHandler
 
         List<Faculty> faculties = await _facultyRepository.GetAll(cancellationToken);
 
-        List<StaffStatus> staffStatuses = new();
+        List<StaffStatus> staffStatuses = [];
 
-        List<ModuleDetails> moduleDetails = new();
+        List<ModuleDetails> moduleDetails = [];
 
         foreach (TrainingModule module in modules)
         {
@@ -103,7 +103,7 @@ internal sealed class GenerateOverviewReportCommandHandler
             {
                 _logger
                     .ForContext(nameof(StaffMember), member, true)
-                    .ForContext(nameof(Error), DomainErrors.Partners.School.NotFound(member.CurrentAssignment?.SchoolCode ?? SchoolCode.Empty), true)
+                    .ForContext(nameof(Error), SchoolErrors.NotFound(member.CurrentAssignment?.SchoolCode ?? SchoolCode.Empty), true)
                     .Warning("Could not include staff member in report");
             }
 
@@ -114,7 +114,7 @@ internal sealed class GenerateOverviewReportCommandHandler
                         !entry.IsDeleted))
                 .ToList();
 
-            List<ModuleStatus> moduleStatuses = new();
+            List<ModuleStatus> moduleStatuses = [];
 
             foreach (TrainingModule module in modules)
             {

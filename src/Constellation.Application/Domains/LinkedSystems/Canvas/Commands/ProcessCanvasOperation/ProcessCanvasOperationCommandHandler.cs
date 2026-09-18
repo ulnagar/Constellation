@@ -1,10 +1,10 @@
 ﻿namespace Constellation.Application.Domains.LinkedSystems.Canvas.Commands.ProcessCanvasOperation;
 
 using Abstractions.Messaging;
-using Core.Errors;
 using Core.Models.Canvas.Models;
 using Core.Models.Operations;
 using Core.Models.Operations.Enums;
+using Core.Models.Operations.Errors;
 using Core.Shared;
 using Interfaces.Gateways;
 using Interfaces.Repositories;
@@ -39,22 +39,22 @@ internal sealed class ProcessCanvasOperationCommandHandler
     // This would allow caching of Canvas User Id with principals (e.g. Student SystemLinks)
     public async Task<Result> Handle(ProcessCanvasOperationCommand request, CancellationToken cancellationToken)
     {
-        CanvasOperation operation = await _operationsRepository.WithDetails(request.OperationId, cancellationToken);
+        CanvasOperation? operation = await _operationsRepository.WithDetails(request.OperationId, cancellationToken);
 
         if (operation is null)
         {
             _logger
                 .ForContext(nameof(ProcessCanvasOperationCommand), request, true)
-                .ForContext(nameof(Error), DomainErrors.Operations.Canvas.NotFound(request.OperationId), true)
+                .ForContext(nameof(Error), CanvasOperationErrors.NotFound(request.OperationId), true)
                 .Warning("Failed to process Canvas Operation");
 
-            return Result.Failure(DomainErrors.Operations.Canvas.NotFound(request.OperationId));
+            return Result.Failure(CanvasOperationErrors.NotFound(request.OperationId));
         }
         
         switch (operation.GetType().Name)
         {
             case nameof(CreateUserCanvasOperation):
-                CreateUserCanvasOperation createOperation = operation as CreateUserCanvasOperation;
+                CreateUserCanvasOperation? createOperation = operation as CreateUserCanvasOperation;
 
                 _logger
                     .ForContext(nameof(CreateUserCanvasOperation), createOperation, true)
@@ -85,10 +85,10 @@ internal sealed class ProcessCanvasOperationCommandHandler
                     .ForContext(nameof(CreateUserCanvasOperation), createOperation, true)
                     .Warning("Failed to create Canvas user for {name}", $"{createOperation.FirstName} {createOperation.LastName}");
 
-                return Result.Failure(DomainErrors.Operations.Canvas.ProcessFailed);
+                return Result.Failure(CanvasOperationErrors.ProcessFailed);
 
             case nameof(UpdateUserEmailCanvasOperation):
-                UpdateUserEmailCanvasOperation updateOperation = operation as UpdateUserEmailCanvasOperation;
+                UpdateUserEmailCanvasOperation? updateOperation = operation as UpdateUserEmailCanvasOperation;
 
                 _logger
                     .ForContext(nameof(UpdateUserEmailCanvasOperation), updateOperation, true)
@@ -117,7 +117,7 @@ internal sealed class ProcessCanvasOperationCommandHandler
                 return Result.Failure(updateSuccess.Error);
 
             case nameof(ModifyEnrolmentCanvasOperation):
-                ModifyEnrolmentCanvasOperation modifyOperation = operation as ModifyEnrolmentCanvasOperation;
+                ModifyEnrolmentCanvasOperation? modifyOperation = operation as ModifyEnrolmentCanvasOperation;
 
                 _logger
                     .ForContext(nameof(ModifyEnrolmentCanvasOperation), modifyOperation, true)
@@ -157,7 +157,7 @@ internal sealed class ProcessCanvasOperationCommandHandler
                 return Result.Failure(modifySuccess.Error);
 
             case nameof(DeleteUserCanvasOperation):
-                DeleteUserCanvasOperation deleteOperation = operation as DeleteUserCanvasOperation;
+                DeleteUserCanvasOperation? deleteOperation = operation as DeleteUserCanvasOperation;
 
                 _logger
                     .ForContext(nameof(DeleteUserCanvasOperation), deleteOperation, true)
@@ -186,6 +186,6 @@ internal sealed class ProcessCanvasOperationCommandHandler
                 return Result.Failure(deleteSuccess.Error);
         }
 
-        return Result.Failure(DomainErrors.Operations.Canvas.Invalid);
+        return Result.Failure(CanvasOperationErrors.Invalid);
     }
 }

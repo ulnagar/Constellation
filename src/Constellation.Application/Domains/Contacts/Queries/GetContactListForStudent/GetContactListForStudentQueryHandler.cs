@@ -3,7 +3,6 @@
 using Abstractions.Messaging;
 using Application.Interfaces.Repositories;
 using Core.Abstractions.Repositories;
-using Core.Errors;
 using Core.Models;
 using Core.Models.Faculties;
 using Core.Models.Faculties.Enums;
@@ -12,10 +11,10 @@ using Core.Models.Families;
 using Core.Models.Offerings;
 using Core.Models.Offerings.Enums;
 using Core.Models.Offerings.Repositories;
-using Core.Models.Offerings.ValueObjects;
 using Core.Models.SchoolContacts;
 using Core.Models.SchoolContacts.Enums;
 using Core.Models.SchoolContacts.Repositories;
+using Core.Models.Schools.Errors;
 using Core.Models.StaffMembers;
 using Core.Models.StaffMembers.Identifiers;
 using Core.Models.StaffMembers.Repositories;
@@ -81,7 +80,7 @@ internal sealed class GetContactListForStudentQueryHandler
         School? school = await _schoolRepository.GetById(enrolment.SchoolCode, cancellationToken);
 
         if (school is null)
-            return Result.Failure<List<ContactResponse>>(DomainErrors.Partners.School.NotFound(enrolment.SchoolCode));
+            return Result.Failure<List<ContactResponse>>(SchoolErrors.NotFound(enrolment.SchoolCode));
 
         List<StaffMember> staffMembers = await _staffRepository
             .GetAll(cancellationToken);

@@ -3,10 +3,10 @@
 using Constellation.Application.Abstractions.Messaging;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Core.Abstractions.Repositories;
-using Constellation.Core.Errors;
 using Constellation.Core.Models.GroupTutorials;
 using Constellation.Core.Models.Identifiers;
 using Constellation.Core.Shared;
+using Core.Models.GroupTutorials.Errors;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
@@ -34,7 +34,7 @@ internal sealed class CreateGroupTutorialCommandHandler : ICommandHandler<Create
         if (tutorialResult.IsFailure)
         {
             //TODO: Log error
-            return Result.Failure<GroupTutorialId>(DomainErrors.GroupTutorials.GroupTutorial.CouldNotCreateTutorial);
+            return Result.Failure<GroupTutorialId>(GroupTutorialErrors.CouldNotCreateTutorial);
         }
 
         _tutorialRepository.Insert(tutorialResult.Value);

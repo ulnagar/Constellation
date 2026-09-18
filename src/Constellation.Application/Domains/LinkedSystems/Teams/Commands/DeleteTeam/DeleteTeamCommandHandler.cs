@@ -2,7 +2,7 @@
 
 using Abstractions.Messaging;
 using Core.Abstractions.Repositories;
-using Core.Errors;
+using Core.Models.LinkedSystems.Errors;
 using Core.Shared;
 using Interfaces.Repositories;
 using System.Threading;
@@ -26,7 +26,7 @@ internal sealed class DeleteTeamCommandHandler
 
         if (team is null)
         {
-            return Result.Failure(DomainErrors.LinkedSystems.Teams.TeamNotFoundInDatabase);
+            return Result.Failure(TeamErrors.TeamNotFoundInDatabase);
         }
 
         _teamRepository.Remove(team);

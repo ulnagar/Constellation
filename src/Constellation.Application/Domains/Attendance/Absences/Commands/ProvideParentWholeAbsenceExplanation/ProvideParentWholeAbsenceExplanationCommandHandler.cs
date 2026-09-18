@@ -1,12 +1,7 @@
 ﻿namespace Constellation.Application.Domains.Attendance.Absences.Commands.ProvideParentWholeAbsenceExplanation;
 
 using Constellation.Application.Abstractions.Messaging;
-using Constellation.Application.Domains.Attendance.Absences.Commands.ConvertAbsenceToAbsenceEntry;
-using Constellation.Application.DTOs;
-using Constellation.Application.Interfaces.Repositories;
-using Constellation.Application.Interfaces.Services;
 using Constellation.Core.Abstractions.Repositories;
-using Constellation.Core.Errors;
 using Constellation.Core.Models.Absences;
 using Constellation.Core.Models.Absences.Enums;
 using Constellation.Core.Models.Offerings;
@@ -21,8 +16,14 @@ using Constellation.Core.Models.Tutorials;
 using Constellation.Core.Models.Tutorials.Errors;
 using Constellation.Core.Models.Tutorials.Identifiers;
 using Constellation.Core.Models.Tutorials.Repositories;
-using Constellation.Core.Shared;
+using ConvertAbsenceToAbsenceEntry;
+using Core.Models.Absences.Errors;
+using Core.Shared;
 using Core.ValueObjects;
+using DTOs;
+using Interfaces.Repositories;
+using Interfaces.Services;
+using Models.Identity.Errors;
 using Serilog;
 using System.Collections.Generic;
 using System.Threading;
@@ -62,16 +63,16 @@ internal sealed class ProvideParentWholeAbsenceExplanationCommandHandler
 
     public async Task<Result> Handle(ProvideParentWholeAbsenceExplanationCommand request, CancellationToken cancellationToken)
     {
-        Absence absence = await _absenceRepository.GetById(request.AbsenceId, cancellationToken);
+        Absence? absence = await _absenceRepository.GetById(request.AbsenceId, cancellationToken);
 
         if (absence is null)
         {
             _logger
                 .ForContext(nameof(ProvideParentWholeAbsenceExplanationCommand), request, true)
-                .ForContext(nameof(Error), DomainErrors.Absences.Absence.NotFound(request.AbsenceId), true)
+                .ForContext(nameof(Error), AbsenceErrors.NotFound(request.AbsenceId), true)
                 .Information("Could not find absence with Id {id} when processing request {@request}", request.AbsenceId, request);
 
-            return Result.Failure(DomainErrors.Absences.Absence.NotFound(request.AbsenceId));
+            return Result.Failure(AbsenceErrors.NotFound(request.AbsenceId));
         }
 
         Dictionary<StudentId, bool> studentIds = await _familyRepository.GetStudentIdsFromFamilyWithEmail(request.ParentEmail, cancellationToken);
@@ -82,10 +83,10 @@ internal sealed class ProvideParentWholeAbsenceExplanationCommandHandler
         {
             _logger
                 .ForContext(nameof(ProvideParentWholeAbsenceExplanationCommand), request, true)
-                .ForContext(nameof(Error), DomainErrors.Permissions.Unauthorised, true)
+                .ForContext(nameof(Error), AuthErrors.NotAuthorised, true)
                 .Information("Parent {parent} does not have permission to view details of student {student} when processing request {@request}", request.ParentEmail, absence.StudentId, request);
 
-            return Result.Failure(DomainErrors.Permissions.Unauthorised);
+            return Result.Failure(AuthErrors.NotAuthorised);
         }
 
         if (residentialParent)
@@ -106,7 +107,7 @@ internal sealed class ProvideParentWholeAbsenceExplanationCommandHandler
             {
                 OfferingId offeringId = OfferingId.FromValue(absence.SourceId);
 
-                Offering offering = await _offeringRepository.GetById(offeringId, cancellationToken);
+                Offering? offering = await _offeringRepository.GetById(offeringId, cancellationToken);
 
                 if (offering is null)
                 {
@@ -125,7 +126,7 @@ internal sealed class ProvideParentWholeAbsenceExplanationCommandHandler
             {
                 TutorialId tutorialId = TutorialId.FromValue(absence.SourceId);
 
-                Tutorial tutorial = await _tutorialRepository.GetById(tutorialId, cancellationToken);
+                Tutorial? tutorial = await _tutorialRepository.GetById(tutorialId, cancellationToken);
 
                 if (tutorial is null)
                 {
@@ -137,7 +138,7 @@ internal sealed class ProvideParentWholeAbsenceExplanationCommandHandler
                 activityName = tutorial.Name;
             }
 
-            Student student = await _studentRepository.GetById(absence.StudentId, cancellationToken);
+            Student? student = await _studentRepository.GetById(absence.StudentId, cancellationToken);
 
             if (student is null)
             {

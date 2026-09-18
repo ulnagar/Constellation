@@ -2,6 +2,7 @@
 
 using Abstractions.Messaging;
 using Application.Models.Identity.Enums;
+using Application.Models.Identity.Errors;
 using Application.Models.Identity.Repositories;
 using Constellation.Application.Models.Identity;
 using Constellation.Core.Errors;
@@ -59,7 +60,7 @@ internal sealed class RemoveAppUser
             _logger
                 .ForContext(nameof(StudentWithdrawnDomainEvent), notification, true)
                 .ForContext(nameof(student.EmailAddress), student.EmailAddress)
-                .ForContext(nameof(Error), DomainErrors.Auth.UserNotFound, true)
+                .ForContext(nameof(Error), AuthErrors.UserNotFoundByEmail(student.EmailAddress.Email), true)
                 .Warning("Failed to delete AppUser for withdrawn Student");
 
             return;

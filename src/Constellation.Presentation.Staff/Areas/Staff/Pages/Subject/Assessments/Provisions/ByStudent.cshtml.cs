@@ -10,6 +10,7 @@ using Application.Domains.Assessments.Provisions.Queries.GetStudentProvisionById
 using Application.Domains.Assessments.Provisions.Queries.GetStudentProvisions;
 using Constellation.Application.Helpers;
 using Constellation.Application.Models.Auth;
+using Constellation.Application.Models.Identity.Errors;
 using Constellation.Presentation.Shared.Helpers.Attributes;
 using Core.Abstractions.Services;
 using Core.Errors;
@@ -127,10 +128,10 @@ public class ByStudentModel : BasePageModel
         if (!authorised.Succeeded)
         {
             _logger
-                .ForContext(nameof(Error), DomainErrors.Permissions.Unauthorised, true)
+                .ForContext(nameof(Error), AuthErrors.NotAuthorised, true)
                 .Warning("Failed to remove Student Provision by user {User}", _currentUserService.UserName);
 
-            ModalContent = ErrorDisplay.Create(DomainErrors.Permissions.Unauthorised);
+            ModalContent = ErrorDisplay.Create(AuthErrors.NotAuthorised);
             await PreparePage();
             return;
         }

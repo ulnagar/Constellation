@@ -5,6 +5,7 @@ using Core.Errors;
 using Errors;
 using Events;
 using Identifiers;
+using LinkedSystems.Errors;
 using Primitives;
 using Shared;
 using System;
@@ -53,7 +54,7 @@ public sealed class Family : AggregateRoot, IAuditableEntity
     public Result LinkFamilyToSentralDetails(string sentralId)
     {
         if (string.IsNullOrWhiteSpace(sentralId))
-            return Result.Failure(DomainErrors.LinkedSystems.Sentral.FamilyIdNotValid(sentralId));
+            return Result.Failure(SentralErrors.FamilyIdNotValid(sentralId));
 
         SentralId = sentralId;
 

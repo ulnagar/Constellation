@@ -1,6 +1,7 @@
 ﻿namespace Constellation.Application.Domains.Attendance.Absences.Queries.GetAbsenceDetailsForParent;
 
 using Abstractions.Messaging;
+using Constellation.Application.Models.Identity.Errors;
 using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.Models.Absences;
 using Constellation.Core.Models.Absences.Enums;
@@ -14,7 +15,7 @@ using Constellation.Core.Models.Tutorials;
 using Constellation.Core.Models.Tutorials.Errors;
 using Constellation.Core.Models.Tutorials.Identifiers;
 using Constellation.Core.Models.Tutorials.Repositories;
-using Core.Errors;
+using Core.Models.Absences.Errors;
 using Core.Models.Students.Errors;
 using Core.Models.Students.Identifiers;
 using Core.Shared;
@@ -52,13 +53,13 @@ internal sealed class GetAbsenceDetailsForParentQueryHandler
 
     public async Task<Result<ParentAbsenceDetailsResponse>> Handle(GetAbsenceDetailsForParentQuery request, CancellationToken cancellationToken)
     {
-        Absence absence = await _absenceRepository.GetById(request.AbsenceId, cancellationToken);
+        Absence? absence = await _absenceRepository.GetById(request.AbsenceId, cancellationToken);
 
         if (absence is null)
         {
             _logger.Information("Could not find an absence with the Id {id}", request.AbsenceId);
 
-            return Result.Failure<ParentAbsenceDetailsResponse>(DomainErrors.Absences.Absence.NotFound(request.AbsenceId));
+            return Result.Failure<ParentAbsenceDetailsResponse>(AbsenceErrors.NotFound(request.AbsenceId));
         }
 
         Dictionary<StudentId, bool> studentsOfParent = await _familyRepository.GetStudentIdsFromFamilyWithEmail(request.ParentEmail, cancellationToken);
@@ -67,10 +68,10 @@ internal sealed class GetAbsenceDetailsForParentQueryHandler
         {
             _logger.Information("Parent ({parent}) is not linked to family that matches student in absence {@absence}", request.ParentEmail, absence);
 
-            return Result.Failure<ParentAbsenceDetailsResponse>(DomainErrors.Permissions.Unauthorised);
+            return Result.Failure<ParentAbsenceDetailsResponse>(AuthErrors.NotAuthorised);
         }
 
-        Student student = await _studentRepository.GetById(absence.StudentId, cancellationToken);
+        Student? student = await _studentRepository.GetById(absence.StudentId, cancellationToken);
 
         if (student is null)
         {
@@ -79,7 +80,7 @@ internal sealed class GetAbsenceDetailsForParentQueryHandler
             return Result.Failure<ParentAbsenceDetailsResponse>(StudentErrors.NotFound(absence.StudentId));
         }
 
-        SchoolEnrolment enrolment = student.CurrentEnrolment;
+        SchoolEnrolment? enrolment = student.CurrentEnrolment;
 
         if (enrolment is null)
         {
@@ -94,7 +95,7 @@ internal sealed class GetAbsenceDetailsForParentQueryHandler
         {
             OfferingId offeringId = OfferingId.FromValue(absence.SourceId);
 
-            Offering offering = await _offeringRepository.GetById(offeringId, cancellationToken);
+            Offering? offering = await _offeringRepository.GetById(offeringId, cancellationToken);
 
             if (offering is null)
             {
@@ -110,7 +111,7 @@ internal sealed class GetAbsenceDetailsForParentQueryHandler
         {
             TutorialId tutorialId = TutorialId.FromValue(absence.SourceId);
 
-            Tutorial tutorial = await _tutorialRepository.GetById(tutorialId, cancellationToken);
+            Tutorial? tutorial = await _tutorialRepository.GetById(tutorialId, cancellationToken);
 
             if (tutorial is null)
             {
@@ -122,7 +123,7 @@ internal sealed class GetAbsenceDetailsForParentQueryHandler
             activityName = tutorial.Name;
         }
 
-        Response response = absence.GetExplainedResponse();
+        Response? response = absence.GetExplainedResponse();
 
         ParentAbsenceDetailsResponse data = new (
             absence.Id,
@@ -136,8 +137,8 @@ internal sealed class GetAbsenceDetailsForParentQueryHandler
             absence.AbsenceTimeframe,
             absence.AbsenceReason.Value,
             activityName,
-            response?.Explanation,
-            response?.VerificationStatus,
+            response?.Explanation ?? string.Empty,
+            response?.VerificationStatus ?? string.Empty,
             response is null ? null : response.VerificationStatus == ResponseVerificationStatus.NotRequired ? response.From : response.Verifier,
             absence.Explained,
             studentsOfParent.GetValueOrDefault(student.Id));

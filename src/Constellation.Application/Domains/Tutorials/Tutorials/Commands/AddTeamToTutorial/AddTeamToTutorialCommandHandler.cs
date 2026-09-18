@@ -5,8 +5,7 @@ using Constellation.Core.Models.LinkedSystems;
 using Constellation.Core.Models.Tutorials;
 using Constellation.Core.Models.Tutorials.Errors;
 using Core.Abstractions.Repositories;
-using Core.Errors;
-using Core.Models;
+using Core.Models.LinkedSystems.Errors;
 using Core.Models.Tutorials.Repositories;
 using Core.Shared;
 using Interfaces.Repositories;
@@ -37,7 +36,7 @@ internal sealed class AddTeamToTutorialCommandHandler
 
     public async Task<Result> Handle(AddTeamToTutorialCommand request, CancellationToken cancellationToken)
     {
-        Tutorial tutorial = await _tutorialRepository.GetById(request.TutorialId, cancellationToken);
+        Tutorial? tutorial = await _tutorialRepository.GetById(request.TutorialId, cancellationToken);
 
         if (tutorial is null)
         {
@@ -49,17 +48,17 @@ internal sealed class AddTeamToTutorialCommandHandler
             return Result.Failure(TutorialErrors.NotFound(request.TutorialId));
         }
 
-        Team team = await _teamRepository.GetById(request.TeamId, cancellationToken);
+        Team? team = await _teamRepository.GetById(request.TeamId, cancellationToken);
 
         if (team is null)
         {
             _logger
                 .ForContext(nameof(AddTeamToTutorialCommand), request, true)
                 .ForContext(nameof(Tutorial), tutorial, true)
-                .ForContext(nameof(Error), DomainErrors.LinkedSystems.Teams.TeamNotFoundInDatabase, true)
+                .ForContext(nameof(Error), TeamErrors.TeamNotFoundInDatabase, true)
                 .Warning("Failed to add Team to tutorial");
 
-            return Result.Failure(DomainErrors.LinkedSystems.Teams.TeamNotFoundInDatabase);
+            return Result.Failure(TeamErrors.TeamNotFoundInDatabase);
         }
 
         Result result = tutorial.AddTeam(

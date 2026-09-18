@@ -1,11 +1,11 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.StudentAdmin.Attendance.Absences;
 
 using Application.Domains.Attendance.Absences.Commands.SendAbsenceNotificationToParent;
+using Application.Models.Identity.Errors;
 using Constellation.Application.Common.PresentationModels;
 using Constellation.Application.Domains.Attendance.Absences.Queries.GetAbsenceDetails;
 using Constellation.Application.Models.Auth;
 using Constellation.Core.Abstractions.Services;
-using Constellation.Core.Errors;
 using Constellation.Core.Models.Absences.Identifiers;
 using Constellation.Core.Models.Students.Identifiers;
 using Constellation.Core.Shared;
@@ -85,10 +85,10 @@ public class DetailsModel : BasePageModel
         if (!isAuthorised.Succeeded)
         {
             _logger
-                .ForContext(nameof(Error), DomainErrors.Auth.NotAuthorised, true)
+                .ForContext(nameof(Error), AuthErrors.NotAuthorised, true)
                 .Warning("Failed to send notification for Absence with id {Id} by user {User}", Id, _currentUserService.UserName);
 
-            ModalContent = ErrorDisplay.Create(DomainErrors.Auth.NotAuthorised);
+            ModalContent = ErrorDisplay.Create(AuthErrors.NotAuthorised);
 
             return RedirectToPage();
         }

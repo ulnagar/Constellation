@@ -1,12 +1,10 @@
 ﻿namespace Constellation.Application.Domains.Attendance.Absences.Commands.SendAbsenceDigestToCoordinator;
 
 using Constellation.Application.Abstractions.Messaging;
-using Constellation.Application.DTOs;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Interfaces.Services;
 using Constellation.Core.Abstractions.Clock;
 using Constellation.Core.Abstractions.Repositories;
-using Constellation.Core.Errors;
 using Constellation.Core.Models;
 using Constellation.Core.Models.Absences;
 using Constellation.Core.Models.Absences.Enums;
@@ -26,6 +24,8 @@ using Constellation.Core.Shared;
 using Constellation.Core.ValueObjects;
 using ConvertAbsenceToAbsenceEntry;
 using Core.Models.Messaging.Email;
+using Core.Models.SchoolContacts.Errors;
+using Core.Models.Schools.Errors;
 using Serilog;
 using System;
 using System.Collections.Generic;
@@ -113,10 +113,10 @@ internal sealed class SendAbsenceDigestToCoordinatorCommandHandler
             {
                 _logger.Warning("{jobId}: Could not find School with Id {id}", request.JobId, enrolment.SchoolCode);
 
-                return Result.Failure(DomainErrors.Partners.School.NotFound(enrolment.SchoolCode));
+                return Result.Failure(SchoolErrors.NotFound(enrolment.SchoolCode));
             }
 
-            if (!recipients.Any()) 
+            if (recipients.Count == 0) 
             {
                 Result<EmailRecipient> result = EmailRecipient.Create(school.Name, school.EmailAddress);
 
@@ -124,7 +124,7 @@ internal sealed class SendAbsenceDigestToCoordinatorCommandHandler
                 {
                     _logger.Warning("{jobId}: No recipients could be found or created: {school}", request.JobId, school);
 
-                    return Result.Failure(DomainErrors.Partners.Contact.NotFound(0));
+                    return Result.Failure(SchoolContactErrors.NoneFound);
                 }
 
                 recipients.Add(result.Value);
@@ -133,7 +133,7 @@ internal sealed class SendAbsenceDigestToCoordinatorCommandHandler
             List<AbsenceEntry> wholeAbsenceEntries = await ProcessAbsences(digestWholeAbsences, cancellationToken);
             List<AbsenceEntry> partialAbsenceEntries = await ProcessAbsences(digestPartialAbsences, cancellationToken);
 
-            if (!wholeAbsenceEntries.Any() && !partialAbsenceEntries.Any())
+            if (wholeAbsenceEntries.Count == 0 && partialAbsenceEntries.Count == 0)
                 return Result.Success();
 
             Result<EmailMessage> sentMessage = await _emailService.SendCoordinatorAbsenceDigest(wholeAbsenceEntries, partialAbsenceEntries, student, school, recipients, cancellationToken);

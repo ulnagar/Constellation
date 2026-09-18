@@ -2,12 +2,12 @@
 
 using Constellation.Application.Abstractions.Messaging;
 using Constellation.Application.Interfaces.Repositories;
-using Constellation.Core.Errors;
 using Constellation.Core.Models;
 using Constellation.Core.Models.Assets;
 using Constellation.Core.Models.Assets.Errors;
 using Constellation.Core.Models.Assets.Repositories;
 using Constellation.Core.Shared;
+using Core.Models.Schools.Errors;
 using Serilog;
 using System.Threading;
 using System.Threading.Tasks;
@@ -52,10 +52,10 @@ internal sealed class TransferAssetToPublicSchoolCommandHandler
         {
             _logger
                 .ForContext(nameof(TransferAssetToPublicSchoolCommand), request, true)
-                .ForContext(nameof(Error), DomainErrors.Partners.School.NotFound(request.SchoolCode), true)
+                .ForContext(nameof(Error), SchoolErrors.NotFound(request.SchoolCode), true)
                 .Warning("Failed to transfer asset to Public School");
 
-            return Result.Failure(DomainErrors.Partners.School.NotFound(request.SchoolCode));
+            return Result.Failure(SchoolErrors.NotFound(request.SchoolCode));
         }
         
         Result<Location> location = Location.CreatePublicSchoolLocationRecord(

@@ -3,6 +3,7 @@
 using Abstractions.Messaging;
 using Application.Models.Identity;
 using Application.Models.Identity.Enums;
+using Application.Models.Identity.Errors;
 using Core.Errors;
 using Core.Models.Auth;
 using Core.Models.Auth.Enums;
@@ -54,7 +55,7 @@ internal sealed class RemoveOldAppUser
             _logger
                 .ForContext(nameof(SchoolContactEmailAddressChangedDomainEvent), notification, true)
                 .ForContext("OldEmailAddress", notification.OldEmailAddress)
-                .ForContext(nameof(Error), DomainErrors.Auth.UserNotFound, true)
+                .ForContext(nameof(Error), AuthErrors.UserNotFoundByEmail(notification.OldEmailAddress), true)
                 .Warning("Failed to delete old School Contact AppUser");
 
             return;

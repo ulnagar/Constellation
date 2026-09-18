@@ -4,7 +4,7 @@ using Abstractions.Messaging;
 using Constellation.Core.Models.LinkedSystems;
 using Core.Abstractions.Repositories;
 using Core.Errors;
-using Core.Models;
+using Core.Models.LinkedSystems.Errors;
 using Core.Shared;
 using Models;
 using System.Collections.Generic;
@@ -28,9 +28,9 @@ internal sealed class GetTeamByNameQueryHandler
         List<Team> teams = await _teamRepository.GetByName(request.Name, cancellationToken);
 
         if (teams.Count == 0)
-            return Result.Failure<TeamResource>(DomainErrors.LinkedSystems.Teams.TeamNotFoundInDatabase);
+            return Result.Failure<TeamResource>(TeamErrors.TeamNotFoundInDatabase);
 
-        Team exactMatch = teams.FirstOrDefault(team => team.Name == request.Name);
+        Team? exactMatch = teams.FirstOrDefault(team => team.Name == request.Name);
 
         if (exactMatch is not null)
         {
@@ -42,6 +42,6 @@ internal sealed class GetTeamByNameQueryHandler
                 exactMatch.IsArchived);
         }
 
-        return Result.Failure<TeamResource>(DomainErrors.LinkedSystems.Teams.MoreThanOneMatchFound);
+        return Result.Failure<TeamResource>(TeamErrors.MoreThanOneMatchFound);
     }
 }

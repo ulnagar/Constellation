@@ -1,7 +1,6 @@
 ﻿namespace Constellation.Application.Domains.Schools.Queries.GetSchoolDetails;
 
 using Abstractions.Messaging;
-using Core.Errors;
 using Core.Models;
 using Core.Models.Enrolments;
 using Core.Models.Enrolments.Repositories;
@@ -10,9 +9,9 @@ using Core.Models.Faculties.Repositories;
 using Core.Models.Offerings;
 using Core.Models.Offerings.Enums;
 using Core.Models.Offerings.Repositories;
-using Core.Models.Offerings.ValueObjects;
 using Core.Models.SchoolContacts;
 using Core.Models.SchoolContacts.Repositories;
+using Core.Models.Schools.Errors;
 using Core.Models.StaffMembers;
 using Core.Models.StaffMembers.Repositories;
 using Core.Models.Students;
@@ -21,7 +20,6 @@ using Core.Models.Students.Repositories;
 using Core.Models.Tutorials;
 using Core.Models.Tutorials.Repositories;
 using Core.Shared;
-using Core.ValueObjects;
 using Interfaces.Repositories;
 using Serilog;
 using Students.Queries.GetCurrentStudentsWithCurrentOfferings;
@@ -74,10 +72,10 @@ internal sealed class GetSchoolDetailsQueryHandler
         {
             _logger
                 .ForContext(nameof(GetSchoolDetailsQuery), request, true)
-                .ForContext(nameof(Error), DomainErrors.Partners.School.NotFound(request.SchoolCode), true)
+                .ForContext(nameof(Error), SchoolErrors.NotFound(request.SchoolCode), true)
                 .Warning("Failed to retrieve School details");
 
-            return Result.Failure<SchoolDetailsResponse>(DomainErrors.Partners.School.NotFound(request.SchoolCode));
+            return Result.Failure<SchoolDetailsResponse>(SchoolErrors.NotFound(request.SchoolCode));
         }
 
         List<Student> students = await _studentRepository.GetCurrentStudentsFromSchool(school.Code, cancellationToken);

@@ -2,8 +2,8 @@
 
 using Abstractions.Messaging;
 using Core.Abstractions.Clock;
-using Core.Errors;
 using Core.Models;
+using Core.Models.Schools.Errors;
 using Core.Models.Students;
 using Core.Models.Students.Errors;
 using Core.Models.Students.Repositories;
@@ -56,10 +56,10 @@ internal sealed class TransferStudentCommandHandler
         {
             _logger
                 .ForContext(nameof(TransferStudentCommand), request, true)
-                .ForContext(nameof(Error), DomainErrors.Partners.School.NotFound(request.SchoolCode), true)
+                .ForContext(nameof(Error), SchoolErrors.NotFound(request.SchoolCode), true)
                 .Warning("Failed to transfer student to new school or grade");
 
-            return Result.Failure(DomainErrors.Partners.School.NotFound(request.SchoolCode));
+            return Result.Failure(SchoolErrors.NotFound(request.SchoolCode));
         }
 
         Result newEnrolment = student.AddSchoolEnrolment(

@@ -2,7 +2,7 @@
 
 using Abstractions.Messaging;
 using Core.Abstractions.Repositories;
-using Core.Errors;
+using Core.Models.LinkedSystems.Errors;
 using Core.Shared;
 using Interfaces.Repositories;
 using System.Threading;
@@ -25,7 +25,7 @@ internal sealed class ArchiveTeamCommandHandler
 
         if (team is null)
         {
-            return Result.Failure(DomainErrors.LinkedSystems.Teams.TeamNotFoundInDatabase);
+            return Result.Failure(TeamErrors.TeamNotFoundInDatabase);
         }
 
         if (team.IsArchived)

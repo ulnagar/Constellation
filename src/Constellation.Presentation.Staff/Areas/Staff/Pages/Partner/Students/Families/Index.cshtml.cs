@@ -4,13 +4,13 @@ using Application.Common.PresentationModels;
 using Application.Domains.Families.Queries.GetFamilyById;
 using Application.Domains.Families.Queries.GetFamilyContacts;
 using Application.Models.Auth;
+using Application.Models.Identity.Errors;
 using Areas;
 using Constellation.Application.Domains.Families.Commands.DeleteFamilyById;
 using Constellation.Application.Domains.Families.Commands.DeleteParentById;
 using Constellation.Application.Domains.Families.Models;
 using Constellation.Presentation.Shared.Helpers.Attributes;
 using Core.Abstractions.Services;
-using Core.Errors;
 using Core.Models.Identifiers;
 using Core.Shared;
 using MediatR;
@@ -87,7 +87,7 @@ public class IndexModel : BasePageModel
         if (!authorized.Succeeded)
         {
             ModalContent = ErrorDisplay.Create(
-                DomainErrors.Permissions.Unauthorised,
+                AuthErrors.NotAuthorised,
                 _linkGenerator.GetPathByPage("/Dashboard", values: new { area = "Staff" }));
 
             return Page();
@@ -147,7 +147,7 @@ public class IndexModel : BasePageModel
         if (!authorized.Succeeded)
         {
             ModalContent = ErrorDisplay.Create(
-                DomainErrors.Permissions.Unauthorised,
+                AuthErrors.NotAuthorised,
                 _linkGenerator.GetPathByPage("/Dashboard", values: new { area = "Staff" }));
 
             return Page();

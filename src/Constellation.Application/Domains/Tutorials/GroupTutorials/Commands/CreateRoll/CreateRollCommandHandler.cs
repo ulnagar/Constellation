@@ -3,10 +3,10 @@
 using Constellation.Application.Abstractions.Messaging;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Core.Abstractions.Repositories;
-using Constellation.Core.Errors;
 using Constellation.Core.Models.GroupTutorials;
 using Constellation.Core.Models.Identifiers;
 using Constellation.Core.Shared;
+using Core.Models.GroupTutorials.Errors;
 using Serilog;
 using System.Threading;
 using System.Threading.Tasks;
@@ -29,10 +29,10 @@ internal sealed class CreateRollCommandHandler : ICommandHandler<CreateRollComma
 
     public async Task<Result<TutorialRollId>> Handle(CreateRollCommand request, CancellationToken cancellationToken)
     {
-        GroupTutorial tutorial = await _tutorialRepository.GetById(request.TutorialId, cancellationToken);
+        GroupTutorial? tutorial = await _tutorialRepository.GetById(request.TutorialId, cancellationToken);
 
         if (tutorial is null)
-            return Result.Failure<TutorialRollId>(DomainErrors.GroupTutorials.GroupTutorial.NotFound(request.TutorialId));
+            return Result.Failure<TutorialRollId>(GroupTutorialErrors.NotFound(request.TutorialId));
 
         Result<TutorialRoll> rollResult = tutorial.CreateRoll(request.RollDate);
 

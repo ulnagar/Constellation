@@ -1,10 +1,8 @@
 ﻿namespace Constellation.Application.Domains.Attendance.Absences.Commands.SendAbsenceNotificationToStudent;
 
 using Constellation.Application.Abstractions.Messaging;
-using Constellation.Application.Interfaces.Services;
 using Constellation.Core.Abstractions.Clock;
 using Constellation.Core.Abstractions.Repositories;
-using Constellation.Core.Errors;
 using Constellation.Core.Models.Absences;
 using Constellation.Core.Models.Absences.Enums;
 using Constellation.Core.Models.Absences.Identifiers;
@@ -17,10 +15,12 @@ using Constellation.Core.Models.Students.Repositories;
 using Constellation.Core.Models.Tutorials;
 using Constellation.Core.Models.Tutorials.Identifiers;
 using Constellation.Core.Models.Tutorials.Repositories;
-using Constellation.Core.Shared;
-using Constellation.Core.ValueObjects;
 using ConvertAbsenceToAbsenceEntry;
+using Core.Models.Absences.Errors;
 using Core.Models.Messaging.Email;
+using Core.Shared;
+using Core.ValueObjects;
+using Interfaces.Services;
 using Serilog;
 using System.Collections.Generic;
 using System.Linq;
@@ -82,7 +82,7 @@ internal sealed class SendAbsenceNotificationToStudentCommandHandler
                 .ForContext(nameof(request.AbsenceIds), request.AbsenceIds)
                 .Warning("{jobId}: Could not find any valid absences from Ids provided", request.JobId);
 
-            return Result.Failure(DomainErrors.Absences.Absence.NotFound(request.AbsenceIds.First()));
+            return Result.Failure(AbsenceErrors.NotFound(request.AbsenceIds.First()));
         }
 
         List<EmailRecipient> recipients = new();

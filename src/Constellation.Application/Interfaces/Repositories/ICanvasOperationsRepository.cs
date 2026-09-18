@@ -9,8 +9,8 @@ using System.Threading.Tasks;
 
 public interface ICanvasOperationsRepository
 {
-    Task<CanvasOperation> WithDetails(int id, CancellationToken cancellationToken = default);
-    Task<CanvasOperation> WithFilter(Expression<Func<CanvasOperation, bool>> predicate, CancellationToken cancellationToken = default);
+    Task<CanvasOperation?> WithDetails(int id, CancellationToken cancellationToken = default);
+    Task<CanvasOperation?> WithFilter(Expression<Func<CanvasOperation, bool>> predicate, CancellationToken cancellationToken = default);
     Task<List<CanvasOperation>> All(CancellationToken cancellationToken = default);
     Task<List<CanvasOperation>> AllWithFilter(Expression<Func<CanvasOperation, bool>> predicate, CancellationToken cancellationToken = default);
     Task<List<CanvasOperation>> AllToProcess(CancellationToken cancellationToken = default);

@@ -9,8 +9,8 @@ using Constellation.Core.Models.Students.Repositories;
 using Constellation.Core.Models.Tutorials;
 using Constellation.Core.Models.Tutorials.Identifiers;
 using Constellation.Core.Models.Tutorials.Repositories;
-using Core.Errors;
 using Core.Models.Absences;
+using Core.Models.Absences.Errors;
 using Core.Models.Offerings;
 using Core.Models.Students;
 using Core.Models.Students.Errors;
@@ -45,16 +45,16 @@ internal sealed class GetAbsenceDetailsForSchoolQueryHandler
 
     public async Task<Result<SchoolAbsenceDetailsResponse>> Handle(GetAbsenceDetailsForSchoolQuery request, CancellationToken cancellationToken)
     {
-        Absence absence = await _absenceRepository.GetById(request.AbsenceId, cancellationToken);
+        Absence? absence = await _absenceRepository.GetById(request.AbsenceId, cancellationToken);
 
         if (absence is null)
         {
             _logger.Warning("Could not find absence with id {id} when trying to retrieve for schools portal", request.AbsenceId);
 
-            return Result.Failure<SchoolAbsenceDetailsResponse>(DomainErrors.Absences.Absence.NotFound(request.AbsenceId));
+            return Result.Failure<SchoolAbsenceDetailsResponse>(AbsenceErrors.NotFound(request.AbsenceId));
         }
 
-        Student student = await _studentRepository.GetById(absence.StudentId, cancellationToken);
+        Student? student = await _studentRepository.GetById(absence.StudentId, cancellationToken);
 
         if (student is null)
         {
@@ -69,7 +69,7 @@ internal sealed class GetAbsenceDetailsForSchoolQueryHandler
         {
             OfferingId offeringId = OfferingId.FromValue(absence.SourceId);
 
-            Offering offering = await _offeringRepository.GetById(offeringId, cancellationToken);
+            Offering? offering = await _offeringRepository.GetById(offeringId, cancellationToken);
 
             if (offering is not null)
                 activityName = offering.Name;
@@ -79,7 +79,7 @@ internal sealed class GetAbsenceDetailsForSchoolQueryHandler
         {
             TutorialId tutorialId = TutorialId.FromValue(absence.SourceId);
 
-            Tutorial tutorial = await _tutorialRepository.GetById(tutorialId, cancellationToken);
+            Tutorial? tutorial = await _tutorialRepository.GetById(tutorialId, cancellationToken);
 
             if (tutorial is not null)
                 activityName = tutorial.Name;

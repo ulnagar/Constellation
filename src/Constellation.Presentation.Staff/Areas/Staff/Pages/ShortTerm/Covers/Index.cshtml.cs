@@ -6,6 +6,7 @@ using Application.Domains.Covers.Models;
 using Application.Domains.Covers.Queries.GetAllCoversForCalendarYear;
 using Application.Domains.Covers.Queries.GetAllCurrentAndFutureCovers;
 using Application.Domains.Covers.Queries.GetFutureCovers;
+using Application.Models.Identity.Errors;
 using Constellation.Application.Models.Auth;
 using Constellation.Core.Models.Covers.Identifiers;
 using Constellation.Presentation.Shared.Helpers.Attributes;
@@ -59,7 +60,7 @@ public class IndexModel : BasePageModel
 
         if (!authorised.Succeeded)
         {
-            ModalContent = ErrorDisplay.Create(DomainErrors.Auth.NotAuthorised);
+            ModalContent = ErrorDisplay.Create(AuthErrors.NotAuthorised);
 
             await PreparePage(cancellationToken);
 

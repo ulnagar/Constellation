@@ -1,11 +1,11 @@
 ﻿namespace Constellation.Core.Models.StaffMembers;
 
 using Abstractions.Clock;
-using Constellation.Core.Errors;
 using Errors;
 using Identifiers;
 using Models.Identifiers;
 using Primitives;
+using Schools.Errors;
 using Shared;
 using System;
 
@@ -55,7 +55,7 @@ public sealed class SchoolAssignment : IAuditableEntity
             return Result.Failure<SchoolAssignment>(StaffMemberErrors.InvalidId);
 
         if (schoolCode == Models.Identifiers.SchoolCode.Empty)
-            return Result.Failure<SchoolAssignment>(DomainErrors.Partners.School.NotFound(schoolCode));
+            return Result.Failure<SchoolAssignment>(SchoolErrors.NotFound(schoolCode));
 
         startDate ??= dateTime.Today;
         

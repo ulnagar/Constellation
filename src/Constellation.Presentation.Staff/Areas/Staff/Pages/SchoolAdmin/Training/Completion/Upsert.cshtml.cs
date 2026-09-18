@@ -11,10 +11,10 @@ using Application.Domains.Training.Queries.GetTrainingModulesAsDictionary;
 using Application.Domains.Training.Queries.GetUploadedTrainingCertificationMetadata;
 using Application.DTOs;
 using Application.Models.Auth;
+using Constellation.Application.Models.Identity.Errors;
 using Constellation.Core.Models.Training.Identifiers;
 using Constellation.Core.Shared;
 using Core.Abstractions.Services;
-using Core.Errors;
 using Core.Models.Attachments.Enums;
 using Core.Models.StaffMembers.Identifiers;
 using MediatR;
@@ -109,7 +109,7 @@ public class UpsertModel : BasePageModel
         {
             // Editor mode selected without edit access
             ModalContent = ErrorDisplay.Create(
-                DomainErrors.Permissions.Unauthorised,
+                AuthErrors.NotAuthorised,
                 _linkGenerator.GetPathByPage("/SchoolAdmin/Training/Completion/Index", values: new { area = "Staff" }));
 
             return Page();
@@ -119,7 +119,7 @@ public class UpsertModel : BasePageModel
         {
             // Editor insert mode selected without edit access
             ModalContent = ErrorDisplay.Create(
-                DomainErrors.Permissions.Unauthorised,
+                AuthErrors.NotAuthorised,
                 _linkGenerator.GetPathByPage("/SchoolAdmin/Training/Modules/Details", values: new { area = "Staff", Id = ModuleId }));
 
             return Page();
@@ -162,11 +162,11 @@ public class UpsertModel : BasePageModel
             {
                 // User is not the staff member listed on the record and does not have permission to edit records
                 _logger
-                    .ForContext(nameof(Error), DomainErrors.Permissions.Unauthorised, true)
+                    .ForContext(nameof(Error), AuthErrors.NotAuthorised, true)
                     .Warning("Failed to retrieve details of Training Completion for edit by user {User}", _currentUserService.UserName);
                 
                 ModalContent = ErrorDisplay.Create(
-                    DomainErrors.Permissions.Unauthorised,
+                    AuthErrors.NotAuthorised,
                     _linkGenerator.GetPathByPage("/SchoolAdmin/Training/Completion/Index", values: new { area = "Staff" }));
 
                 return Page();

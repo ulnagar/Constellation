@@ -18,23 +18,20 @@ public static class SchoolContactErrors
         "SchoolContact.NoneFound",
         "Could not find any matching school contacts");
 
+    public static readonly Error FirstNameEmpty = new(
+        "SchoolContact.Validation.FirstNameEmpty",
+        "The provided First Name is empty");
 
-    public static class Validation
-    {
-        public static readonly Error FirstNameEmpty = new(
-            "SchoolContact.Validation.FirstNameEmpty",
-            "The provided First Name is empty");
+    public static readonly Error LastNameEmpty = new(
+        "SchoolContact.Validation.LastNameEmpty",
+        "The provided Last Name is empty");
 
-        public static readonly Error LastNameEmpty = new(
-            "SchoolContact.Validation.LastNameEmpty",
-            "The provided Last Name is empty");
+    public static readonly Error EmailAddressEmpty = new(
+        "SchoolContact.Validation.EmailAddressEmpty",
+        "The provided email address is empty");
 
-        public static readonly Error EmailAddressEmpty = new(
-            "SchoolContact.Validation.EmailAddressEmpty",
-            "The provided email address is empty");
-
-        public static readonly Error PhoneNumberInvalid = new(
-            "SchoolContact.Validation.PhoneNumberInvalid",
-            "The provided Phone Number is not valid");
-    }
+    public static readonly Error PhoneNumberInvalid = new(
+        "SchoolContact.Validation.PhoneNumberInvalid",
+        "The provided Phone Number is not valid");
+    
 }

@@ -20,11 +20,11 @@ using Core.Models.Faculties;
 using Core.Models.Faculties.Enums;
 using Core.Models.Faculties.Repositories;
 using Core.Models.GroupTutorials;
+using Core.Models.LinkedSystems.Errors;
 using Core.Models.Offerings;
 using Core.Models.Offerings.Enums;
 using Core.Models.Offerings.Errors;
 using Core.Models.Offerings.Repositories;
-using Core.Models.Offerings.ValueObjects;
 using Core.Models.StaffMembers;
 using Core.Models.StaffMembers.Identifiers;
 using Core.Models.StaffMembers.Repositories;
@@ -98,9 +98,9 @@ internal sealed class GetTeamMembershipByIdQueryHandler
 
         if (team is null)
         {
-            _logger.Warning("Error: Task failed with error {@error}", DomainErrors.LinkedSystems.Teams.TeamNotFoundInDatabase);
+            _logger.Warning("Error: Task failed with error {@error}", TeamErrors.TeamNotFoundInDatabase);
 
-            return Result.Failure<List<TeamMembershipResponse>>(DomainErrors.LinkedSystems.Teams.TeamNotFoundInDatabase);
+            return Result.Failure<List<TeamMembershipResponse>>(TeamErrors.TeamNotFoundInDatabase);
         }
 
         TeamsConfiguration? teamsConfiguration = await _appSettings.Teams(cancellationToken);

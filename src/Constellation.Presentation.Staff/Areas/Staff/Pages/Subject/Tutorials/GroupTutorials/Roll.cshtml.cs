@@ -1,5 +1,6 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Subject.Tutorials.GroupTutorials;
 
+using Application.Models.Identity.Errors;
 using Constellation.Application.Common.PresentationModels;
 using Constellation.Application.Domains.Tutorials.GroupTutorials.Commands.AddStudentToTutorialRoll;
 using Constellation.Application.Domains.Tutorials.GroupTutorials.Commands.RemoveStudentFromTutorialRoll;
@@ -7,13 +8,13 @@ using Constellation.Application.Domains.Tutorials.GroupTutorials.Commands.Submit
 using Constellation.Application.Domains.Tutorials.GroupTutorials.Queries.GetTutorialRollWithDetailsById;
 using Constellation.Application.Models.Auth;
 using Constellation.Core.Abstractions.Services;
-using Constellation.Core.Errors;
 using Constellation.Core.Models.Identifiers;
 using Constellation.Core.Models.StaffMembers.Identifiers;
 using Constellation.Core.Models.Students.Identifiers;
 using Constellation.Core.Shared;
 using Constellation.Presentation.Shared.Helpers.Attributes;
 using Constellation.Presentation.Staff.Areas.Staff.Pages.Shared.Components.TutorialRollAddStudent;
+using Core.Models.GroupTutorials.Errors;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -75,7 +76,7 @@ public class RollModel : BasePageModel
 
             if (!isAuthorised.Succeeded)
             {
-                return ShowError(DomainErrors.Permissions.Unauthorised);
+                return ShowError(AuthErrors.NotAuthorised);
             }
         }
 
@@ -105,10 +106,10 @@ public class RollModel : BasePageModel
         if (!isAuthorised.Succeeded)
         {
             _logger
-                .ForContext(nameof(Error), DomainErrors.Permissions.Unauthorised, true)
+                .ForContext(nameof(Error), AuthErrors.NotAuthorised, true)
                 .Warning("Failed to submit Group Tutorial Roll by user {User}", _currentUserService.UserName);
 
-            return ShowError(DomainErrors.Permissions.Unauthorised);
+            return ShowError(AuthErrors.NotAuthorised);
         }
 
         Result result = await _mediator.Send(command);
@@ -138,16 +139,16 @@ public class RollModel : BasePageModel
         if (!isAuthorised.Succeeded)
         {
             _logger
-                .ForContext(nameof(Error), DomainErrors.Auth.NotAuthorised, true)
+                .ForContext(nameof(Error), AuthErrors.NotAuthorised, true)
                 .Warning("Failed to add student to Group Tutorial Roll by user {User}", _currentUserService.UserName);
 
-            return ShowError(DomainErrors.Permissions.Unauthorised);
+            return ShowError(AuthErrors.NotAuthorised);
         }
 
         if (AddStudentSelection.StudentId == StudentId.Empty)
         {
             _logger
-                .ForContext(nameof(Error), DomainErrors.GroupTutorials.TutorialRoll.StudentNotFound(AddStudentSelection.StudentId), true)
+                .ForContext(nameof(Error), GroupTutorialRollErrors.StudentNotFound(AddStudentSelection.StudentId), true)
                 .Warning("Failed to add student to Group Tutorial Roll by user {User}", _currentUserService.UserName);
 
             await PreparePage();
@@ -183,10 +184,10 @@ public class RollModel : BasePageModel
         if (!isAuthorised.Succeeded)
         {
             _logger
-                .ForContext(nameof(Error), DomainErrors.Auth.NotAuthorised, true)
+                .ForContext(nameof(Error), AuthErrors.NotAuthorised, true)
                 .Warning("Failed to remove student from Group Tutorial Roll by user {User}", _currentUserService.UserName);
 
-            return ShowError(DomainErrors.Permissions.Unauthorised);
+            return ShowError(AuthErrors.NotAuthorised);
         }
 
         Result result = await _mediator.Send(command);

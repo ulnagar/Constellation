@@ -1,6 +1,7 @@
 ﻿namespace Constellation.Application.Domains.StaffMembers.Events.StaffMemberResignedDomainEvent;
 
 using Abstractions.Messaging;
+using Application.Models.Identity.Errors;
 using Application.Models.Identity.Repositories;
 using Constellation.Application.Models.Identity;
 using Constellation.Application.Models.Identity.Enums;
@@ -58,7 +59,7 @@ internal sealed class RemoveUserAccount
         {
             _logger
                 .ForContext(nameof(StaffMemberResignedDomainEvent), notification, true)
-                .ForContext(nameof(Error), DomainErrors.Auth.UserNotFound, true)
+                .ForContext(nameof(Error), AuthErrors.UserNotFoundByEmail(staffMember.EmailAddress.Email), true)
                 .Warning("Failed to delete old Staff Member AppUser");
 
             return;

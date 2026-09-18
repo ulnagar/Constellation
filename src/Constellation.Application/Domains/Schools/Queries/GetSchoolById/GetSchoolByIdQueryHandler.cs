@@ -1,8 +1,8 @@
 ﻿namespace Constellation.Application.Domains.Schools.Queries.GetSchoolById;
 
 using Abstractions.Messaging;
-using Core.Errors;
 using Core.Models;
+using Core.Models.Schools.Errors;
 using Core.Shared;
 using Interfaces.Repositories;
 using Serilog;
@@ -31,10 +31,10 @@ internal sealed class GetSchoolByIdQueryHandler
         {
             _logger
                 .ForContext(nameof(GetSchoolByIdQuery), request, true)
-                .ForContext(nameof(Error), DomainErrors.Partners.School.NotFound(request.SchoolCode), true)
+                .ForContext(nameof(Error), SchoolErrors.NotFound(request.SchoolCode), true)
                 .Warning("Failed to retrieve school");
 
-            return Result.Failure<SchoolResponse>(DomainErrors.Partners.School.NotFound(request.SchoolCode));
+            return Result.Failure<SchoolResponse>(SchoolErrors.NotFound(request.SchoolCode));
         }
 
         return new SchoolResponse(school.Code, school.Name);

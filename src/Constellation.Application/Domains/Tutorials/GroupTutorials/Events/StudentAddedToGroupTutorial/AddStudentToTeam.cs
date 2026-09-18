@@ -13,6 +13,7 @@ using Constellation.Core.Models.Operations.Enums;
 using Constellation.Core.Models.Students;
 using Constellation.Core.Models.Students.Errors;
 using Constellation.Core.Models.Students.Repositories;
+using Core.Models.GroupTutorials.Errors;
 using Core.Models.LinkedSystems;
 using Core.Models.Operations.Repositories;
 using Core.Shared;
@@ -57,7 +58,7 @@ internal sealed class AddStudentToTeam
         {
             _logger
                 .ForContext(nameof(StudentAddedToGroupTutorialDomainEvent), notification, true)
-                .ForContext(nameof(Error), DomainErrors.GroupTutorials.GroupTutorial.NotFound(notification.TutorialId), true)
+                .ForContext(nameof(Error), GroupTutorialErrors.NotFound(notification.TutorialId), true)
                 .Error("Failed to complete the event handler");
 
             return;
@@ -69,7 +70,7 @@ internal sealed class AddStudentToTeam
         {
             _logger
                 .ForContext(nameof(StudentAddedToGroupTutorialDomainEvent), notification, true)
-                .ForContext(nameof(Error), DomainErrors.GroupTutorials.TutorialEnrolment.NotFound, true)
+                .ForContext(nameof(Error), GroupTutorialEnrolmentErrors.NotFound, true)
                 .Error("Failed to complete the event handler");
 
             return;

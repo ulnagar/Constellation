@@ -6,6 +6,7 @@ using Constellation.Core.Errors;
 using Constellation.Core.Models;
 using Constellation.Core.Models.GroupTutorials;
 using Constellation.Core.Models.Identifiers;
+using Core.Models.GroupTutorials.Errors;
 using Core.Models.StaffMembers;
 using Core.Models.StaffMembers.ValueObjects;
 using Core.Models.Students;
@@ -55,7 +56,7 @@ public class GroupTutorialTests
 
         // Assert
         result.IsFailure.Should().BeTrue();
-        result.Error.Code.Should().Be(DomainErrors.GroupTutorials.GroupTutorial.TutorialHasExpired.Code);
+        result.Error.Code.Should().Be(GroupTutorialErrors.TutorialHasExpired.Code);
     }
 
     [Fact]
@@ -75,7 +76,7 @@ public class GroupTutorialTests
 
         // Assert
         result.IsFailure.Should().BeTrue();
-        result.Error.Code.Should().Be(DomainErrors.GroupTutorials.GroupTutorial.TutorialHasExpired.Code);
+        result.Error.Code.Should().Be(GroupTutorialErrors.TutorialHasExpired.Code);
     }
 
     [Fact]
@@ -355,7 +356,7 @@ public class GroupTutorialTests
 
         // Assert
         result.IsFailure.Should().BeTrue();
-        result.Error.Code.Should().Be(DomainErrors.GroupTutorials.GroupTutorial.TutorialHasExpired.Code);
+        result.Error.Code.Should().Be(GroupTutorialErrors.TutorialHasExpired.Code);
     }
 
     [Fact]
@@ -377,7 +378,7 @@ public class GroupTutorialTests
 
         // Assert
         result.IsFailure.Should().BeTrue();
-        result.Error.Code.Should().Be(DomainErrors.GroupTutorials.GroupTutorial.TutorialHasExpired.Code);
+        result.Error.Code.Should().Be(GroupTutorialErrors.TutorialHasExpired.Code);
     }
 
     [Fact]

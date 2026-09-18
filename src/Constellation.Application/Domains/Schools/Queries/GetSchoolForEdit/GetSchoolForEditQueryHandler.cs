@@ -1,8 +1,8 @@
 ﻿namespace Constellation.Application.Domains.Schools.Queries.GetSchoolForEdit;
 
 using Abstractions.Messaging;
-using Core.Errors;
 using Core.Models;
+using Core.Models.Schools.Errors;
 using Core.Shared;
 using Interfaces.Repositories;
 using Serilog;
@@ -31,10 +31,10 @@ internal sealed class GetSchoolForEditQueryHandler
         {
             _logger
                 .ForContext(nameof(GetSchoolForEditQuery), request, true)
-                .ForContext(nameof(Error), DomainErrors.Partners.School.NotFound(request.SchoolCode), true)
+                .ForContext(nameof(Error), SchoolErrors.NotFound(request.SchoolCode), true)
                 .Warning("Failed to retrieve School");
 
-            return Result.Failure<SchoolEditResponse>(DomainErrors.Partners.School.NotFound(request.SchoolCode));
+            return Result.Failure<SchoolEditResponse>(SchoolErrors.NotFound(request.SchoolCode));
         }
 
         return new SchoolEditResponse(

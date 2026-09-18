@@ -2,12 +2,12 @@
 
 using Constellation.Application.Abstractions.Messaging;
 using Constellation.Core.Abstractions.Repositories;
-using Constellation.Core.Errors;
 using Constellation.Core.Models.GroupTutorials;
 using Constellation.Core.Models.Students;
 using Constellation.Core.Models.Students.Repositories;
 using Constellation.Core.Shared;
 using Core.Extensions;
+using Core.Models.GroupTutorials.Errors;
 using Core.Models.StaffMembers;
 using Core.Models.StaffMembers.Identifiers;
 using Core.Models.StaffMembers.Repositories;
@@ -35,10 +35,10 @@ internal sealed class GetTutorialWithDetailsByIdQueryHandler
 
     public async Task<Result<GroupTutorialDetailResponse>> Handle(GetTutorialWithDetailsByIdQuery request, CancellationToken cancellationToken)
     {
-        GroupTutorial tutorial = await _groupTutorialRepository.GetById(request.Id, cancellationToken);
+        GroupTutorial? tutorial = await _groupTutorialRepository.GetById(request.Id, cancellationToken);
 
         if (tutorial is null)
-            return Result.Failure<GroupTutorialDetailResponse>(DomainErrors.GroupTutorials.GroupTutorial.NotFound(request.Id));
+            return Result.Failure<GroupTutorialDetailResponse>(GroupTutorialErrors.NotFound(request.Id));
 
         List<TutorialTeacher> teacherLinks = tutorial.Teachers.Where(teacher => !teacher.IsDeleted).ToList();
         List<TutorialEnrolment> studentLinks = tutorial.CurrentEnrolments.ToList();

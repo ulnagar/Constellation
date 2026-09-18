@@ -1,6 +1,7 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Subject.Tutorials.GroupTutorials;
 
 using Application.Domains.Tutorials.GroupTutorials.Queries.GenerateTutorialAttendanceReport;
+using Application.Models.Identity.Errors;
 using Constellation.Application.Common.PresentationModels;
 using Constellation.Application.Domains.Tutorials.GroupTutorials.Commands.AddStudentToTutorial;
 using Constellation.Application.Domains.Tutorials.GroupTutorials.Commands.AddTeacherToTutorial;
@@ -87,10 +88,10 @@ public class DetailsModel : BasePageModel
         if (!isAuthorised.Succeeded)
         {
             _logger
-                .ForContext(nameof(Error), DomainErrors.Auth.NotAuthorised, true)
+                .ForContext(nameof(Error), AuthErrors.NotAuthorised, true)
                 .Warning("Failed to enrol student in Group Tutorial by user {User}", _currentUserService.UserName);
 
-            return ShowError(DomainErrors.Permissions.Unauthorised);
+            return ShowError(AuthErrors.NotAuthorised);
         }
 
         if (viewModel.StudentId == StudentId.Empty)
@@ -133,16 +134,16 @@ public class DetailsModel : BasePageModel
         if (!isAuthorised.Succeeded)
         {
             _logger
-                .ForContext(nameof(Error), DomainErrors.Auth.NotAuthorised, true)
+                .ForContext(nameof(Error), AuthErrors.NotAuthorised, true)
                 .Warning("Failed to add teacher to Group Tutorial by user {User}", _currentUserService.UserName);
 
-            return ShowError(DomainErrors.Permissions.Unauthorised);
+            return ShowError(AuthErrors.NotAuthorised);
         }
 
         if (viewModel.StaffId == StaffId.Empty)
         {
             _logger
-                .ForContext(nameof(Error), DomainErrors.Auth.NotAuthorised, true)
+                .ForContext(nameof(Error), AuthErrors.NotAuthorised, true)
                 .Warning("Failed to add teacher to Group Tutorial by user {User}", _currentUserService.UserName);
 
             await PreparePage();
@@ -154,7 +155,7 @@ public class DetailsModel : BasePageModel
         if (result.IsFailure)
         {
             _logger
-                .ForContext(nameof(Error), DomainErrors.Auth.NotAuthorised, true)
+                .ForContext(nameof(Error), AuthErrors.NotAuthorised, true)
                 .Warning("Failed to add teacher to Group Tutorial by user {User}", _currentUserService.UserName);
 
             return ShowError(result.Error);
@@ -261,7 +262,7 @@ public class DetailsModel : BasePageModel
         CreateRollCommand command = new(Id, DateOnly.FromDateTime(viewModel.RollDate));
 
         _logger
-            .ForContext(nameof(Error), DomainErrors.Auth.NotAuthorised, true)
+            .ForContext(nameof(Error), AuthErrors.NotAuthorised, true)
             .Warning("Failed to create roll for Group Tutorial by user {User}", _currentUserService.UserName);
 
         AuthorizationResult isAuthorised = await _authorizationService.AuthorizeAsync(User, Id, AuthPolicies.CanSubmitGroupTutorialRolls);
@@ -269,10 +270,10 @@ public class DetailsModel : BasePageModel
         if (!isAuthorised.Succeeded)
         {
             _logger
-                .ForContext(nameof(Error), DomainErrors.Auth.NotAuthorised, true)
+                .ForContext(nameof(Error), AuthErrors.NotAuthorised, true)
                 .Warning("Failed to create roll for Group Tutorial by user {User}", _currentUserService.UserName);
 
-            return ShowError(DomainErrors.Permissions.Unauthorised);
+            return ShowError(AuthErrors.NotAuthorised);
         }
 
         Result<TutorialRollId> result = await _mediator.Send(command);

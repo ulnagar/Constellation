@@ -1,8 +1,6 @@
-﻿#nullable enable
-namespace Constellation.Application.Domains.Attendance.Absences.Queries.ExportAbsencesReport;
+﻿namespace Constellation.Application.Domains.Attendance.Absences.Queries.ExportAbsencesReport;
 
 using Abstractions.Messaging;
-using Constellation.Application.Domains.Attendance.Absences.Queries.GetAbsencesWithFilterForReport;
 using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.Models;
 using Constellation.Core.Models.Absences;
@@ -10,14 +8,15 @@ using Constellation.Core.Models.Offerings;
 using Constellation.Core.Models.Offerings.Repositories;
 using Constellation.Core.Models.Students;
 using Constellation.Core.Models.Students.Repositories;
-using Core.Errors;
 using Core.Models.Absences.Enums;
+using Core.Models.Absences.Errors;
 using Core.Models.Offerings.Identifiers;
 using Core.Models.Tutorials;
 using Core.Models.Tutorials.Identifiers;
 using Core.Models.Tutorials.Repositories;
 using Core.Shared;
 using DTOs;
+using GetAbsencesWithFilterForReport;
 using Helpers;
 using Interfaces.Repositories;
 using Interfaces.Services;
@@ -62,7 +61,7 @@ internal sealed class ExportAbsencesReportCommandHandler
             request.Grades.Count == 0 &&
             request.SchoolCodes.Count == 0 &&
             request.CourseIds.Count == 0)
-            return Result.Failure<FileDto>(DomainErrors.Absences.Report.NoFilterSupplied);
+            return Result.Failure<FileDto>(AbsenceReportErrors.NoFilterSupplied);
 
         List<Student> students = [];
 

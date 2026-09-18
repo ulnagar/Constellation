@@ -79,10 +79,10 @@ public sealed class GroupTutorial : AggregateRoot, IAuditableEntity
             IsDeleted;
 
         if (hasEndedOrBeenDeleted)
-            return Result.Failure<TutorialTeacher>(DomainErrors.GroupTutorials.GroupTutorial.TutorialHasExpired);
+            return Result.Failure<TutorialTeacher>(GroupTutorialErrors.TutorialHasExpired);
 
         if (effectiveTo.HasValue && effectiveTo.Value < DateOnly.FromDateTime(DateTime.Today))
-            return Result.Failure<TutorialTeacher>(DomainErrors.GroupTutorials.TutorialTeacher.TimeExpired);
+            return Result.Failure<TutorialTeacher>(GroupTutorialTeacherErrors.TimeExpired);
 
         if (_teachers.Any(enrol => enrol.StaffId == teacher.Id && !enrol.IsDeleted))
         {
@@ -133,19 +133,19 @@ public sealed class GroupTutorial : AggregateRoot, IAuditableEntity
             IsDeleted;
 
         if (hasEndedOrBeenDeleted)
-            return Result.Failure<TutorialEnrolment>(DomainErrors.GroupTutorials.GroupTutorial.TutorialHasExpired);
+            return Result.Failure<TutorialEnrolment>(GroupTutorialErrors.TutorialHasExpired);
 
         if (effectiveTo.HasValue && effectiveTo.Value < DateOnly.FromDateTime(DateTime.Today))
-            return Result.Failure<TutorialEnrolment>(DomainErrors.GroupTutorials.TutorialEnrolment.TimeExpired);
+            return Result.Failure<TutorialEnrolment>(GroupTutorialEnrolmentErrors.TimeExpired);
 
         if (_enrolments.Any(enrol => enrol.StudentId == student.Id && !enrol.IsDeleted))
         {
-            TutorialEnrolment existingEntry = _enrolments.FirstOrDefault(enrol => enrol.StudentId == student.Id && !enrol.IsDeleted);
+            TutorialEnrolment? existingEntry = _enrolments.FirstOrDefault(enrol => enrol.StudentId == student.Id && !enrol.IsDeleted);
 
             return existingEntry;
         }
 
-        TutorialEnrolment enrolment = new TutorialEnrolment(new TutorialEnrolmentId(), student, effectiveTo);
+        TutorialEnrolment enrolment = new(new TutorialEnrolmentId(), student, effectiveTo);
 
         RaiseDomainEvent(new StudentAddedToGroupTutorialDomainEvent(new DomainEventId(), Id, enrolment.Id));
 
@@ -184,12 +184,12 @@ public sealed class GroupTutorial : AggregateRoot, IAuditableEntity
     {
         if (Rolls.Any(roll => roll.SessionDate == rollDate))
         {
-            return Result.Failure<TutorialRoll>(DomainErrors.GroupTutorials.TutorialRoll.RollAlreadyExistsForDate(rollDate));
+            return Result.Failure<TutorialRoll>(GroupTutorialRollErrors.RollAlreadyExistsForDate(rollDate));
         }
 
         if (rollDate < StartDate || rollDate > EndDate)
         {
-            return Result.Failure<TutorialRoll>(DomainErrors.GroupTutorials.TutorialRoll.RollDateInvalid(rollDate));
+            return Result.Failure<TutorialRoll>(GroupTutorialRollErrors.RollDateInvalid(rollDate));
         }
 
         var roll = new TutorialRoll(new TutorialRollId(), this, rollDate);
@@ -210,7 +210,7 @@ public sealed class GroupTutorial : AggregateRoot, IAuditableEntity
     {
         if (roll.Status != Enums.TutorialRollStatus.Unsubmitted)
         {
-            return Result.Failure(DomainErrors.GroupTutorials.TutorialRoll.SubmitInvalidStatus);
+            return Result.Failure(GroupTutorialRollErrors.SubmitInvalidStatus);
         }
 
         roll.Submit(staffMember.Id, studentPresence);

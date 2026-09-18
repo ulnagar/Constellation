@@ -2,7 +2,8 @@
 
 using Abstractions.Messaging;
 using Core.Abstractions.Repositories;
-using Core.Errors;
+using Core.Models.Casuals;
+using Core.Models.Casuals.Errors;
 using Core.Shared;
 using System.Threading;
 using System.Threading.Tasks;
@@ -20,11 +21,11 @@ internal sealed class GetCasualByIdQueryHandler
 
     public async Task<Result<CasualResponse>> Handle(GetCasualByIdQuery request, CancellationToken cancellationToken)
     {
-        var casual = await _casualRepository.GetById(request.CasualId, cancellationToken);
+        Casual? casual = await _casualRepository.GetById(request.CasualId, cancellationToken);
 
         if (casual is null)
         {
-            return Result.Failure<CasualResponse>(DomainErrors.Casuals.Casual.NotFound(request.CasualId));
+            return Result.Failure<CasualResponse>(CasualErrors.NotFound(request.CasualId));
         }
 
         return new CasualResponse(

@@ -2,7 +2,7 @@
 
 using Abstractions.Messaging;
 using Application.Models.Identity;
-using Core.Errors;
+using Application.Models.Identity.Errors;
 using Core.Models.Auth;
 using Core.Shared;
 using Microsoft.AspNetCore.Identity;
@@ -25,25 +25,25 @@ internal sealed class RemoveUserFromRoleCommandHandler
 
     public async Task<Result> Handle(RemoveUserFromRoleCommand request, CancellationToken cancellationToken)
     {
-        var user = await _userManager.FindByIdAsync(request.UserId.ToString());
+        AppUser? user = await _userManager.FindByIdAsync(request.UserId.ToString());
 
         if (user is null)
         {
-            return Result.Failure(DomainErrors.Auth.UserNotFound);
+            return Result.Failure(AuthErrors.UserNotFound(request.UserId));
         }
 
-        var role = await _roleManager.FindByIdAsync(request.RoleId.ToString());
+        AppRole? role = await _roleManager.FindByIdAsync(request.RoleId.ToString());
 
         if (role is null)
         {
-            return Result.Failure(DomainErrors.Auth.RoleNotFound);
+            return Result.Failure(AuthErrors.RoleNotFound(request.RoleId));
         }
 
-        var result = await _userManager.RemoveFromRoleAsync(user, role.Name);
+        IdentityResult result = await _userManager.RemoveFromRoleAsync(user, role.Name);
 
         if (!result.Succeeded)
         {
-            return Result.Failure(DomainErrors.Auth.CannotUpdateRole(role.Name));
+            return Result.Failure(AuthErrors.CannotUpdateRole(role.Name));
         }
         else
         {

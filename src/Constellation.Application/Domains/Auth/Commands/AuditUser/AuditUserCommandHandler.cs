@@ -1,8 +1,8 @@
 ﻿namespace Constellation.Application.Domains.Auth.Commands.AuditUser;
 
 using Abstractions.Messaging;
+using Application.Models.Identity.Errors;
 using Core.Abstractions.Repositories;
-using Core.Errors;
 using Core.Models.Auth;
 using Core.Models.Auth.Enums;
 using Core.Models.Families;
@@ -46,7 +46,7 @@ internal sealed class AuditUserCommandHandler
         AppUser? user = await _userManager.FindByIdAsync(request.UserId.ToString());
 
         if (user is null)
-            return Result.Failure(DomainErrors.Auth.UserNotFound);
+            return Result.Failure(AuthErrors.UserNotFound(request.UserId));
 
         EmailAddress emailAddress = EmailAddress.FromValue(user.Email!);
 

@@ -1,12 +1,10 @@
 ﻿namespace Constellation.Application.Domains.SchoolContacts.Commands.CreateContactWithRole;
 
 using Abstractions.Messaging;
-using Constellation.Application.Domains.SchoolContacts.Commands.CreateContact;
-using Constellation.Core.Models.SchoolContacts.Identifiers;
-using Core.Errors;
 using Core.Models;
 using Core.Models.SchoolContacts;
 using Core.Models.SchoolContacts.Repositories;
+using Core.Models.Schools.Errors;
 using Core.Shared;
 using Core.ValueObjects;
 using Interfaces.Repositories;
@@ -43,10 +41,10 @@ internal sealed class CreateContactWithRoleCommandHandler
         {
             _logger
                 .ForContext(nameof(CreateContactWithRoleCommand), request, true)
-                .ForContext(nameof(Error), DomainErrors.Partners.School.NotFound(request.SchoolCode), true)
+                .ForContext(nameof(Error), SchoolErrors.NotFound(request.SchoolCode), true)
                 .Warning("Failed to create new School Contact");
 
-            return Result.Failure(DomainErrors.Partners.School.NotFound(request.SchoolCode));
+            return Result.Failure(SchoolErrors.NotFound(request.SchoolCode));
         }
 
         Result<EmailAddress> emailAddress = EmailAddress.Create(request.EmailAddress);

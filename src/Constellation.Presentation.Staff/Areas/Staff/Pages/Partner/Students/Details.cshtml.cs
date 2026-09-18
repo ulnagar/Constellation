@@ -19,7 +19,7 @@ using Constellation.Application.Domains.Students.Models;
 using Constellation.Application.Domains.Students.Queries.GetLifecycleDetailsForStudent;
 using Constellation.Application.Domains.Students.Queries.GetSchoolEnrolmentHistoryForStudent;
 using Constellation.Application.Models.Auth;
-using Constellation.Core.Errors;
+using Constellation.Application.Models.Identity.Errors;
 using Constellation.Core.Shared;
 using Constellation.Presentation.Shared.Helpers.Attributes;
 using Constellation.Presentation.Staff.Areas;
@@ -76,18 +76,18 @@ public class DetailsModel : BasePageModel
 
     public StudentResponse Student { get; set; }
 
-    public List<FamilyContactResponse> FamilyContacts { get; set; } = new();
+    public List<FamilyContactResponse> FamilyContacts { get; set; } = [];
 
-    public List<StudentEnrolmentResponse> Enrolments { get; set; } = new();
+    public List<StudentEnrolmentResponse> Enrolments { get; set; } = [];
 
-    public List<StudentSessionDetailsResponse> Sessions { get; set; } = new();
+    public List<StudentSessionDetailsResponse> Sessions { get; set; } = [];
     public int MinPerFn => CalculateTotalSessionDuration();
 
-    public List<StudentDeviceResponse> Equipment { get; set; } = new();
+    public List<StudentDeviceResponse> Equipment { get; set; } = [];
 
-    public List<StudentAbsenceSummaryResponse> Absences { get; set; } = new();
+    public List<StudentAbsenceSummaryResponse> Absences { get; set; } = [];
 
-    public List<SchoolEnrolmentResponse> SchoolEnrolments { get; set; } = new();
+    public List<SchoolEnrolmentResponse> SchoolEnrolments { get; set; } = [];
 
     public RecordLifecycleDetailsResponse RecordLifecycle { get; set; } = new(string.Empty, DateTime.MinValue, string.Empty, DateTime.MinValue, string.Empty, DateTime.MinValue);
 
@@ -124,27 +124,27 @@ public class DetailsModel : BasePageModel
 
         Result<List<SchoolEnrolmentResponse>> schoolEnrolmentRequest = await _mediator.Send(new GetSchoolEnrolmentHistoryForStudentQuery(Id), cancellationToken);
 
-        SchoolEnrolments = schoolEnrolmentRequest.IsSuccess ? schoolEnrolmentRequest.Value : new();
+        SchoolEnrolments = schoolEnrolmentRequest.IsSuccess ? schoolEnrolmentRequest.Value : [];
 
         Result<List<FamilyContactResponse>> familyRequest = await _mediator.Send(new GetFamilyContactsForStudentQuery(Id), cancellationToken);
 
-        FamilyContacts = familyRequest.IsSuccess ? familyRequest.Value : new();
+        FamilyContacts = familyRequest.IsSuccess ? familyRequest.Value : [];
 
         Result<List<StudentEnrolmentResponse>> enrolmentRequest = await _mediator.Send(new GetStudentEnrolmentsWithDetailsQuery(Id), cancellationToken);
 
-        Enrolments = enrolmentRequest.IsSuccess ? enrolmentRequest.Value : new();
+        Enrolments = enrolmentRequest.IsSuccess ? enrolmentRequest.Value : [];
 
         Result<List<StudentSessionDetailsResponse>> sessionRequest = await _mediator.Send(new GetSessionDetailsForStudentQuery(Id), cancellationToken);
 
-        Sessions = sessionRequest.IsSuccess ? sessionRequest.Value : new();
+        Sessions = sessionRequest.IsSuccess ? sessionRequest.Value : [];
 
         Result<List<StudentDeviceResponse>> equipmentRequest = await _mediator.Send(new GetDevicesAllocatedToStudentQuery(Id), cancellationToken);
 
-        Equipment = equipmentRequest.IsSuccess ? equipmentRequest.Value : new();
+        Equipment = equipmentRequest.IsSuccess ? equipmentRequest.Value : [];
 
         Result<List<StudentAbsenceSummaryResponse>> absencesRequest = await _mediator.Send(new GetAbsenceSummaryForStudentQuery(Id), cancellationToken);
 
-        Absences = absencesRequest.IsSuccess ? absencesRequest.Value : new();
+        Absences = absencesRequest.IsSuccess ? absencesRequest.Value : [];
 
         Result<RecordLifecycleDetailsResponse> lifecycleRequest = await _mediator.Send(new GetLifecycleDetailsForStudentQuery(Id), cancellationToken);
 
@@ -167,10 +167,10 @@ public class DetailsModel : BasePageModel
         if (!authorised.Succeeded)
         {
             _logger
-                .ForContext(nameof(Error), DomainErrors.Permissions.Unauthorised, true)
+                .ForContext(nameof(Error), AuthErrors.NotAuthorised, true)
                 .Warning("Failed to withdraw Student by user {User}", _currentUserService.UserName);
 
-            GenerateError(DomainErrors.Permissions.Unauthorised);
+            GenerateError(AuthErrors.NotAuthorised);
             await PreparePage(cancellationToken);
             return;
         }
@@ -204,10 +204,10 @@ public class DetailsModel : BasePageModel
         if (!authorised.Succeeded)
         {
             _logger
-                .ForContext(nameof(Error), DomainErrors.Permissions.Unauthorised, true)
+                .ForContext(nameof(Error), AuthErrors.NotAuthorised, true)
                 .Warning("Failed to reinstate Student by user {User}", _currentUserService.UserName);
 
-            GenerateError(DomainErrors.Permissions.Unauthorised);
+            GenerateError(AuthErrors.NotAuthorised);
             await PreparePage(cancellationToken);
             return Page();
         }
@@ -243,10 +243,10 @@ public class DetailsModel : BasePageModel
         if (!authorised.Succeeded)
         {
             _logger
-                .ForContext(nameof(Error), DomainErrors.Permissions.Unauthorised, true)
+                .ForContext(nameof(Error), AuthErrors.NotAuthorised, true)
                 .Warning("Failed to unenrol Student from Offering by user {User}", _currentUserService.UserName);
 
-            GenerateError(DomainErrors.Permissions.Unauthorised);
+            GenerateError(AuthErrors.NotAuthorised);
             await PreparePage(cancellationToken);
             return;
         }
@@ -280,10 +280,10 @@ public class DetailsModel : BasePageModel
         if (!authorised.Succeeded)
         {
             _logger
-                .ForContext(nameof(Error), DomainErrors.Permissions.Unauthorised, true)
+                .ForContext(nameof(Error), AuthErrors.NotAuthorised, true)
                 .Warning("Failed to unenrol Student from Tutorial by user {User}", _currentUserService.UserName);
 
-            GenerateError(DomainErrors.Permissions.Unauthorised);
+            GenerateError(AuthErrors.NotAuthorised);
             await PreparePage(cancellationToken);
             return;
         }
@@ -322,10 +322,10 @@ public class DetailsModel : BasePageModel
         if (!authorised.Succeeded)
         {
             _logger
-                .ForContext(nameof(Error), DomainErrors.Permissions.Unauthorised, true)
+                .ForContext(nameof(Error), AuthErrors.NotAuthorised, true)
                 .Warning("Failed to bulk unenrol Student from Offerings by user {User}", _currentUserService.UserName);
 
-            GenerateError(DomainErrors.Permissions.Unauthorised);
+            GenerateError(AuthErrors.NotAuthorised);
             await PreparePage(cancellationToken);
             return;
         }
@@ -359,10 +359,10 @@ public class DetailsModel : BasePageModel
         if (!authorised.Succeeded)
         {
             _logger
-                .ForContext(nameof(Error), DomainErrors.Permissions.Unauthorised, true)
+                .ForContext(nameof(Error), AuthErrors.NotAuthorised, true)
                 .Warning("Failed to transfer Student to new School/Grade by user {User}", _currentUserService.UserName);
 
-            GenerateError(DomainErrors.Permissions.Unauthorised);
+            GenerateError(AuthErrors.NotAuthorised);
             await PreparePage(cancellationToken);
             return Page();
         }
@@ -400,10 +400,10 @@ public class DetailsModel : BasePageModel
         if (!authorised.Succeeded)
         {
             _logger
-                .ForContext(nameof(Error), DomainErrors.Permissions.Unauthorised, true)
+                .ForContext(nameof(Error), AuthErrors.NotAuthorised, true)
                 .Warning("Failed to remove School Enrolment by user {User}", _currentUserService.UserName);
 
-            GenerateError(DomainErrors.Permissions.Unauthorised);
+            GenerateError(AuthErrors.NotAuthorised);
             await PreparePage(cancellationToken);
             return Page();
         }
@@ -441,7 +441,7 @@ public class DetailsModel : BasePageModel
 
     private int CalculateTotalSessionDuration()
     {
-        if (!Sessions.Any())
+        if (Sessions.Count == 0)
             return 0;
 
         return Sessions.Sum(session => session.Duration);

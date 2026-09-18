@@ -5,8 +5,8 @@ using Application.Domains.Training.Commands.CreateTrainingModule;
 using Application.Domains.Training.Commands.UpdateTrainingModule;
 using Application.Domains.Training.Queries.GetTrainingModuleEditContext;
 using Constellation.Application.Models.Auth;
+using Constellation.Application.Models.Identity.Errors;
 using Constellation.Core.Enums;
-using Constellation.Core.Errors;
 using Constellation.Core.Models.Training.Identifiers;
 using Constellation.Core.Shared;
 using Core.Abstractions.Services;
@@ -74,7 +74,7 @@ public class UpsertModel : BasePageModel
                     .Warning("Failed to retrieve Training Module with id {Id} for edit by user {User}", Id, _currentUserService.UserName);
 
                 ModalContent = ErrorDisplay.Create(
-                    DomainErrors.Permissions.Unauthorised,
+                    AuthErrors.NotAuthorised,
                     _linkGenerator.GetPathByPage("/SchoolAdmin/Training/Modules/Index", values: new { area = "Staff" }));
 
                 return;

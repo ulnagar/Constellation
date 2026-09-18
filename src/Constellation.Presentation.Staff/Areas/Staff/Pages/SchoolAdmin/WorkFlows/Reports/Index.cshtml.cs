@@ -4,6 +4,7 @@ using Application.Common.PresentationModels;
 using Application.Domains.WorkFlows.Queries.ExportOpenCaseReport;
 using Application.DTOs;
 using Application.Models.Auth;
+using Application.Models.Identity.Errors;
 using Constellation.Presentation.Shared.Helpers.Attributes;
 using Core.Abstractions.Services;
 using Core.Errors;
@@ -50,10 +51,10 @@ public class IndexModel : BasePageModel
         if (!authorised.Succeeded)
         {
             _logger
-                .ForContext(nameof(Error), DomainErrors.Auth.NotAuthorised, true)
+                .ForContext(nameof(Error), AuthErrors.NotAuthorised, true)
                 .Information("Requested to generate Open Case Report for WorkFlow Cases by user {User}", _currentUserService.UserName);
             
-            ModalContent = ErrorDisplay.Create(DomainErrors.Auth.NotAuthorised);
+            ModalContent = ErrorDisplay.Create(AuthErrors.NotAuthorised);
 
             return Page();
         }

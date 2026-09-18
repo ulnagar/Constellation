@@ -5,12 +5,12 @@ using Application.Domains.Families.Queries.GetParentWithStudentIds;
 using Application.Domains.LinkedSystems.Sentral.Queries.GetTermsAndWeeksForCurrentYear;
 using Application.DTOs;
 using Application.Models.Auth;
+using Application.Models.Identity.Errors;
 using Constellation.Application.Domains.Attendance.Reports.Queries.GenerateAttendanceReportForStudent;
 using Constellation.Application.Domains.Students.Queries.GetStudentsByParentEmail;
 using Constellation.Core.Shared;
 using Constellation.Presentation.Shared.Helpers.Attributes;
 using Core.Abstractions.Services;
-using Core.Errors;
 using Core.Models.Auth;
 using Core.Models.Students.Identifiers;
 using MediatR;
@@ -72,7 +72,7 @@ public class ReportsModel : BasePageModel
             _logger
                 .Warning("Unauthorised attempt to download attendance report by parent {name}", _currentUserService.UserName);
 
-            ModalContent = ErrorDisplay.Create(DomainErrors.Auth.NotAuthorised);
+            ModalContent = ErrorDisplay.Create(AuthErrors.NotAuthorised);
 
             await PreparePage();
 

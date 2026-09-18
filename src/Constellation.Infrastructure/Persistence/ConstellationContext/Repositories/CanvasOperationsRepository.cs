@@ -43,14 +43,14 @@ public class CanvasOperationsRepository : ICanvasOperationsRepository
             .Where(predicate)
             .ToListAsync(cancellationToken);
 
-    public async Task<CanvasOperation> WithDetails(
+    public async Task<CanvasOperation?> WithDetails(
         int id,
         CancellationToken cancellationToken = default) =>
         await _context
             .Set<CanvasOperation>()
             .SingleOrDefaultAsync(operation => operation.Id == id, cancellationToken);
 
-    public async Task<CanvasOperation> WithFilter(
+    public async Task<CanvasOperation?> WithFilter(
         Expression<Func<CanvasOperation, bool>> predicate,
         CancellationToken cancellationToken = default) =>
         await _context

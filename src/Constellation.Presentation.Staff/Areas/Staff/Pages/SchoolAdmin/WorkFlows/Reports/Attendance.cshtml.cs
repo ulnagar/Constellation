@@ -4,6 +4,7 @@ using Application.Common.PresentationModels;
 using Application.Domains.WorkFlows.Commands.CreateAttendanceCase;
 using Application.Domains.WorkFlows.Commands.UpdateAttendanceCaseDetails;
 using Application.Models.Auth;
+using Application.Models.Identity.Errors;
 using Constellation.Application.Domains.Attendance.Reports.Queries.GetAttendanceTrendValues;
 using Constellation.Presentation.Shared.Helpers.Attributes;
 using Core.Abstractions.Services;
@@ -78,7 +79,7 @@ public class AttendanceModel : BasePageModel
         if (!authorised.Succeeded)
         {
             ModalContent = ErrorDisplay.Create(
-                DomainErrors.Auth.NotAuthorised,
+                AuthErrors.NotAuthorised,
                 _linkGenerator.GetPathByPage("/SchoolAdmin/WorkFlows/Reports/Index", values: new { area = "Staff" }));
 
             return Page();

@@ -2,7 +2,6 @@
 
 using Constellation.Application.Abstractions.Messaging;
 using Constellation.Application.Interfaces.Repositories;
-using Constellation.Core.Errors;
 using Constellation.Core.Models.Enrolments;
 using Constellation.Core.Models.Enrolments.Repositories;
 using Constellation.Core.Models.Offerings;
@@ -12,6 +11,7 @@ using Constellation.Core.Models.Students;
 using Constellation.Core.Models.Students.Errors;
 using Constellation.Core.Models.Students.Repositories;
 using Constellation.Core.Shared;
+using Core.Models.Enrolments.Errors;
 using Serilog;
 using System.Collections.Generic;
 using System.Linq;
@@ -73,10 +73,10 @@ internal sealed class EnrolStudentInOfferingCommandHandler
         {
             _logger
                 .ForContext(nameof(EnrolStudentInOfferingCommand), request, true)
-                .ForContext(nameof(Error), DomainErrors.Enrolments.Enrolment.AlreadyExists(request.StudentId, request.OfferingId), true)
+                .ForContext(nameof(Error), EnrolmentErrors.AlreadyExists(request.StudentId, request.OfferingId), true)
                 .Warning("Could not enrol student");
 
-            return Result.Failure(DomainErrors.Enrolments.Enrolment.AlreadyExists(request.StudentId, request.OfferingId));
+            return Result.Failure(EnrolmentErrors.AlreadyExists(request.StudentId, request.OfferingId));
         }
 
         Enrolment enrolment = OfferingEnrolment.Create(request.StudentId, request.OfferingId);

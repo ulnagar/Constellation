@@ -1,14 +1,13 @@
 ﻿namespace Constellation.Application.Domains.Enrolments.Queries.GetStudentEnrolmentsWithDetails;
 
 using Constellation.Application.Abstractions.Messaging;
-using Constellation.Core.Errors;
 using Constellation.Core.Models.Offerings.Repositories;
 using Constellation.Core.Shared;
 using Core.Models.Enrolments;
+using Core.Models.Enrolments.Errors;
 using Core.Models.Enrolments.Repositories;
 using Core.Models.Offerings;
 using Core.Models.Offerings.Enums;
-using Core.Models.Offerings.ValueObjects;
 using Core.Models.StaffMembers;
 using Core.Models.StaffMembers.Identifiers;
 using Core.Models.StaffMembers.Repositories;
@@ -58,7 +57,7 @@ internal sealed class GetStudentEnrolmentsWithDetailsQueryHandler
         {
             _logger.Warning("No active enrolments found for student {id}", request.StudentId);
 
-            return Result.Failure<List<StudentEnrolmentResponse>>(DomainErrors.Enrolments.Enrolment.NotFoundForStudent(request.StudentId));
+            return Result.Failure<List<StudentEnrolmentResponse>>(EnrolmentErrors.NotFoundForStudent(request.StudentId));
         }
 
         foreach (Enrolment enrolment in enrolments)
@@ -67,7 +66,7 @@ internal sealed class GetStudentEnrolmentsWithDetailsQueryHandler
             {
                 case OfferingEnrolment offeringEnrolment:
                     {
-                        Offering offering = await _offeringRepository.GetById(offeringEnrolment.OfferingId, cancellationToken);
+                        Offering? offering = await _offeringRepository.GetById(offeringEnrolment.OfferingId, cancellationToken);
 
                         if (offering is null)
                         {
@@ -83,7 +82,7 @@ internal sealed class GetStudentEnrolmentsWithDetailsQueryHandler
                             _logger.Warning("Could not find teacher for offering {offering}", offering.Name);
                         }
 
-                        Course course = await _courseRepository.GetById(offering.CourseId, cancellationToken);
+                        Course? course = await _courseRepository.GetById(offering.CourseId, cancellationToken);
 
                         if (course is null)
                         {
@@ -113,7 +112,7 @@ internal sealed class GetStudentEnrolmentsWithDetailsQueryHandler
 
                 case TutorialEnrolment tutorialEnrolment:
                     {
-                        Tutorial tutorial = await _tutorialRepository.GetById(tutorialEnrolment.TutorialId, cancellationToken);
+                        Tutorial? tutorial = await _tutorialRepository.GetById(tutorialEnrolment.TutorialId, cancellationToken);
 
                         if (tutorial is null)
                         {

@@ -2,11 +2,11 @@
 
 using Abstractions.Messaging;
 using Core.Abstractions.Repositories;
-using Core.Errors;
 using Core.Models;
 using Core.Models.SchoolContacts;
 using Core.Models.SchoolContacts.Identifiers;
 using Core.Models.SchoolContacts.Repositories;
+using Core.Models.Schools.Errors;
 using Core.Models.SciencePracs;
 using Core.Models.SciencePracs.Errors;
 using Core.Models.Students;
@@ -86,7 +86,7 @@ internal sealed class GetLessonRollDetailsQueryHandler
         {
             _logger.Warning("Could not locate school with Id {code}", roll.SchoolCode);
 
-            return Result.Failure<LessonRollDetailsResponse>(DomainErrors.Partners.School.NotFound(roll.SchoolCode));
+            return Result.Failure<LessonRollDetailsResponse>(SchoolErrors.NotFound(roll.SchoolCode));
         }
 
         LessonRollDetailsResponse.Contact contactDetails = null;
@@ -95,7 +95,7 @@ internal sealed class GetLessonRollDetailsQueryHandler
         {
             SchoolContact? contact = null;
 
-            if (roll.SubmittedBy.Contains('@'))
+            if (roll.SubmittedBy.Contains('@', StringComparison.CurrentCultureIgnoreCase))
             {
                 Result<EmailAddress> emailAddress = EmailAddress.Create(roll.SubmittedBy);
 

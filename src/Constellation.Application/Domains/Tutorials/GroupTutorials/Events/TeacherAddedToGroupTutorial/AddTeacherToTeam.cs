@@ -12,6 +12,7 @@ using Constellation.Core.Models.StaffMembers;
 using Constellation.Core.Models.StaffMembers.Errors;
 using Constellation.Core.Shared;
 using Core.Errors;
+using Core.Models.GroupTutorials.Errors;
 using Core.Models.LinkedSystems;
 using Core.Models.Operations;
 using Core.Models.Operations.Repositories;
@@ -57,7 +58,7 @@ internal sealed class AddTeacherToTeam
         {
             _logger
                 .ForContext(nameof(TeacherAddedToGroupTutorialDomainEvent), notification, true)
-                .ForContext(nameof(Error), DomainErrors.GroupTutorials.GroupTutorial.NotFound(notification.TutorialId), true)
+                .ForContext(nameof(Error), GroupTutorialErrors.NotFound(notification.TutorialId), true)
                 .Error("Failed to complete the event handler");
 
             return;
@@ -69,7 +70,7 @@ internal sealed class AddTeacherToTeam
         {
             _logger
                 .ForContext(nameof(TeacherAddedToGroupTutorialDomainEvent), notification, true)
-                .ForContext(nameof(Error), DomainErrors.GroupTutorials.TutorialTeacher.NotFound, true)
+                .ForContext(nameof(Error), GroupTutorialTeacherErrors.NotFound, true)
                 .Error("Failed to complete the event handler");
 
             return;

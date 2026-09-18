@@ -8,6 +8,7 @@ using Constellation.Core.Models.GroupTutorials;
 using Constellation.Core.Models.Students;
 using Constellation.Core.Models.Students.Repositories;
 using Constellation.Core.Shared;
+using Core.Models.GroupTutorials.Errors;
 using Core.Models.Students.Errors;
 using System.Linq;
 using System.Threading;
@@ -32,17 +33,17 @@ internal sealed class RemoveStudentFromTutorialCommandHandler
 
     public async Task<Result> Handle(RemoveStudentFromTutorialCommand request, CancellationToken cancellationToken)
     {
-        GroupTutorial tutorial = await _groupTutorialRepository.GetById(request.TutorialId, cancellationToken);
+        GroupTutorial? tutorial = await _groupTutorialRepository.GetById(request.TutorialId, cancellationToken);
 
         if (tutorial is null)
-            return Result.Failure(DomainErrors.GroupTutorials.GroupTutorial.NotFound(request.TutorialId));
+            return Result.Failure(GroupTutorialErrors.NotFound(request.TutorialId));
 
-        TutorialEnrolment studentRecord = tutorial.Enrolments.FirstOrDefault(enrolment => enrolment.Id == request.EnrolmentId);
+        TutorialEnrolment? studentRecord = tutorial.Enrolments.FirstOrDefault(enrolment => enrolment.Id == request.EnrolmentId);
 
         if (studentRecord is null)
-            return Result.Failure(DomainErrors.GroupTutorials.TutorialEnrolment.NotFound);
+            return Result.Failure(GroupTutorialEnrolmentErrors.NotFound);
 
-        Student studentEntity = await _studentRepository.GetById(studentRecord.StudentId, cancellationToken);
+        Student? studentEntity = await _studentRepository.GetById(studentRecord.StudentId, cancellationToken);
 
         if (studentEntity is null)
             return Result.Failure(StudentErrors.NotFound(studentRecord.StudentId));

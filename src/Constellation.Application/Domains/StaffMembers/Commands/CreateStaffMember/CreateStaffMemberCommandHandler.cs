@@ -2,9 +2,9 @@
 
 using Abstractions.Messaging;
 using Core.Abstractions.Clock;
-using Core.Errors;
 using Core.Models;
 using Core.Models.Identifiers;
+using Core.Models.Schools.Errors;
 using Core.Models.StaffMembers;
 using Core.Models.StaffMembers.Errors;
 using Core.Models.StaffMembers.Repositories;
@@ -76,10 +76,10 @@ internal sealed class CreateStaffMemberCommandHandler
             {
                 _logger
                     .ForContext(nameof(CreateStaffMemberCommand), request, true)
-                    .ForContext(nameof(Error), DomainErrors.Partners.School.NotFound(request.SchoolCode), true)
+                    .ForContext(nameof(Error), SchoolErrors.NotFound(request.SchoolCode), true)
                     .Warning("Failed to create new staff member");
 
-                return Result.Failure(DomainErrors.Partners.School.NotFound(request.SchoolCode));
+                return Result.Failure(SchoolErrors.NotFound(request.SchoolCode));
             }
 
             staffMember.Value.AddSchoolAssignment(

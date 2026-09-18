@@ -67,7 +67,7 @@ public sealed class SchoolContact : AggregateRoot, IAuditableEntity
         if (!string.IsNullOrWhiteSpace(number))
         {
             if (!int.TryParse(number.Trim().Replace(" ", ""), out _))
-                return Result.Failure<SchoolContact>(SchoolContactErrors.Validation.PhoneNumberInvalid);
+                return Result.Failure<SchoolContact>(SchoolContactErrors.PhoneNumberInvalid);
 
             Result<PhoneNumber> phone = PhoneNumber.Create(number);
             if (phone.IsFailure)
@@ -189,7 +189,7 @@ public sealed class SchoolContact : AggregateRoot, IAuditableEntity
         if (!string.IsNullOrWhiteSpace(number))
         {
             if (!int.TryParse(number.Trim().Replace(" ", ""), out _))
-                return Result.Failure<SchoolContact>(SchoolContactErrors.Validation.PhoneNumberInvalid);
+                return Result.Failure<SchoolContact>(SchoolContactErrors.PhoneNumberInvalid);
 
             Result<PhoneNumber> phone = PhoneNumber.Create(number);
             if (phone.IsFailure)

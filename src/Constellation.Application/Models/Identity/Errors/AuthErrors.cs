@@ -25,4 +25,16 @@ public static class AuthErrors
     public static Func<Guid, Error> UserNotFound = userId => new(
         "Auth.User.NotFound",
         $"The user with Id '{userId}' was not found.");
+
+    public static Func<string, Error> UserNotFoundByEmail = email => new(
+        "Auth.User.NotFound",
+        $"A user with the email '{email}' could not be found");
+
+    public static Func<string, Error> StaffUserNotFound = staffId => new(
+        "Auth.User.NotFound",
+        $"A user with the Staff Id '{staffId}' could not be found");
+
+    public static readonly Func<string, Error> CannotUpdateRole = (role) => new Error(
+        "Auth.CannotUpdateRole",
+        $"Cannot update role {role}");
 }

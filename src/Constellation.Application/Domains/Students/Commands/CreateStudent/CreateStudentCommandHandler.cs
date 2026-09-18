@@ -3,9 +3,9 @@
 using Abstractions.Messaging;
 using Core.Abstractions.Clock;
 using Core.Enums;
-using Core.Errors;
 using Core.Models;
 using Core.Models.Identifiers;
+using Core.Models.Schools.Errors;
 using Core.Models.Students;
 using Core.Models.Students.Errors;
 using Core.Models.Students.Repositories;
@@ -81,10 +81,10 @@ internal sealed class CreateStudentCommandHandler
                 {
                     _logger
                         .ForContext(nameof(CreateStudentCommand), request, true)
-                        .ForContext(nameof(Error), DomainErrors.Partners.School.NotFound(request.SchoolCode), true)
+                        .ForContext(nameof(Error), SchoolErrors.NotFound(request.SchoolCode), true)
                         .Warning("Failed to create new student");
 
-                    return Result.Failure(DomainErrors.Partners.School.NotFound(request.SchoolCode));
+                    return Result.Failure(SchoolErrors.NotFound(request.SchoolCode));
                 }
 
                 student.Value.AddSchoolEnrolment(
@@ -128,10 +128,10 @@ internal sealed class CreateStudentCommandHandler
             {
                 _logger
                     .ForContext(nameof(CreateStudentCommand), request, true)
-                    .ForContext(nameof(Error), DomainErrors.Partners.School.NotFound(request.SchoolCode), true)
+                    .ForContext(nameof(Error), SchoolErrors.NotFound(request.SchoolCode), true)
                     .Warning("Failed to create new student");
 
-                return Result.Failure(DomainErrors.Partners.School.NotFound(request.SchoolCode));
+                return Result.Failure(SchoolErrors.NotFound(request.SchoolCode));
             }
 
             Result<Student> student = Student.Create(

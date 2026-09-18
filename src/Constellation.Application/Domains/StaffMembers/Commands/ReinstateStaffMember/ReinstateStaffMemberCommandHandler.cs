@@ -2,8 +2,8 @@
 
 using Abstractions.Messaging;
 using Core.Abstractions.Clock;
-using Core.Errors;
 using Core.Models;
+using Core.Models.Schools.Errors;
 using Core.Models.StaffMembers;
 using Core.Models.StaffMembers.Errors;
 using Core.Models.StaffMembers.Repositories;
@@ -59,10 +59,10 @@ internal sealed class ReinstateStaffMemberCommandHandler
         {
             _logger
                 .ForContext(nameof(ReinstateStaffMemberCommand), request, true)
-                .ForContext(nameof(Error), DomainErrors.Partners.School.NotFound(request.SchoolCode), true)
+                .ForContext(nameof(Error), SchoolErrors.NotFound(request.SchoolCode), true)
                 .Warning("Failed to reinstate staff member with id {Id}", request.StaffId);
 
-            return Result.Failure(DomainErrors.Partners.School.NotFound(request.SchoolCode));
+            return Result.Failure(SchoolErrors.NotFound(request.SchoolCode));
         }
 
         Result result = staffMember.Reinstate(

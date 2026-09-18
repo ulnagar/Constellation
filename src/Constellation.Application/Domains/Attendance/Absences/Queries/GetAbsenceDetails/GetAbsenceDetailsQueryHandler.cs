@@ -5,7 +5,7 @@ using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.Models.Absences;
 using Constellation.Core.Models.Students;
 using Constellation.Core.Models.Students.Repositories;
-using Core.Errors;
+using Core.Models.Absences.Errors;
 using Core.Models.Students.Errors;
 using Core.Shared;
 using Serilog;
@@ -34,16 +34,16 @@ internal sealed class GetAbsenceDetailsQueryHandler
         GetAbsenceDetailsQuery request,
         CancellationToken cancellationToken)
     {
-        Absence absence = await _absenceRepository.GetById(request.AbsenceId, cancellationToken);
+        Absence? absence = await _absenceRepository.GetById(request.AbsenceId, cancellationToken);
 
         if (absence is null)
         {
             _logger.Warning("Could not locate absence with Id {id}", request.AbsenceId);
 
-            return Result.Failure<AbsenceDetailsResponse>(DomainErrors.Absences.Absence.NotFound(request.AbsenceId));
+            return Result.Failure<AbsenceDetailsResponse>(AbsenceErrors.NotFound(request.AbsenceId));
         }
 
-        Student student = await _studentRepository.GetById(absence.StudentId, cancellationToken);
+        Student? student = await _studentRepository.GetById(absence.StudentId, cancellationToken);
 
         if (student is null)
         {
@@ -52,7 +52,7 @@ internal sealed class GetAbsenceDetailsQueryHandler
             return Result.Failure<AbsenceDetailsResponse>(StudentErrors.NotFound(absence.StudentId));        
         }
 
-        SchoolEnrolment enrolment = student.CurrentEnrolment;
+        SchoolEnrolment? enrolment = student.CurrentEnrolment;
 
         if (enrolment is null)
         {

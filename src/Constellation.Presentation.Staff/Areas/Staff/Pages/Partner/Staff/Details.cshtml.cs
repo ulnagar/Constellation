@@ -1,7 +1,6 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Partner.Staff;
 
 using Application.Common.PresentationModels;
-using Application.Domains.Auth.Queries.DoesStaffMemberHaveRegisteredPasskey;
 using Application.Domains.StaffMembers.Commands.AddStaffToFaculty;
 using Application.Domains.StaffMembers.Commands.ReinstateStaffMember;
 using Application.Domains.StaffMembers.Commands.RemoveSchoolAssignment;
@@ -11,10 +10,10 @@ using Application.Domains.StaffMembers.Commands.TransferStaffMember;
 using Application.Domains.StaffMembers.Queries.GetLifecycleDetailsForStaffMember;
 using Application.Domains.StaffMembers.Queries.GetStaffDetails;
 using Application.Models.Auth;
+using Application.Models.Identity.Errors;
 using Constellation.Application.Domains.Students.Queries.GetLifecycleDetailsForStudent;
 using Constellation.Presentation.Shared.Helpers.Attributes;
 using Core.Abstractions.Services;
-using Core.Errors;
 using Core.Models.Faculties.Enums;
 using Core.Models.Faculties.Identifiers;
 using Core.Models.StaffMembers.Identifiers;
@@ -78,7 +77,7 @@ public class DetailsModel : BasePageModel
 
         if (!authorised.Succeeded)
         {
-            ModalContent = ErrorDisplay.Create(DomainErrors.Auth.NotAuthorised);
+            ModalContent = ErrorDisplay.Create(AuthErrors.NotAuthorised);
 
             await PreparePage();
             return Page();
@@ -113,7 +112,7 @@ public class DetailsModel : BasePageModel
 
         if (!authorised.Succeeded)
         {
-            ModalContent = ErrorDisplay.Create(DomainErrors.Auth.NotAuthorised);
+            ModalContent = ErrorDisplay.Create(AuthErrors.NotAuthorised);
 
             await PreparePage();
             return Page();
@@ -149,10 +148,10 @@ public class DetailsModel : BasePageModel
         if (!authorised.Succeeded)
         {
             _logger
-                .ForContext(nameof(Error), DomainErrors.Permissions.Unauthorised, true)
+                .ForContext(nameof(Error), AuthErrors.NotAuthorised, true)
                 .Warning("Failed to remove School Assignment by user {User}", _currentUserService.UserName);
 
-            ModalContent = ErrorDisplay.Create(DomainErrors.Permissions.Unauthorised);
+            ModalContent = ErrorDisplay.Create(AuthErrors.NotAuthorised);
             await PreparePage();
             return Page();
         }
@@ -187,7 +186,7 @@ public class DetailsModel : BasePageModel
 
         if (!authorised.Succeeded)
         {
-            ModalContent = ErrorDisplay.Create(DomainErrors.Auth.NotAuthorised);
+            ModalContent = ErrorDisplay.Create(AuthErrors.NotAuthorised);
 
             await PreparePage();
             return Page();
@@ -225,7 +224,7 @@ public class DetailsModel : BasePageModel
 
         if (!authorised.Succeeded)
         {
-            ModalContent = ErrorDisplay.Create(DomainErrors.Auth.NotAuthorised);
+            ModalContent = ErrorDisplay.Create(AuthErrors.NotAuthorised);
 
             await PreparePage();
             return Page();
@@ -263,7 +262,7 @@ public class DetailsModel : BasePageModel
 
         if (!authorised.Succeeded)
         {
-            ModalContent = ErrorDisplay.Create(DomainErrors.Auth.NotAuthorised);
+            ModalContent = ErrorDisplay.Create(AuthErrors.NotAuthorised);
 
             await PreparePage();
             return Page();

@@ -2,7 +2,6 @@
 
 using Abstractions.Messaging;
 using Core.Abstractions.Clock;
-using Core.Errors;
 using Core.Models.Attachments;
 using Core.Models.Attachments.Repository;
 using Core.Models.Attachments.Services;
@@ -40,15 +39,15 @@ public class ReplaceStudentReportCommandHandler
 
     public async Task<Result> Handle(ReplaceStudentReportCommand request, CancellationToken cancellationToken)
     {
-        AcademicReport existingReport = await _reportRepository.GetAcademicReportByPublishId(request.OldPublishId, cancellationToken);
+        AcademicReport? existingReport = await _reportRepository.GetAcademicReportByPublishId(request.OldPublishId, cancellationToken);
 
         if (existingReport is null)
             return Result.Failure(AcademicReportErrors.NotFoundByPublishId(request.OldPublishId));
 
-        Attachment existingFile = await _attachmentRepository.GetAcademicReportByLinkId(existingReport.Id.ToString(), cancellationToken);
+        Attachment? existingFile = await _attachmentRepository.GetAcademicReportByLinkId(existingReport.Id.ToString(), cancellationToken);
 
         if (existingFile is null)
-            return Result.Failure(DomainErrors.Documents.AcademicReport.NotFound(existingReport.Id.ToString()));
+            return Result.Failure(AcademicReportErrors.FileNotFound(existingReport.Id.ToString()));
 
         existingReport.Update(request.NewPublishId);
 

@@ -5,7 +5,7 @@ using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.Models.GroupTutorials;
 using Constellation.Core.Models.Students;
 using Constellation.Core.Models.Students.Repositories;
-using Core.Errors;
+using Core.Models.GroupTutorials.Errors;
 using Core.Models.Students.Errors;
 using Core.Shared;
 using Interfaces.Repositories;
@@ -32,28 +32,28 @@ internal sealed class RemoveStudentFromTutorialRollCommandHandler
 
     public async Task<Result> Handle(RemoveStudentFromTutorialRollCommand request, CancellationToken cancellationToken)
     {
-        GroupTutorial tutorial = await _groupTutorialRepository.GetById(request.TutorialId, cancellationToken);
+        GroupTutorial? tutorial = await _groupTutorialRepository.GetById(request.TutorialId, cancellationToken);
 
         if (tutorial is null)
-            return Result.Failure(DomainErrors.GroupTutorials.GroupTutorial.NotFound(request.TutorialId));
+            return Result.Failure(GroupTutorialErrors.NotFound(request.TutorialId));
 
-        TutorialRoll roll = tutorial.Rolls.FirstOrDefault(roll => roll.Id == request.RollId);
+        TutorialRoll? roll = tutorial.Rolls.FirstOrDefault(roll => roll.Id == request.RollId);
 
         if (roll is null)
-            return Result.Failure(DomainErrors.GroupTutorials.TutorialRoll.NotFound(request.RollId));
+            return Result.Failure(GroupTutorialRollErrors.NotFound(request.RollId));
 
-        Student student = await _studentRepository.GetById(request.StudentId, cancellationToken);
+        Student? student = await _studentRepository.GetById(request.StudentId, cancellationToken);
 
         if (student is null)
             return Result.Failure(StudentErrors.NotFound(request.StudentId));
 
-        TutorialRollStudent studentRecord = roll.Students.FirstOrDefault(entry => entry.StudentId == student.Id);
+        TutorialRollStudent? studentRecord = roll.Students.FirstOrDefault(entry => entry.StudentId == student.Id);
 
         if (studentRecord is null)
-            return Result.Failure(DomainErrors.GroupTutorials.TutorialRoll.StudentNotFound(student.Id));
+            return Result.Failure(GroupTutorialRollErrors.StudentNotFound(student.Id));
 
         if (studentRecord.Enrolled)
-            return Result.Failure(DomainErrors.GroupTutorials.TutorialRoll.RemoveEnrolledStudent(student.Id));
+            return Result.Failure(GroupTutorialRollErrors.RemoveEnrolledStudent(student.Id));
 
         roll.RemoveStudent(student.Id);
 

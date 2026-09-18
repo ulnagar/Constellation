@@ -3,8 +3,8 @@
 using Constellation.Application.Abstractions.Messaging;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Core.Abstractions.Repositories;
-using Constellation.Core.Errors;
 using Constellation.Core.Shared;
+using Core.Models.GroupTutorials.Errors;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -27,7 +27,7 @@ internal sealed class EditGroupTutorialCommandHandler
 
         if (tutorial is null)
         {
-            return Result.Failure(DomainErrors.GroupTutorials.GroupTutorial.NotFound(request.Id));
+            return Result.Failure(GroupTutorialErrors.NotFound(request.Id));
         }
 
         tutorial.Edit(request.Name, request.StartDate, request.EndDate);

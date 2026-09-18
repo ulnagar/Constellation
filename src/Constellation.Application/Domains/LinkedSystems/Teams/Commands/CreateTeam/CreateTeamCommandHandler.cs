@@ -7,14 +7,12 @@ using Constellation.Core.Models.Tutorials;
 using Constellation.Core.Models.Tutorials.Repositories;
 using Constellation.Core.Models.Tutorials.ValueObjects;
 using Core.Abstractions.Repositories;
-using Core.Errors;
+using Core.Models.LinkedSystems.Errors;
 using Core.Shared;
 using Interfaces.Repositories;
 using Serilog;
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Reflection.Metadata.Ecma335;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -50,10 +48,10 @@ public sealed class CreateTeamCommandHandler
         {
             _logger
                 .ForContext(nameof(CreateTeamCommand), request, true)
-                .ForContext(nameof(Error), DomainErrors.LinkedSystems.Teams.AlreadyExists(request.Id), true)
+                .ForContext(nameof(Error), TeamErrors.AlreadyExists(request.Id), true)
                 .Warning("Failed to register Team in the database");
 
-            return Result.Failure(DomainErrors.LinkedSystems.Teams.AlreadyExists(request.Id));
+            return Result.Failure(TeamErrors.AlreadyExists(request.Id));
         }
 
         Team team = Team.Create(
@@ -69,7 +67,7 @@ public sealed class CreateTeamCommandHandler
         { 
             string[] tokens = request.Description.Split(';');
 
-            Tutorial tutorial = null;
+            Tutorial? tutorial = null;
 
             foreach (string token in tokens)
             {

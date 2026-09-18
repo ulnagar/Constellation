@@ -1,6 +1,7 @@
 ﻿namespace Constellation.Application.Domains.Families.Events.ParentRemovedFromFamily;
 
 using Abstractions.Messaging;
+using Application.Models.Identity.Errors;
 using Constellation.Application.Models.Identity;
 using Constellation.Application.Models.Identity.Enums;
 using Constellation.Application.Models.Identity.Repositories;
@@ -73,7 +74,7 @@ internal sealed class RemoveAppUser
                 .ForContext(nameof(ParentEmailAddressChangedDomainEvent), notification, true)
                 .ForContext(nameof(Family), family, true)
                 .ForContext(nameof(Parent), parent, true)
-                .ForContext(nameof(Error), DomainErrors.Auth.UserNotFound, true)
+                .ForContext(nameof(Error), AuthErrors.UserNotFoundByEmail(parent.EmailAddress.Email), true)
                 .Warning("Failed to update Parent AppUser");
 
             return;

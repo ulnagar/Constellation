@@ -5,8 +5,8 @@ using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.Models.GroupTutorials;
 using Constellation.Core.Models.Students;
 using Constellation.Core.Models.Students.Repositories;
-using Core.Errors;
 using Core.Extensions;
+using Core.Models.GroupTutorials.Errors;
 using Core.Models.StaffMembers;
 using Core.Models.StaffMembers.Repositories;
 using Core.Shared;
@@ -41,10 +41,10 @@ internal sealed class GenerateTutorialAttendanceReportQueryHandler
 
     public async Task<Result<FileDto>> Handle(GenerateTutorialAttendanceReportQuery request, CancellationToken cancellationToken)
     {
-        GroupTutorial tutorial = await _groupTutorialRepository.GetById(request.TutorialId, cancellationToken);
+        GroupTutorial? tutorial = await _groupTutorialRepository.GetById(request.TutorialId, cancellationToken);
 
         if (tutorial is null)
-            return Result.Failure<FileDto>(DomainErrors.GroupTutorials.GroupTutorial.NotFound(request.TutorialId));
+            return Result.Failure<FileDto>(GroupTutorialErrors.NotFound(request.TutorialId));
 
         List<TutorialRoll> reportableRolls = tutorial.Rolls
             .Where(roll => roll.Status == Core.Enums.TutorialRollStatus.Submitted)
@@ -60,12 +60,12 @@ internal sealed class GenerateTutorialAttendanceReportQueryHandler
 
             foreach (TutorialRollStudent student in roll.Students)
             {
-                Student entity = studentEntities.FirstOrDefault(entry => entry.Id == student.StudentId);
+                Student? entity = studentEntities.FirstOrDefault(entry => entry.Id == student.StudentId);
 
                 if (entity is null)
                     continue;
 
-                SchoolEnrolment enrolment = entity.CurrentEnrolment;
+                SchoolEnrolment? enrolment = entity.CurrentEnrolment;
 
                 if (enrolment is null)
                     continue;
@@ -81,7 +81,7 @@ internal sealed class GenerateTutorialAttendanceReportQueryHandler
             if (!roll.StaffId.HasValue)
                 continue;
 
-            StaffMember staffMember = await _staffRepository.GetById(roll.StaffId.Value, cancellationToken);
+            StaffMember? staffMember = await _staffRepository.GetById(roll.StaffId.Value, cancellationToken);
 
             rolls.Add(new(
                 roll.Id,

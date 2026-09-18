@@ -7,6 +7,7 @@ using Constellation.Core.Models.Students;
 using Constellation.Core.Models.Students.Repositories;
 using Core.Errors;
 using Core.Extensions;
+using Core.Models.GroupTutorials.Errors;
 using Core.Models.StaffMembers;
 using Core.Models.StaffMembers.Identifiers;
 using Core.Models.StaffMembers.Repositories;
@@ -35,23 +36,23 @@ internal sealed class GetTutorialRollWithDetailsByIdQueryHandler
 
     public async Task<Result<TutorialRollDetailResponse>> Handle(GetTutorialRollWithDetailsByIdQuery request, CancellationToken cancellationToken)
     {
-        GroupTutorial tutorial = await _groupTutorialRepository.GetById(request.TutorialId, cancellationToken);
+        GroupTutorial? tutorial = await _groupTutorialRepository.GetById(request.TutorialId, cancellationToken);
 
         if (tutorial is null)
-            return Result.Failure<TutorialRollDetailResponse>(DomainErrors.GroupTutorials.GroupTutorial.NotFound(request.TutorialId));
+            return Result.Failure<TutorialRollDetailResponse>(GroupTutorialErrors.NotFound(request.TutorialId));
 
-        TutorialRoll roll = tutorial.Rolls.FirstOrDefault(roll => roll.Id == request.RollId);
+        TutorialRoll? roll = tutorial.Rolls.FirstOrDefault(roll => roll.Id == request.RollId);
 
         if (roll is null)
-            return Result.Failure<TutorialRollDetailResponse>(DomainErrors.GroupTutorials.TutorialRoll.NotFound(request.RollId));
+            return Result.Failure<TutorialRollDetailResponse>(GroupTutorialRollErrors.NotFound(request.RollId));
 
         string staffName = string.Empty;
 
         if (roll.Status == Core.Enums.TutorialRollStatus.Submitted)
         {
-            StaffMember staffMember = await _staffRepository.GetById(roll.StaffId.Value, cancellationToken);
+            StaffMember? staffMember = await _staffRepository.GetById(roll.StaffId.Value, cancellationToken);
 
-            staffName = staffMember?.Name.DisplayName;
+            staffName = staffMember?.Name.DisplayName!;
         }
 
         List<Student> studentEntities = await _studentRepository.GetListFromIds(roll.Students.Select(student => student.StudentId).ToList(), cancellationToken);

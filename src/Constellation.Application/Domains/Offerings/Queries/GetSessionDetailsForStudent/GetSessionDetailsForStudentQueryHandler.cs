@@ -2,9 +2,8 @@
 
 using Abstractions.Messaging;
 using Constellation.Core.Models.Offerings.Repositories;
-using Constellation.Core.Models.Offerings.ValueObjects;
-using Core.Errors;
 using Core.Models.Enrolments;
+using Core.Models.Enrolments.Errors;
 using Core.Models.Enrolments.Repositories;
 using Core.Models.Offerings;
 using Core.Models.Offerings.Enums;
@@ -57,7 +56,7 @@ internal sealed class GetSessionDetailsForStudentQueryHandler
         {
             _logger.Warning("No active enrolments found for student {id}", request.StudentId);
 
-            return Result.Failure<List<StudentSessionDetailsResponse>>(DomainErrors.Enrolments.Enrolment.NotFoundForStudent(request.StudentId));
+            return Result.Failure<List<StudentSessionDetailsResponse>>(EnrolmentErrors.NotFoundForStudent(request.StudentId));
         }
 
         foreach (Enrolment enrolment in enrolments)
@@ -66,7 +65,7 @@ internal sealed class GetSessionDetailsForStudentQueryHandler
             {
                 case OfferingEnrolment offeringEnrolment:
                     {
-                        Offering offering = await _offeringRepository.GetById(offeringEnrolment.OfferingId, cancellationToken);
+                        Offering? offering = await _offeringRepository.GetById(offeringEnrolment.OfferingId, cancellationToken);
 
                         if (offering is null)
                         {
@@ -86,7 +85,7 @@ internal sealed class GetSessionDetailsForStudentQueryHandler
 
                         foreach (Session session in offering.Sessions.Where(session => !session.IsDeleted))
                         {
-                            Period period = await _periodRepository.GetById(session.PeriodId, cancellationToken);
+                            Period? period = await _periodRepository.GetById(session.PeriodId, cancellationToken);
 
                             if (period is null)
                             {
@@ -108,7 +107,7 @@ internal sealed class GetSessionDetailsForStudentQueryHandler
 
                 case TutorialEnrolment tutorialEnrolment:
                     {
-                        Tutorial tutorial = await _tutorialRepository.GetById(tutorialEnrolment.TutorialId, cancellationToken);
+                        Tutorial? tutorial = await _tutorialRepository.GetById(tutorialEnrolment.TutorialId, cancellationToken);
 
                         if (tutorial is null)
                         {

@@ -3,8 +3,8 @@
 using Abstractions.Messaging;
 using Constellation.Core.Models.Students.Repositories;
 using Core.Abstractions.Clock;
-using Core.Errors;
 using Core.Models;
+using Core.Models.Schools.Errors;
 using Core.Models.Students;
 using Core.Models.Students.Errors;
 using Core.Shared;
@@ -61,10 +61,10 @@ internal sealed class ReinstateStudentCommandHandler
         {
             _logger
                 .ForContext(nameof(ReinstateStudentCommand), request, true)
-                .ForContext(nameof(Error), DomainErrors.Partners.School.NotFound(request.SchoolCode), true)
+                .ForContext(nameof(Error), SchoolErrors.NotFound(request.SchoolCode), true)
                 .Warning("Failed to reinstate student with id {Id}", request.StudentId);
 
-            return Result.Failure(DomainErrors.Partners.School.NotFound(request.SchoolCode));
+            return Result.Failure(SchoolErrors.NotFound(request.SchoolCode));
         }
 
         Result result = student.Reinstate(

@@ -5,10 +5,10 @@ using Application.Domains.AssetManagement.Stocktake.Commands.CancelSighting;
 using Application.Domains.AssetManagement.Stocktake.Queries.GetStocktakeEvent;
 using Application.Domains.AssetManagement.Stocktake.Queries.GetStocktakeSightingsForStaffMember;
 using Application.Models.Auth;
+using Application.Models.Identity.Errors;
 using Constellation.Application.Domains.AssetManagement.Stocktake.Models;
 using Constellation.Core.Models.StaffMembers.Identifiers;
 using Core.Abstractions.Services;
-using Core.Errors;
 using Core.Models.Stocktake.Identifiers;
 using Core.Shared;
 using MediatR;
@@ -69,11 +69,11 @@ public class DashboardModel : BasePageModel
         if (string.IsNullOrWhiteSpace(claimStaffId))
         {
             ModalContent = ErrorDisplay.Create(
-                DomainErrors.Auth.UserNotFound,
+                AuthErrors.StaffUserNotFound(claimStaffId),
                 _linkGenerator.GetPathByPage("/Dashboard", values: new { area = "Staff" }));
 
             _logger
-                .ForContext(nameof(Error), DomainErrors.Auth.UserNotFound, true)
+                .ForContext(nameof(Error), AuthErrors.StaffUserNotFound(claimStaffId), true)
                 .Warning("Failed to view Stocktake Dashboard by user {User}", _currentUserService.UserName);
 
             return Page();

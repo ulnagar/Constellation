@@ -2,7 +2,8 @@
 
 using Abstractions.Messaging;
 using Core.Abstractions.Repositories;
-using Core.Errors;
+using Core.Models.Casuals;
+using Core.Models.Casuals.Errors;
 using Core.Shared;
 using Core.ValueObjects;
 using Interfaces.Repositories;
@@ -25,14 +26,14 @@ internal sealed class UpdateCasualCommandHandler
 
     public async Task<Result> Handle(UpdateCasualCommand request, CancellationToken cancellationToken)
     {
-        var casual = await _casualRepository.GetById(request.Id, cancellationToken);
+        Casual? casual = await _casualRepository.GetById(request.Id, cancellationToken);
 
         if (casual is null)
         {
-            return Result.Failure(DomainErrors.Casuals.Casual.NotFound(request.Id));
+            return Result.Failure(CasualErrors.NotFound(request.Id));
         }
 
-        var nameResult = Name.Create(request.FirstName, string.Empty, request.LastName);
+        Result<Name> nameResult = Name.Create(request.FirstName, string.Empty, request.LastName);
 
         if (nameResult.IsFailure)
         {

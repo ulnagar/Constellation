@@ -2,7 +2,7 @@
 
 using Abstractions.Messaging;
 using Core.Abstractions.Repositories;
-using Core.Errors;
+using Core.Models.LinkedSystems.Errors;
 using Core.Shared;
 using Models;
 using System.Threading;
@@ -24,7 +24,7 @@ internal sealed class GetTeamByIdQueryHandler
 
         if (team is null)
         {
-            return Result.Failure<TeamResource>(DomainErrors.LinkedSystems.Teams.TeamNotFoundInDatabase);
+            return Result.Failure<TeamResource>(TeamErrors.TeamNotFoundInDatabase);
         }
 
         return new TeamResource(

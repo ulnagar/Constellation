@@ -2,7 +2,8 @@
 
 using Abstractions.Messaging;
 using Core.Abstractions.Repositories;
-using Core.Errors;
+using Core.Models.Casuals;
+using Core.Models.Casuals.Errors;
 using Core.Shared;
 using Interfaces.Repositories;
 using System.Threading;
@@ -24,11 +25,11 @@ internal sealed class RestoreCasualCommandHandler
 
     public async Task<Result> Handle(RestoreCasualCommand request, CancellationToken cancellationToken)
     {
-        var casual = await _casualRepository.GetById(request.CasualId, cancellationToken);
+        Casual? casual = await _casualRepository.GetById(request.CasualId, cancellationToken);
 
         if (casual is null)
         {
-            return Result.Failure(DomainErrors.Casuals.Casual.NotFound(request.CasualId));
+            return Result.Failure(CasualErrors.NotFound(request.CasualId));
         }
 
         if (casual.IsDeleted)

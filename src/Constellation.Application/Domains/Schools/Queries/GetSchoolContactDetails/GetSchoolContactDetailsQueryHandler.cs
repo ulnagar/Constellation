@@ -1,8 +1,8 @@
 ﻿namespace Constellation.Application.Domains.Schools.Queries.GetSchoolContactDetails;
 
 using Abstractions.Messaging;
-using Core.Errors;
 using Core.Models;
+using Core.Models.Schools.Errors;
 using Core.Shared;
 using Interfaces.Repositories;
 using Serilog;
@@ -31,10 +31,10 @@ public sealed class GetSchoolContactDetailsQueryHandler
         {
             _logger
                 .ForContext(nameof(GetSchoolContactDetailsQuery), request, true)
-                .ForContext(nameof(Error), DomainErrors.Partners.School.NotFound(request.Code), true)
+                .ForContext(nameof(Error), SchoolErrors.NotFound(request.Code), true)
                 .Warning("Failed to retrieve contact details for school");
 
-            return Result.Failure<SchoolContactDetailsResponse>(DomainErrors.Partners.School.NotFound(request.Code));
+            return Result.Failure<SchoolContactDetailsResponse>(SchoolErrors.NotFound(request.Code));
         }
 
         return new SchoolContactDetailsResponse(

@@ -4,6 +4,7 @@ using Abstractions.Messaging;
 using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.Models.GroupTutorials;
 using Core.Errors;
+using Core.Models.GroupTutorials.Errors;
 using Core.Models.StaffMembers;
 using Core.Models.StaffMembers.Errors;
 using Core.Models.StaffMembers.Repositories;
@@ -33,19 +34,19 @@ internal sealed class SubmitRollCommandHandler
 
     public async Task<Result> Handle(SubmitRollCommand request, CancellationToken cancellationToken)
     {
-        GroupTutorial tutorial = await _groupTutorialRepository.GetById(request.TutorialId, cancellationToken);
+        GroupTutorial? tutorial = await _groupTutorialRepository.GetById(request.TutorialId, cancellationToken);
 
         if (tutorial is null)
-            return Result.Failure(DomainErrors.GroupTutorials.GroupTutorial.NotFound(request.TutorialId));
+            return Result.Failure(GroupTutorialErrors.NotFound(request.TutorialId));
 
-        TutorialRoll roll = tutorial.Rolls.FirstOrDefault(roll => roll.Id == request.RollId);
+        TutorialRoll? roll = tutorial.Rolls.FirstOrDefault(roll => roll.Id == request.RollId);
 
         if (roll is null)
-            return Result.Failure(DomainErrors.GroupTutorials.TutorialRoll.NotFound(request.RollId));
+            return Result.Failure(GroupTutorialRollErrors.NotFound(request.RollId));
 
         Result<EmailAddress> emailAddress = EmailAddress.Create(request.StaffEmail);
 
-        StaffMember staffMember = emailAddress.IsSuccess
+        StaffMember? staffMember = emailAddress.IsSuccess
             ? await _staffRepository.GetCurrentByEmailAddress(emailAddress.Value, cancellationToken)
             : null;
 

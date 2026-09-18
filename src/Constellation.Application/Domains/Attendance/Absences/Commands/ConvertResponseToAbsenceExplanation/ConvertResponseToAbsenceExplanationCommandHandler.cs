@@ -2,7 +2,6 @@
 
 using Constellation.Application.Abstractions.Messaging;
 using Constellation.Core.Abstractions.Repositories;
-using Constellation.Core.Errors;
 using Constellation.Core.Models.Absences;
 using Constellation.Core.Models.Absences.Enums;
 using Constellation.Core.Models.Offerings;
@@ -13,7 +12,8 @@ using Constellation.Core.Models.Tutorials;
 using Constellation.Core.Models.Tutorials.Errors;
 using Constellation.Core.Models.Tutorials.Identifiers;
 using Constellation.Core.Models.Tutorials.Repositories;
-using Constellation.Core.Shared;
+using Core.Models.Absences.Errors;
+using Core.Shared;
 using Serilog;
 using System.Linq;
 using System.Threading;
@@ -41,22 +41,22 @@ internal sealed class ConvertResponseToAbsenceExplanationCommandHandler
 
     public async Task<Result<AbsenceExplanation>> Handle(ConvertResponseToAbsenceExplanationCommand request, CancellationToken cancellationToken)
     {
-        Absence absence = await _absenceRepository.GetById(request.AbsenceId, cancellationToken);
+        Absence? absence = await _absenceRepository.GetById(request.AbsenceId, cancellationToken);
 
         if (absence is null)
         {
             _logger.Warning("Could not find absence with Id {id}", request.AbsenceId);
 
-            return Result.Failure<AbsenceExplanation>(DomainErrors.Absences.Absence.NotFound(request.AbsenceId));
+            return Result.Failure<AbsenceExplanation>(AbsenceErrors.NotFound(request.AbsenceId));
         }
 
-        Response response = absence.Responses.FirstOrDefault(response => response.Id == request.ResponseId);
+        Response? response = absence.Responses.FirstOrDefault(response => response.Id == request.ResponseId);
 
         if (response is null)
         {
             _logger.Warning("Could not find absence response with Id {id}", request.ResponseId);
 
-            return Result.Failure<AbsenceExplanation>(DomainErrors.Absences.Response.NotFound(request.ResponseId));
+            return Result.Failure<AbsenceExplanation>(AbsenceResponseErrors.NotFound(request.ResponseId));
         }
 
         string activityName = string.Empty;
@@ -65,7 +65,7 @@ internal sealed class ConvertResponseToAbsenceExplanationCommandHandler
         {
             OfferingId offeringId = OfferingId.FromValue(absence.SourceId);
 
-            Offering offering = await _offeringRepository.GetById(offeringId, cancellationToken);
+            Offering? offering = await _offeringRepository.GetById(offeringId, cancellationToken);
 
             if (offering is null)
             {
@@ -81,7 +81,7 @@ internal sealed class ConvertResponseToAbsenceExplanationCommandHandler
         {
             TutorialId tutorialId = TutorialId.FromValue(absence.SourceId);
 
-            Tutorial tutorial = await _tutorialRepository.GetById(tutorialId, cancellationToken);
+            Tutorial? tutorial = await _tutorialRepository.GetById(tutorialId, cancellationToken);
 
             if (tutorial is null)
             {
