@@ -1,6 +1,10 @@
 ﻿namespace Constellation.Infrastructure.Persistence.ConstellationContext.Converters;
 
+using Constellation.Core.Primitives;
 using Core.Enums;
+using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using Microsoft.EntityFrameworkCore.Metadata.Conventions;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 internal sealed class GradeConverter : ValueConverter<Grade, string?>
@@ -27,4 +31,23 @@ internal sealed class GradeConverter : ValueConverter<Grade, string?>
     }
 
     public override bool ConvertsNulls => true;
+}
+
+internal sealed class GradeConvention : IModelFinalizingConvention
+{
+    public void ProcessModelFinalizing(
+        IConventionModelBuilder modelBuilder,
+        IConventionContext<IConventionModelBuilder> context)
+    {
+        foreach (IConventionEntityType entityType in modelBuilder.Metadata.GetEntityTypes())
+        {
+            foreach (IConventionProperty property in entityType.GetProperties())
+            {
+                if (property.ClrType != typeof(Grade))
+                    continue;
+
+                property.Builder.HasConversion(typeof(GradeConverter));
+            }
+        }
+    }
 }

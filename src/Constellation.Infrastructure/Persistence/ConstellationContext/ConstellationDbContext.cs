@@ -2,6 +2,7 @@
 
 using Constellation.Application.Models;
 using Constellation.Application.Models.Identity;
+using Constellation.Core.Enums;
 using Converters;
 using Core.Models.Auth;
 using Core.Primitives;
@@ -34,6 +35,9 @@ public class ConstellationDbContext : IdentityDbContext<AppUser, AppRole, Guid>
     protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
     {
         configurationBuilder.Conventions.Add(_ => new StronglyTypedIdConvention());
+        //configurationBuilder.Conventions.Add(_ => new GradeConvention());
+        base.ConfigureConventions(configurationBuilder);
+        configurationBuilder.Properties<Grade>().HaveConversion<GradeConverter>();
     }
 
     protected override void OnModelCreating(ModelBuilder builder)

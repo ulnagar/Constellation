@@ -23,10 +23,6 @@ internal sealed class AssessmentConfiguration : IEntityTypeConfiguration<Assessm
             .OnDelete(DeleteBehavior.Restrict);
 
         builder
-            .Property(assessment => assessment.Grade)
-            .HasConversion<string>();
-
-        builder
             .Property(assessment => assessment.CanvasCourse)
             .HasConversion(
                 course => course.HasValue ? course.Value.ToString() : null,
