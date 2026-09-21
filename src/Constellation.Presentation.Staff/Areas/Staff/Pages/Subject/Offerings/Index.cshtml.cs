@@ -39,7 +39,7 @@ public class IndexModel : BasePageModel
     [BindProperty(SupportsGet = true)]
     public GetAllOfferingSummariesQuery.FilterEnum Filter { get; set; } = GetAllOfferingSummariesQuery.FilterEnum.Active;
     [BindProperty(SupportsGet = true)]
-    public GradeDto SelectedGrade { get; set; } = GradeDto.All;
+    public Grade SelectedGrade { get; set; } = Grade.Empty;
     [BindProperty(SupportsGet = true)]
     public string SelectedFaculty { get; set; }
 
@@ -71,8 +71,8 @@ public class IndexModel : BasePageModel
 
         Offerings = SelectedGrade switch
         {
-            GradeDto.All => Offerings,
-            var g => Offerings.Where(offering => offering.Grade.Order == (int)g).ToList()
+            { Value: "" } => Offerings,
+            var g => Offerings.Where(offering => offering.Grade == g).ToList()
         };
 
         Offerings = SelectedFaculty switch
@@ -83,18 +83,5 @@ public class IndexModel : BasePageModel
         };
 
         Offerings = Offerings.OrderByDescending(offering => offering.EndDate.Year).ThenBy(offering => offering.Name).ToList();
-    }
-
-    public enum GradeDto
-    {
-        All,
-        Y05 = 5,
-        Y06 = 6,
-        Y07 = 7,
-        Y08 = 8,
-        Y09 = 9,
-        Y10 = 10,
-        Y11 = 11,
-        Y12 = 12
     }
 }

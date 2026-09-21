@@ -38,7 +38,7 @@ internal sealed class UpdateLessonGradeCommandHandler
 
     public async Task<Result> Handle(UpdateLessonGradeCommand request, CancellationToken cancellationToken)
     {
-        SciencePracLesson lesson = await _lessonRepository.GetById(request.LessonId, cancellationToken);
+        SciencePracLesson? lesson = await _lessonRepository.GetById(request.LessonId, cancellationToken);
 
         if (lesson is null)
         {
@@ -50,9 +50,7 @@ internal sealed class UpdateLessonGradeCommandHandler
             return Result.Failure(SciencePracLessonErrors.NotFound(request.LessonId));
         }
 
-        OfferingId? offeringId = lesson.Offerings.FirstOrDefault()?.OfferingId;
-
-        if (offeringId is null)
+        if (lesson.Offerings.Count == 0)
         {
             _logger
                 .ForContext(nameof(UpdateLessonGradeCommand), request, true)
@@ -63,17 +61,19 @@ internal sealed class UpdateLessonGradeCommandHandler
             return Result.Failure(SciencePracLessonErrors.NoOfferingsLinked);
         }
 
-        Course course = await _courseRepository.GetByOfferingId(offeringId.Value, cancellationToken);
+        OfferingId offeringId = lesson.Offerings[0].OfferingId;
+        
+        Course? course = await _courseRepository.GetByOfferingId(offeringId, cancellationToken);
 
         if (course is null)
         {
             _logger
                 .ForContext(nameof(UpdateLessonGradeCommand), request, true)
                 .ForContext(nameof(SciencePracLesson), lesson, true)
-                .ForContext(nameof(Error), CourseErrors.NotFoundByOfferingId(offeringId.Value), true)
+                .ForContext(nameof(Error), CourseErrors.NotFoundByOfferingId(offeringId), true)
                 .Warning("Failed to update Science Prac Lesson grade");
 
-            return Result.Failure(CourseErrors.NotFoundByOfferingId(offeringId.Value));
+            return Result.Failure(CourseErrors.NotFoundByOfferingId(offeringId));
         }
 
         lesson.UpdateGrade(course.Grade);

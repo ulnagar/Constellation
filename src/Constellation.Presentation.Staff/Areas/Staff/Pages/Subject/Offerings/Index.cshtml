@@ -48,7 +48,7 @@
         <div class="dropdown-menu">
             @foreach (var grade in Model.Grades)
             {
-                <a asp-page="/Subject/Offerings/Index" asp-area="Staff" asp-route-selectedGrade="@grade" class="dropdown-item">@grade.AsName()</a>
+                <a asp-page="/Subject/Offerings/Index" asp-area="Staff" asp-route-selectedGrade="@grade.Value" class="dropdown-item">@grade.AsName()</a>
             }
         </div>
     </div>

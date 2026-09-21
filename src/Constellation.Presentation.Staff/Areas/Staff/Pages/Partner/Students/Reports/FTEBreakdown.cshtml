@@ -31,7 +31,7 @@
     </tr>
     </thead>
     <tbody>
-    @foreach (var grade in Model.Grades.OrderBy(grade => grade.Grade))
+    @foreach (var grade in Model.Grades.OrderBy(grade => grade.Grade.Order))
     {
         <tr>
             <td>@grade.Grade</td>

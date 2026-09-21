@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Microsoft.EntityFrameworkCore.Metadata.Conventions;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
-internal sealed class GradeConverter : ValueConverter<Grade, string?>
+internal sealed class GradeConverter : ValueConverter<Grade, string>
 {
     public GradeConverter()
         : base(
@@ -16,21 +16,18 @@ internal sealed class GradeConverter : ValueConverter<Grade, string?>
             new ConverterMappingHints())
     { }
 
-    private static string? GradeToString(Grade grade) =>
-        grade == Grade.Empty ? null : grade.Value;
+    private static string GradeToString(Grade grade) =>
+        grade == Grade.Empty ? string.Empty : grade.Value;
 
-    private static Grade StringToGrade(string? value)
+    private static Grade StringToGrade(string value)
     {
-        if (value is null)
+        if (string.IsNullOrEmpty(value))
             return Grade.Empty;
-
 
         Grade? grade = Grade.FromValue(value);
 
         return grade ?? Grade.Empty;
     }
-
-    public override bool ConvertsNulls => true;
 }
 
 internal sealed class GradeConvention : IModelFinalizingConvention

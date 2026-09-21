@@ -10,37 +10,21 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            // Straightforward int -> nvarchar(3) columns (5-12 -> Y05-Y12, anything else -> NULL)
-            ConvertIntGradeColumnToString(migrationBuilder, "Assessments", "Students", "StudentGrade",
-                isNullable: false);
-            ConvertIntGradeColumnToString(migrationBuilder, "Attendance", "CheckInResponses", "Grade",
-                isNullable: false);
-            ConvertIntGradeColumnToString(migrationBuilder, "Attendance", "Plans", "Grade", isNullable: false);
-            ConvertIntGradeColumnToString(migrationBuilder, "AwardNominations", "Nominations", "Grade",
-                isNullable: true);
-            ConvertIntGradeColumnToString(migrationBuilder, "dbo", "Subjects_Courses", "Grade", isNullable: false);
-            ConvertIntGradeColumnToString(migrationBuilder, "dbo", "WorkFlows_CaseDetails", "Grade", isNullable: true);
-            ConvertIntGradeColumnToString(migrationBuilder, "Students", "SchoolEnrolments", "Grade", isNullable: false);
-            ConvertIntGradeColumnToString(migrationBuilder, "ThirdParty", "ConsentRequirements", "Grade",
-                isNullable: true);
-            ConvertIntGradeColumnToString(migrationBuilder, "ThirdParty", "Transactions", "Grade", isNullable: false);
+            ConvertIntGradeColumnToString(migrationBuilder, "Assessments", "Students", "StudentGrade");
+            ConvertIntGradeColumnToString(migrationBuilder, "Attendance", "CheckInResponses", "Grade");
+            ConvertIntGradeColumnToString(migrationBuilder, "Attendance", "Plans", "Grade");
+            ConvertIntGradeColumnToString(migrationBuilder, "AwardNominations", "Nominations", "Grade");
+            ConvertIntGradeColumnToString(migrationBuilder, "dbo", "WorkFlows_CaseDetails", "Grade");
+            ConvertIntGradeColumnToString(migrationBuilder, "Students", "SchoolEnrolments", "Grade");
+            ConvertIntGradeColumnToString(migrationBuilder, "ThirdParty", "ConsentRequirements", "Grade");
+            ConvertIntGradeColumnToString(migrationBuilder, "ThirdParty", "Transactions", "Grade");
+            // Subjects_Courses handled separately
+            ConvertSubjectsCoursesGrade(migrationBuilder);
 
-            // Special case: sentinel value 13 meant "invalid/unknown" -> now Grade.Empty, which the
-            // converter round-trips as NULL (GradeConverter.GradeToString maps Grade.Empty -> null)
-            migrationBuilder.Sql(@"
-                DECLARE @DefaultConstraint sysname;
-                SELECT @DefaultConstraint = dc.name
-                FROM sys.default_constraints dc
-                JOIN sys.columns c ON c.object_id = dc.parent_object_id AND c.column_id = dc.parent_column_id
-                WHERE dc.parent_object_id = OBJECT_ID('SciencePracs.Lessons') AND c.name = 'Grade';
-
-                IF @DefaultConstraint IS NOT NULL
-                    EXEC('ALTER TABLE [SciencePracs].[Lessons] DROP CONSTRAINT [' + @DefaultConstraint + '];');
-            ");
+            // Special case: sentinel value 13 meant "invalid/unknown" -> now Grade.Empty ("")
+            migrationBuilder.Sql("ALTER TABLE [SciencePracs].[Lessons] ADD [Grade_New] nvarchar(3) NULL;");
 
             migrationBuilder.Sql(@"
-                ALTER TABLE [SciencePracs].[Lessons] ADD [Grade_New] nvarchar(3) NULL;
-
                 UPDATE [SciencePracs].[Lessons]
                 SET [Grade_New] = CASE [Grade]
                     WHEN 5  THEN 'Y05'
@@ -51,24 +35,19 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                     WHEN 10 THEN 'Y10'
                     WHEN 11 THEN 'Y11'
                     WHEN 12 THEN 'Y12'
-                    ELSE NULL  -- covers the old '13 = invalid/unknown' sentinel
+                    ELSE ''  -- old '13 = invalid/unknown' sentinel -> Grade.Empty
                 END;
-
-                ALTER TABLE [SciencePracs].[Lessons] DROP COLUMN [Grade];
             ");
 
+            migrationBuilder.Sql("ALTER TABLE [SciencePracs].[Lessons] DROP COLUMN [Grade];");
             migrationBuilder.Sql("EXEC sp_rename 'SciencePracs.Lessons.Grade_New', 'Grade', 'COLUMN';");
-
-            // NOT NULL with no default: Grade.Empty (NULL) is a valid, meaningful value here, so the
-            // column stays nullable rather than forcing a non-null default.
-            migrationBuilder.Sql("ALTER TABLE [SciencePracs].[Lessons] ALTER COLUMN [Grade] nvarchar(3) NULL;");
+            migrationBuilder.Sql("ALTER TABLE [SciencePracs].[Lessons] ALTER COLUMN [Grade] nvarchar(3) NOT NULL;");
 
             // Special case: AwardNominations.PeriodGrades - Grade is part of the composite PK
+            migrationBuilder.Sql("ALTER TABLE [AwardNominations].[PeriodGrades] DROP CONSTRAINT [PK_PeriodGrades];");
+            migrationBuilder.Sql("ALTER TABLE [AwardNominations].[PeriodGrades] ADD [Grade_New] nvarchar(3) NULL;");
+
             migrationBuilder.Sql(@"
-                ALTER TABLE [AwardNominations].[PeriodGrades] DROP CONSTRAINT [PK_PeriodGrades];
-
-                ALTER TABLE [AwardNominations].[PeriodGrades] ADD [Grade_New] nvarchar(3) NULL;
-
                 UPDATE [AwardNominations].[PeriodGrades]
                 SET [Grade_New] = CASE [Grade]
                     WHEN 5  THEN 'Y05'
@@ -81,15 +60,13 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                     WHEN 12 THEN 'Y12'
                     ELSE NULL
                 END;
-
-                ALTER TABLE [AwardNominations].[PeriodGrades] DROP COLUMN [Grade];
             ");
 
+            migrationBuilder.Sql("ALTER TABLE [AwardNominations].[PeriodGrades] DROP COLUMN [Grade];");
             migrationBuilder.Sql("EXEC sp_rename 'AwardNominations.PeriodGrades.Grade_New', 'Grade', 'COLUMN';");
-
+            migrationBuilder.Sql(
+                "ALTER TABLE [AwardNominations].[PeriodGrades] ALTER COLUMN [Grade] nvarchar(3) NOT NULL;");
             migrationBuilder.Sql(@"
-                ALTER TABLE [AwardNominations].[PeriodGrades] ALTER COLUMN [Grade] nvarchar(3) NOT NULL;
-
                 ALTER TABLE [AwardNominations].[PeriodGrades]
                     ADD CONSTRAINT [PK_PeriodGrades] PRIMARY KEY CLUSTERED ([PeriodId] ASC, [Grade] ASC);
             ");
@@ -98,66 +75,51 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            // Reverse: AwardNominations.PeriodGrades first (PK column)
+            // AwardNominations.PeriodGrades first (PK column)
+            migrationBuilder.Sql("ALTER TABLE [AwardNominations].[PeriodGrades] DROP CONSTRAINT [PK_PeriodGrades];");
+            migrationBuilder.Sql("ALTER TABLE [AwardNominations].[PeriodGrades] ADD [Grade_Old] int NULL;");
+
             migrationBuilder.Sql(@"
-                ALTER TABLE [AwardNominations].[PeriodGrades] DROP CONSTRAINT [PK_PeriodGrades];
-
-                ALTER TABLE [AwardNominations].[PeriodGrades] ADD [Grade_Old] int NULL;
-
                 UPDATE [AwardNominations].[PeriodGrades]
                 SET [Grade_Old] = CASE [Grade]
                     WHEN 'Y05' THEN 5  WHEN 'Y06' THEN 6  WHEN 'Y07' THEN 7  WHEN 'Y08' THEN 8
                     WHEN 'Y09' THEN 9  WHEN 'Y10' THEN 10 WHEN 'Y11' THEN 11 WHEN 'Y12' THEN 12
                     ELSE 0
                 END;
-
-                ALTER TABLE [AwardNominations].[PeriodGrades] DROP COLUMN [Grade];
             ");
 
+            migrationBuilder.Sql("ALTER TABLE [AwardNominations].[PeriodGrades] DROP COLUMN [Grade];");
             migrationBuilder.Sql("EXEC sp_rename 'AwardNominations.PeriodGrades.Grade_Old', 'Grade', 'COLUMN';");
-
+            migrationBuilder.Sql("ALTER TABLE [AwardNominations].[PeriodGrades] ALTER COLUMN [Grade] int NOT NULL;");
             migrationBuilder.Sql(@"
-                ALTER TABLE [AwardNominations].[PeriodGrades] ALTER COLUMN [Grade] int NOT NULL;
-
                 ALTER TABLE [AwardNominations].[PeriodGrades]
                     ADD CONSTRAINT [PK_PeriodGrades] PRIMARY KEY CLUSTERED ([PeriodId] ASC, [Grade] ASC);
             ");
 
             // SciencePracs.Lessons: NULL reverts to the old 13 sentinel
-            ConvertStringGradeColumnToInt(migrationBuilder, "SciencePracs", "Lessons", "Grade", isNullable: false,
-                nullSentinel: 13);
+            ConvertStringGradeColumnToInt(migrationBuilder, "SciencePracs", "Lessons", "Grade", nullSentinel: 13);
             migrationBuilder.Sql("ALTER TABLE [SciencePracs].[Lessons] ADD DEFAULT ((13)) FOR [Grade];");
 
-            ConvertStringGradeColumnToInt(migrationBuilder, "ThirdParty", "Transactions", "Grade", isNullable: false,
-                nullSentinel: 0);
+            ConvertStringGradeColumnToInt(migrationBuilder, "ThirdParty", "Transactions", "Grade", nullSentinel: 0);
             ConvertStringGradeColumnToInt(migrationBuilder, "ThirdParty", "ConsentRequirements", "Grade",
-                isNullable: true, nullSentinel: null);
-            ConvertStringGradeColumnToInt(migrationBuilder, "Students", "SchoolEnrolments", "Grade", isNullable: false,
                 nullSentinel: 0);
-            ConvertStringGradeColumnToInt(migrationBuilder, "dbo", "WorkFlows_CaseDetails", "Grade", isNullable: true,
-                nullSentinel: null);
-            ConvertStringGradeColumnToInt(migrationBuilder, "dbo", "Subjects_Courses", "Grade", isNullable: false,
-                nullSentinel: 0);
+            ConvertStringGradeColumnToInt(migrationBuilder, "Students", "SchoolEnrolments", "Grade", nullSentinel: 0);
+            ConvertStringGradeColumnToInt(migrationBuilder, "dbo", "WorkFlows_CaseDetails", "Grade", nullSentinel: 0);
             ConvertStringGradeColumnToInt(migrationBuilder, "AwardNominations", "Nominations", "Grade",
-                isNullable: true, nullSentinel: null);
-            ConvertStringGradeColumnToInt(migrationBuilder, "Attendance", "Plans", "Grade", isNullable: false,
                 nullSentinel: 0);
-            ConvertStringGradeColumnToInt(migrationBuilder, "Attendance", "CheckInResponses", "Grade",
-                isNullable: false, nullSentinel: 0);
-            ConvertStringGradeColumnToInt(migrationBuilder, "Assessments", "Students", "StudentGrade",
-                isNullable: false, nullSentinel: 0);
+            ConvertStringGradeColumnToInt(migrationBuilder, "Attendance", "Plans", "Grade", nullSentinel: 0);
+            ConvertStringGradeColumnToInt(migrationBuilder, "Attendance", "CheckInResponses", "Grade", nullSentinel: 0);
+            ConvertStringGradeColumnToInt(migrationBuilder, "Assessments", "Students", "StudentGrade", nullSentinel: 0);
         }
 
         private static void ConvertIntGradeColumnToString(
             MigrationBuilder migrationBuilder,
             string schema,
             string table,
-            string column,
-            bool isNullable)
+            string column)
         {
             string fullTable = $"[{schema}].[{table}]";
 
-            // Drop any default constraint on the column first
             migrationBuilder.Sql($@"
                 DECLARE @DefaultConstraint sysname;
                 SELECT @DefaultConstraint = dc.name
@@ -169,9 +131,9 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                     EXEC('ALTER TABLE {fullTable} DROP CONSTRAINT [' + @DefaultConstraint + '];');
             ");
 
-            migrationBuilder.Sql($@"
-                ALTER TABLE {fullTable} ADD [{column}_New] nvarchar(3) NULL;
+            migrationBuilder.Sql($"ALTER TABLE {fullTable} ADD [{column}_New] nvarchar(3) NULL;");
 
+            migrationBuilder.Sql($@"
                 UPDATE {fullTable}
                 SET [{column}_New] = CASE [{column}]
                     WHEN 5  THEN 'Y05'
@@ -182,25 +144,13 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                     WHEN 10 THEN 'Y10'
                     WHEN 11 THEN 'Y11'
                     WHEN 12 THEN 'Y12'
-                    ELSE NULL
+                    ELSE ''
                 END;
-
-                ALTER TABLE {fullTable} DROP COLUMN [{column}];
             ");
 
+            migrationBuilder.Sql($"ALTER TABLE {fullTable} DROP COLUMN [{column}];");
             migrationBuilder.Sql($"EXEC sp_rename '{schema}.{table}.{column}_New', '{column}', 'COLUMN';");
-
-            if (isNullable)
-            {
-                migrationBuilder.Sql($"ALTER TABLE {fullTable} ALTER COLUMN [{column}] nvarchar(3) NULL;");
-            }
-            else
-            {
-                // NOTE: if any row resolved to NULL above (an unexpected/out-of-range old value),
-                // this ALTER COLUMN will fail. Investigate and clean those rows before rerunning
-                // if that happens - do not silently coerce them to Grade.Empty here.
-                migrationBuilder.Sql($"ALTER TABLE {fullTable} ALTER COLUMN [{column}] nvarchar(3) NOT NULL;");
-            }
+            migrationBuilder.Sql($"ALTER TABLE {fullTable} ALTER COLUMN [{column}] nvarchar(3) NOT NULL;");
         }
 
         private static void ConvertStringGradeColumnToInt(
@@ -208,30 +158,65 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
             string schema,
             string table,
             string column,
-            bool isNullable,
-            int? nullSentinel)
+            int nullSentinel)
         {
             string fullTable = $"[{schema}].[{table}]";
-            string elseClause = nullSentinel.HasValue ? nullSentinel.Value.ToString() : "NULL";
+
+            migrationBuilder.Sql($"ALTER TABLE {fullTable} ADD [{column}_Old] int NULL;");
 
             migrationBuilder.Sql($@"
-                ALTER TABLE {fullTable} ADD [{column}_Old] int NULL;
-
                 UPDATE {fullTable}
                 SET [{column}_Old] = CASE [{column}]
                     WHEN 'Y05' THEN 5  WHEN 'Y06' THEN 6  WHEN 'Y07' THEN 7  WHEN 'Y08' THEN 8
                     WHEN 'Y09' THEN 9  WHEN 'Y10' THEN 10 WHEN 'Y11' THEN 11 WHEN 'Y12' THEN 12
-                    ELSE {elseClause}
+                    ELSE {nullSentinel}
                 END;
-
-                ALTER TABLE {fullTable} DROP COLUMN [{column}];
             ");
 
+            migrationBuilder.Sql($"ALTER TABLE {fullTable} DROP COLUMN [{column}];");
             migrationBuilder.Sql($"EXEC sp_rename '{schema}.{table}.{column}_Old', '{column}', 'COLUMN';");
+            migrationBuilder.Sql($"ALTER TABLE {fullTable} ALTER COLUMN [{column}] int NOT NULL;");
+        }
 
-            migrationBuilder.Sql(isNullable
-                ? $"ALTER TABLE {fullTable} ALTER COLUMN [{column}] int NULL;"
-                : $"ALTER TABLE {fullTable} ALTER COLUMN [{column}] int NOT NULL;");
+        private static void ConvertSubjectsCoursesGrade(MigrationBuilder migrationBuilder)
+        {
+            const string fullTable = "[dbo].[Subjects_Courses]";
+
+            // The two long-unused non-curriculum courses being removed
+            migrationBuilder.Sql(@"
+                DECLARE @CourseIds TABLE (Id uniqueidentifier);
+                INSERT INTO @CourseIds SELECT Id FROM [dbo].[Subjects_Courses] WHERE Grade NOT IN (5,6,7,8,9,10,11,12);
+
+                DECLARE @OfferingIds TABLE (Id uniqueidentifier);
+                INSERT INTO @OfferingIds SELECT Id FROM [dbo].[Offerings_Offerings] WHERE CourseId IN (SELECT Id FROM @CourseIds);
+
+                DELETE FROM [dbo].[Offerings_Sessions] WHERE OfferingId IN (SELECT Id FROM @OfferingIds);
+                DELETE FROM [dbo].[Offerings_Teachers] WHERE OfferingId IN (SELECT Id FROM @OfferingIds);
+                DELETE FROM [dbo].[Offerings_Resources] WHERE OfferingId IN (SELECT Id FROM @OfferingIds);
+                DELETE FROM [dbo].[Enrolments] WHERE OfferingId IN (SELECT Id FROM @OfferingIds);
+                DELETE FROM [dbo].[Offerings_Offerings] WHERE Id IN (SELECT Id FROM @OfferingIds);
+                DELETE FROM [dbo].[Subjects_Courses] WHERE Id IN (SELECT Id FROM @CourseIds);
+            ");
+
+            migrationBuilder.Sql($"ALTER TABLE {fullTable} ADD [Grade_New] nvarchar(3) NULL;");
+
+            migrationBuilder.Sql($@"
+                UPDATE {fullTable}
+                SET [Grade_New] = CASE [Grade]
+                    WHEN 5  THEN 'Y05'
+                    WHEN 6  THEN 'Y06'
+                    WHEN 7  THEN 'Y07'
+                    WHEN 8  THEN 'Y08'
+                    WHEN 9  THEN 'Y09'
+                    WHEN 10 THEN 'Y10'
+                    WHEN 11 THEN 'Y11'
+                    WHEN 12 THEN 'Y12'
+                END;
+            ");
+
+            migrationBuilder.Sql($"ALTER TABLE {fullTable} DROP COLUMN [Grade];");
+            migrationBuilder.Sql("EXEC sp_rename 'dbo.Subjects_Courses.Grade_New', 'Grade', 'COLUMN';");
+            migrationBuilder.Sql($"ALTER TABLE {fullTable} ALTER COLUMN [Grade] nvarchar(3) NOT NULL;");
         }
     }
 }

@@ -6,6 +6,7 @@ using Constellation.Application.Domains.Enrolments.Queries.GetFTETotalByGrade;
 using Constellation.Core.Shared;
 using Constellation.Presentation.Shared.Helpers.Attributes;
 using Core.Abstractions.Services;
+using Core.Enums;
 using Core.Extensions;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
@@ -48,7 +49,7 @@ public class FTEBreakdownModel : BasePageModel
 
     public class GradeEntry
     {
-        public string Grade { get; set; }
+        public Grade Grade { get; set; }
         public int MaleEnrolments { get; set; }
         public decimal MaleEnrolmentFTE { get; set; }
         public int FemaleEnrolments { get; set; }
@@ -81,7 +82,7 @@ public class FTEBreakdownModel : BasePageModel
         {
             Grades.Add(new()
             {
-                Grade = entry.Grade.AsName(),
+                Grade = entry.Grade,
                 MaleEnrolments = entry.MaleEnrolments,
                 MaleEnrolmentFTE = entry.MaleEnrolmentFTE,
                 FemaleEnrolments = entry.FemaleEnrolments,
