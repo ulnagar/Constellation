@@ -25,7 +25,7 @@ internal class AttendanceRepository : IAttendanceRepository
         _dateTime = dateTime;
     }
 
-    public async Task<AttendanceValue> GetById(
+    public async Task<AttendanceValue?> GetById(
         AttendanceValueId id,
         CancellationToken cancellationToken = default) =>
         await _context
@@ -73,7 +73,7 @@ internal class AttendanceRepository : IAttendanceRepository
             .ToListAsync(cancellationToken);
     }
 
-    public async Task<AttendanceValue> GetLatestForStudent(
+    public async Task<AttendanceValue?> GetLatestForStudent(
         StudentId studentId,
         CancellationToken cancellationToken = default) =>
         await _context

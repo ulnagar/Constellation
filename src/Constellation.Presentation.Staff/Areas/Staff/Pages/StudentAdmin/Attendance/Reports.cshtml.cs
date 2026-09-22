@@ -1,5 +1,6 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.StudentAdmin.Attendance;
 
+using Application.Domains.Attendance.Absences.Queries.ExportAttendanceStatisticsReport;
 using Application.Domains.Attendance.Absences.Queries.ExportUnexplainedPartialAbsencesReport;
 using Application.Domains.ScheduledReports.Commands.CreateScheduledReport;
 using Constellation.Application.Common.PresentationModels;
@@ -7,6 +8,7 @@ using Constellation.Application.Domains.Attendance.Reports.Queries.GenerateAtten
 using Constellation.Application.Domains.Attendance.Reports.Queries.GenerateHistoricalDailyAttendanceReport;
 using Constellation.Application.DTOs;
 using Constellation.Application.Extensions;
+using Constellation.Application.Helpers;
 using Constellation.Application.Models.Auth;
 using Constellation.Core.Abstractions.Services;
 using Constellation.Core.Shared;
@@ -125,5 +127,25 @@ public class ReportsModel : BasePageModel
         }
 
         return RedirectToPage();
+    }
+
+    public async Task<IActionResult> OnGetStatisticsReport()
+    {
+        _logger
+            .Information("Requested to export Attendance Statistics report by user {User}", _currentUserService.UserName);
+
+        Result<byte[]> fileRequest = await _mediator.Send(new ExportAttendanceStatisticsReportQuery());
+
+        if (!fileRequest.IsSuccess)
+        {
+            _logger
+                .ForContext(nameof(Error), fileRequest.Error, true)
+                .Warning("Failed to export Attendance Statistics report by user {User}", _currentUserService.UserName);
+
+            ModalContent = ErrorDisplay.Create(fileRequest.Error);
+            return Page();
+        }
+        
+        return File(fileRequest.Value, FileContentTypes.ExcelModernFile, "Attendance Statistics.xlsx");
     }
 }

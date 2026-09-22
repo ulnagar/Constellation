@@ -52,6 +52,24 @@
     </div>
 </div>
 
+<hr />
+
+<div class="row mt-3">
+    <div class="col-md-8">
+        <h3>Attendance Statistics</h3>
+    </div>
+</div>
+
+<div class="row mt-3">
+    <div class="col-md-12">
+        <h4>Summary Report</h4>
+        An Excel report of the attendance statistics for the current year
+    </div>
+    <div class="col-md-2">
+        <a asp-page-handler="StatisticsReport" class="btn btn-block btn-warning">Run Report</a>
+    </div>
+</div>
+
 <vc:student-attendance-report />
 <vc:historical-attendance-report />
 
