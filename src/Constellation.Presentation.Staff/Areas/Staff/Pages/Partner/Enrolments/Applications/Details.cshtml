@@ -17,10 +17,7 @@
 <div class="page-menu">
     @if (canEditTest.Succeeded && !isArchived)
     {
-        if (Model.Application.Status == ApplicationStatus.Pending)
-        {
-            <a asp-page="/Partner/Enrolments/Applications/Upsert" asp-area="Staff" asp-route-id="@Model.Id" asp-route-PeriodId="@Model.PeriodId" class="btn btn-success">Edit</a>
-        }
+        <a asp-page="/Partner/Enrolments/Applications/Upsert" asp-area="Staff" asp-route-id="@Model.Id" asp-route-PeriodId="@Model.PeriodId" class="btn btn-success">Edit</a>
 
         if (Model.Application.Status != ApplicationStatus.Offered)
         {
