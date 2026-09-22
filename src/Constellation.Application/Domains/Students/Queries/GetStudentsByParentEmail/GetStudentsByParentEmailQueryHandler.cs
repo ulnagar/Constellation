@@ -3,7 +3,6 @@
 using Abstractions.Messaging;
 using Constellation.Core.Models.Students.Repositories;
 using Core.Abstractions.Repositories;
-using Core.Extensions;
 using Core.Models.Students;
 using Core.Models.Students.Identifiers;
 using Core.Shared;
@@ -36,7 +35,7 @@ public sealed class GetStudentsByParentEmailQueryHandler
 
         foreach (Student student in students)
         {
-            SchoolEnrolment enrolment = student.CurrentEnrolment;
+            SchoolEnrolment? enrolment = student.CurrentEnrolment;
 
             if (enrolment is null)
                 continue;
@@ -45,9 +44,8 @@ public sealed class GetStudentsByParentEmailQueryHandler
 
             response.Add(new(
                 student.Id,
-                student.Name.PreferredName,
-                student.Name.LastName,
-                enrolment.Grade.AsName(),
+                student.Name,
+                enrolment.Grade,
                 isResidential));
         }
 

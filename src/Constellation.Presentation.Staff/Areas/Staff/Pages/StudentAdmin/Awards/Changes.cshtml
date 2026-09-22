@@ -82,7 +82,7 @@
 
 <hr />
 
-@foreach (var entry in Model.AwardStatistics.OrderBy(award => award.Grade))
+@foreach (var entry in Model.AwardStatistics.OrderBy(award => award.Grade.Order).ThenBy(award => award.Name.SortOrder))
 {
     <h4>@entry.Name.DisplayName (@entry.Grade.AsName())</h4>
     <table class="table table-striped">

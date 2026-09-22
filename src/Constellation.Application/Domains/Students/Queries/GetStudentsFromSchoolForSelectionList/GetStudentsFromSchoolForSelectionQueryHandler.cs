@@ -41,7 +41,7 @@ internal sealed class GetStudentsFromSchoolForSelectionQueryHandler
                 student.Id,
                 student.Name.PreferredName, 
                 student.Name.LastName,
-                enrolment.Grade.AsName()));
+                enrolment.Grade));
         }
 
         return response;

@@ -57,7 +57,7 @@ internal sealed class GetAbsencesForFamilyQueryHandler
 
         foreach (Student student in students)
         {
-            SchoolEnrolment enrolment = student.CurrentEnrolment;
+            SchoolEnrolment? enrolment = student.CurrentEnrolment;
 
             if (enrolment is null)
                 continue;
@@ -72,7 +72,7 @@ internal sealed class GetAbsencesForFamilyQueryHandler
                 {
                     OfferingId offeringId = OfferingId.FromValue(absence.SourceId);
 
-                    Offering offering = await _offeringRepository.GetById(offeringId, cancellationToken);
+                    Offering? offering = await _offeringRepository.GetById(offeringId, cancellationToken);
 
                     if (offering is not null)
                         activityName = offering.Name;
@@ -82,13 +82,13 @@ internal sealed class GetAbsencesForFamilyQueryHandler
                 {
                     TutorialId tutorialId = TutorialId.FromValue(absence.SourceId);
 
-                    Tutorial tutorial = await _tutorialRepository.GetById(tutorialId, cancellationToken);
+                    Tutorial? tutorial = await _tutorialRepository.GetById(tutorialId, cancellationToken);
 
                     if (tutorial is not null)
                         activityName = tutorial.Name;
                 }
 
-                Response response = absence.GetExplainedResponse();
+                Response? response = absence.GetExplainedResponse();
 
                 AbsenceForFamilyResponse.AbsenceStatus status;
 
@@ -111,7 +111,7 @@ internal sealed class GetAbsencesForFamilyQueryHandler
                 AbsenceForFamilyResponse entry = new(
                     absence.Id,
                     student.Id,
-                    student.Name.DisplayName,
+                    student.Name,
                     enrolment.Grade,
                     absence.Type.Value,
                     absence.Date.ToDateTime(TimeOnly.MinValue),

@@ -3,21 +3,18 @@
 using Core.Enums;
 using Core.Models.Reports.Enums;
 using Core.Models.Reports.Identifiers;
+using Core.ValueObjects;
 using System;
 
 public abstract record SchoolReportResponse(
     string StudentId,
-    string FirstName,
-    string LastName,
-    string DisplayName,
+    Name Student,
     Grade Grade,
     string Year);
 
 public sealed record SchoolAcademicReportResponse(
     string StudentId,
-    string FirstName,
-    string LastName,
-    string DisplayName,
+    Name Student,
     Grade Grade,
     AcademicReportId Id,
     string PublishId,
@@ -25,25 +22,19 @@ public sealed record SchoolAcademicReportResponse(
     string ReportingPeriod)
     : SchoolReportResponse(
         StudentId,
-        FirstName,
-        LastName,
-        DisplayName,
+        Student,
         Grade,
         Year);
 
 public sealed record SchoolExternalReportResponse(
     string StudentId,
-    string FirstName,
-    string LastName,
-    string DisplayName,
+    Name Student,
     Grade Grade,
     ExternalReportId Id,
     ReportType Type,
     DateOnly IssuedDate)
     : SchoolReportResponse(
         StudentId,
-        FirstName,
-        LastName,
-        DisplayName,
+        Student,
         Grade,
         IssuedDate.Year.ToString());

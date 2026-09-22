@@ -55,8 +55,7 @@ public class IndexModel : BasePageModel
 
         Reports = reportsResponse.Value
             .OrderBy(report => report.Grade)
-            .ThenBy(report => report.LastName)
-            .ThenBy(report => report.FirstName)
+            .ThenBy(report => report.Student.SortOrder)
             .ToList();
     }
 
@@ -76,8 +75,7 @@ public class IndexModel : BasePageModel
 
             Reports = reportsResponse.Value
                 .OrderBy(report => report.Grade)
-                .ThenBy(report => report.LastName)
-                .ThenBy(report => report.FirstName)
+                .ThenBy(report => report.Student.SortOrder)
                 .ToList();
 
             return Page();
@@ -102,8 +100,7 @@ public class IndexModel : BasePageModel
 
             Reports = reportsResponse.Value
                 .OrderBy(report => report.Grade)
-                .ThenBy(report => report.LastName)
-                .ThenBy(report => report.FirstName)
+                .ThenBy(report => report.Student.SortOrder)
                 .ToList();
 
             return Page();

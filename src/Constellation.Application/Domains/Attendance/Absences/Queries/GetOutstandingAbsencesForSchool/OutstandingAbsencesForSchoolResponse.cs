@@ -2,11 +2,12 @@
 
 using Constellation.Core.Enums;
 using Constellation.Core.Models.Absences.Identifiers;
+using Core.ValueObjects;
 using System;
 
 public sealed record OutstandingAbsencesForSchoolResponse(
     AbsenceId AbsenceId,
-    string StudentName,
+    Name StudentName,
     Grade StudentGrade,
     string AbsenceType,
     DateTime AbsenceDate,

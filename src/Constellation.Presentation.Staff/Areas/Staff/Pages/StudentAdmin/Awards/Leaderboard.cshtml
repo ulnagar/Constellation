@@ -10,19 +10,21 @@
 <div>
     <ul class="nav nav-pills" data-tabs="tabs" role="tablist">
         @{
-            var first = Model.Entries.First();
+            var orderedGroups = Model.Entries.OrderBy(kvp => kvp.Key.Order).ToList();
+
+            var first = orderedGroups.First();
         }
 
         <li class="nav-item">
-            <a class="nav-link active" href="#@first.Key" data-toggle="pill" role="tab">
+            <a class="nav-link active" href="#@first.Key.Value" data-toggle="pill" role="tab">
                 @first.Key.AsName()
             </a>
         </li>
 
-        @foreach (var group in Model.Entries.Skip(1))
+        @foreach (var group in orderedGroups.Skip(1))
         {
             <li class="nav-item">
-                <a class="nav-link" href="#@group.Key" data-toggle="pill" role="tab">
+                <a class="nav-link" href="#@group.Key.Value" data-toggle="pill" role="tab">
                     @group.Key.AsName()
                 </a>
             </li>
@@ -30,16 +32,16 @@
     </ul>
 
     <div class="tab-content mt-3">
-        @foreach (var group in Model.Entries)
+        @foreach (var group in orderedGroups)
         {
             var positionedAwards = group
                 .GroupBy(award => award.AwardedAstras)
                 .OrderByDescending(award => award.Key)
                 .ToList();
 
-            var active = group.Key == Model.Entries.First().Key;
+            var active = group == first;
 
-            <div id="@group.Key" class="tab-pane @(active ? "active" : "")" role="tabpanel">
+            <div id="@group.Key.Value" class="tab-pane @(active ? "active" : "")" role="tabpanel">
                 <h4>@group.Key.AsName()</h4>
 
                 <table class="table">

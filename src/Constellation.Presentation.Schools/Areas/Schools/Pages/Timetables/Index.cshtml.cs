@@ -52,7 +52,7 @@ public class IndexModel : BasePageModel
         }
 
         Students = students.Value
-            .OrderBy(student => student.Grade)
+            .OrderBy(student => student.Grade.Order)
             .ThenBy(student => student.Name.SortOrder)
             .ToList();
     }

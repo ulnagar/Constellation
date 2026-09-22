@@ -55,7 +55,7 @@ public class LeaderboardModel : BasePageModel
             return;
         }
 
-        foreach (Grade grade in Enum.GetValues(typeof(Grade)))
+        foreach (Grade grade in Grade.GetOptions.Where(grade => grade.Order > 0).OrderBy(grade => grade.Order))
         {
             List<StudentAwardStatisticsResponse> studentWinners = statisticsRequest.Value
                 .Where(student => student.Grade == grade)

@@ -53,9 +53,7 @@ internal sealed class GetCombinedReportListForSchoolQueryHandler
             {
                 results.Add(new SchoolAcademicReportResponse(
                     student.StudentReferenceNumber,
-                    student.Name.FirstName,
-                    student.Name.LastName,
-                    student.Name.DisplayName,
+                    student.Name,
                     enrolment.Grade,
                     report.Id,
                     report.PublishId,
@@ -67,9 +65,7 @@ internal sealed class GetCombinedReportListForSchoolQueryHandler
             {
                 results.Add(new SchoolExternalReportResponse(
                     student.StudentReferenceNumber,
-                    student.Name.FirstName,
-                    student.Name.LastName,
-                    student.Name.DisplayName,
+                    student.Name,
                     enrolment.Grade,
                     report.Id,
                     report.Type,

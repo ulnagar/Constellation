@@ -1,7 +1,7 @@
 ﻿@page
-@using Constellation.Application.Domains.StudentReports.Queries.GetCombinedReportListForSchool
-@using Constellation.Core.Extensions
 @model Constellation.Presentation.Schools.Areas.Schools.Pages.Reports.IndexModel
+
+@using Constellation.Application.Domains.StudentReports.Queries.GetCombinedReportListForSchool
 @{
 }
 
@@ -22,7 +22,7 @@
                 </thead>
                 <tbody>
                     @{
-                        var items = Model.Reports.GroupBy(report => report.DisplayName).ToList();
+                        var items = Model.Reports.OrderBy(report => report.Grade.Order).ThenBy(report => report.Student.SortOrder).GroupBy(report => report.Student).ToList();
 
                         if (items.Count == 0)
                         {
@@ -34,7 +34,7 @@
                             var first = group.First();
 
                             <tr class="group">
-                                <td colspan="6">@first.DisplayName - @first.Grade.AsName()</td>
+                                <td colspan="6">@group.Key.DisplayName - @first.Grade.Name</td>
                             </tr>
 
                             var byYear = group.OrderBy(entry => entry.Year).GroupBy(entry => entry.Year);

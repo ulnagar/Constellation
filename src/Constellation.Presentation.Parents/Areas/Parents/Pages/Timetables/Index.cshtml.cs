@@ -104,8 +104,7 @@ public class IndexModel : BasePageModel
 
         Students = studentsRequest.Value
             .OrderBy(student => student.CurrentGrade)
-            .ThenBy(student => student.LastName)
-            .ThenBy(student => student.FirstName)
+            .ThenBy(student => student.Student.SortOrder)
             .ToList();
 
         if (Students.Count == 1)

@@ -9,8 +9,7 @@ public sealed class ScienceLessonRollSummary
     public SciencePracRollId Id { get; set; }
     public SciencePracLessonId LessonId { get; set; }
     public string LessonName { get; set; }
-    public Grade LessonGrade { get; set; }
-    public string Grade => LessonGrade.Name;
+    public Grade Grade { get; set; }
     public string LessonCourseName { get; set; }
     public DateTime LessonDueDate { get; set; }
     public bool IsSubmitted { get; set; }

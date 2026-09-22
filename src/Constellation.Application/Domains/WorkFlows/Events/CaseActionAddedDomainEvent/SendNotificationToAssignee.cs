@@ -7,6 +7,7 @@ using Core.Models.StaffMembers;
 using Core.Models.StaffMembers.Errors;
 using Core.Models.StaffMembers.Repositories;
 using Core.Models.WorkFlow;
+using Core.Models.WorkFlow.Enums;
 using Core.Models.WorkFlow.Errors;
 using Core.Models.WorkFlow.Events;
 using Core.Models.WorkFlow.Repositories;
@@ -41,7 +42,7 @@ internal sealed class SendNotificationToAssignee
 
     public async Task Handle(CaseActionAddedDomainEvent notification, CancellationToken cancellationToken)
     {
-        Case item = await _caseRepository.GetById(notification.CaseId, cancellationToken);
+        Case? item = await _caseRepository.GetById(notification.CaseId, cancellationToken);
 
         if (item is null)
         {
@@ -53,7 +54,7 @@ internal sealed class SendNotificationToAssignee
             return;
         }
 
-        Action action = item.Actions.FirstOrDefault(entry => entry.Id == notification.ActionId);
+        Action? action = item.Actions.FirstOrDefault(entry => entry.Id == notification.ActionId);
 
         if (action is null)
         {
@@ -65,7 +66,10 @@ internal sealed class SendNotificationToAssignee
             return;
         }
 
-        StaffMember assignee = await _staffRepository.GetById(action.AssignedToId, cancellationToken);
+        if (action.Status == ActionStatus.Completed)
+            return;
+
+        StaffMember? assignee = await _staffRepository.GetById(action.AssignedToId, cancellationToken);
 
         if (assignee is null)
         {

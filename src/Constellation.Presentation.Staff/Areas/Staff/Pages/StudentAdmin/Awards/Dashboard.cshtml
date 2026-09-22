@@ -203,11 +203,11 @@
             $.each(groupBy(dataSeries, 'awardType'),
                 function (index, point) {
                     if (point[0].awardType === awardType) {
-                        data["data"]["datasets"][0]["data"].push(point.find(item => item.grade === "Year 05").count);
-                        data["data"]["datasets"][0]["data"].push(point.find(item => item.grade === "Year 06").count);
-                        data["data"]["datasets"][0]["data"].push(point.find(item => item.grade === "Year 07").count);
-                        data["data"]["datasets"][0]["data"].push(point.find(item => item.grade === "Year 08").count);
-                        data["data"]["datasets"][0]["data"].push(point.find(item => item.grade === "Year 09").count);
+                        data["data"]["datasets"][0]["data"].push(point.find(item => item.grade === "Year 5").count);
+                        data["data"]["datasets"][0]["data"].push(point.find(item => item.grade === "Year 6").count);
+                        data["data"]["datasets"][0]["data"].push(point.find(item => item.grade === "Year 7").count);
+                        data["data"]["datasets"][0]["data"].push(point.find(item => item.grade === "Year 8").count);
+                        data["data"]["datasets"][0]["data"].push(point.find(item => item.grade === "Year 9").count);
                         data["data"]["datasets"][0]["data"].push(point.find(item => item.grade === "Year 10").count);
                         data["data"]["datasets"][0]["data"].push(point.find(item => item.grade === "Year 11").count);
                         data["data"]["datasets"][0]["data"].push(point.find(item => item.grade === "Year 12").count);

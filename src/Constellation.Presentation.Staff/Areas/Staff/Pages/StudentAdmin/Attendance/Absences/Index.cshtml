@@ -117,8 +117,8 @@
                             <h5>Primary</h5>
                         </div>
                         <div class="col">
-                            <button id="gradeSelect-@Grade.Y05" type="button" class="btn btn-outline-info select-button" onClick="toggleGrade('@Grade.Y05')">@Grade.Y05.AsName()</button>
-                            <button id="gradeSelect-@Grade.Y06" type="button" class="btn btn-outline-info select-button" onClick="toggleGrade('@Grade.Y06')">@Grade.Y06.AsName()</button>
+                            <button id="gradeSelect-@Grade.Y05.Value" type="button" class="btn btn-outline-info select-button" onClick="toggleGrade('@Grade.Y05.Value')">@Grade.Y05.Name</button>
+                            <button id="gradeSelect-@Grade.Y06.Value" type="button" class="btn btn-outline-info select-button" onClick="toggleGrade('@Grade.Y06.Value')">@Grade.Y06.Name</button>
                         </div>
                     </div>
 
@@ -127,10 +127,10 @@
                             <h5>Junior Secondary</h5>
                         </div>
                         <div class="col">
-                            <button id="gradeSelect-@Grade.Y07" type="button" class="btn btn-outline-info select-button" onClick="toggleGrade('@Grade.Y07')">@Grade.Y07.AsName()</button>
-                            <button id="gradeSelect-@Grade.Y08" type="button" class="btn btn-outline-info select-button" onClick="toggleGrade('@Grade.Y08')">@Grade.Y08.AsName()</button>
-                            <button id="gradeSelect-@Grade.Y09" type="button" class="btn btn-outline-info select-button" onClick="toggleGrade('@Grade.Y09')">@Grade.Y09.AsName()</button>
-                            <button id="gradeSelect-@Grade.Y10" type="button" class="btn btn-outline-info select-button" onClick="toggleGrade('@Grade.Y10')">@Grade.Y10.AsName()</button>
+                            <button id="gradeSelect-@Grade.Y07.Value" type="button" class="btn btn-outline-info select-button" onClick="toggleGrade('@Grade.Y07.Value')">@Grade.Y07.Name</button>
+                            <button id="gradeSelect-@Grade.Y08.Value" type="button" class="btn btn-outline-info select-button" onClick="toggleGrade('@Grade.Y08.Value')">@Grade.Y08.Name</button>
+                            <button id="gradeSelect-@Grade.Y09.Value" type="button" class="btn btn-outline-info select-button" onClick="toggleGrade('@Grade.Y09.Value')">@Grade.Y09.Name</button>
+                            <button id="gradeSelect-@Grade.Y10.Value" type="button" class="btn btn-outline-info select-button" onClick="toggleGrade('@Grade.Y10.Value')">@Grade.Y10.Name</button>
                         </div>
                     </div>
 
@@ -139,8 +139,8 @@
                             <h5>Senior Secondary</h5>
                         </div>
                         <div class="col">
-                            <button id="gradeSelect-@Grade.Y11" type="button" class="btn btn-outline-info select-button" onClick="toggleGrade('@Grade.Y11')">@Grade.Y11.AsName()</button>
-                            <button id="gradeSelect-@Grade.Y12" type="button" class="btn btn-outline-info select-button" onClick="toggleGrade('@Grade.Y12')">@Grade.Y12.AsName()</button>
+                            <button id="gradeSelect-@Grade.Y11.Value" type="button" class="btn btn-outline-info select-button" onClick="toggleGrade('@Grade.Y11.Value')">@Grade.Y11.Name</button>
+                            <button id="gradeSelect-@Grade.Y12.Value" type="button" class="btn btn-outline-info select-button" onClick="toggleGrade('@Grade.Y12.Value')">@Grade.Y12.Name</button>
                         </div>
                     </div>
                 </div>
@@ -283,7 +283,7 @@
 
                 @foreach (var grade in Model.Filter.Grades)
                 {
-                    @:toggleGrade('@grade');
+                    @:toggleGrade('@grade.Value');
                 }
 
                 @foreach (var student in Model.Filter.Students)

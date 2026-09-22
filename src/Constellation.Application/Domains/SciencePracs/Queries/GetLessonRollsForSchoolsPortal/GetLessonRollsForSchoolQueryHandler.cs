@@ -67,8 +67,8 @@ internal sealed class GetLessonRollsForSchoolQueryHandler
                 LessonName = lesson.Name,
                 LessonDueDate = lesson.DueDate.ToDateTime(TimeOnly.MinValue),
                 IsSubmitted = roll.Status == Core.Enums.LessonStatus.Completed,
-                LessonGrade = course.Grade,
-                LessonCourseName = course.Name,
+                Grade = lesson.Grade,
+                LessonCourseName = course?.Name ?? string.Empty,
                 Statistics = $"{presentStudents}/{totalStudents}"
             };
 

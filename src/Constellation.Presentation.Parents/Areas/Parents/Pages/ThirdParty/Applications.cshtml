@@ -14,7 +14,7 @@
         @foreach (var student in Model.Students)
         {
             <button class="list-group-item list-group-item-action student-select-button" data-student-id="@student.StudentId">
-                @student.DisplayName (@student.CurrentGrade)
+                @student.Student.DisplayName (@student.CurrentGrade.Name)
             </button>
         }
     </ul>
@@ -25,7 +25,7 @@ else
         <span class="row d-flex align-items-center">
             @*Display as flex to enable vertical centering of the button in the second div*@
             <div class="col-lg">
-                <div class="h4">Applications for @Model.SelectedStudent?.DisplayName</div>
+                <div class="h4">Applications for @Model.SelectedStudent?.Student.DisplayName</div>
                 @*If the view has collapsed and the button below is hidden, turn the entire entry into a clickable element*@
                 @if (Model.Students.Count > 1)
                 {
@@ -165,7 +165,7 @@ else
 
             <div class="row d-none" id="approveBlock">
                 <div class="col">
-                    <p><span class="fw-bold fst-italic">I consent</span> to @Model.SelectedStudent.FirstName using the following applications:</p>
+                    <p><span class="fw-bold fst-italic">I consent</span> to @Model.SelectedStudent.Student.FirstName using the following applications:</p>
                     <ul id="approveList">
 
                     </ul>
@@ -174,7 +174,7 @@ else
 
             <div class="row d-none" id="rejectBlock">
                 <div class="col">
-                    <p><span class="fw-bold fst-italic">I do not consent</span> to @Model.SelectedStudent.FirstName using the following applications:</p>
+                    <p><span class="fw-bold fst-italic">I do not consent</span> to @Model.SelectedStudent.Student.FirstName using the following applications:</p>
                     <ul id="rejectList">
 
                     </ul>

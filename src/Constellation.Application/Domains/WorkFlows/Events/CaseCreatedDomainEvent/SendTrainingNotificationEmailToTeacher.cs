@@ -200,10 +200,10 @@ internal sealed class SendTrainingNotificationEmailToTeacher
                     if (principalEmail.IsFailure)
                     {
                         _logger
-                            .ForContext(nameof(CaseActionAddedDomainEvent), notification, true)
+                            .ForContext(nameof(CaseCreatedDomainEvent), notification, true)
                             .ForContext(nameof(StaffMember), principal.Key, true)
                             .ForContext(nameof(Error), principalEmail.Error, true)
-                            .Warning("Could not send notification to recipients for Training Case update");
+                            .Warning("Could not send notification to teacher for new Training Action");
 
                         return;
                     }

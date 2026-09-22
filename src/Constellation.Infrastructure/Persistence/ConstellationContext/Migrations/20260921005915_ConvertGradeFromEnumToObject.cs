@@ -14,14 +14,27 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
             ConvertIntGradeColumnToString(migrationBuilder, "Attendance", "CheckInResponses", "Grade");
             ConvertIntGradeColumnToString(migrationBuilder, "Attendance", "Plans", "Grade");
             ConvertIntGradeColumnToString(migrationBuilder, "AwardNominations", "Nominations", "Grade");
+            ConvertIntGradeColumnToString(migrationBuilder, "dbo", "Attendance_Values", "Grade");
             ConvertIntGradeColumnToString(migrationBuilder, "dbo", "WorkFlows_CaseDetails", "Grade");
             ConvertIntGradeColumnToString(migrationBuilder, "Students", "SchoolEnrolments", "Grade");
             ConvertIntGradeColumnToString(migrationBuilder, "ThirdParty", "ConsentRequirements", "Grade");
             ConvertIntGradeColumnToString(migrationBuilder, "ThirdParty", "Transactions", "Grade");
+            ConvertIntGradeColumnToString(migrationBuilder, "Tutorials", "Requests", "Grade");
             // Subjects_Courses handled separately
             ConvertSubjectsCoursesGrade(migrationBuilder);
 
             // Special case: sentinel value 13 meant "invalid/unknown" -> now Grade.Empty ("")
+            migrationBuilder.Sql(@"
+                DECLARE @DefaultConstraint sysname;
+                SELECT @DefaultConstraint = dc.name
+                FROM sys.default_constraints dc
+                JOIN sys.columns c ON c.object_id = dc.parent_object_id AND c.column_id = dc.parent_column_id
+                WHERE dc.parent_object_id = OBJECT_ID('SciencePracs.Lessons') AND c.name = 'Grade';
+
+                IF @DefaultConstraint IS NOT NULL
+                    EXEC('ALTER TABLE [SciencePracs].[Lessons] DROP CONSTRAINT [' + @DefaultConstraint + '];');
+            ");
+
             migrationBuilder.Sql("ALTER TABLE [SciencePracs].[Lessons] ADD [Grade_New] nvarchar(3) NULL;");
 
             migrationBuilder.Sql(@"
@@ -42,7 +55,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
             migrationBuilder.Sql("ALTER TABLE [SciencePracs].[Lessons] DROP COLUMN [Grade];");
             migrationBuilder.Sql("EXEC sp_rename 'SciencePracs.Lessons.Grade_New', 'Grade', 'COLUMN';");
             migrationBuilder.Sql("ALTER TABLE [SciencePracs].[Lessons] ALTER COLUMN [Grade] nvarchar(3) NOT NULL;");
-
+            
             // Special case: AwardNominations.PeriodGrades - Grade is part of the composite PK
             migrationBuilder.Sql("ALTER TABLE [AwardNominations].[PeriodGrades] DROP CONSTRAINT [PK_PeriodGrades];");
             migrationBuilder.Sql("ALTER TABLE [AwardNominations].[PeriodGrades] ADD [Grade_New] nvarchar(3) NULL;");
@@ -105,11 +118,13 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                 nullSentinel: 0);
             ConvertStringGradeColumnToInt(migrationBuilder, "Students", "SchoolEnrolments", "Grade", nullSentinel: 0);
             ConvertStringGradeColumnToInt(migrationBuilder, "dbo", "WorkFlows_CaseDetails", "Grade", nullSentinel: 0);
+            ConvertStringGradeColumnToInt(migrationBuilder, "dbo", "Attendance_Values", "Grade", nullSentinel: 0);
             ConvertStringGradeColumnToInt(migrationBuilder, "AwardNominations", "Nominations", "Grade",
                 nullSentinel: 0);
             ConvertStringGradeColumnToInt(migrationBuilder, "Attendance", "Plans", "Grade", nullSentinel: 0);
             ConvertStringGradeColumnToInt(migrationBuilder, "Attendance", "CheckInResponses", "Grade", nullSentinel: 0);
             ConvertStringGradeColumnToInt(migrationBuilder, "Assessments", "Students", "StudentGrade", nullSentinel: 0);
+            ConvertStringGradeColumnToInt(migrationBuilder, "Tutorials", "Requests", "Grade", nullSentinel: 0);
         }
 
         private static void ConvertIntGradeColumnToString(

@@ -23,7 +23,7 @@
                 <tbody>
                 @{
                     var items = Model.Plans
-                        .OrderBy(plan => plan.Grade)
+                        .OrderBy(plan => plan.Grade.Order)
                         .GroupBy(plan => plan.Grade)
                         .ToList();
 

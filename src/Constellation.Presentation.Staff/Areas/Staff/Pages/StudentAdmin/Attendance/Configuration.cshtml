@@ -66,7 +66,7 @@
             <td>@item.School</td>
             <td>@item.SRN</td>
             <td>@Html.DisplayFor(model => item.Gender, "Gender") @item.Name</td>
-            <td>@Html.DisplayFor(model => item.Grade, "Grade")</td>
+            <td data-order="@item.Grade.Order">@Html.DisplayFor(model => item.Grade, "Grade")</td>
             <td>@Html.DisplayFor(model => item.ActiveWhole, "Boolean") Whole</td>
             <td>
                 @foreach (var entry in item.AbsenceSettings.Where(entry => entry.AbsenceType == AbsenceType.Whole))
@@ -85,7 +85,7 @@
             <td>@item.School</td>
             <td>@item.SRN</td>
             <td>@Html.DisplayFor(model => item.Gender, "Gender") @item.Name</td>
-            <td>@Html.DisplayFor(model => item.Grade, "Grade")</td>
+            <td data-order="@item.Grade.Order">@Html.DisplayFor(model => item.Grade, "Grade")</td>
             <td>@Html.DisplayFor(model => item.ActivePartial, "Boolean") Partial</td>
             <td>
                 @foreach (var entry in item.AbsenceSettings.Where(entry => entry.AbsenceType == AbsenceType.Partial))

@@ -1,6 +1,7 @@
 ﻿@page
-@using Constellation.Presentation.Schools.Areas.Schools.Pages.ScienceRolls
 @model Constellation.Presentation.Schools.Areas.Schools.Pages.ScienceRolls.IndexModel
+
+@using Constellation.Presentation.Schools.Areas.Schools.Pages.ScienceRolls
 @{
 }
 
@@ -53,7 +54,7 @@
         </thead>
         <tbody>
             @{
-                var items = Model.Lessons.GroupBy(lesson => lesson.Grade).ToList();
+                var items = Model.Lessons.GroupBy(lesson => lesson.Grade).OrderBy(kvp => kvp.Key.Order).ToList();
 
                 if (items.Count == 0)
                 {
@@ -62,10 +63,8 @@
                 
                 foreach (var group in items)
                 {
-                    var first = group.First();
-
                     <tr class="group">
-                            <td colspan="6">@first.Grade</td>
+                        <td colspan="6">@group.Key.Name</td>
                     </tr>
 
                     @foreach (var item in group)

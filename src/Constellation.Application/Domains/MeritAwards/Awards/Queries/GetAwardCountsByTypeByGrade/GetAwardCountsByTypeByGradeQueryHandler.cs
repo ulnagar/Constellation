@@ -40,13 +40,13 @@ internal sealed class GetAwardCountsByTypeByGradeQueryHandler
 
         foreach (StudentAward award in awards)
         {
-            Student student = students.FirstOrDefault(student => student.Id == award.StudentId);
+            Student? student = students.FirstOrDefault(student => student.Id == award.StudentId);
 
             // If Student is null, they have likely withdrawn and therefore is not included in the "Current Students" retrieved above
             if (student is null)
                 continue;
 
-            SchoolEnrolment enrolment = student.CurrentEnrolment;
+            SchoolEnrolment? enrolment = student.CurrentEnrolment;
 
             if (enrolment is null)
                 continue;
@@ -59,7 +59,7 @@ internal sealed class GetAwardCountsByTypeByGradeQueryHandler
             });
         }
 
-        foreach (Grade grade in Enum.GetValues(typeof(Grade)))
+        foreach (Grade grade in Grade.GetOptions.Where(grade => grade.Order > 0).OrderBy(grade => grade.Order))
         {
             for (int j = 0; j <= 3; j++)
             {
@@ -82,7 +82,7 @@ internal sealed class GetAwardCountsByTypeByGradeQueryHandler
             }
         }
 
-        foreach (Grade grade in Enum.GetValues(typeof(Grade)))
+        foreach (Grade grade in Grade.GetOptions.Where(grade => grade.Order > 0).OrderBy(grade => grade.Order))
         {
             for (int j = 0; j <= 3; j++)
             {

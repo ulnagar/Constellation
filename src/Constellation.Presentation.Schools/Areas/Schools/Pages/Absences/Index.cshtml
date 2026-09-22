@@ -76,7 +76,7 @@
                 </thead>
                 <tbody>
                     @{
-                        var items = Model.Absences.GroupBy(student => student.StudentName).ToList();
+                        var items = Model.Absences.OrderBy(student => student.StudentGrade.Order).ThenBy(student => student.StudentName.SortOrder).GroupBy(student => student.StudentName).ToList();
 
                         if (items.Count == 0)
                         {
@@ -88,7 +88,7 @@
                             var first = group.First();
 
                             <tr class="group">
-                                <td colspan="6">@first.StudentName @first.StudentGrade.AsName()</td>
+                                <td colspan="6">@first.StudentName - @first.StudentGrade.AsName()</td>
                             </tr>
 
                             @foreach (var item in group.OrderBy(entry => entry.AbsenceDate))

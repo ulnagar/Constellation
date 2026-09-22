@@ -1,7 +1,7 @@
 ﻿@page
-@using Constellation.Core.Extensions
-@using Microsoft.AspNetCore.WebUtilities
 @model Constellation.Presentation.Parents.Areas.Parents.Pages.Profile.IndexModel
+
+@using Microsoft.AspNetCore.WebUtilities
 @{
 }
 
@@ -21,7 +21,7 @@
             <ul>
                 @foreach (var student in Model.CurrentUser.Students)
                 {
-                    <li>@student.Name (@student.Grade.AsName() - @student.School)</li>
+                    <li>@student.Name (@student.Grade.Name - @student.School)</li>
                 }
             </ul>
         </div>

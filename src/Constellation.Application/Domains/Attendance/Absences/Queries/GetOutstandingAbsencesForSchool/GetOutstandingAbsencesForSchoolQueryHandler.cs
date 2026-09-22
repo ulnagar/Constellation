@@ -103,7 +103,7 @@ internal sealed class GetOutstandingAbsencesForSchoolQueryHandler
 
                 OutstandingAbsencesForSchoolResponse entry = new(
                     absence.Id,
-                    student.Name.DisplayName,
+                    student.Name,
                     enrolment.Grade,
                     absence.Type.Value,
                     absence.Date.ToDateTime(TimeOnly.MinValue),

@@ -15,8 +15,8 @@ using System.Linq;
 
 public sealed class SciencePracLesson : AggregateRoot
 {
-    private readonly List<SciencePracLessonOffering> _offerings = new();
-    private readonly List<SciencePracRoll> _rolls = new();
+    private readonly List<SciencePracLessonOffering> _offerings = [];
+    private readonly List<SciencePracRoll> _rolls = [];
     
     // Required for EF Core
     private SciencePracLesson() { }
@@ -33,6 +33,7 @@ public sealed class SciencePracLesson : AggregateRoot
         Name = name;
         DueDate = dueDate;
         DoNotGenerateRolls = doNotGenerateRolls;
+        Grade = grade;
 
         foreach (OfferingId offering in offerings)
             AddOffering(offering);
@@ -56,9 +57,7 @@ public sealed class SciencePracLesson : AggregateRoot
         bool doNotGenerateRolls)
     {
         if (dueDate < DateOnly.FromDateTime(DateTime.Today))
-        {
             return Result.Failure<SciencePracLesson>(SciencePracLessonErrors.PastDueDate(dueDate));
-        }
 
         return new SciencePracLesson(
             name,
@@ -76,12 +75,10 @@ public sealed class SciencePracLesson : AggregateRoot
         List<StudentId> presentStudents,
         List<StudentId> absentStudents)
     {
-        SciencePracRoll roll = _rolls.FirstOrDefault(roll => roll.Id == rollId);
+        SciencePracRoll? roll = _rolls.FirstOrDefault(roll => roll.Id == rollId);
 
         if (roll is null)
-        {
             return Result.Failure(SciencePracRollErrors.NotFound(rollId));
-        }
 
         Result attempt = roll.MarkRoll(
             submittedBy,

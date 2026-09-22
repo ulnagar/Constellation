@@ -24,7 +24,7 @@
                 <button type="button" data-action-id="@Model.Action.Id.Value" class="btn btn-sm btn-secondary reassign-action-button">Reassign</button>
                 <button type="button" data-action-id="@Model.Action.Id.Value" class="btn btn-sm btn-danger cancel-action-button">Mark Cancelled</button>
             }
-            <button type="button" data-toggle="collapse" data-target="#@notesDiv" aria-expanded="false" aria-controls="@notesDiv" class="btn btn-sm btn-primary">Show Notes</button>
+            <button type="button" data-toggle="collapse" data-target="#A-@notesDiv" aria-expanded="false" aria-controls="A-@notesDiv" class="btn btn-sm btn-primary">Show Notes</button>
         </div>
     }
     <div class="col-12 mt-3">
@@ -48,7 +48,7 @@
             <dd>@Model.Action.Status.Name</dd>
         </dl>
     </div>
-    <div class="col-12 mt-2 collapse" id="@notesDiv">
+    <div class="col-12 mt-2 collapse" id="A-@notesDiv">
         <strong>Notes:</strong>
         @foreach (var note in Model.Action.Notes.OrderBy(note => note.SubmittedAt))
         {

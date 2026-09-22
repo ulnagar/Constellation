@@ -13,7 +13,7 @@
             <div class="col font-weight-bold">
                 <select asp-for="StudentId" class="form-control" id="student-selector">
                     <option value="">-- Select --</option>
-                    @foreach (var student in Model.Students.OrderBy(student => student.CurrentGrade).ThenBy(student => student.LastName))
+                    @foreach (var student in Model.Students.OrderBy(student => student.CurrentGrade.Order).ThenBy(student => student.LastName))
                     {
                         <option value="@student.StudentId">(@student.CurrentGrade) @student.DisplayName</option>
                     }

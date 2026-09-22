@@ -107,7 +107,7 @@
                                 <div class="row d-flex align-items-center">
                                     @*Display as flex to enable vertical centering of the button in the second div*@
                                     <div class="col-lg-8">
-                                        <div class="h5">@entry.StudentName (@entry.StudentGrade) - @entry.AbsenceReason</div>
+                                        <div class="h5">@entry.StudentName.DisplayName (@entry.StudentGrade.Name) - @entry.AbsenceReason</div>
                                         @*<div><span class="me-2">@entry.Status.ToString()</span> <span class="me-2">@entry.Id</span></div>*@
                                         <div><span class="me-2">@entry.AbsenceDate.ToString("dd/MM")</span> <span class="me-2">@entry.OfferingName</span> @entry.AbsenceLength min (@entry.AbsenceTimeframe)</div>
 

@@ -16,7 +16,7 @@
         @foreach (var student in Model.Students)
         {
             <button class="list-group-item list-group-item-action student-select-button" data-student-id="@student.StudentId">
-                @student.DisplayName (@student.CurrentGrade)
+                @student.Student.DisplayName (@student.CurrentGrade.Name)
             </button>
         }
     </ul>
@@ -27,7 +27,7 @@ else
         <span class="row d-flex align-items-center">
             @*Display as flex to enable vertical centering of the button in the second div*@
             <div class="col-lg">
-                <div class="h4">Timetable for @Model.SelectedStudent?.DisplayName</div>
+                <div class="h4">Timetable for @Model.SelectedStudent?.Student.DisplayName</div>
                 @*If the view has collapsed and the button below is hidden, turn the entire entry into a clickable element*@
                 @if (Model.Students.Count > 1)
                 {
@@ -106,18 +106,6 @@ else
                                 </div>
                             }
                         }
-                        @* else if (Model.Week is null)
-                    {
-                        @foreach (var entry in Model.Weeks)
-                        {
-                            <div class="col w-auto position-relative p-2">
-                                <div class="h4">@entry.Name</div>
-                                <div class="d-block">
-                                    <a asp-route-studentId="@Model.StudentId" asp-route-week="@entry.Value" asp-route-day="@Model.Day" class="stretched-link"></a>
-                                </div>
-                            </div>
-                        }
-                    } *@
                         else
                         {
                             <div class="col">
@@ -146,18 +134,6 @@ else
                                 </div>
                             }
                         }
-                        @*                     else if (Model.Day is null)
-                    {
-                        @foreach (var day in PeriodDay.GetOptions)
-                        {
-                            <div class="col w-auto position-relative p-2 select-item">
-                                <div class="h4">@day.Name</div>
-                                <div class="d-block">
-                                    <a asp-route-studentId="@Model.StudentId" asp-route-week="@Model.Week!.Value" asp-route-day="@day.Value" class="stretched-link"></a>
-                                </div>
-                            </div>
-                        }
-                    } *@
                         else
                         {
                             <div class="col">
@@ -176,7 +152,7 @@ else
         
         @{
             var entries = Model.Day is not null
-                ? Model.TimetableData!.Timetables
+                ? Model.TimetableData.Timetables
                     .Where(entry => 
                         entry.Timetable == Model.Timetable &&
                         entry.Day == Model.Day &&

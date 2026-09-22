@@ -102,8 +102,7 @@ public class ApplicationsModel : BasePageModel
         Students = studentsRequest.Value
             .Where(student => student.ResidentialFamily)
             .OrderBy(student => student.CurrentGrade)
-            .ThenBy(student => student.LastName)
-            .ThenBy(student => student.FirstName)
+            .ThenBy(student => student.Student.SortOrder)
             .ToList();
 
         if (Students.Count == 0)
