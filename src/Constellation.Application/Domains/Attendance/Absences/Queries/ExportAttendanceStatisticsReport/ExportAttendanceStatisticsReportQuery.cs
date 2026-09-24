@@ -1,7 +1,8 @@
 ﻿namespace Constellation.Application.Domains.Attendance.Absences.Queries.ExportAttendanceStatisticsReport;
 
 using Abstractions.Messaging;
-using DTOs;
+using Constellation.Application.Domains.Attendance.Absences.Models;
 
-public sealed class ExportAttendanceStatisticsReportQuery
+public sealed record ExportAttendanceStatisticsReportQuery(
+    AttendanceStatisticsResponse Statistics)
     : IQuery<byte[]>;

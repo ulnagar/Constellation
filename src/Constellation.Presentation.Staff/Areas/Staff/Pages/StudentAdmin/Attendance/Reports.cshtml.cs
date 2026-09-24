@@ -1,7 +1,9 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.StudentAdmin.Attendance;
 
+using Application.Domains.Attendance.Absences.Models;
 using Application.Domains.Attendance.Absences.Queries.ExportAttendanceStatisticsReport;
 using Application.Domains.Attendance.Absences.Queries.ExportUnexplainedPartialAbsencesReport;
+using Application.Domains.Attendance.Absences.Queries.GetAttendanceStatistics;
 using Application.Domains.ScheduledReports.Commands.CreateScheduledReport;
 using Constellation.Application.Common.PresentationModels;
 using Constellation.Application.Domains.Attendance.Reports.Queries.GenerateAttendanceReportForStudent;
@@ -134,9 +136,22 @@ public class ReportsModel : BasePageModel
         _logger
             .Information("Requested to export Attendance Statistics report by user {User}", _currentUserService.UserName);
 
-        Result<byte[]> fileRequest = await _mediator.Send(new ExportAttendanceStatisticsReportQuery());
+        Result<AttendanceStatisticsResponse> statistics = await _mediator.Send(new GetAttendanceStatisticsQuery());
 
-        if (!fileRequest.IsSuccess)
+        if (statistics.IsFailure)
+        {
+
+            _logger
+                .ForContext(nameof(Error), statistics.Error, true)
+                .Warning("Failed to export Attendance Statistics report by user {User}", _currentUserService.UserName);
+
+            ModalContent = ErrorDisplay.Create(statistics.Error);
+            return Page();
+        }
+
+        Result<byte[]> fileRequest = await _mediator.Send(new ExportAttendanceStatisticsReportQuery(statistics.Value));
+
+        if (fileRequest.IsFailure)
         {
             _logger
                 .ForContext(nameof(Error), fileRequest.Error, true)

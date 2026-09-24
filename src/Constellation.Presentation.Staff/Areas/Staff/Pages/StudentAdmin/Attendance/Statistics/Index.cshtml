@@ -1,0 +1,291 @@
+﻿@page
+@model Constellation.Presentation.Staff.Areas.Staff.Pages.StudentAdmin.Attendance.Statistics.IndexModel
+
+@using Constellation.Core.Enums
+@{
+    Layout = "Shared/_StaffLayout.bs5";
+}
+
+    <!-- Header -->
+    <div class="dashboard-header border">
+        <h2>Attendance Statistics - @Model.Statistics.WholeSchoolAttendancePercentage.Last().Key</h2>
+    </div>
+
+    <div class="row g-3">
+
+        <!-- Whole school attendance target -->
+        <div class="col-lg-4">
+            <div class="panel border">
+                <h2>Whole School Attendance<br>Target: 95.9% by 2027</h2>
+                
+                @foreach (var week in Model.Statistics.WholeSchoolAttendancePercentage)
+                {
+                    <div class="progress-row">
+                        <div class="label">@week.Key</div>
+                        <div class="progress-inline">
+                            <div class="chart-placeholder">
+                                <canvas class="week-chart"
+                                        data-label="@week.Key"
+                                        data-attendance="@week.Value"
+                                        data-target="95.9"
+                                ></canvas>
+                            </div>
+                            <div class="progress-value">
+                                @week.Value.ToString("F1")%
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <!-- Unexplained partial absences -->
+        <div class="col-lg-8">
+            <div class="panel border">
+                <h2>Unexplained partial absences this year</h2>
+                <p class="panel-note">
+                    Partial absences are absences when a student arrives late or leaves early during a lesson.
+                    Partial absences are explained by the student, by visiting Constellation and adding a reason.
+                    Once a reason has been added, a notification is sent to the ACC to verify. Partial absences
+                    remain unexplained until verified. If rejected, the absence is treated as truancy.
+                </p>
+
+                <div class="row row-cols-2 g-2 partial-graph">
+                    @{
+                        var partialAbsenceByGrade = Grade.GetOptions
+                            .Where(grade => grade.Order > 0).OrderBy(grade => grade.Order)
+                            .Select(g => new { Label = g.Name, Unexplained = Model.Statistics.UnexplainedPartialAbsenceCountByGrade[g], Total = Model.Statistics.TotalPartialAbsenceCountByGrade[g] })
+                            .ToList();
+                    }
+
+                    <script id="partialAbsenceData" type="application/json">
+                        @Html.Raw(Json.Serialize(partialAbsenceByGrade))
+                    </script>
+
+                    <div class="chart-placeholder">
+                        <canvas id="partialAbsenceChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- % attendance by year group scatter -->
+        <div class="col-lg-4">
+            <div class="panel border">
+                <h2>% attendance by year group</h2>
+                <div class="chart-placeholder">
+                    <canvas id="attendanceByYearChart"></canvas>
+                    <!-- Chart.js scatter/bubble chart to be initialized here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Whole absences stacked bar -->
+        <div class="col-lg-8">
+            <div class="panel border">
+                <h2>Unexplained whole absences this year</h2>
+                <p class="panel-note">
+                    Whole absences are absences when a student does not attend a lesson.
+                    Whole absences are explained by the parent, by visiting Constellation and adding a reason.
+                    If the reason is rejected, the absence is treated as truancy.
+                </p>
+
+                <div class="row row-cols-2 g-2 partial-graph">
+                    @{
+                        var wholeAbsenceByGrade = Grade.GetOptions
+                            .Where(grade => grade.Order > 0).OrderBy(grade => grade.Order)
+                            .Select(g => new { Label = g.Name, Unexplained = Model.Statistics.UnexplainedWholeAbsenceCountByGrade[g], Total = Model.Statistics.TotalWholeAbsenceCountByGrade[g] })
+                            .ToList();
+                    }
+
+                    <script id="wholeAbsenceData" type="application/json">
+                        @Html.Raw(Json.Serialize(wholeAbsenceByGrade))
+                    </script>
+
+                    <div class="chart-placeholder">
+                        <canvas id="wholeAbsenceChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+@section Scripts 
+{
+    <script src="~/lib/Chart.js/chart.min.js"></script>
+    <script src="~/lib/Chart.js-annotation/chartjs-plugin-annotation.js"></script>
+
+    <script>
+        // One percentage stacked bar chart per week, each built from the
+        // canvas's own data-* attributes (data-label / data-attendance / data-target).
+        document.querySelectorAll('.week-chart').forEach((canvas) => {
+            const label = canvas.dataset.label;
+            const attendance = parseFloat(canvas.dataset.attendance);
+            const target = parseFloat(canvas.dataset.target);
+            const remainder = 100 - attendance;
+ 
+            new Chart(canvas, {
+                type: 'bar',
+                data: {
+                    labels: [label],
+                    datasets: [
+                        {
+                            label: 'Attendance %',
+                            data: [attendance],
+                            backgroundColor: '#f4c84c',
+                            stack: 'attendance',
+                            borderRadius: { topLeft: 8, bottomLeft: 8, topRight: 0, bottomRight: 0 },
+                            borderSkipped: false
+                        },
+                        {
+                            label: 'Remainder',
+                            data: [remainder],
+                            backgroundColor: '#2fa39a',
+                            stack: 'attendance',
+                            borderRadius: { topLeft: 0, bottomLeft: 0, topRight: 8, bottomRight: 8 },
+                            borderSkipped: false
+                        }
+                    ]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    events: [],
+                    scales: {
+                        x: {
+                            stacked: true,
+                            min: 0,
+                            max: 100,
+                            display: false,
+                            grid: { display: false }
+                        },
+                        y: {
+                            stacked: true,
+                            display: false,
+                            grid: { display: false }
+                        }
+                    },
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: (context) => `${context.dataset.label}: ${context.parsed.x}%`
+                            }
+                        },
+                        annotation: {
+                            annotations: {
+                                targetLine: {
+                                    type: 'line',
+                                    scaleID: 'x',
+                                    value: target,
+                                    borderColor: '#1c1c1c',
+                                    borderWidth: 2,
+                                    borderDash: [6, 6],
+                                    label: {
+                                        enabled: false,
+                                        content: `${target}%`,
+                                        position: 'end',
+                                        backgroundColor: '#1c1c1c',
+                                        font: { size: 9 }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        });
+
+        const partialAbsenceData = JSON.parse(document.getElementById('partialAbsenceData').textContent);
+
+        const partialGradeLabels = partialAbsenceData.map(g => g.label);
+        const partialUnexplained = partialAbsenceData.map(g => g.unexplained);
+        const partialExplained = partialAbsenceData.map(g => g.total - g.unexplained);
+
+        new Chart(document.getElementById('partialAbsenceChart'), {
+          type: 'bar',
+          data: {
+            labels: partialGradeLabels,
+            datasets: [
+              {
+                label: 'Unexplained',
+                data: partialUnexplained,
+                backgroundColor: '#f4c84c',
+                stack: 'partial'
+              },
+              {
+                label: 'Explained',
+                data: partialExplained,
+                backgroundColor: '#2fa39a',
+                stack: 'partial',
+                borderRadius: { topLeft: 8, topRight: 8, bottomLeft: 0, bottomRight: 0 },
+                borderSkipped: false
+              }
+            ]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+              x: { stacked: true, ticks: { font: { weight: 'bold', size: 16 } } },
+              y: { stacked: true, beginAtZero: true, }
+            },
+            plugins: {
+              legend: { display: true, position: 'bottom' },
+              tooltip: {
+                callbacks: {
+                  label: (context) => `${context.dataset.label}: ${context.parsed.y}`
+                }
+              }
+            }
+          }
+        });
+
+        const wholeAbsenceData = JSON.parse(document.getElementById('wholeAbsenceData').textContent);
+
+        const wholeGradeLabels = wholeAbsenceData.map(g => g.label);
+        const wholeUnexplained = wholeAbsenceData.map(g => g.unexplained);
+        const wholeExplained = wholeAbsenceData.map(g => g.total - g.unexplained);
+
+        new Chart(document.getElementById('wholeAbsenceChart'), {
+          type: 'bar',
+          data: {
+            labels: wholeGradeLabels,
+            datasets: [
+              {
+                label: 'Unexplained',
+                data: wholeUnexplained,
+                backgroundColor: '#f4c84c',
+                stack: 'whole'
+              },
+              {
+                label: 'Explained',
+                data: wholeExplained,
+                backgroundColor: '#2fa39a',
+                stack: 'whole',
+                borderRadius: { topLeft: 8, topRight: 8, bottomLeft: 0, bottomRight: 0 },
+                borderSkipped: false
+              }
+            ]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+              x: { stacked: true, ticks: { font: { weight: 'bold', size: 16 } } },
+              y: { stacked: true, beginAtZero: true, }
+            },
+            plugins: {
+              legend: { display: true, position: 'bottom' },
+              tooltip: {
+                callbacks: {
+                  label: (context) => `${context.dataset.label}: ${context.parsed.y}`
+                }
+              }
+            }
+          }
+        });
+    </script>
+}

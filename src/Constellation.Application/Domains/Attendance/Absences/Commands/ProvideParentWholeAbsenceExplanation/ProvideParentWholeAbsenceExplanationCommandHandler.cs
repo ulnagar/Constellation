@@ -1,6 +1,7 @@
 ﻿namespace Constellation.Application.Domains.Attendance.Absences.Commands.ProvideParentWholeAbsenceExplanation;
 
 using Constellation.Application.Abstractions.Messaging;
+using Constellation.Application.Models.Identity.Errors;
 using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.Models.Absences;
 using Constellation.Core.Models.Absences.Enums;
@@ -23,7 +24,6 @@ using Core.ValueObjects;
 using DTOs;
 using Interfaces.Repositories;
 using Interfaces.Services;
-using Models.Identity.Errors;
 using Serilog;
 using System.Collections.Generic;
 using System.Threading;

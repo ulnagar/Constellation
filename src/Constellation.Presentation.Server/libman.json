@@ -16,6 +16,10 @@
       "destination": "wwwroot/lib/Chart.js/"
     },
     {
+      "library": "chartjs-plugin-annotation@1.4.0",
+      "destination": "wwwroot/lib/Chart.js-annotation/"
+    },
+    {
       "library": "downloadjs@1.4.8",
       "destination": "wwwroot/lib/downloadjs/"
     },

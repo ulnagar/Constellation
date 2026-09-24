@@ -42,6 +42,7 @@ internal static class ActivePage
     public const string StudentAdmin_Attendance_CheckIn = "StudentAdmin.Attendance.CheckIn";
     public const string StudentAdmin_Attendance_Plans = "StudentAdmin.Attendance.Plans";
     public const string StudentAdmin_Attendance_Reports = "StudentAdmin.Attendance.Reports";
+    public const string StudentAdmin_Attendance_Statistics = "StudentAdmin.Attendance.Statistics";
     public const string StudentAdmin_Awards_List = "StudentAdmin.Awards.List";
     public const string StudentAdmin_Awards_Dashboard = "StudentAdmin.Awards.Dashboard";
     public const string StudentAdmin_Awards_Leaderboard = "StudentAdmin.Awards.Leaderboard";
