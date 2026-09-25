@@ -5,7 +5,13 @@
     --ink: #1c1c1c;
 }
 
+#statistics-image {
+    background-color: #7fb2dd;
+    padding: 20px;
+}
+
 .dashboard-header {
+    background-color: #fff;
     border-radius: 16px;
     padding: 20px 28px;
     display: flex;
@@ -21,6 +27,7 @@
     }
 
 .panel {
+    background-color: #fff;
     border-radius: 16px;
     padding: 20px 24px;
     height: 100%;

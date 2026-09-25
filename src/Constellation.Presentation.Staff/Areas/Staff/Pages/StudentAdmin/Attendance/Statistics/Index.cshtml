@@ -6,6 +6,14 @@
     Layout = "Shared/_StaffLayout.bs5";
 }
 
+<div class="page-menu">
+    <button type="button" class="btn btn-success" onclick="downloadElementAsPng('statistics-image', 'attendance-summary.png')">Export</button>
+</div>
+
+<hr />
+
+<div id="statistics-image"> 
+
     <!-- Header -->
     <div class="dashboard-header border">
         <h2>Attendance Statistics - @Model.Statistics.WholeSchoolAttendancePercentage.Last().Key</h2>
@@ -72,10 +80,21 @@
         <!-- % attendance by year group scatter -->
         <div class="col-lg-4">
             <div class="panel border">
-                <h2>% attendance by year group</h2>
+                <h2 class="mb-3 pb-3">% attendance by year group</h2>
+
+                @{
+                    var attendanceByGrade = Grade.GetOptions
+                        .Where(grade => grade.Order > 0).OrderBy(grade => grade.Order)
+                        .Select(g => new { Label = g.Name, AttendancePercentage = Model.Statistics.CurrentWholeSchoolAttendanceByGrade[g] })
+                        .ToList();
+                }
+
+                <script id="gradeAttendanceData" type="application/json">
+                    @Html.Raw(Json.Serialize(attendanceByGrade))
+                </script>
+
                 <div class="chart-placeholder">
-                    <canvas id="attendanceByYearChart"></canvas>
-                    <!-- Chart.js scatter/bubble chart to be initialized here -->
+                    <canvas id="gradeAttendanceChart"></canvas>
                 </div>
             </div>
         </div>
@@ -110,13 +129,29 @@
         </div>
 
     </div>
+</div>
 
 @section Scripts 
 {
     <script src="~/lib/Chart.js/chart.min.js"></script>
     <script src="~/lib/Chart.js-annotation/chartjs-plugin-annotation.js"></script>
+    <script src="~/lib/html2canvas/html2canvas.js"></script>
 
     <script>
+        function downloadElementAsPng(elementId, filename) {
+            const element = document.getElementById(elementId);
+
+            html2canvas(element, {
+                backgroundColor: '#ffffff', // avoids a transparent/black background in the PNG
+                scale: 2 // renders at 2x resolution for a crisper export
+            }).then((canvas) => {
+                const link = document.createElement('a');
+                link.href = canvas.toDataURL('image/png');
+                link.download = filename;
+                link.click();
+            });
+        }
+
         // One percentage stacked bar chart per week, each built from the
         // canvas's own data-* attributes (data-label / data-attendance / data-target).
         document.querySelectorAll('.week-chart').forEach((canvas) => {
@@ -286,6 +321,67 @@
               }
             }
           }
+        });
+
+        const gradeAttendanceData = JSON.parse(document.getElementById('gradeAttendanceData').textContent);
+
+        const gradeColors = [
+            '#A8D8D8', // Year 5  – pastel teal
+            '#A8C8E8', // Year 6  – pastel blue
+            '#B8B0E0', // Year 7  – pastel periwinkle
+            '#D0A8D8', // Year 8  – pastel mauve
+            '#E8A8C0', // Year 9  – pastel pink
+            '#F0B8A0', // Year 10 – pastel coral
+            '#F0D090', // Year 11 – pastel gold
+            '#D8E098'  // Year 12 – pastel lime
+        ];
+        
+        const segmentAngle = 360 / gradeAttendanceData.length; // 45° for 8 grades
+        const rotation = (segmentAngle / 2); // -22.5
+
+        new Chart(document.getElementById('gradeAttendanceChart'), {
+            type: 'polarArea',
+            data: {
+                labels: gradeAttendanceData.map(g => g.label),
+                datasets: [
+                    {
+                        data: gradeAttendanceData.map(g => g.attendancePercentage),
+                        backgroundColor: gradeColors,
+                        borderWidth: 1,
+                        borderColor: '#ffffff'
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    r: {
+                        min: 70,
+                        max: 100,
+                        ticks: {
+                          display: true,
+                          stepSize: 5,
+                          backdropColor: 'transparent',
+                          callback: (value) => value + '%'
+                        },
+                        pointLabels: {
+                          display: true,
+                          centerPointLabels: true,
+                          font: { weight: 'bold', size: 16 }
+                        },
+                        grid: { color: '#e0e0e0' }
+                    }
+                },
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            label: (context) => `${context.label}: ${context.parsed.r.toFixed(1)}%`
+                        }
+                    }
+                }
+            }
         });
     </script>
 }

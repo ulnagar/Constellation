@@ -28,6 +28,10 @@
       "destination": "wwwroot/lib/summernote/"
     },
     {
+      "library": "html2canvas-next@1.12.0",
+      "destination": "wwwroot/lib/html2canvas/"
+    },
+    {
       "library": "leaflet@1.7.1",
       "destination": "wwwroot/lib/leaflet/"
     },
