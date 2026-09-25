@@ -1,5 +1,15 @@
 [
   {
+    "Datestamp": "2026-09-25 09:00",
+    "Title": "Attendance Plans",
+    "Body": "Update Attendance Plans to include Stage 6 students, and accelerated students across multiple timetables"
+  },
+  {
+    "Datestamp": "2026-09-25 09:00",
+    "Title": "Attendance Statistics",
+    "Body": "Add dashboard for attendance statistics to be shared with staff and students"
+  },
+  {
     "Datestamp": "2026-08-24 09:00",
     "Title": "Messaging",
     "Body": "Add full search for messaging history (Recent) page, including view option for emails with full metadata."
