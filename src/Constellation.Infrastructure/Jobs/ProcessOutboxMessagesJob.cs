@@ -1,6 +1,7 @@
 ﻿#pragma warning disable CA2326
 namespace Constellation.Infrastructure.Jobs;
 
+using Constellation.Application.Helpers.JsonConverters;
 using Constellation.Application.Interfaces.Jobs;
 using Core.Primitives;
 using MediatR;
@@ -69,7 +70,8 @@ internal sealed class ProcessOutboxMessagesJob : IProcessOutboxMessagesJob
                     new JsonSerializerSettings
                     {
                         ConstructorHandling = ConstructorHandling.AllowNonPublicDefaultConstructor,
-                        TypeNameHandling = TypeNameHandling.All
+                        TypeNameHandling = TypeNameHandling.All,
+                        Converters = { new GradeNewtonsoftJsonConverter() }
                     });
 
             if (eventItem is null)

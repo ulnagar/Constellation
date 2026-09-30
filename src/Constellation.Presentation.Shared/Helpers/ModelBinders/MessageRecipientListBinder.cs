@@ -40,7 +40,7 @@ public sealed class MessageRecipientListBinder : IModelBinder
 
             var recipients = dto.Recipients
                 .Where(r => !string.IsNullOrWhiteSpace(r.Name))
-                .Select(r => CreateRecipient(r))
+                .Select(CreateRecipient)
                 .Where(r => r is not null)
                 .Cast<MessageRecipient>()
                 .ToList();

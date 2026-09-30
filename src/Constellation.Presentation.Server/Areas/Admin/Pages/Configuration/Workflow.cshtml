@@ -65,20 +65,20 @@
                         </div>
                     </div>
                     <div class="card-footer">
-                        @foreach (var grade in Grade.GetOptions.Where(grade => grade.Order > 0).OrderBy(grade => grade))
+                        @foreach (var grade in Grade.GetOptions.Where(grade => grade.Order > 0).OrderBy(grade => grade.Order))
                         {
                             var selected = entry.Value.Contains(grade);
 
                             if (selected)
                             {
-                                <button type="button" class="btn btn-primary mb-1 grade-toggle-button" data-key="@entry.Key" data-grade-name="@grade" data-grade-number="@grade">@grade.Name</button>
+                                <button type="button" class="btn btn-primary mb-1 grade-toggle-button" data-key="@entry.Key" data-grade-name="@grade" data-grade-number="@grade.Value">@grade.Name</button>
 
                                 <input type="hidden" name="Contacts[@entry.Key].Value.index" value="@grade" />
                                 <input type="hidden" name="Contacts[@entry.Key].Value[@grade]" value="@grade" />
                             }
                             else
                             {
-                                <button type="button" class="btn btn-outline-secondary mb-1 grade-toggle-button" data-key="@entry.Key" data-grade-name="@grade" data-grade-number="@grade">@grade.Name</button>
+                                <button type="button" class="btn btn-outline-secondary mb-1 grade-toggle-button" data-key="@entry.Key" data-grade-name="@grade" data-grade-number="@grade.Value">@grade.Name</button>
                             }
                         }
                     </div>
@@ -143,9 +143,9 @@
                 </div>
             </div>
             <div class="card-footer">
-                @foreach (var grade in Grade.GetOptions.Where(grade => grade.Order > 0).OrderBy(grade => grade))
+                @foreach (var grade in Grade.GetOptions.Where(grade => grade.Order > 0).OrderBy(grade => grade.Order))
                 {
-                    <button type="button" class="btn btn-outline-secondary mb-1 grade-toggle-button" data-key="" data-grade-name="@grade" data-grade-number="@grade">@grade.Name</button>
+                    <button type="button" class="btn btn-outline-secondary mb-1 grade-toggle-button" data-key="" data-grade-name="@grade" data-grade-number="@grade.Value">@grade.Name</button>
                 }
             </div>
         </div>

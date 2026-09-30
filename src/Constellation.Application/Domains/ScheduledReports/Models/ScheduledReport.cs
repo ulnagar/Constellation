@@ -2,6 +2,7 @@
 namespace Constellation.Application.Domains.ScheduledReports.Models;
 
 using Abstractions.Messaging;
+using Constellation.Application.Helpers.JsonConverters;
 using Core.Abstractions.Clock;
 using Core.Shared;
 using Core.ValueObjects;
@@ -28,7 +29,10 @@ public sealed class ScheduledReport
             ScheduledAt = dateTime.Now,
             ReportDefinition = JsonConvert.SerializeObject(
                 reportDefinition,
-                new JsonSerializerSettings { TypeNameHandling = TypeNameHandling.All }),
+                new JsonSerializerSettings { 
+                    TypeNameHandling = TypeNameHandling.All,
+                    Converters = { new GradeNewtonsoftJsonConverter() }
+                }),
             ForwardTo = recipient
         };
 
@@ -42,7 +46,8 @@ public sealed class ScheduledReport
                 new JsonSerializerSettings
                 {
                     ConstructorHandling = ConstructorHandling.AllowNonPublicDefaultConstructor,
-                    TypeNameHandling = TypeNameHandling.All
+                    TypeNameHandling = TypeNameHandling.All,
+                    Converters = { new GradeNewtonsoftJsonConverter() }
                 });
 
     public void StartRun(IDateTimeProvider dateTime)

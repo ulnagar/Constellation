@@ -1,5 +1,6 @@
 ﻿namespace Constellation.Infrastructure.Persistence.ConstellationContext.Converters;
 
+using Constellation.Application.Helpers.JsonConverters;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
@@ -20,7 +21,8 @@ internal sealed class JsonColumnConverter<T> : ValueConverter<T, string?>
             new JsonSerializerSettings
             {
                 TypeNameHandling = TypeNameHandling.All,
-                NullValueHandling = NullValueHandling.Ignore
+                NullValueHandling = NullValueHandling.Ignore,
+                Converters = { new GradeNewtonsoftJsonConverter() }
             });
 
     private static T JsonToType(string? value) =>
@@ -31,7 +33,8 @@ internal sealed class JsonColumnConverter<T> : ValueConverter<T, string?>
                 ContractResolver = new PrivateMemberContractResolver(),
                 ConstructorHandling = ConstructorHandling.AllowNonPublicDefaultConstructor,
                 TypeNameHandling = TypeNameHandling.All,
-                NullValueHandling = NullValueHandling.Ignore
+                NullValueHandling = NullValueHandling.Ignore,
+                Converters = { new GradeNewtonsoftJsonConverter() }
             });
 }
 

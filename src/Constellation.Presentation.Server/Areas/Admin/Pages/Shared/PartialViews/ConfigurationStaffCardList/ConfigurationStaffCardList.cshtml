@@ -32,20 +32,20 @@
                     </div>
                 </div>
                 <div class="card-footer">
-                    @foreach (var grade in Grade.GetOptions.Where(grade => grade.Order > 0).OrderBy(grade => grade))
+                    @foreach (var grade in Grade.GetOptions.Where(grade => grade.Order > 0).OrderBy(grade => grade.Order))
                     {
                         var selected = entry.Value.Contains(grade);
 
                         if (selected)
                         {
-                            <button type="button" class="btn btn-primary mb-1 grade-toggle-button" data-property-name="@Model.PropertyName" data-key="@entry.Key" data-grade-name="@grade" data-grade-number="@grade">@grade.Name</button>
+                            <button type="button" class="btn btn-primary mb-1 grade-toggle-button" data-property-name="@Model.PropertyName" data-key="@entry.Key" data-grade-name="@grade" data-grade-number="@grade.Value">@grade.Name</button>
 
                             <input type="hidden" name="@(Model.PropertyName)[@entry.Key].Value.index" value="@grade" />
-                            <input type="hidden" name="@(Model.PropertyName)[@entry.Key].Value[@grade]" value="@grade" />
+                            <input type="hidden" name="@(Model.PropertyName)[@entry.Key].Value[@grade]" value="@grade.Value" />
                         }
                         else
                         {
-                            <button type="button" class="btn btn-outline-secondary mb-1 grade-toggle-button" data-property-name="@Model.PropertyName" data-key="@entry.Key" data-grade-name="@grade" data-grade-number="@grade">@grade.Name</button>
+                            <button type="button" class="btn btn-outline-secondary mb-1 grade-toggle-button" data-property-name="@Model.PropertyName" data-key="@entry.Key" data-grade-name="@grade" data-grade-number="@grade.Value">@grade.Name</button>
                         }
                     }
                 </div>

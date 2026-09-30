@@ -1,5 +1,6 @@
 ﻿namespace Constellation.Infrastructure.Persistence.EnrolmentContext.Converters;
 
+using Constellation.Application.Helpers.JsonConverters;
 using ConstellationContext.Converters;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
@@ -24,7 +25,8 @@ internal sealed class JsonListConverter<TItem> : ValueConverter<IReadOnlyList<TI
 
     private static readonly JsonSerializerSettings Settings = new()
     {
-        ContractResolver = new PrivateMemberContractResolver()
+        ContractResolver = new PrivateMemberContractResolver(),
+        Converters = { new GradeNewtonsoftJsonConverter() }
     };
 }
 

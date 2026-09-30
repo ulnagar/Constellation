@@ -1,5 +1,6 @@
 ﻿namespace Constellation.Infrastructure.Persistence.ConstellationContext;
 
+using Constellation.Application.Helpers.JsonConverters;
 using Constellation.Application.Models;
 using Constellation.Application.Models.Identity;
 using Constellation.Core.Enums;
@@ -66,7 +67,8 @@ public class ConstellationDbContext : IdentityDbContext<AppUser, AppRole, Guid>
                 integrationEvent,
                 new JsonSerializerSettings
                 {
-                    TypeNameHandling = TypeNameHandling.All
+                    TypeNameHandling = TypeNameHandling.All,
+                    Converters = { new GradeNewtonsoftJsonConverter() }
                 })
         };
 

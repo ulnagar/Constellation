@@ -1,5 +1,6 @@
 ﻿namespace Constellation.Infrastructure.Persistence.Shared.Interceptors;
 
+using Constellation.Application.Helpers.JsonConverters;
 using Core.Primitives;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
@@ -41,7 +42,8 @@ public sealed class ConvertDomainEventsToOutboxMessagesInterceptor
                     domainEvent,
                     new JsonSerializerSettings
                     {
-                        TypeNameHandling = TypeNameHandling.All
+                        TypeNameHandling = TypeNameHandling.All,
+                        Converters = { new GradeNewtonsoftJsonConverter() }
                     })
             })
             .ToList();
