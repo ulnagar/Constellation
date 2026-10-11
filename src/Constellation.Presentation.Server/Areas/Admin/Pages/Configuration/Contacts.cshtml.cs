@@ -45,9 +45,11 @@ public class ContactsModel : BasePageModel
     public List<ContactPosition> Positions { get; set; } = [];
     public List<StaffSelectionListResponse> StaffMembers { get; set; } = [];
 
-    public async Task OnGet()
+    public async Task<IActionResult> OnGet()
     {
-        Position ??= ContactPosition.CareersAdvisor;
+        if (Position is null)
+            return RedirectToPage(routeValues: new { area = "Admin", Position = ContactPosition.CareersAdvisor.Value });
+
 
         ContactsConfiguration? configuration = await _appSettings.Contacts(Position);
 
@@ -64,11 +66,13 @@ public class ContactsModel : BasePageModel
         {
             ModalContent = ErrorDisplay.Create(staffMembers.Error);
 
-            return;
+            return Page();
         }
 
         StaffMembers = staffMembers.Value;
         Positions = ContactPosition.GetOptions.ToList();
+
+        return Page();
     }
 
     public async Task<IActionResult> OnPostSave()

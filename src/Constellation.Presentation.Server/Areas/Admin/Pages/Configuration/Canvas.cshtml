@@ -77,11 +77,11 @@
                                     <button type="button" class="btn btn-primary mb-1 grade-toggle-button" data-key="@entry.Key" data-grade-name="@grade" data-grade-number="@grade">@grade.Name</button>
 
                                     <input type="hidden" name="Admins[@entry.Key].Value.index" value="@grade" />
-                                    <input type="hidden" name="Admins[@entry.Key].Value[@grade]" value="@grade" />
+                                    <input type="hidden" name="Admins[@entry.Key].Value[@grade]" value="@grade.Value" />
                                 }
                                 else
                                 {
-                                    <button type="button" class="btn btn-outline-secondary mb-1 grade-toggle-button" data-key="@entry.Key" data-grade-name="@grade" data-grade-number="@grade">@grade.Name</button>
+                                    <button type="button" class="btn btn-outline-secondary mb-1 grade-toggle-button" data-key="@entry.Key" data-grade-name="@grade" data-grade-number="@grade.Value">@grade.Name</button>
                                 }
                             }
                         </div>
