@@ -9,6 +9,10 @@ using ValueObjects;
 
 public static class StudentErrors
 {
+    public static readonly Error InvalidEmailChange = new(
+        "Student.InvalidEmailChange",
+        "Cannot set email to empty if there is a current email address specified");
+
     public static readonly Func<StudentId, Error> AlreadyExists = id => new(
         "Student.AlreadyExists",
         $"A Student with the Id {id} already exists");

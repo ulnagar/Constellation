@@ -29,7 +29,7 @@ internal sealed class UpdateStudentCommandHandler
 
     public async Task<Result> Handle(UpdateStudentCommand request, CancellationToken cancellationToken)
     {
-        Student student = await _studentRepository.GetById(request.StudentId, cancellationToken);
+        Student? student = await _studentRepository.GetById(request.StudentId, cancellationToken);
 
         if (student is null)
         {
@@ -40,7 +40,7 @@ internal sealed class UpdateStudentCommandHandler
 
             return Result.Failure(StudentErrors.NotFound(request.StudentId));
         }
-
+        
         Result attempt = student.UpdateStudent(
             request.SRN,
             request.Name,

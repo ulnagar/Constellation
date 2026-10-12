@@ -69,8 +69,8 @@ public class UpsertModel : BasePageModel
     [ModelBinder(typeof(BaseFromValueBinder))]
     public Gender Gender { get; set; }
 
-    [BindProperty]
-    public Grade Grade { get; set; }
+    [BindProperty] 
+    public Grade Grade { get; set; } = Grade.Empty;
 
     [BindProperty]
     public string? EmailAddress { get; set; } = string.Empty;
@@ -126,6 +126,9 @@ public class UpsertModel : BasePageModel
 
     public async Task<IActionResult> OnPostCreate()
     {
+        if (Grade == Grade.Empty)
+            ModelState.AddModelError(nameof(Grade), "You must select a Grade for this student");
+
         if (!ModelState.IsValid)
         {
             await PreparePage();
@@ -168,6 +171,9 @@ public class UpsertModel : BasePageModel
 
     public async Task<IActionResult> OnPostUpdate()
     {
+        if (Grade == Grade.Empty)
+            ModelState.Remove(nameof(Grade));
+
         if (!ModelState.IsValid)
         {
             await PreparePage();
@@ -175,26 +181,9 @@ public class UpsertModel : BasePageModel
             return Page();
         }
 
-        GetStudentByIdQuery command = new(Id);
-        
-        Result<StudentResponse> student = await _mediator.Send(command);
+        StudentReferenceNumber? srn = Core.Models.Students.ValueObjects.StudentReferenceNumber.Empty;
 
-        if (student.IsFailure)
-        {
-            ModalContent = ErrorDisplay.Create(
-                student.Error,
-                _linkGenerator.GetPathByPage("/Partner/Students/Index", values: new { area = "Staff" }));
-
-            _logger
-                .ForContext(nameof(Error), student.Error, true)
-                .Warning("Failed to retrieve Student with id {Id} for edit by user {User}", Id, _currentUserService.UserName);
-
-            return Page();
-        }
-
-        StudentReferenceNumber? srn = null;
-
-        if (student.Value.StudentReferenceNumber != Core.Models.Students.ValueObjects.StudentReferenceNumber.Empty || StudentReferenceNumber is not null)
+        if (StudentReferenceNumber is not null)
         {
             Result<StudentReferenceNumber> srnRequest = Core.Models.Students.ValueObjects.StudentReferenceNumber.Create(StudentReferenceNumber);
 
@@ -204,7 +193,7 @@ public class UpsertModel : BasePageModel
 
                 _logger
                     .ForContext(nameof(Error), srnRequest.Error, true)
-                    .Warning("Failed to create new Student by user {User}", _currentUserService.UserName);
+                    .Warning("Failed to update Student with id {Id} by user {User}", Id, _currentUserService.UserName);
 
                 await PreparePage();
                 return Page();
@@ -221,7 +210,7 @@ public class UpsertModel : BasePageModel
 
             _logger
                 .ForContext(nameof(Error), name.Error, true)
-                .Warning("Failed to create new Student by user {User}", _currentUserService.UserName);
+                .Warning("Failed to update Student with id {Id} by user {User}", Id, _currentUserService.UserName);
 
             await PreparePage();
             return Page();
@@ -229,7 +218,7 @@ public class UpsertModel : BasePageModel
 
         EmailAddress email = Core.ValueObjects.EmailAddress.None;
 
-        if (student.Value.EmailAddress != Core.ValueObjects.EmailAddress.None || EmailAddress is not null)
+        if (EmailAddress is not null)
         {
             Result<EmailAddress> emailRequest = Core.ValueObjects.EmailAddress.Create(EmailAddress);
 
@@ -239,7 +228,7 @@ public class UpsertModel : BasePageModel
 
                 _logger
                     .ForContext(nameof(Error), emailRequest.Error, true)
-                    .Warning("Failed to create new Student by user {User}", _currentUserService.UserName);
+                    .Warning("Failed to update Student with id {Id} by user {User}", Id, _currentUserService.UserName);
 
                 await PreparePage();
                 return Page();

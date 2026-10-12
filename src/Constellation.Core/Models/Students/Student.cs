@@ -327,6 +327,9 @@ public class Student : AggregateRoot, IAuditableEntity
         Name = name;
         PreferredGender = preferredGender;
 
+        if (EmailAddress != EmailAddress.None && emailAddress == EmailAddress.None)
+            return Result.Failure(StudentErrors.InvalidEmailChange);
+        
         if (EmailAddress != emailAddress)
         {
             RaiseDomainEvent(new StudentEmailAddressChangedDomainEvent(new(), Id, EmailAddress.Email, emailAddress.Email));
