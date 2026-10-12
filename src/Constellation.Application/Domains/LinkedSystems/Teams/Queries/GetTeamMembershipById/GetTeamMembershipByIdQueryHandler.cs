@@ -125,7 +125,7 @@ internal sealed class GetTeamMembershipByIdQueryHandler
                     continue;
 
                 List<TeamMembershipResponse.TeamMembershipChannelResponse> studentChannels = (student.CurrentEnrolment is not null)
-                    ? new() { new ($"{_dateTime.CurrentYear} - {student.CurrentEnrolment.Grade.AsName()}", TeamsMembershipLevel.Member.Value) }
+                    ? new() { new ($"{_dateTime.CurrentYear} - {student.CurrentEnrolment.Grade.AsZeroFilledName()}", TeamsMembershipLevel.Member.Value) }
                     : new();
 
                 TeamMembershipResponse entry = new(
@@ -155,15 +155,15 @@ internal sealed class GetTeamMembershipByIdQueryHandler
                     foreach (Grade grade in grades)
                     {
                         if (ownerChannelGrades!.Contains(grade))
-                            staffChannels.Add(new($"{_dateTime.CurrentYear} - {grade.AsName()}", TeamsMembershipLevel.Owner.Value));
+                            staffChannels.Add(new($"{_dateTime.CurrentYear} - {grade.AsZeroFilledName()}", TeamsMembershipLevel.Owner.Value));
                         else
-                            staffChannels.Add(new($"{_dateTime.CurrentYear} - {grade.AsName()}", TeamsMembershipLevel.Member.Value));
+                            staffChannels.Add(new($"{_dateTime.CurrentYear} - {grade.AsZeroFilledName()}", TeamsMembershipLevel.Member.Value));
                     }
                 }
                 else
                 {
                     foreach (Grade grade in grades)
-                        staffChannels.Add(new($"{_dateTime.CurrentYear} - {grade.AsName()}", TeamsMembershipLevel.Member.Value));
+                        staffChannels.Add(new($"{_dateTime.CurrentYear} - {grade.AsZeroFilledName()}", TeamsMembershipLevel.Member.Value));
                 }
 
                 bool teamOwnerExists = teamsConfiguration.StudentTeamOwners.Any(entry => entry.Key.Id == staffMember.Id);
@@ -199,7 +199,7 @@ internal sealed class GetTeamMembershipByIdQueryHandler
                 List<Grade> masterGrades = Grade.GetOptions.Where(entry => entry.Order > 0).ToList();
 
                 foreach (Grade grade in masterGrades)
-                    masterChannels.Add(new($"{_dateTime.CurrentYear} - {grade.AsName()}", TeamsMembershipLevel.Owner.Value));
+                    masterChannels.Add(new($"{_dateTime.CurrentYear} - {grade.AsZeroFilledName()}", TeamsMembershipLevel.Owner.Value));
 
                 TeamMembershipResponse mandatoryOwnerEntry = new(
                     team.Id,

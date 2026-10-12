@@ -9,5 +9,6 @@ public static class GradeExtensions
     {
         public string AsNumber() => grade.Order.ToString(CultureInfo.InvariantCulture).PadLeft(2, '0');
         public string AsName() => grade.Name;
+        public string AsZeroFilledName() => $"Year {grade.AsNumber()}";
     }
 }
