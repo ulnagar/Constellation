@@ -5,6 +5,7 @@ using System.Collections.Generic;
 
 public sealed record AttendanceStatisticsResponse
 {
+    public List<(DateOnly StartDate, string PeriodName)> PeriodList { get; set; } = [];
     public Dictionary<string, decimal> WholeSchoolAttendancePercentage { get; set; } = [];
     public Dictionary<Grade, decimal> CurrentWholeSchoolAttendanceByGrade { get; set; } = [];
     public Dictionary<Grade, int> UnexplainedPartialAbsenceCountByGrade { get; set; } = [];

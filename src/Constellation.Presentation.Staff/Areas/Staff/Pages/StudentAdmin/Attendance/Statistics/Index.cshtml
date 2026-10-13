@@ -16,7 +16,7 @@
 
     <!-- Header -->
     <div class="dashboard-header border">
-        <h2>Attendance Statistics - @Model.Statistics.WholeSchoolAttendancePercentage.Last().Key</h2>
+        <h2>Attendance Statistics - @Model.Statistics.PeriodList.OrderBy(entry => entry.StartDate).Last().PeriodName</h2>
     </div>
 
     <div class="row g-3">
@@ -26,8 +26,10 @@
             <div class="panel border">
                 <h2>Whole School Attendance<br>Target: 95.9% by 2027</h2>
                 
-                @foreach (var week in Model.Statistics.WholeSchoolAttendancePercentage)
+                @foreach (var period in Model.Statistics.PeriodList.OrderBy(entry => entry.StartDate))
                 {
+                    var week = Model.Statistics.WholeSchoolAttendancePercentage.FirstOrDefault(entry => entry.Key == period.PeriodName);
+
                     <div class="progress-row">
                         <div class="label">@week.Key</div>
                         <div class="progress-inline">

@@ -37,6 +37,11 @@ internal sealed class GetAttendanceStatisticsQueryHandler
 
         List<AttendanceValue> recentWholeSchool = await _attendanceRepository.GetAllRecent(cancellationToken);
 
+        response.PeriodList = recentWholeSchool
+            .DistinctBy(entry => entry.PeriodLabel)
+            .Select(entry => (entry.StartDate, entry.PeriodLabel))
+            .ToList();
+
         List<IGrouping<string, AttendanceValue>> byPeriod = recentWholeSchool.GroupBy(value => value.PeriodLabel).ToList();
         
         foreach (IGrouping<string, AttendanceValue> period in byPeriod)
