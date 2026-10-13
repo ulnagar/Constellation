@@ -12,6 +12,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using Models;
+using Presentation.Shared.Extensions;
 using Serilog;
 using OfferResponse = Application.Domains.EnrolmentContext.Offers.Queries.GetOfferForResponse.OfferResponse;
 
@@ -35,7 +36,9 @@ public class IndexModel : BasePageModel
         _currentUserService = currentUserService;
         _dateTime = dateTime;
         _linkGenerator = linkGenerator;
-        _logger = logger;
+        _logger = logger
+            .ForEnrolmentsPortal()
+            .ForContext<IndexModel>();
     }
 
     [BindProperty(SupportsGet = true)]

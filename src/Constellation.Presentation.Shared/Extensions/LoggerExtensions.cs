@@ -9,6 +9,7 @@ public static class LoggerExtensions
     private static string StudentPortal => "Student Portal";
     private static string ParentPortal => "Parent Portal";
     private static string SchoolsPortal => "Schools Portal";
+    private static string EnrolmentsPortal => "Enrolments Portal";
 
     extension(ILogger logger)
     {
@@ -26,5 +27,8 @@ public static class LoggerExtensions
 
         public ILogger ForStudentPortal() =>
             logger.ForApplication(StudentPortal);
+
+        public ILogger ForEnrolmentsPortal() =>
+            logger.ForApplication(EnrolmentsPortal);
     }
 }
