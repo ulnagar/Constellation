@@ -42,15 +42,6 @@ internal sealed class UpdateEnrolmentApplicationCommandHandler
         }
 
         Result updateResult = application.Update(
-            request.StudentReferenceNumber,
-            request.StudentName,
-            request.StudentGender,
-            request.DateOfBirth,
-            request.StudentEmailAddress,
-            request.ParentName,
-            request.ParentEmailAddress,
-            request.ParentPhoneNumber,
-            request.MailingAddress,
             request.ApplicationReference,
             request.CurrentSchoolCode,
             request.CurrentSchool,
@@ -71,18 +62,30 @@ internal sealed class UpdateEnrolmentApplicationCommandHandler
 
         foreach (CourseSelection course in application.SelectedCourses.ToList())
         {
-            if (request.Courses.Any(entry => entry == course.Course))
-                continue;
+            CourseSelection? existingCourse = request.Courses.FirstOrDefault(entry => entry.Course == course.Course);
 
-            application.UpdateCourse(course.Course, CourseSelectionStatus.Withdrawn);
+            if (existingCourse is null)
+            {
+                application.UpdateCourse(course.Course, course.Line, CourseSelectionStatus.Withdrawn);
+                continue;
+            }
+
+            if (existingCourse.Line != course.Line)
+                application.UpdateCourse(course.Course, existingCourse.Line, course.Status);
         }
 
-        foreach (EnrolmentCourse course in request.Courses)
+        foreach (CourseSelection course in request.Courses)
         {
-            if (application.SelectedCourses.Any(entry => entry.Course == course))
-                continue;
+            CourseSelection? existingCourse = application.SelectedCourses.FirstOrDefault(entry => entry.Course == course.Course);
 
-            application.AddCourse(course);
+            if (existingCourse is null)
+            {
+                application.AddCourse(course.Course, course.Line);
+                continue;
+            }
+
+            if (existingCourse.Line != course.Line)
+                application.UpdateCourse(course.Course, course.Line, existingCourse.Status);
         }
 
         await _unitOfWork.CompleteAsync(cancellationToken);

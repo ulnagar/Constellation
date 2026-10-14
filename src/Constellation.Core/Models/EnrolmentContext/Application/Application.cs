@@ -1,20 +1,20 @@
 ﻿namespace Constellation.Core.Models.EnrolmentContext.Application;
 
 using Core.Enums;
+using EnrolmentParent;
 using EnrolmentPeriod.Enums;
 using EnrolmentPeriod.Identifiers;
+using EnrolmentStudent.Identifiers;
 using Enums;
 using Errors;
 using Identifiers;
 using Models.Identifiers;
 using Shared;
-using Students.Enums;
-using Students.ValueObjects;
-using ValueObjects;
 
 public sealed class Application
 {
     private readonly List<CourseSelection> _courses = [];
+    private readonly List<EnrolmentParent> _parents = [];
 
     /// <summary>
     /// DO NOT USE. EF CORE ONLY
@@ -25,18 +25,19 @@ public sealed class Application
 
     private Application(
         EnrolmentPeriodId periodId,
-        Name studentName,
-        Gender studentGender,
+        EnrolmentStudentId studentId,
+        EnrolmentParent parent,
         Program program,
         Grade grade)
     {
         Id = new();
 
         PeriodId = periodId;
-        StudentName = studentName;
-        StudentGender = studentGender;
         Program = program;
         Grade = grade;
+
+        StudentId = studentId;
+        _parents.Add(parent);
 
         Status = ApplicationStatus.Pending;
     }
@@ -45,19 +46,11 @@ public sealed class Application
     public ApplicationId Id { get; private set; }
     public EnrolmentPeriodId PeriodId { get; private set; }
 
-
     /* Student Details */
-    public StudentReferenceNumber? StudentReferenceNumber { get; private set; }
-    public Name StudentName { get; private set; }
-    public Gender StudentGender { get; private set; } = Gender.Empty;
-    public DateOnly? DateOfBirth { get; private set; }
-    public EmailAddress? StudentEmailAddress { get; private set; }
+    public EnrolmentStudentId StudentId { get; private set; }
     
     /* Parent Details */
-    public Name? ParentName { get; private set; }
-    public EmailAddress? ParentEmailAddress { get; private set; }
-    public PhoneNumber? ParentPhoneNumber { get; private set; }
-    public MailingAddress? MailingAddress { get; private set; }
+    public IReadOnlyList<EnrolmentParent> Parents => _parents.AsReadOnly();
 
     /* Application Details */
     public string? ApplicationReference { get; private set; }
@@ -72,15 +65,8 @@ public sealed class Application
 
     public static Result<Application> Create(
         EnrolmentPeriodId periodId,
-        StudentReferenceNumber? studentReferenceNumber,
-        Name studentName,
-        Gender studentGender,
-        DateOnly? dateOfBirth,
-        EmailAddress? studentEmailAddress,
-        Name? parentName,
-        EmailAddress? parentEmailAddress,
-        PhoneNumber? parentPhoneNumber,
-        MailingAddress? mailingAddress,
+        EnrolmentStudentId studentId,
+        EnrolmentParent parent,
         string? applicationReference,
         SchoolCode? currentSchoolCode,
         string? currentSchool,
@@ -90,29 +76,18 @@ public sealed class Application
         Grade grade)
     {
         if (periodId == EnrolmentPeriodId.Empty)
-        {
             return Result.Failure<Application>(EnrolmentApplicationErrors.InvalidEnrolmentPeriod);
-        }
 
         if (!IsValidProgramGradeCombination(program, grade))
-        {
             return Result.Failure<Application>(EnrolmentApplicationErrors.InvalidProgramGradeCombination(program, grade));
-        }
 
         Application application = new(
             periodId,
-            studentName, 
-            studentGender, 
+            studentId, 
+            parent, 
             program, 
             grade)
         {
-            StudentReferenceNumber = studentReferenceNumber,
-            StudentEmailAddress = studentEmailAddress,
-            DateOfBirth = dateOfBirth,
-            ParentName = parentName,
-            ParentEmailAddress = parentEmailAddress,
-            ParentPhoneNumber = parentPhoneNumber,
-            MailingAddress = mailingAddress,
             ApplicationReference = applicationReference,
             CurrentSchoolCode = currentSchoolCode,
             CurrentSchool = currentSchool,
@@ -124,15 +99,6 @@ public sealed class Application
     }
 
     public Result Update(
-        StudentReferenceNumber? studentReferenceNumber,
-        Name studentName,
-        Gender studentGender,
-        DateOnly? dateOfBirth,
-        EmailAddress? studentEmailAddress,
-        Name? parentName,
-        EmailAddress? parentEmailAddress,
-        PhoneNumber? parentPhoneNumber,
-        MailingAddress? mailingAddress,
         string applicationReference,
         SchoolCode? currentSchoolCode,
         string currentSchool,
@@ -147,15 +113,6 @@ public sealed class Application
         if (!IsValidProgramGradeCombination(program, grade))
             return Result.Failure<Application>(EnrolmentApplicationErrors.InvalidProgramGradeCombination(program, grade));
 
-        StudentReferenceNumber = studentReferenceNumber;
-        StudentName = studentName;
-        StudentGender = studentGender;
-        StudentEmailAddress = studentEmailAddress;
-        DateOfBirth = dateOfBirth;
-        ParentName = parentName;
-        ParentEmailAddress = parentEmailAddress;
-        ParentPhoneNumber = parentPhoneNumber;
-        MailingAddress = mailingAddress;
         ApplicationReference = applicationReference;
         CurrentSchoolCode = currentSchoolCode;
         CurrentSchool = currentSchool;
@@ -192,34 +149,43 @@ public sealed class Application
         {
             foreach (CourseSelection course in _courses.Where(course => course.Status == CourseSelectionStatus.Pending).ToList())
             {
-                UpdateCourse(course.Course, CourseSelectionStatus.Approved);
+                UpdateCourse(course.Course, course.Line, CourseSelectionStatus.Approved);
             }
         }
 
         return Result.Success();
     }
 
-    public void AddCourse(EnrolmentCourse course)
+    public void AddParent(EnrolmentParent parent)
+    {
+        if (_parents.Any(entry => entry.Id == parent.Id))
+            return;
+
+        _parents.Add(parent);
+    }
+
+    public void RemoveParent(EnrolmentParent parent) =>
+        _parents.Remove(parent);
+
+    public void AddCourse(EnrolmentCourse course, string line)
     {
         if (_courses.Any(entry => entry.Course == course))
             return;
 
-        _courses.Add(new(course));
+        _courses.Add(new(course, line));
     }
 
     public void RemoveCourse(EnrolmentCourse course) =>
         _courses.RemoveAll(entry => entry.Course == course);
 
-    public Result UpdateCourse(EnrolmentCourse course, CourseSelectionStatus status)
+    public Result UpdateCourse(EnrolmentCourse course, string line, CourseSelectionStatus status)
     {
         int index = _courses.FindIndex(entry => entry.Course == course);
 
         if (index < 0)
-            return Result.Failure(new Error(
-                "Application.CourseNotSelected",
-                $"{course.Name} is not currently selected on this application."));
+            return Result.Failure(EnrolmentApplicationErrors.InvalidCourse(course));
 
-        _courses[index] = _courses[index] with { Status = status };
+        _courses[index] = _courses[index] with { Line = line, Status = status };
 
         return Result.Success();
     }
@@ -233,96 +199,6 @@ public sealed class Application
             return Result.Failure<Application>(EnrolmentApplicationErrors.InvalidProgramGradeCombination(Program, grade));
 
         Grade = grade;
-
-        return Result.Success();
-    }
-
-    public Result UpdateStudentName(Name studentName)
-    {
-        if (Status == ApplicationStatus.Archived)
-            return Result.Failure(EnrolmentApplicationErrors.CannotUpdateArchivedApplication);
-
-        StudentName = studentName;
-
-        return Result.Success();
-    }
-
-    public Result UpdateStudentReferenceNumber(StudentReferenceNumber srn)
-    {
-        if (Status == ApplicationStatus.Archived)
-            return Result.Failure(EnrolmentApplicationErrors.CannotUpdateArchivedApplication);
-
-        StudentReferenceNumber = srn;
-
-        return Result.Success();
-    }
-
-    public Result UpdateParentName(Name parentName)
-    {
-        if (Status == ApplicationStatus.Archived)
-            return Result.Failure(EnrolmentApplicationErrors.CannotUpdateArchivedApplication);
-
-        ParentName = parentName;
-
-        return Result.Success();
-    }
-
-    public Result UpdateDateOfBirth(DateOnly dateOfBirth)
-    {
-        if (Status == ApplicationStatus.Archived)
-            return Result.Failure(EnrolmentApplicationErrors.CannotUpdateArchivedApplication);
-
-        DateOfBirth = dateOfBirth;
-
-        return Result.Success();
-    }
-
-    public Result UpdateGender(Gender gender)
-    {
-        if (Status == ApplicationStatus.Archived)
-            return Result.Failure(EnrolmentApplicationErrors.CannotUpdateArchivedApplication);
-
-        StudentGender = gender;
-
-        return Result.Success();
-    }
-
-    public Result UpdateStudentEmail(EmailAddress studentEmail)
-    {
-        if (Status == ApplicationStatus.Archived)
-            return Result.Failure(EnrolmentApplicationErrors.CannotUpdateArchivedApplication);
-
-        StudentEmailAddress = studentEmail;
-
-        return Result.Success();
-    }
-
-    public Result UpdateParentEmail(EmailAddress parentEmail)
-    {
-        if (Status == ApplicationStatus.Archived)
-            return Result.Failure(EnrolmentApplicationErrors.CannotUpdateArchivedApplication);
-
-        ParentEmailAddress = parentEmail;
-
-        return Result.Success();
-    }
-
-    public Result UpdateParentPhone(PhoneNumber parentPhone)
-    {
-        if (Status == ApplicationStatus.Archived)
-            return Result.Failure(EnrolmentApplicationErrors.CannotUpdateArchivedApplication);
-
-        ParentPhoneNumber = parentPhone;
-
-        return Result.Success();
-    }
-
-    public Result UpdateMailingAddress(MailingAddress address)
-    {
-        if (Status == ApplicationStatus.Archived)
-            return Result.Failure(EnrolmentApplicationErrors.CannotUpdateArchivedApplication);
-
-        MailingAddress = address;
 
         return Result.Success();
     }
@@ -348,6 +224,7 @@ public sealed class Application
 
         return Result.Success();
     }
+
     public Result UpdateApplicationReference(string? applicationReference)
     {
         if (Status == ApplicationStatus.Archived)

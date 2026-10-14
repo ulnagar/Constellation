@@ -21,9 +21,7 @@ public sealed record EnrolmentOfferExport(
     Name StudentName,
     EmailAddress? StudentEmail,
     Gender StudentGender,
-    Name? ParentName,
-    EmailAddress? ParentEmailAddress,
-    PhoneNumber? ParentPhoneNumber,
+    List<EnrolmentOfferExport.Parent> Parents,
     string ApplicationReference,
     SchoolCode? CurrentSchoolCode,
     string CurrentSchool,
@@ -41,4 +39,10 @@ public sealed record EnrolmentOfferExport(
     bool? HasCourtOrders,
     bool? HasHealthConcerns,
     bool? LaptopRequested,
-    List<string> Notes);
+    List<string> Notes)
+{
+    public sealed record Parent(
+        Name? ParentName,
+        EmailAddress? ParentEmailAddress,
+        PhoneNumber? ParentPhoneNumber);
+}

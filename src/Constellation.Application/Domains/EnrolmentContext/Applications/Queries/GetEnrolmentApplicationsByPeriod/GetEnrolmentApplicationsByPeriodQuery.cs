@@ -7,4 +7,4 @@ using System.Collections.Generic;
 
 public sealed record GetEnrolmentApplicationsByPeriodQuery(
     EnrolmentPeriodId PeriodId)
-    : IQuery<List<EnrolmentApplicationResponse>>;
+    : IQuery<List<EnrolmentApplicationSummary>>;

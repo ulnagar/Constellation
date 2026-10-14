@@ -3,8 +3,10 @@
 using Core.Enums;
 using Core.Models.EnrolmentContext.Application;
 using Core.Models.EnrolmentContext.Application.Enums;
+using Core.Models.EnrolmentContext.EnrolmentParent.Identifiers;
 using Core.Models.EnrolmentContext.EnrolmentPeriod.Enums;
 using Core.Models.EnrolmentContext.EnrolmentPeriod.Identifiers;
+using Core.Models.EnrolmentContext.EnrolmentStudent.Identifiers;
 using Core.Models.Identifiers;
 using Core.Models.Students.Enums;
 using Core.Models.Students.ValueObjects;
@@ -16,15 +18,13 @@ public sealed record EnrolmentApplicationResponse(
     EnrolmentPeriodId PeriodId,
     string PeriodName,
     string PeriodYear,
+    EnrolmentStudentId StudentId,
     StudentReferenceNumber? StudentReferenceNumber,
     Name StudentName,
     Gender StudentGender,
     DateOnly? DateOfBirth,
     EmailAddress? StudentEmailAddress,
-    Name? ParentName,
-    EmailAddress? ParentEmailAddress,
-    PhoneNumber? ParentPhoneNumber,
-    MailingAddress? MailingAddress,
+    List<EnrolmentApplicationResponse.Parent> Parents,
     string ApplicationReference,
     SchoolCode? CurrentSchoolCode,
     string CurrentSchool,
@@ -33,4 +33,12 @@ public sealed record EnrolmentApplicationResponse(
     Program Program,
     Grade Grade,
     ApplicationStatus Status,
-    IReadOnlyList<CourseSelection> SelectedCourses);
+    IReadOnlyList<CourseSelection> SelectedCourses)
+{
+    public sealed record Parent(
+        EnrolmentParentId Id,
+        Name Name,
+        EmailAddress? Email,
+        PhoneNumber? PhoneNumber,
+        MailingAddress? MailingAddress);
+}

@@ -7,5 +7,6 @@ using ApplicationId = Core.Models.EnrolmentContext.Application.Identifiers.Appli
 public sealed record UpdateEnrolmentApplicationCourseCommand(
     ApplicationId ApplicationId,
     EnrolmentCourse Course,
+    string Line,
     CourseSelectionStatus Status)
     : ICommand;

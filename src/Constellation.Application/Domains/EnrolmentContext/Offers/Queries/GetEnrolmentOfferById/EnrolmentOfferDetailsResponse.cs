@@ -10,6 +10,8 @@ using Constellation.Core.Models.Students.Enums;
 using Constellation.Core.Models.Students.ValueObjects;
 using Core.Models.EnrolmentContext.Application.Enums;
 using Core.Models.EnrolmentContext.Application.Identifiers;
+using Core.Models.EnrolmentContext.EnrolmentParent.Identifiers;
+using Core.Models.EnrolmentContext.EnrolmentStudent.Identifiers;
 using Core.ValueObjects;
 
 public sealed record EnrolmentOfferDetailsResponse(
@@ -17,15 +19,13 @@ public sealed record EnrolmentOfferDetailsResponse(
     ApplicationId ApplicationId,
     EnrolmentPeriodId PeriodId,
     string PeriodName,
+    EnrolmentStudentId StudentId,
     StudentReferenceNumber? StudentReferenceNumber,
     Name StudentName,
     Gender StudentGender,
     DateOnly? DateOfBirth,
     EmailAddress? StudentEmailAddress,
-    Name? ParentName,
-    EmailAddress? ParentEmailAddress,
-    PhoneNumber? ParentPhoneNumber,
-    MailingAddress? MailingAddress,
+    List<EnrolmentOfferDetailsResponse.Parent> Parents,
     string ApplicationReference,
     SchoolCode? CurrentSchoolCode,
     string CurrentSchool,
@@ -44,6 +44,13 @@ public sealed record EnrolmentOfferDetailsResponse(
     bool RequestedLaptop,
     List<EnrolmentOfferDetailsResponse.Note> Notes)
 {
+    public sealed record Parent(
+        EnrolmentParentId Id,
+        Name Name,
+        EmailAddress Email,
+        PhoneNumber PhoneNumber,
+        MailingAddress? MailingAddress);
+
     public sealed record Note(
         DateTimeOffset Timestamp,
         string CreatedBy,

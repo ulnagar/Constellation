@@ -8,11 +8,13 @@ using Core.Extensions;
 using Core.Models.EnrolmentContext.Application;
 using Core.Models.EnrolmentContext.Application.Repositories;
 using Core.Models.EnrolmentContext.EnrolmentPeriod.Identifiers;
+using Core.Models.EnrolmentContext.EnrolmentStudent;
+using Core.Models.EnrolmentContext.EnrolmentStudent.Identifiers;
+using Core.Models.EnrolmentContext.EnrolmentStudent.Repositories;
 using Core.Models.EnrolmentContext.Offer;
 using Core.Models.EnrolmentContext.Offer.Errors;
 using Core.Models.EnrolmentContext.Offer.Repositories;
 using Core.Shared;
-using Models;
 using Serilog;
 using System.Globalization;
 
@@ -21,17 +23,20 @@ internal sealed class ExportOfferListQueryHandler
 {
     private readonly IEnrolmentApplicationRepository _applicationRepository;
     private readonly IEnrolmentOfferRepository _offerRepository;
+    private readonly IEnrolmentStudentRepository _studentRepository;
     private readonly IExcelWriter _writer;
     private readonly ILogger _logger;
 
     public ExportOfferListQueryHandler(
         IEnrolmentApplicationRepository applicationRepository,
         IEnrolmentOfferRepository offerRepository,
+        IEnrolmentStudentRepository studentRepository,
         IExcelWriter writer,
         ILogger logger)
     {
         _applicationRepository = applicationRepository;
         _offerRepository = offerRepository;
+        _studentRepository = studentRepository;
         _writer = writer;
         _logger = logger
             .ForContext<ExportOfferListQuery>();
@@ -44,9 +49,11 @@ internal sealed class ExportOfferListQueryHandler
         if (offers.Count == 0)
             return Result.Failure<byte[]>(EnrolmentOfferErrors.NoneFound);
 
-        List<Application> applications =
-            await _applicationRepository.GetListFromIds(offers.Select(entry => entry.ApplicationId).ToList(),
-                cancellationToken);
+        List<Application> applications = await _applicationRepository.GetListFromIds(offers.Select(entry => entry.ApplicationId).ToList(), cancellationToken);
+
+        List<EnrolmentStudentId> studentIds = applications.Select(entry => entry.StudentId).Distinct().ToList();
+
+        List<EnrolmentStudent> students = await _studentRepository.GetListFromIds(studentIds, cancellationToken);
 
         List<EnrolmentOfferExport> rows = [];
 
@@ -64,11 +71,26 @@ internal sealed class ExportOfferListQueryHandler
                 continue;
             }
 
+            EnrolmentStudent? student = students.FirstOrDefault(entry => entry.Id == application.StudentId);
+
+            if (student is null)
+                continue;
+
             List<string> notes = [];
 
-            foreach (var note in offer.Notes)
+            foreach (OfferNote note in offer.Notes)
             {
                 notes.Add($"{note.CreatedAt.ToLocalTime().ToString("g", CultureInfo.CurrentCulture)} - {note.CreatedBy} - {note.Note}");
+            }
+
+            List<EnrolmentOfferExport.Parent> parents = [];
+
+            foreach (var parent in application.Parents)
+            {
+                parents.Add(new(
+                    parent.Name,
+                    parent.Email,
+                    parent.PhoneNumber));
             }
 
             rows.Add(new(
@@ -76,13 +98,11 @@ internal sealed class ExportOfferListQueryHandler
                 application.Id,
                 EnrolmentPeriodId.Empty,
                 string.Empty,
-                application.StudentReferenceNumber,
-                application.StudentName,
-                application.StudentEmailAddress,
-                application.StudentGender,
-                application.ParentName,
-                application.ParentEmailAddress,
-                application.ParentPhoneNumber,
+                student.StudentReferenceNumber,
+                student.Name,
+                student.StudentEmailAddress,
+                student.StudentGender,
+                parents,
                 application.ApplicationReference ?? string.Empty,
                 application.CurrentSchoolCode,
                 application.CurrentSchool ?? string.Empty,
@@ -103,10 +123,13 @@ internal sealed class ExportOfferListQueryHandler
                 notes));
         }
 
+        int maxParents = rows.Select(a => a.Parents.Count).DefaultIfEmpty(0).Max();
+        
         IExcelWorkbook workbook = _writer.CreateWorkbook();
         IExcelWorksheet sheet = _writer.AddWorksheet(workbook, "Sheet 1");
 
-        _writer.WriteRange(sheet, 2, rows,
+        List<ExcelColumn<EnrolmentOfferExport>> columns =
+        [
             new("Application Reference", a => a.ApplicationReference),
             new("SRN", a => a.StudentReferenceNumber?.Value ?? string.Empty),
             new("Student Family Name", a => a.StudentName.LastName),
@@ -121,11 +144,21 @@ internal sealed class ExportOfferListQueryHandler
             new("Current School Code", a => a.CurrentSchoolCode, ExcelColumnFormat.Text),
             new("Current School", a => a.CurrentSchool),
             new("Destination School Code", a => a.DestinationSchoolCode, ExcelColumnFormat.Text),
-            new("Destination School", a => a.DestinationSchool),
-            new("Parent First Name", a => a.ParentName?.FirstName),
-            new("Parent Last Name", a => a.ParentName?.LastName),
-            new("Phone Number", a => a.ParentPhoneNumber),
-            new("Email", a => a.ParentEmailAddress),
+            new("Destination School", a => a.DestinationSchool)
+        ];
+
+        for (int i = 0; i < maxParents; i++)
+        {
+            int index = i;
+            string prefix = $"Parent {index + 1}";
+
+            columns.Add(new($"{prefix} First Name", a => ParentAt(a, index)?.ParentName?.FirstName));
+            columns.Add(new($"{prefix} Last Name", a => ParentAt(a, index)?.ParentName?.LastName));
+            columns.Add(new($"{prefix} Phone Number", a => ParentAt(a, index)?.ParentPhoneNumber));
+            columns.Add(new($"{prefix} Email", a => ParentAt(a, index)?.ParentEmailAddress));
+        }
+
+        columns.AddRange([
             new("Status", a => a.Status.ToString()),
             new("Offered At", a => a.OfferedAt, ExcelColumnFormat.Date),
             new("Respond By", a => a.RespondBy, ExcelColumnFormat.Date),
@@ -134,9 +167,12 @@ internal sealed class ExportOfferListQueryHandler
             new("Response", a => a.Response),
             new("Court Orders", a => a.HasCourtOrders is null ? "N/A" : a.HasCourtOrders.Value ? "Yes" : "No"),
             new("Health Concerns", a => a.HasHealthConcerns is null ? "N/A" : a.HasHealthConcerns.Value ? "Yes" : "No"),
-            new ("Laptop Requested", a => a.LaptopRequested is null ? "N/A" : a.LaptopRequested.Value ? "Yes" : "No"),
-            new("Notes", a => string.Join("\n", a.Notes), ExcelColumnFormat.List));
+            new("Laptop Requested", a => a.LaptopRequested is null ? "N/A" : a.LaptopRequested.Value ? "Yes" : "No"),
+            new("Notes", a => string.Join("\n", a.Notes), ExcelColumnFormat.List)
+        ]);
 
+        _writer.WriteRange(sheet, 2, rows, columns.ToArray());
+            
         _writer.ApplyHeaderStyle(sheet, 1);
         _writer.AddAutoFilter(sheet);
         _writer.AutoFitColumns(sheet);
@@ -145,4 +181,7 @@ internal sealed class ExportOfferListQueryHandler
 
         return file;
     }
+
+    static EnrolmentOfferExport.Parent? ParentAt(EnrolmentOfferExport export, int index) =>
+        index < export.Parents.Count ? export.Parents[index] : null;
 }

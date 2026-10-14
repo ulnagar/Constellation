@@ -9,6 +9,9 @@ using Core.Models.EnrolmentContext.Application;
 using Core.Models.EnrolmentContext.Application.Errors;
 using Core.Models.EnrolmentContext.EnrolmentPeriod;
 using Core.Models.EnrolmentContext.EnrolmentPeriod.Errors;
+using Core.Models.EnrolmentContext.EnrolmentStudent;
+using Core.Models.EnrolmentContext.EnrolmentStudent.Identifiers;
+using Core.Models.EnrolmentContext.EnrolmentStudent.Repositories;
 using Core.Models.EnrolmentContext.Offer;
 using Core.Shared;
 using Serilog;
@@ -20,17 +23,20 @@ internal sealed class GetOfferSummaryForPeriodQueryHandler
     private readonly IEnrolmentOfferRepository _offerRepository;
     private readonly IEnrolmentApplicationRepository _applicationRepository;
     private readonly IEnrolmentPeriodRepository _periodRepository;
+    private readonly IEnrolmentStudentRepository _studentRepository;
     private readonly ILogger _logger;
 
     public GetOfferSummaryForPeriodQueryHandler(
         IEnrolmentOfferRepository offerRepository,
         IEnrolmentApplicationRepository applicationRepository,
         IEnrolmentPeriodRepository periodRepository,
+        IEnrolmentStudentRepository studentRepository,
         ILogger logger)
     {
         _offerRepository = offerRepository;
         _applicationRepository = applicationRepository;
         _periodRepository = periodRepository;
+        _studentRepository = studentRepository;
         _logger = logger
             .ForContext<GetOfferSummaryForPeriodQuery>();
     }
@@ -55,6 +61,10 @@ internal sealed class GetOfferSummaryForPeriodQueryHandler
         
         List<Application> applications = await _applicationRepository.GetApplicationsByPeriod(request.PeriodId, cancellationToken);
 
+        List<EnrolmentStudentId> studentIds = applications.Select(entry => entry.StudentId).Distinct().ToList();
+
+        List<EnrolmentStudent> students = await _studentRepository.GetListFromIds(studentIds, cancellationToken);
+
         foreach (Offer offer in offers)
         {
             Application? application = applications.FirstOrDefault(entry => entry.Id == offer.ApplicationId);
@@ -69,10 +79,12 @@ internal sealed class GetOfferSummaryForPeriodQueryHandler
                 continue;
             }
 
+            EnrolmentStudent student = students.First(entry => entry.Id == application.StudentId);
+
             responses.Add(new(
                 offer.Id,
-                application.StudentName,
-                application.StudentGender,
+                student.Name,
+                student.StudentGender,
                 application.ApplicationReference ?? string.Empty,
                 application.DestinationSchoolCode,
                 application.DestinationSchool ?? string.Empty,

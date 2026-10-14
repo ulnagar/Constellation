@@ -5,9 +5,13 @@ using Core.Models.EnrolmentContext.Application;
 using Core.Models.EnrolmentContext.Application.Enums;
 using Core.Models.EnrolmentContext.Application.Errors;
 using Core.Models.EnrolmentContext.Application.Repositories;
+using Core.Models.EnrolmentContext.EnrolmentParent;
 using Core.Models.EnrolmentContext.EnrolmentPeriod;
 using Core.Models.EnrolmentContext.EnrolmentPeriod.Errors;
 using Core.Models.EnrolmentContext.EnrolmentPeriod.Repositories;
+using Core.Models.EnrolmentContext.EnrolmentStudent;
+using Core.Models.EnrolmentContext.EnrolmentStudent.Errors;
+using Core.Models.EnrolmentContext.EnrolmentStudent.Repositories;
 using Core.Models.EnrolmentContext.Offer;
 using Core.Models.EnrolmentContext.Offer.Errors;
 using Core.Models.EnrolmentContext.Offer.Repositories;
@@ -20,17 +24,20 @@ internal sealed class GetEnrolmentOfferByIdQueryHandler
     private readonly IEnrolmentApplicationRepository _applicationRepository;
     private readonly IEnrolmentOfferRepository _offerRepository;
     private readonly IEnrolmentPeriodRepository _periodRepository;
+    private readonly IEnrolmentStudentRepository _studentRepository;
     private readonly ILogger _logger;
 
     public GetEnrolmentOfferByIdQueryHandler(
         IEnrolmentApplicationRepository applicationRepository,
         IEnrolmentOfferRepository offerRepository,
         IEnrolmentPeriodRepository periodRepository,
+        IEnrolmentStudentRepository studentRepository,
         ILogger logger)
     {
         _applicationRepository = applicationRepository;
         _offerRepository = offerRepository;
         _periodRepository = periodRepository;
+        _studentRepository = studentRepository;
         _logger = logger
             .ForContext<GetEnrolmentOfferByIdQuery>();
     }
@@ -61,6 +68,18 @@ internal sealed class GetEnrolmentOfferByIdQueryHandler
             return Result.Failure<EnrolmentOfferDetailsResponse>(EnrolmentApplicationErrors.NotFound(offer.ApplicationId));
         }
 
+        EnrolmentStudent? student = await _studentRepository.GetById(application.StudentId, cancellationToken);
+
+        if (student is null)
+        {
+            _logger
+                .ForContext(nameof(GetEnrolmentOfferByIdQuery), request, true)
+                .ForContext(nameof(Error), EnrolmentStudentErrors.NotFound(application.StudentId), true)
+                .Warning("Failed to retrieve Offer");
+
+            return Result.Failure<EnrolmentOfferDetailsResponse>(EnrolmentStudentErrors.NotFound(application.StudentId));
+        }
+
         EnrolmentPeriod? period = await _periodRepository.GetEnrolmentPeriodById(offer.PeriodId, cancellationToken);
 
         if (period is null)
@@ -75,7 +94,7 @@ internal sealed class GetEnrolmentOfferByIdQueryHandler
 
         List<EnrolmentOfferDetailsResponse.Note> notes = [];
 
-        foreach (var note in offer.Notes)
+        foreach (OfferNote note in offer.Notes)
         {
             notes.Add(new(
                 note.CreatedAt,
@@ -83,20 +102,30 @@ internal sealed class GetEnrolmentOfferByIdQueryHandler
                 note.Note));
         }
 
+        List<EnrolmentOfferDetailsResponse.Parent> parents = [];
+
+        foreach (EnrolmentParent parent in application.Parents)
+        {
+            parents.Add(new(
+                parent.Id,
+                parent.Name,
+                parent.Email,
+                parent.PhoneNumber,
+                parent.MailingAddress));
+        }
+
         return new EnrolmentOfferDetailsResponse(
             offer.Id,
             application.Id,
             period.Id,
             period.Label,
-            application.StudentReferenceNumber,
-            application.StudentName,
-            application.StudentGender,
-            application.DateOfBirth,
-            application.StudentEmailAddress,
-            application.ParentName,
-            application.ParentEmailAddress,
-            application.ParentPhoneNumber,
-            application.MailingAddress,
+            student.Id,
+            student.StudentReferenceNumber,
+            student.Name,
+            student.StudentGender,
+            student.DateOfBirth,
+            student.StudentEmailAddress,
+            parents,
             application.ApplicationReference,
             application.CurrentSchoolCode,
             application.CurrentSchool,

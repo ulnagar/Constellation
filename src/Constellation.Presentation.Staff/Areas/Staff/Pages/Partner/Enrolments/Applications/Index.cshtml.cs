@@ -54,7 +54,7 @@ public class IndexModel : PeriodScopedPageModel
     public StatusFilter Status { get; set; } = StatusFilter.All;
 
     public List<EnrolmentPeriodResponse> Periods { get; set; } = [];
-    public List<EnrolmentApplicationResponse> Applications { get; set; } = [];
+    public List<EnrolmentApplicationSummary> Applications { get; set; } = [];
 
     public async Task<IActionResult> OnGet() => await PreparePage();
 
@@ -73,7 +73,7 @@ public class IndexModel : PeriodScopedPageModel
             .OrderBy(entry => entry.OpenAt)
             .ToList();
 
-        Result<List<EnrolmentApplicationResponse>> applications = await _mediator.Send(new GetEnrolmentApplicationsByPeriodQuery(Period.Id));
+        Result<List<EnrolmentApplicationSummary>> applications = await _mediator.Send(new GetEnrolmentApplicationsByPeriodQuery(Period.Id));
 
         if (applications.IsFailure)
         {
@@ -211,8 +211,8 @@ public class IndexModel : PeriodScopedPageModel
         Rejected
     }
 
-    private static List<EnrolmentApplicationResponse> FilterApplications(
-        IEnumerable<EnrolmentApplicationResponse> applications,
+    private static List<EnrolmentApplicationSummary> FilterApplications(
+        IEnumerable<EnrolmentApplicationSummary> applications,
         StatusFilter filter)
     {
         return filter switch
