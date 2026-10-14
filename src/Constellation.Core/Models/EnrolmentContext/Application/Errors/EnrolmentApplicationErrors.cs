@@ -2,6 +2,7 @@
 
 using Core.Enums;
 using EnrolmentPeriod.Enums;
+using Enums;
 using Extensions;
 using Shared;
 using System;
@@ -40,4 +41,16 @@ public static class EnrolmentApplicationErrors
     public static readonly Error CannotUpdateOfferedApplication = new(
         "Enrolment.Application.CannotUpdateOfferedApplication",
         "Cannot update an Application that has been marked as Offered");
+
+    public static readonly Func<EnrolmentCourse, Error> InvalidCourse = (course) => new(
+        "Enrolment.Application.CourseNotSelected",
+        $"{course.Name} is not currently selected on this application.");
+
+    public static readonly Error ParentRequired = new(
+        "Enrolment.Application.ParentRequired",
+        "Applications must include at least one parent");
+
+    public static readonly Func<EnrolmentCourse, Error> CourseMustIncludeLine = course => new(
+        "Enrolment.Application.CourseMustIncludeLine",
+        $"The selected course {course} must include a timetable line");
 }

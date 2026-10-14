@@ -2,4 +2,7 @@
 
 using Enums;
 
-public sealed record CourseSelection(EnrolmentCourse Course, CourseSelectionStatus Status = CourseSelectionStatus.Pending);
+public sealed record CourseSelection(
+    EnrolmentCourse Course, 
+    string Line, 
+    CourseSelectionStatus Status = CourseSelectionStatus.Pending);

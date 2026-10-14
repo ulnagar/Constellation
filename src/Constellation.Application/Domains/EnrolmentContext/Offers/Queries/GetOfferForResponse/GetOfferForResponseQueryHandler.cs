@@ -5,6 +5,9 @@ using Core.Models.EnrolmentContext.Application;
 using Core.Models.EnrolmentContext.Application.Enums;
 using Core.Models.EnrolmentContext.Application.Errors;
 using Core.Models.EnrolmentContext.Application.Repositories;
+using Core.Models.EnrolmentContext.EnrolmentStudent;
+using Core.Models.EnrolmentContext.EnrolmentStudent.Errors;
+using Core.Models.EnrolmentContext.EnrolmentStudent.Repositories;
 using Core.Models.EnrolmentContext.Offer;
 using Core.Models.EnrolmentContext.Offer.Errors;
 using Core.Models.EnrolmentContext.Offer.Repositories;
@@ -16,15 +19,18 @@ internal sealed class GetOfferForResponseQueryHandler
 {
     private readonly IEnrolmentOfferRepository _offerRepository;
     private readonly IEnrolmentApplicationRepository _applicationRepository;
+    private readonly IEnrolmentStudentRepository _studentRepository;
     private readonly ILogger _logger;
 
     public GetOfferForResponseQueryHandler(
         IEnrolmentOfferRepository offerRepository,
         IEnrolmentApplicationRepository applicationRepository,
+        IEnrolmentStudentRepository studentRepository,
         ILogger logger)
     {
         _offerRepository = offerRepository;
         _applicationRepository = applicationRepository;
+        _studentRepository = studentRepository;
         _logger = logger
             .ForContext<GetOfferForResponseQuery>();
     }
@@ -55,11 +61,23 @@ internal sealed class GetOfferForResponseQueryHandler
             return Result.Failure<OfferResponse>(EnrolmentApplicationErrors.NotFound(offer.ApplicationId));
         }
 
+        EnrolmentStudent? student = await _studentRepository.GetById(application.StudentId, cancellationToken);
+
+        if (student is null)
+        {
+            _logger
+                .ForContext(nameof(GetOfferForResponseQuery), request, true)
+                .ForContext(nameof(Error), EnrolmentStudentErrors.NotFound(application.StudentId), true)
+                .Warning("Failed to retrieve Offer for response");
+
+            return Result.Failure<OfferResponse>(EnrolmentStudentErrors.NotFound(application.StudentId));
+        }
+
         return new OfferResponse(
             offer.Id,
             offer.ApplicationId,
             offer.PeriodId,
-            application.StudentName,
+            student.Name,
             application.Grade,
             application.Program,
             application.SelectedCourses.Where(entry => entry.Status == CourseSelectionStatus.Approved).ToList(),

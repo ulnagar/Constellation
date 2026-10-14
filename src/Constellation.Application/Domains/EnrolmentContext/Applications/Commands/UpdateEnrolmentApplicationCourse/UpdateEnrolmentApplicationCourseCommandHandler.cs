@@ -40,7 +40,7 @@ internal sealed class UpdateEnrolmentApplicationCourseCommandHandler
             return Result.Failure(EnrolmentApplicationErrors.NotFound(request.ApplicationId));
         }
 
-        Result update = application.UpdateCourse(request.Course, request.Status);
+        Result update = application.UpdateCourse(request.Course, request.Line, request.Status);
 
         if (update.IsFailure)
         {

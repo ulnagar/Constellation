@@ -7,25 +7,29 @@ using Core.Models.EnrolmentContext.Application;
 using Core.Models.EnrolmentContext.Application.Enums;
 using Core.Models.EnrolmentContext.Application.Errors;
 using Core.Models.EnrolmentContext.Application.Repositories;
-using Core.Models.EnrolmentContext.EnrolmentPeriod.Repositories;
-using Core.Models.Students.Enums;
+using Core.Models.EnrolmentContext.EnrolmentParent;
+using Core.Models.EnrolmentContext.EnrolmentStudent;
+using Core.Models.EnrolmentContext.EnrolmentStudent.Identifiers;
+using Core.Models.EnrolmentContext.EnrolmentStudent.Repositories;
 using Core.Shared;
 using Serilog;
-using System.Globalization;
 
 internal sealed class ExportApplicationsListQueryHandler
 : IQueryHandler<ExportApplicationsListQuery, byte[]>
 {
     private readonly IEnrolmentApplicationRepository _applicationRepository;
+    private readonly IEnrolmentStudentRepository _studentRepository;
     private readonly IExcelWriter _writer;
     private readonly ILogger _logger;
 
     public ExportApplicationsListQueryHandler(
         IEnrolmentApplicationRepository applicationRepository,
+        IEnrolmentStudentRepository studentRepository,
         IExcelWriter writer,
         ILogger logger)
     {
         _applicationRepository = applicationRepository;
+        _studentRepository = studentRepository;
         _writer = writer;
         _logger = logger
             .ForContext<ExportApplicationsListQuery>();
@@ -38,34 +42,55 @@ internal sealed class ExportApplicationsListQueryHandler
         if (applications.Count == 0)
             return Result.Failure<byte[]>(EnrolmentApplicationErrors.NoneFound);
 
+        int maxParents = applications.Select(a => a.Parents.Count).DefaultIfEmpty(0).Max();
+
+        List<EnrolmentStudentId> studentIds = applications.Select(a => a.StudentId).Distinct().ToList();
+
+        List<EnrolmentStudent> students = await _studentRepository.GetListFromIds(studentIds, cancellationToken);
+        
         IExcelWorkbook workbook = _writer.CreateWorkbook();
         IExcelWorksheet sheet = _writer.AddWorksheet(workbook, "Sheet 1");
 
-        _writer.WriteRange(sheet, 2, applications,
+        List<ExcelColumn<Application>> columns =
+        [
             new("Application Reference", a => a.ApplicationReference),
-            new("SRN", a => a.StudentReferenceNumber?.Value ?? ""),
-            new("Student Family Name", a => a.StudentName.LastName),
-            new("Student Given Names", a => a.StudentName.FirstName),
-            new("Student Preferred Name", a => a.StudentName.PreferredName),
-            new("Full Name", a => a.StudentName.DisplayName),
-            new("Student Email", a => a.StudentEmailAddress?.Email ?? ""),
-            new("DoB", a => a.DateOfBirth, ExcelColumnFormat.Date),
-            new("Gender", a => a.StudentGender?.Name ?? "Unknown"),
+            new("SRN", a => StudentFor(a, students)?.StudentReferenceNumber?.Value ?? ""),
+            new("Student Family Name", a => StudentFor(a, students)?.Name.LastName),
+            new("Student Given Names", a => StudentFor(a, students)?.Name.FirstName),
+            new("Student Preferred Name", a => StudentFor(a, students)?.Name.PreferredName),
+            new("Full Name", a => StudentFor(a, students)?.Name.DisplayName),
+            new("Student Email", a => StudentFor(a, students)?.StudentEmailAddress?.Email ?? ""),
+            new("DoB", a => StudentFor(a, students)?.DateOfBirth, ExcelColumnFormat.Date),
+            new("Gender", a => StudentFor(a, students)?.StudentGender?.Name ?? "Unknown"),
             new("Cohort", a => a.Grade.AsNumber(), ExcelColumnFormat.Text),
-            new("Courses", a => String.Join("; ", a.SelectedCourses.Where(entry => entry.Status <= CourseSelectionStatus.Approved).Select(entry => entry.Course.Name))),
+            new("Courses", a => 
+                String.Join("; ", a.SelectedCourses
+                    .Where(entry => entry.Status <= CourseSelectionStatus.Approved)
+                    .Select(entry => $"{entry.Course.Name} ({entry.Line})"))),
             new("Current School Code", a => a.CurrentSchoolCode, ExcelColumnFormat.Text),
             new("Current School", a => a.CurrentSchool),
             new("Destination School Code", a => a.DestinationSchoolCode, ExcelColumnFormat.Text),
-            new("Destination School", a => a.DestinationSchool),
-            new("Parent First Name", a => a.ParentName?.FirstName),
-            new("Parent Last Name", a => a.ParentName?.LastName),
-            new("Street Address", a => a.MailingAddress?.Street),
-            new("Town", a => a.MailingAddress?.Town),
-            new("State", a => a.MailingAddress?.State),
-            new("PostCode", a => a.MailingAddress?.Postcode, ExcelColumnFormat.Text),
-            new("Phone Number", a => a.ParentPhoneNumber),
-            new("Parent Email", a => a.ParentEmailAddress),
-            new("Status", a => a.Status.ToString()));
+            new("Destination School", a => a.DestinationSchool)
+        ];
+
+        for (int i = 0; i < maxParents; i++)
+        {
+            int index = i;
+            string prefix = $"Parent {index + 1}";
+
+            columns.Add(new($"{prefix} First Name", a => ParentAt(a, index)?.Name.FirstName));
+            columns.Add(new($"{prefix} Last Name", a => ParentAt(a, index)?.Name.LastName));
+            columns.Add(new($"{prefix} Street Address", a => ParentAt(a, index)?.MailingAddress?.Street));
+            columns.Add(new($"{prefix} Town", a => ParentAt(a, index)?.MailingAddress?.Town));
+            columns.Add(new($"{prefix} State", a => ParentAt(a, index)?.MailingAddress?.State));
+            columns.Add(new($"{prefix} PostCode", a => ParentAt(a, index)?.MailingAddress?.Postcode, ExcelColumnFormat.Text));
+            columns.Add(new($"{prefix} Phone Number", a => ParentAt(a, index)?.PhoneNumber));
+            columns.Add(new($"{prefix} Email", a => ParentAt(a, index)?.Email));
+        }
+
+        columns.Add(new("Status", a => a.Status.ToString()));
+
+        _writer.WriteRange(sheet, 2, applications, columns.ToArray());
 
         _writer.ApplyHeaderStyle(sheet, 1);
         _writer.AddAutoFilter(sheet);
@@ -75,4 +100,10 @@ internal sealed class ExportApplicationsListQueryHandler
 
         return file;
     }
+
+    static EnrolmentParent? ParentAt(Application application, int index) =>
+        index < application.Parents.Count ? application.Parents[index] : null;
+
+    static EnrolmentStudent? StudentFor(Application application, List<EnrolmentStudent> students) =>
+        students.FirstOrDefault(entry => entry.Id == application.StudentId);
 }

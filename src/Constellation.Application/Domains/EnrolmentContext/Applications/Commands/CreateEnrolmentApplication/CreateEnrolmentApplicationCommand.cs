@@ -2,6 +2,7 @@
 
 using Abstractions.Messaging;
 using Core.Enums;
+using Core.Models.EnrolmentContext.Application;
 using Core.Models.EnrolmentContext.Application.Enums;
 using Core.Models.EnrolmentContext.EnrolmentPeriod.Enums;
 using Core.Models.EnrolmentContext.EnrolmentPeriod.Identifiers;
@@ -29,5 +30,5 @@ public sealed record CreateEnrolmentApplicationCommand(
     string DestinationSchool,
     Program Program,
     Grade Grade,
-    List<EnrolmentCourse> Courses)
+    List<CourseSelection> Courses)
     : ICommand;

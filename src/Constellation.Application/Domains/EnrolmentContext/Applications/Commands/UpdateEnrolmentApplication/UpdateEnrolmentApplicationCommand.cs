@@ -7,6 +7,7 @@ using Constellation.Core.Models.Identifiers;
 using Constellation.Core.Models.Students.Enums;
 using Constellation.Core.Models.Students.ValueObjects;
 using Constellation.Core.ValueObjects;
+using Core.Models.EnrolmentContext.Application;
 using Core.Models.EnrolmentContext.Application.Enums;
 using Core.Models.EnrolmentContext.EnrolmentPeriod.Enums;
 using System;
@@ -14,15 +15,6 @@ using ApplicationId = Core.Models.EnrolmentContext.Application.Identifiers.Appli
 
 public sealed record UpdateEnrolmentApplicationCommand(
     ApplicationId ApplicationId,
-    StudentReferenceNumber? StudentReferenceNumber,
-    Name StudentName,
-    Gender StudentGender,
-    DateOnly? DateOfBirth,
-    EmailAddress? StudentEmailAddress,
-    Name? ParentName,
-    EmailAddress? ParentEmailAddress,
-    PhoneNumber? ParentPhoneNumber,
-    MailingAddress? MailingAddress,
     string ApplicationReference,
     SchoolCode? CurrentSchoolCode,
     string CurrentSchool,
@@ -30,5 +22,5 @@ public sealed record UpdateEnrolmentApplicationCommand(
     string DestinationSchool,
     Program Program,
     Grade Grade,
-    List<EnrolmentCourse> Courses)
+    List<CourseSelection> Courses)
     : ICommand;

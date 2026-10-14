@@ -4,6 +4,8 @@ using Models.StaffMembers.Identifiers;
 
 public interface ICurrentUserService
 {
+    Task<Guid?> GetUserId();
+
     string UserName { get; }
     string EmailAddress { get; }
     bool IsAuthenticated { get; }
