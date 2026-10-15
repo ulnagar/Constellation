@@ -5,6 +5,7 @@ using Application.Interfaces.Jobs;
 using Application.Interfaces.Services;
 using Core.Models.EnrolmentContext.Application;
 using Core.Models.EnrolmentContext.Application.Repositories;
+using Core.Models.EnrolmentContext.EnrolmentParent;
 using Core.Models.EnrolmentContext.EnrolmentPeriod;
 using Core.Models.EnrolmentContext.EnrolmentPeriod.Repositories;
 using Core.Models.EnrolmentContext.EnrolmentStudent;
@@ -12,6 +13,7 @@ using Core.Models.EnrolmentContext.EnrolmentStudent.Repositories;
 using Core.Models.EnrolmentContext.Offer;
 using Core.Models.EnrolmentContext.Offer.Enums;
 using Core.Models.EnrolmentContext.Offer.Repositories;
+using Core.Shared;
 using System;
 
 internal sealed class EnrolmentTimingJob : IEnrolmentTimingJob
@@ -80,12 +82,17 @@ internal sealed class EnrolmentTimingJob : IEnrolmentTimingJob
 
             if (offer.IsReminderDue(DateTimeOffset.Now))
             {
-                _logger
-                    .ForContext(nameof(Offer), offer, true)
-                    .Information("Sending reminder for {user}", student.Name.DisplayName);
+                foreach (EnrolmentParent parent in application.Parents)
+                {
+                    _logger
+                        .ForContext(nameof(Offer), offer, true)
+                        .Information("Sending reminder for {user} to {parent}", student.Name.DisplayName, parent.Email.Email);
 
-                await _emailService.SendEnrolmentOfferReminder(application, offer, period.Year, cancellationToken);
-                offer.MarkReminderSent(DateTimeOffset.Now);
+                    Result success = await _emailService.SendEnrolmentFormReminder(application, parent, student, offer, period.Year, cancellationToken);
+
+                    if (success.IsSuccess && offer.ReminderSentAt is null)
+                        offer.MarkReminderSent(DateTimeOffset.Now);
+                }
             }
 
             if (offer.RespondBy.HasValue && offer.RespondBy < DateTimeOffset.Now)

@@ -12,6 +12,12 @@ public interface IImportRowMapper<TResult, in TContext>
         TContext context,
         CancellationToken cancellationToken = default);
 
+    Task<Result<TResult>> MapNewWithExistingStudent(
+        StagedImportRow row,
+        IReadOnlyDictionary<string, string?> columnMapping,
+        TContext context,
+        CancellationToken cancellationToken = default);
+
     Task<Result> ApplyUpdates(
         TResult existing,
         StagedImportRow row,

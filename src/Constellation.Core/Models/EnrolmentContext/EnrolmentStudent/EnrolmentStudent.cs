@@ -31,17 +31,17 @@ public sealed class EnrolmentStudent
 
         StudentReferenceNumber = srn;
         Name = name;
-        StudentGender = gender;
+        Gender = gender;
         DateOfBirth = dateOfBirth;
-        StudentEmailAddress = email;
+        Email = email;
     }
 
     public EnrolmentStudentId Id { get; private set; }
     public StudentReferenceNumber? StudentReferenceNumber { get; private set; }
     public Name Name { get; private set; }
-    public Gender StudentGender { get; private set; }
+    public Gender Gender { get; private set; }
     public DateOnly? DateOfBirth { get; private set; }
-    public EmailAddress StudentEmailAddress { get; private set; }
+    public EmailAddress Email { get; private set; }
     public IReadOnlyList<EnrolmentParent> Parents => _parents.AsReadOnly();
 
     public static EnrolmentStudent Create(
@@ -63,10 +63,10 @@ public sealed class EnrolmentStudent
         => DateOfBirth = dateOfBirth;
 
     public void UpdateGender(Gender gender)
-        => StudentGender = gender;
+        => Gender = gender;
     
     public void UpdateStudentEmail(EmailAddress studentEmail) 
-        => StudentEmailAddress = studentEmail;
+        => Email = studentEmail;
     
     public void UpdateStudentName(Name studentName) 
         => Name = studentName;

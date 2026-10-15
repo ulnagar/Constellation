@@ -11,6 +11,7 @@ public interface IEnrolmentStudentRepository
     Task<EnrolmentStudent?> GetById(EnrolmentStudentId studentId, CancellationToken cancellationToken = default);
     Task<EnrolmentStudent?> GetByEmail(EmailAddress email, CancellationToken cancellationToken = default);
     Task<EnrolmentStudent?> GetBySRN(StudentReferenceNumber srn, CancellationToken cancellationToken = default);
+    Task<List<EnrolmentStudent>> GetByName(string firstName, string lastName, CancellationToken cancellationToken = default);
 
     Task<List<EnrolmentStudent>> GetListFromIds(List<EnrolmentStudentId> studentIds, CancellationToken cancellationToken = default);
 

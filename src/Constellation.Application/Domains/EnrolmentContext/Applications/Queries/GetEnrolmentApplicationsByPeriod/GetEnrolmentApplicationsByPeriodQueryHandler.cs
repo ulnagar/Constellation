@@ -50,7 +50,7 @@ internal sealed class GetEnrolmentApplicationsByPeriodQueryHandler
             response.Add(new(
                 application.Id,
                 student.Name,
-                student.StudentGender,
+                student.Gender,
                 application.ApplicationReference ?? string.Empty,
                 application.DestinationSchoolCode,
                 application.DestinationSchool ?? string.Empty,

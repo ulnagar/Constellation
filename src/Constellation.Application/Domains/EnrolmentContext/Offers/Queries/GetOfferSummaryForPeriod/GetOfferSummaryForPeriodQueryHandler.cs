@@ -84,7 +84,7 @@ internal sealed class GetOfferSummaryForPeriodQueryHandler
             responses.Add(new(
                 offer.Id,
                 student.Name,
-                student.StudentGender,
+                student.Gender,
                 application.ApplicationReference ?? string.Empty,
                 application.DestinationSchoolCode,
                 application.DestinationSchool ?? string.Empty,

@@ -11,32 +11,40 @@ using Core.Models.EnrolmentContext.Application.Repositories;
 using Core.Models.EnrolmentContext.EnrolmentPeriod;
 using Core.Models.EnrolmentContext.EnrolmentPeriod.Identifiers;
 using Core.Models.EnrolmentContext.EnrolmentPeriod.Repositories;
+using Core.Models.EnrolmentContext.EnrolmentStudent;
+using Core.Models.EnrolmentContext.EnrolmentStudent.Errors;
+using Core.Models.EnrolmentContext.EnrolmentStudent.Identifiers;
+using Core.Models.EnrolmentContext.EnrolmentStudent.Repositories;
 using Core.Shared;
 using Import.Helpers;
 using Import.Interfaces;
 using Import.Models;
 using Interfaces;
+using Models;
 using System.Collections.Generic;
 
 internal sealed class ImportApplicationsCommandHandler
 : ICommandHandler<ImportApplicationsCommand, ImportRunResult<Application>>
 {
     private readonly IImportStagingCache _stagingCache;
-    private readonly IImportRowMapper<Application, EnrolmentPeriod> _rowMapper;
+    private readonly IImportRowMapper<Application, ApplicationImportContext> _rowMapper;
     private readonly IEnrolmentApplicationRepository _applicationRepository;
+    private readonly IEnrolmentStudentRepository _studentRepository;
     private readonly IEnrolmentPeriodRepository _periodRepository;
     private readonly IEnrolmentUnitOfWork _unitOfWork;
 
     public ImportApplicationsCommandHandler(
         IImportStagingCache stagingCache,
-        IImportRowMapper<Application, EnrolmentPeriod> rowMapper,
+        IImportRowMapper<Application, ApplicationImportContext> rowMapper,
         IEnrolmentApplicationRepository applicationRepository,
+        IEnrolmentStudentRepository studentRepository,
         IEnrolmentPeriodRepository periodRepository,
         IEnrolmentUnitOfWork unitOfWork)
     {
         _stagingCache = stagingCache;
         _rowMapper = rowMapper;
         _applicationRepository = applicationRepository;
+        _studentRepository = studentRepository;
         _periodRepository = periodRepository;
         _unitOfWork = unitOfWork;
     }
@@ -68,7 +76,7 @@ internal sealed class ImportApplicationsCommandHandler
 
             if (match.Value.IsNew)
             {
-                Result<Application> mapped = await _rowMapper.MapNew(row, request.Mapping.Mappings, period, cancellationToken);
+                Result<Application> mapped = await _rowMapper.MapNew(row, request.Mapping.Mappings, new(period), cancellationToken);
 
                 if (mapped.IsFailure)
                 {
@@ -79,10 +87,9 @@ internal sealed class ImportApplicationsCommandHandler
                 succeeded++;
                 _applicationRepository.Insert(mapped.Value);
             }
-            else
+            else if (match.Value.application is not null)
             {
-                Result mapped = await _rowMapper.ApplyUpdates(match.Value.application!, row, request.Mapping.Mappings,
-                    period, cancellationToken);
+                Result mapped = await _rowMapper.ApplyUpdates(match.Value.application!, row, request.Mapping.Mappings, new(period, match.Value.student), cancellationToken);
 
                 if (mapped.IsFailure)
                 {
@@ -91,6 +98,10 @@ internal sealed class ImportApplicationsCommandHandler
                 }
 
                 succeeded++;
+            }
+            else if (match.Value.student is not null)
+            {
+                goto break do while;
             }
         }
 
@@ -115,10 +126,17 @@ internal sealed class ImportApplicationsCommandHandler
             Application? byReference = await _applicationRepository.GetApplicationByReference(periodId, reference, cancellationToken);
 
             if (byReference is not null)
-                return Result.Success(ApplicationMatchResult.Existing(byReference));
+            {
+                EnrolmentStudent? student = await _studentRepository.GetById(byReference.StudentId, cancellationToken);
+
+                if (student is null)
+                    return Result.Failure<ApplicationMatchResult>(EnrolmentStudentErrors.NotFound(byReference.StudentId));
+
+                return Result.Success(ApplicationMatchResult.Existing(byReference, student));
+            }
         }
 
-        // Then match by SRN
+        // Then by student, matched by SRN
         string? srn = ImportRowValueAccessor.Get(row, columnMapping, EnrolmentApplicationImportFields.StudentReferenceNumber);
 
         if (!string.IsNullOrWhiteSpace(srn))
@@ -127,10 +145,17 @@ internal sealed class ImportApplicationsCommandHandler
 
             if (!srnResult.IsFailure)
             {
-                Application? bySRN = await _applicationRepository.GetApplicationBySRN(periodId, srnResult.Value, cancellationToken);
+                EnrolmentStudent? studentFromSRN = await _studentRepository.GetBySRN(srnResult.Value, cancellationToken);
 
-                if (bySRN is not null)
-                    return Result.Success(ApplicationMatchResult.Existing(bySRN));
+                if (studentFromSRN is not null)
+                {
+                    Application? application = await _applicationRepository.GetApplicationByStudentId(periodId, studentFromSRN.Id, cancellationToken);
+
+                    if (application is not null)
+                        return Result.Success(ApplicationMatchResult.Existing(application, studentFromSRN));
+                    else
+                        return Result.Success(ApplicationMatchResult.ExistingStudent(studentFromSRN));
+                }
             }
         }
 
@@ -141,21 +166,26 @@ internal sealed class ImportApplicationsCommandHandler
         if (string.IsNullOrWhiteSpace(firstName) || string.IsNullOrWhiteSpace(lastName))
             return Result.Success(ApplicationMatchResult.New()); // nothing to match against
 
+        List<EnrolmentStudent> candidateStudents = await _studentRepository.GetByName(firstName, lastName, cancellationToken);
+
+        List<EnrolmentStudentId> studentIds = candidateStudents.Select(entry => entry.Id).Distinct().ToList();
+
         List<Application> candidates = await _applicationRepository
-            .GetApplicationByStudentName(periodId, firstName, lastName, cancellationToken);
+            .GetApplicationFromStudentId(periodId, studentIds, cancellationToken);
 
         return candidates.Count switch
         {
             0 => Result.Success(ApplicationMatchResult.New()),
-            1 => Result.Success(ApplicationMatchResult.Existing(candidates[0])),
+            1 => Result.Success(ApplicationMatchResult.Existing(candidates[0], candidateStudents.First(entry => entry.Id == candidates[0].StudentId))),
             _ => Result.Failure<ApplicationMatchResult>(
                 EnrolmentApplicationErrors.MultipleExistingApplications)
         };
     }
 
-    private sealed record ApplicationMatchResult(Application? application, bool IsNew)
+    private sealed record ApplicationMatchResult(Application? application, EnrolmentStudent? student, bool IsNew)
     {
-        public static ApplicationMatchResult New() => new(null, true);
-        public static ApplicationMatchResult Existing(Application application) => new(application, false);
+        public static ApplicationMatchResult New() => new(null, null, true);
+        public static ApplicationMatchResult Existing(Application application, EnrolmentStudent student) => new(application, student, false);
+        public static ApplicationMatchResult ExistingStudent(EnrolmentStudent student) => new(null, student, false);
     }
 }

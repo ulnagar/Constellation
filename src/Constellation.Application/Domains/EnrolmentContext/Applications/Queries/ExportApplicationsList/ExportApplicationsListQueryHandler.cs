@@ -59,9 +59,9 @@ internal sealed class ExportApplicationsListQueryHandler
             new("Student Given Names", a => StudentFor(a, students)?.Name.FirstName),
             new("Student Preferred Name", a => StudentFor(a, students)?.Name.PreferredName),
             new("Full Name", a => StudentFor(a, students)?.Name.DisplayName),
-            new("Student Email", a => StudentFor(a, students)?.StudentEmailAddress?.Email ?? ""),
+            new("Student Email", a => StudentFor(a, students)?.Email?.Email ?? ""),
             new("DoB", a => StudentFor(a, students)?.DateOfBirth, ExcelColumnFormat.Date),
-            new("Gender", a => StudentFor(a, students)?.StudentGender?.Name ?? "Unknown"),
+            new("Gender", a => StudentFor(a, students)?.Gender?.Name ?? "Unknown"),
             new("Cohort", a => a.Grade.AsNumber(), ExcelColumnFormat.Text),
             new("Courses", a => 
                 String.Join("; ", a.SelectedCourses

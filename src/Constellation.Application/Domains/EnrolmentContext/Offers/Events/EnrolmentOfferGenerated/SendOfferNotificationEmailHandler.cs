@@ -10,7 +10,11 @@ using Constellation.Core.Models.EnrolmentContext.Offer.Errors;
 using Constellation.Core.Shared;
 using Core.Models.EnrolmentContext.Application;
 using Core.Models.EnrolmentContext.Application.Repositories;
+using Core.Models.EnrolmentContext.EnrolmentParent;
 using Core.Models.EnrolmentContext.EnrolmentPeriod.Repositories;
+using Core.Models.EnrolmentContext.EnrolmentStudent;
+using Core.Models.EnrolmentContext.EnrolmentStudent.Errors;
+using Core.Models.EnrolmentContext.EnrolmentStudent.Repositories;
 using Core.Models.EnrolmentContext.Offer.Events;
 using Core.Models.EnrolmentContext.Offer.Repositories;
 using Serilog;
@@ -19,6 +23,7 @@ internal class SendOfferNotificationEmailHandler
     : IDomainEventHandler<EnrolmentOfferGeneratedDomainEvent>
 {
     private readonly IEnrolmentApplicationRepository _applicationRepository;
+    private readonly IEnrolmentStudentRepository _studentRepository;
     private readonly IEnrolmentPeriodRepository _periodRepository;
     private readonly IEnrolmentOfferRepository _offerRepository;
     private readonly IEmailService _emailService;
@@ -26,12 +31,14 @@ internal class SendOfferNotificationEmailHandler
 
     public SendOfferNotificationEmailHandler(
         IEnrolmentApplicationRepository applicationRepository,
+        IEnrolmentStudentRepository studentRepository,
         IEnrolmentPeriodRepository periodRepository,
         IEnrolmentOfferRepository offerRepository,
         IEmailService emailService,
         ILogger logger)
     {
         _applicationRepository = applicationRepository;
+        _studentRepository = studentRepository;
         _periodRepository = periodRepository;
         _offerRepository = offerRepository;
         _emailService = emailService;
@@ -65,6 +72,18 @@ internal class SendOfferNotificationEmailHandler
             return;
         }
 
+        EnrolmentStudent? student = await _studentRepository.GetById(application.StudentId, cancellationToken);
+
+        if (student is null)
+        {
+            _logger
+                .ForContext(nameof(EnrolmentOfferGeneratedDomainEvent), notification, true)
+                .ForContext(nameof(Error), EnrolmentStudentErrors.NotFound(application.StudentId), true)
+                .Warning("Failed to send new Offer email to parent");
+
+            return;
+        }
+
         EnrolmentPeriod? period = await _periodRepository.GetEnrolmentPeriodById(offer.PeriodId, cancellationToken);
 
         if (period is null)
@@ -77,19 +96,25 @@ internal class SendOfferNotificationEmailHandler
             return;
         }
 
-        // Send the email
-        Result email = await _emailService.SendEnrolmentOfferNotification(
-            application,
-            offer,
-            period.Year,
-            cancellationToken);
-
-        if (email.IsFailure)
+        foreach (EnrolmentParent parent in application.Parents)
         {
-            _logger
-                .ForContext(nameof(EnrolmentOfferGeneratedDomainEvent), notification, true)
-                .ForContext(nameof(Error), email.Error, true)
-                .Warning("Failed to send new Offer email to parent");
+            // Send the email
+            Result email = await _emailService.SendEnrolmentFormNotification(
+                application,
+                parent,
+                student,
+                offer,
+                period.Year,
+                cancellationToken);
+
+            if (email.IsFailure)
+            {
+                _logger
+                    .ForContext(nameof(EnrolmentOfferGeneratedDomainEvent), notification, true)
+                    .ForContext(nameof(EnrolmentParent), parent, true)
+                    .ForContext(nameof(Error), email.Error, true)
+                    .Warning("Failed to send new Offer email to parent");
+            }
         }
     }
 }
