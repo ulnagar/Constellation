@@ -1,10 +1,10 @@
 ﻿namespace Constellation.Infrastructure.Persistence.EnrolmentContext.EntityConfigurations.Application;
 
-using ComplexTypes;
 using ConstellationContext.Converters;
 using Converters;
 using Core.Models.EnrolmentContext.Application;
 using Core.Models.EnrolmentContext.EnrolmentPeriod;
+using Core.Models.EnrolmentContext.EnrolmentStudent;
 using Core.Models.Identifiers;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
@@ -25,48 +25,18 @@ internal sealed class ApplicationConfiguration : IEntityTypeConfiguration<Applic
             .OnDelete(DeleteBehavior.Restrict);
 
         builder
-            .Property(entry => entry.StudentReferenceNumber)
-            .HasConversion<StudentReferenceNumberConverter>()
-            .IsRequired(false);
+            .HasOne<EnrolmentStudent>()
+            .WithMany()
+            .HasForeignKey(entry => entry.StudentId)
+            .OnDelete(DeleteBehavior.Restrict);
 
         builder
-            .ComplexProperty(entry => entry.StudentName)
-            .IsRequired()
-            .ConfigureName("Student");
+            .HasMany(entry => entry.Parents)
+            .WithMany();
 
         builder
-            .Property(entry => entry.StudentGender)
-            .IsRequired()
-            .HasConversion<GenderConverter>();
-
-        builder
-            .Property(entry => entry.DateOfBirth)
-            .IsRequired(false);
-
-        builder
-            .Property(entry => entry.StudentEmailAddress)
-            .HasConversion<EmailAddressConverter>()
-            .IsRequired(false);
-
-        builder
-            .OwnsOne(
-                entry => entry.ParentName,
-                owned => owned.ConfigureName("Parent"));
-
-        builder
-            .Property(entry => entry.ParentEmailAddress)
-            .HasConversion<EmailAddressConverter>()
-            .IsRequired(false);
-
-        builder
-            .Property(entry => entry.ParentPhoneNumber)
-            .HasConversion<PhoneNumberConverter>()
-            .IsRequired(false);
-
-        builder
-            .OwnsOne(
-                entry => entry.MailingAddress,
-                owned => owned.ConfigureMailingAddress());
+            .Navigation(entry => entry.Parents)
+            .AutoInclude();
 
         builder
             .Property(entry => entry.CurrentSchoolCode)
