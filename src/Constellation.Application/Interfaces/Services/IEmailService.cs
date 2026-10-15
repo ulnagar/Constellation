@@ -12,6 +12,8 @@ using Constellation.Core.Models.WorkFlow.Identifiers;
 using Core.Models.Assessments;
 using Core.Models.Assessments.Archive;
 using Core.Models.Assessments.Archive.Identifiers;
+using Core.Models.EnrolmentContext.EnrolmentParent;
+using Core.Models.EnrolmentContext.EnrolmentStudent;
 using Core.Models.Messaging.Drafts;
 using Core.Models.Messaging.Email;
 using Core.Models.Messaging.Sms;
@@ -90,9 +92,9 @@ public interface IEmailService
     Task SendUpdatedCoverEmail(Cover cover, Offering offering, EmailRecipient coveringTeacher, List<EmailRecipient> primaryRecipients, List<EmailRecipient> secondaryRecipients, DateOnly originalStartDate, TimeOnly startTime, TimeOnly endTime, string teamLink, List<Attachment> attachments, CancellationToken cancellationToken = default);
 
     // Enrolment Emails
-    Task<Result> SendEnrolmentOfferNotification(Application application, Offer offer, string year, CancellationToken cancellationToken = default);
-    Task<Result> SendEnrolmentOfferReminder(Application application, Offer offer, string year, CancellationToken cancellationToken = default);
-    Task<Result> SendEnrolmentOfferReceipt(Application application, Offer offer, string year, CancellationToken cancellationToken = default);
+    Task<Result> SendEnrolmentFormNotification(Application application, EnrolmentParent parent, EnrolmentStudent student, Offer offer, string year, CancellationToken cancellationToken = default);
+    Task<Result> SendEnrolmentFormReminder(Application application, EnrolmentParent parent, EnrolmentStudent student, Offer offer, string year, CancellationToken cancellationToken = default);
+    Task<Result> SendEnrolmentFormReceipt(Application application, EnrolmentParent parent, EnrolmentStudent student, Offer offer, string year, CancellationToken cancellationToken = default);
 
     // Messaging Emails
     Task<Result> SendQueuedMessage(MessageSender sender, EmailRecipient receiver, string subject, string messageBody, string module, CancellationToken cancellationToken = default);

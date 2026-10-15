@@ -78,7 +78,7 @@ internal sealed class SendOfferResponseReceiptEmailHandler
         }
 
         // Send the email
-        Result email = await _emailService.SendEnrolmentOfferReceipt(
+        Result email = await _emailService.SendEnrolmentFormReceipt(
             application,
             offer,
             period.Year,

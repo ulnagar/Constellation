@@ -8,13 +8,17 @@ using Core.Errors;
 using Core.Models.AppSettings.Enums;
 using Core.Models.EnrolmentContext.Application;
 using Core.Models.EnrolmentContext.Application.Enums;
+using Core.Models.EnrolmentContext.EnrolmentParent;
+using Core.Models.EnrolmentContext.EnrolmentStudent;
 using Core.Models.EnrolmentContext.Offer;
 using Core.ValueObjects;
 
 public sealed partial class Service : IEmailService
 {
-    public async Task<Result> SendEnrolmentOfferNotification(
+    public async Task<Result> SendEnrolmentFormNotification(
         Application application,
+        EnrolmentParent parent,
+        EnrolmentStudent student,
         Offer offer,
         string year,
         CancellationToken cancellationToken = default)
@@ -33,8 +37,8 @@ public sealed partial class Service : IEmailService
             Preheader = "",
             Id = offer.Id,
             Grade = application.Grade,
-            ParentName = application.ParentName!,
-            StudentName = application.StudentName,
+            ParentName = parent.Name,
+            StudentName = student.Name,
             RespondBy = offer.RespondBy!.Value,
             Year = year,
             Courses = application.SelectedCourses
@@ -43,13 +47,10 @@ public sealed partial class Service : IEmailService
                 .ToList()
         };
 
-        if (application.ParentName is null)
-            return Result.Failure(ApplicationErrors.ArgumentNull(nameof(Application.ParentName)));
+        if (parent.Email == EmailAddress.None)
+            return Result.Failure(ApplicationErrors.ArgumentNull(nameof(parent.Email)));
 
-        if (application.ParentEmailAddress is null)
-            return Result.Failure(ApplicationErrors.ArgumentNull(nameof(Application.ParentEmailAddress)));
-
-        Result<EmailRecipient> recipient = EmailRecipient.Create(application.ParentName, application.ParentEmailAddress);
+        Result<EmailRecipient> recipient = EmailRecipient.Create(parent.Name, parent.Email);
 
         if (recipient.IsFailure)
             return recipient;
@@ -63,8 +64,10 @@ public sealed partial class Service : IEmailService
             cancellationToken: cancellationToken);
     }
 
-    public async Task<Result> SendEnrolmentOfferReminder(
+    public async Task<Result> SendEnrolmentFormReminder(
         Application application,
+        EnrolmentParent parent,
+        EnrolmentStudent student,
         Offer offer,
         string year,
         CancellationToken cancellationToken = default)
@@ -83,19 +86,16 @@ public sealed partial class Service : IEmailService
             Preheader = "",
             Id = offer.Id,
             Grade = application.Grade,
-            ParentName = application.ParentName!,
-            StudentName = application.StudentName,
+            ParentName = parent.Name,
+            StudentName = student.Name,
             RespondBy = offer.RespondBy!.Value,
             Year = year
         };
 
-        if (application.ParentName is null)
-            return Result.Failure(ApplicationErrors.ArgumentNull(nameof(Application.ParentName)));
+        if (parent.Email == EmailAddress.None)
+            return Result.Failure(ApplicationErrors.ArgumentNull(nameof(parent.Email)));
 
-        if (application.ParentEmailAddress is null)
-            return Result.Failure(ApplicationErrors.ArgumentNull(nameof(Application.ParentEmailAddress)));
-
-        Result<EmailRecipient> recipient = EmailRecipient.Create(application.ParentName, application.ParentEmailAddress);
+        Result<EmailRecipient> recipient = EmailRecipient.Create(parent.Name, parent.Email);
 
         if (recipient.IsFailure)
             return recipient;
@@ -109,8 +109,10 @@ public sealed partial class Service : IEmailService
             cancellationToken: cancellationToken);
     }
 
-    public async Task<Result> SendEnrolmentOfferReceipt(
+    public async Task<Result> SendEnrolmentFormReceipt(
         Application application,
+        EnrolmentParent parent,
+        EnrolmentStudent student,
         Offer offer,
         string year,
         CancellationToken cancellationToken = default)
@@ -129,8 +131,8 @@ public sealed partial class Service : IEmailService
             Preheader = "",
             Id = offer.Id,
             Grade = application.Grade,
-            ParentName = application.ParentName!,
-            StudentName = application.StudentName,
+            ParentName = parent.Name,
+            StudentName = student.Name,
             RespondedAt = offer.RespondedAt!.Value,
             Year = year,
             Status = offer.Response,
@@ -139,13 +141,10 @@ public sealed partial class Service : IEmailService
             LaptopRequested = offer.RequestedLaptop
         };
 
-        if (application.ParentName is null)
-            return Result.Failure(ApplicationErrors.ArgumentNull(nameof(Application.ParentName)));
+        if (parent.Email == EmailAddress.None)
+            return Result.Failure(ApplicationErrors.ArgumentNull(nameof(parent.Email)));
 
-        if (application.ParentEmailAddress is null)
-            return Result.Failure(ApplicationErrors.ArgumentNull(nameof(Application.ParentEmailAddress)));
-
-        Result<EmailRecipient> recipient = EmailRecipient.Create(application.ParentName, application.ParentEmailAddress);
+        Result<EmailRecipient> recipient = EmailRecipient.Create(parent.Name, parent.Email);
 
         if (recipient.IsFailure)
             return recipient;

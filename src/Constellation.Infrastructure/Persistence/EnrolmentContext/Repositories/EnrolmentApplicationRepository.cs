@@ -1,14 +1,13 @@
 ﻿namespace Constellation.Infrastructure.Persistence.EnrolmentContext.Repositories;
 
-using Constellation.Core.Models.Students.ValueObjects;
 using Core.Models.EnrolmentContext.Application;
 using Core.Models.EnrolmentContext.Application.Repositories;
 using Core.Models.EnrolmentContext.EnrolmentPeriod.Identifiers;
+using Core.Models.EnrolmentContext.EnrolmentStudent.Identifiers;
 using Microsoft.EntityFrameworkCore;
 using ApplicationId = Core.Models.EnrolmentContext.Application.Identifiers.ApplicationId;
 
-internal sealed class EnrolmentApplicationRepository
-: IEnrolmentApplicationRepository
+internal sealed class EnrolmentApplicationRepository : IEnrolmentApplicationRepository
 {
     private readonly EnrolmentDbContext _context;
 
@@ -45,30 +44,28 @@ internal sealed class EnrolmentApplicationRepository
                     entry.ApplicationReference == reference,
                 cancellationToken);
 
-    public async Task<Application?> GetApplicationBySRN(
+    public async Task<Application?> GetApplicationByStudentId(
         EnrolmentPeriodId periodId,
-        StudentReferenceNumber studentReferenceNumber,
+        EnrolmentStudentId studentId,
         CancellationToken cancellationToken = default) =>
         await _context
             .Set<Application>()
             .FirstOrDefaultAsync(entry =>
                     entry.PeriodId == periodId &&
-                    entry.StudentReferenceNumber == studentReferenceNumber,
+                    entry.StudentId == studentId,
                 cancellationToken);
 
-    public async Task<List<Application>> GetApplicationByStudentName(
+    public async Task<List<Application>> GetApplicationFromStudentId(
         EnrolmentPeriodId periodId,
-        string firstName,
-        string lastName,
+        List<EnrolmentStudentId> studentIds,
         CancellationToken cancellationToken = default) =>
         await _context
             .Set<Application>()
             .Where(entry =>
-                    entry.PeriodId == periodId &&
-                    entry.StudentName.FirstName == firstName &&
-                    entry.StudentName.LastName == lastName)
+                entry.PeriodId == periodId &&
+                studentIds.Contains(entry.StudentId))
             .ToListAsync(cancellationToken);
-
+    
     public async Task<List<Application>> GetApplicationsByPeriod(
         EnrolmentPeriodId id,
         CancellationToken cancellationToken = default) =>

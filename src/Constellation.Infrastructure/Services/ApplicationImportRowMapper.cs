@@ -1,16 +1,19 @@
 ﻿namespace Constellation.Infrastructure.Services;
 
 using Application.Common.Errors;
+using Application.Domains.EnrolmentContext.Applications.Models;
 using Application.Domains.Import.Helpers;
 using Application.Domains.Import.Interfaces;
 using Application.Domains.Import.Models;
 using Application.Interfaces.Repositories;
 using Application.Models.ImportCache;
 using Core.Enums;
+using Core.Errors;
 using Core.Models;
 using Core.Models.EnrolmentContext.Application;
 using Core.Models.EnrolmentContext.Application.Enums;
-using Core.Models.EnrolmentContext.EnrolmentPeriod;
+using Core.Models.EnrolmentContext.EnrolmentParent;
+using Core.Models.EnrolmentContext.EnrolmentStudent;
 using Core.Models.Identifiers;
 using Core.Models.Students.Enums;
 using Core.Models.Students.ValueObjects;
@@ -19,7 +22,7 @@ using Core.ValueObjects;
 using System.Collections.Generic;
 using System.Globalization;
 
-internal sealed class ApplicationImportRowMapper : IImportRowMapper<Application, EnrolmentPeriod>
+internal sealed class ApplicationImportRowMapper : IImportRowMapper<(Application, EnrolmentStudent), ApplicationImportContext>
 {
     private readonly ISchoolRepository _schoolRepository;
 
@@ -29,10 +32,10 @@ internal sealed class ApplicationImportRowMapper : IImportRowMapper<Application,
         _schoolRepository = schoolRepository;
     }
 
-    public async Task<Result<Application>> MapNew(
+    public async Task<Result<(Application, EnrolmentStudent)>> MapNew(
         StagedImportRow row,
         IReadOnlyDictionary<string, string?> columnMapping,
-        EnrolmentPeriod period,
+        ApplicationImportContext context,
         CancellationToken cancellationToken = default)
     {
         string? Get(string fieldKey) => ImportRowValueAccessor.Get(row, columnMapping, fieldKey);
@@ -59,13 +62,13 @@ internal sealed class ApplicationImportRowMapper : IImportRowMapper<Application,
         string? courseList = Get(EnrolmentApplicationImportFields.Subjects);
 
         if (string.IsNullOrWhiteSpace(studentNameFirst))
-            return Result.Failure<Application>(ImportErrors.RequiredFieldMissing("Student First Name", row.RowNumber));
+            return Result.Failure<(Application, EnrolmentStudent)>(ImportErrors.RequiredFieldMissing("Student First Name", row.RowNumber));
 
         if (string.IsNullOrWhiteSpace(studentNameLast))
-            return Result.Failure<Application>(ImportErrors.RequiredFieldMissing("Student Last Name", row.RowNumber));
+            return Result.Failure<(Application, EnrolmentStudent)>(ImportErrors.RequiredFieldMissing("Student Last Name", row.RowNumber));
 
         if (string.IsNullOrWhiteSpace(grade))
-            return Result.Failure<Application>(ImportErrors.RequiredFieldMissing("Grade", row.RowNumber));
+            return Result.Failure<(Application, EnrolmentStudent)>(ImportErrors.RequiredFieldMissing("Grade", row.RowNumber));
 
         Result<Name> studentNameResult = Name.Create(
             studentNameFirst,
@@ -73,12 +76,12 @@ internal sealed class ApplicationImportRowMapper : IImportRowMapper<Application,
             studentNameLast);
 
         if (studentNameResult.IsFailure)
-            return Result.Failure<Application>(studentNameResult.Error);
+            return Result.Failure<(Application, EnrolmentStudent)>(studentNameResult.Error);
 
         bool gradeResult = Grade.TryParse(grade, out Grade gradeValue);
 
         if (!gradeResult)
-            return Result.Failure<Application>(ImportErrors.ValueParseError(typeof(Grade), "Grade"));
+            return Result.Failure<(Application, EnrolmentStudent)>(ImportErrors.ValueParseError(typeof(Grade), "Grade"));
 
         StudentReferenceNumber? srn = null;
         if (!string.IsNullOrWhiteSpace(studentReferenceNumber))
@@ -86,7 +89,7 @@ internal sealed class ApplicationImportRowMapper : IImportRowMapper<Application,
             Result<StudentReferenceNumber> srnResult = StudentReferenceNumber.Create(studentReferenceNumber);
 
             if (srnResult.IsFailure)
-                return Result.Failure<Application>(srnResult.Error);
+                return Result.Failure<(Application, EnrolmentStudent)>(srnResult.Error);
 
             srn = srnResult.Value;
         }
@@ -100,7 +103,7 @@ internal sealed class ApplicationImportRowMapper : IImportRowMapper<Application,
                 parentNameLast);
 
             if (parentNameResult.IsFailure)
-                return Result.Failure<Application>(parentNameResult.Error);
+                return Result.Failure<(Application, EnrolmentStudent)>(parentNameResult.Error);
 
             parentName = parentNameResult.Value;
         }
@@ -117,7 +120,7 @@ internal sealed class ApplicationImportRowMapper : IImportRowMapper<Application,
             if (dateTimeOfBirth)
                 birthDate = DateOnly.FromDateTime(parsed);
             else
-                return Result.Failure<Application>(ImportErrors.ValueParseError(typeof(DateOnly), "Date Of Birth"));
+                return Result.Failure<(Application, EnrolmentStudent)>(ImportErrors.ValueParseError(typeof(DateOnly), "Date Of Birth"));
         }
 
         Gender gender = Gender.Empty;
@@ -126,7 +129,7 @@ internal sealed class ApplicationImportRowMapper : IImportRowMapper<Application,
             Gender? genderValue = Gender.FromValue(genderString);
 
             if (genderValue is null)
-                return Result.Failure<Application>(ImportErrors.ValueParseError(typeof(Gender), "Gender"));
+                return Result.Failure<(Application, EnrolmentStudent)>(ImportErrors.ValueParseError(typeof(Gender), "Gender"));
 
             gender = genderValue;
         }
@@ -137,10 +140,17 @@ internal sealed class ApplicationImportRowMapper : IImportRowMapper<Application,
             Result<EmailAddress> studentEmailAddressResult = EmailAddress.Create(studentEmailAddress);
 
             if (studentEmailAddressResult.IsFailure)
-                return Result.Failure<Application>(studentEmailAddressResult.Error);
+                return Result.Failure<(Application, EnrolmentStudent)>(studentEmailAddressResult.Error);
 
             studentEmail = studentEmailAddressResult.Value;
         }
+
+        EnrolmentStudent student = EnrolmentStudent.Create(
+            studentNameResult.Value,
+            gender,
+            srn,
+            birthDate,
+            studentEmail);
 
         EmailAddress? parentEmail = null;
         if (!string.IsNullOrWhiteSpace(parentEmailAddress))
@@ -148,7 +158,7 @@ internal sealed class ApplicationImportRowMapper : IImportRowMapper<Application,
             Result<EmailAddress> parentEmailAddressResult = EmailAddress.Create(parentEmailAddress);
 
             if (parentEmailAddressResult.IsFailure)
-                return Result.Failure<Application>(parentEmailAddressResult.Error);
+                return Result.Failure<(Application, EnrolmentStudent)>(parentEmailAddressResult.Error);
 
             parentEmail = parentEmailAddressResult.Value;
         }
@@ -159,7 +169,7 @@ internal sealed class ApplicationImportRowMapper : IImportRowMapper<Application,
             Result<PhoneNumber> parentPhoneNumberResult = PhoneNumber.Create(parentPhoneNumber);
 
             if (parentPhoneNumberResult.IsFailure)
-                return Result.Failure<Application>(parentPhoneNumberResult.Error);
+                return Result.Failure<(Application, EnrolmentStudent)>(parentPhoneNumberResult.Error);
 
             parentPhone = parentPhoneNumberResult.Value;
         }
@@ -177,9 +187,255 @@ internal sealed class ApplicationImportRowMapper : IImportRowMapper<Application,
                 mailingAddressPostcode);
 
             if (mailingAddressResult.IsFailure)
-                return Result.Failure<Application>(mailingAddressResult.Error);
+                return Result.Failure<(Application, EnrolmentStudent)>(mailingAddressResult.Error);
 
             address = mailingAddressResult.Value;
+        }
+
+        EnrolmentParent parent = EnrolmentParent.Create(
+            null,
+            parentName,
+            parentEmail,
+            parentPhone,
+            address);
+
+        SchoolCode? currentSchoolCode = null;
+        string? currentSchool = null;
+        if (!string.IsNullOrWhiteSpace(currentSchoolName))
+        {
+            School? foundSchool = await _schoolRepository.GetByName(currentSchoolName, cancellationToken);
+
+            if (foundSchool is not null)
+                currentSchoolCode = foundSchool.Code;
+
+            currentSchool = currentSchoolName;
+        }
+
+        SchoolCode? destinationSchoolCode = null;
+        string? destinationSchool = null;
+        if (!string.IsNullOrWhiteSpace(destinationSchoolName))
+        {
+            School? foundSchool = await _schoolRepository.GetByName(destinationSchoolName, cancellationToken);
+
+            if (foundSchool is null)
+                return Result.Failure<(Application, EnrolmentStudent)>(ImportErrors.ValueParseError(typeof(School), "Destination School"));
+
+            destinationSchoolCode = foundSchool.Code;
+            destinationSchool = foundSchool.Name;
+        }
+
+        Result<Application> application = Application.Create(
+            context.Period.Id,
+            student.Id,
+            parent,
+            applicationReference,
+            currentSchoolCode,
+            currentSchool,
+            destinationSchoolCode,
+            destinationSchool,
+            context.Period.Program,
+            gradeValue);
+
+        if (application.IsFailure || courseList is null)
+            return (application.Value, student);
+
+        string[] courses = courseList.Split(';');
+        List<EnrolmentCourse> validCourses = EnrolmentCourse.GetOptions.ToList();
+
+        foreach (string course in courses)
+        {
+            string[] parts = course.Split(':');
+
+            EnrolmentCourse? foundCourse = validCourses.FirstOrDefault(entry =>
+                entry.Value == parts[0].Trim()
+                || entry.Name == parts[0].Trim());
+
+            if (foundCourse is null)
+                return Result.Failure<(Application, EnrolmentStudent)>(ImportErrors.ValueParseError(typeof(EnrolmentCourse), "Courses"));
+
+            application.Value.AddCourse(foundCourse, parts[1]);
+        }
+
+        return (application.Value, student);
+    }
+
+    public async Task<Result<(Application, EnrolmentStudent)>> MapNewWithExistingStudent(
+        StagedImportRow row,
+        IReadOnlyDictionary<string, string?> columnMapping,
+        ApplicationImportContext context,
+        CancellationToken cancellationToken = default)
+    {
+        if (context.ExistingStudent is null)
+            return Result.Failure<(Application, EnrolmentStudent)>(ApplicationErrors.ArgumentNull(nameof(EnrolmentStudent)));
+
+        string? Get(string fieldKey) => ImportRowValueAccessor.Get(row, columnMapping, fieldKey);
+
+        string? studentReferenceNumber = Get(EnrolmentApplicationImportFields.StudentReferenceNumber);
+        string? studentNameFirst = Get(EnrolmentApplicationImportFields.StudentNameFirst);
+        string? studentNamePreferred = Get(EnrolmentApplicationImportFields.StudentNamePreferred);
+        string? studentNameLast = Get(EnrolmentApplicationImportFields.StudentNameLast);
+        string? dateOfBirth = Get(EnrolmentApplicationImportFields.DateOfBirth);
+        string? genderString = Get(EnrolmentApplicationImportFields.Gender);
+        string? studentEmailAddress = Get(EnrolmentApplicationImportFields.StudentEmailAddress);
+        string? parentNameFirst = Get(EnrolmentApplicationImportFields.ParentNameFirst);
+        string? parentNameLast = Get(EnrolmentApplicationImportFields.ParentNameLast);
+        string? parentEmailAddress = Get(EnrolmentApplicationImportFields.ParentEmailAddress);
+        string? parentPhoneNumber = Get(EnrolmentApplicationImportFields.ParentPhoneNumber);
+        string? mailingAddressStreet = Get(EnrolmentApplicationImportFields.MailingAddressStreet);
+        string? mailingAddressTown = Get(EnrolmentApplicationImportFields.MailingAddressTown);
+        string? mailingAddressState = Get(EnrolmentApplicationImportFields.MailingAddressState);
+        string? mailingAddressPostcode = Get(EnrolmentApplicationImportFields.MailingAddressPostcode);
+        string? applicationReference = Get(EnrolmentApplicationImportFields.ApplicationReference);
+        string? currentSchoolName = Get(EnrolmentApplicationImportFields.CurrentSchoolName);
+        string? destinationSchoolName = Get(EnrolmentApplicationImportFields.DestinationSchoolName);
+        string? grade = Get(EnrolmentApplicationImportFields.Grade);
+        string? courseList = Get(EnrolmentApplicationImportFields.Subjects);
+
+        if (string.IsNullOrWhiteSpace(studentNameFirst))
+            return Result.Failure<(Application, EnrolmentStudent)>(ImportErrors.RequiredFieldMissing("Student First Name", row.RowNumber));
+
+        if (string.IsNullOrWhiteSpace(studentNameLast))
+            return Result.Failure<(Application, EnrolmentStudent)>(ImportErrors.RequiredFieldMissing("Student Last Name", row.RowNumber));
+
+        if (string.IsNullOrWhiteSpace(grade))
+            return Result.Failure<(Application, EnrolmentStudent)>(ImportErrors.RequiredFieldMissing("Grade", row.RowNumber));
+
+        Result<Name> studentNameResult = Name.Create(
+            studentNameFirst,
+            studentNamePreferred ?? string.Empty,
+            studentNameLast);
+
+        if (studentNameResult.IsFailure)
+            return Result.Failure<(Application, EnrolmentStudent)>(studentNameResult.Error);
+
+        context.ExistingStudent.UpdateStudentName(studentNameResult.Value);
+
+        bool gradeResult = Grade.TryParse(grade, out Grade gradeValue);
+
+        if (!gradeResult)
+            return Result.Failure<(Application, EnrolmentStudent)>(ImportErrors.ValueParseError(typeof(Grade), "Grade"));
+
+        StudentReferenceNumber? srn = null;
+        if (!string.IsNullOrWhiteSpace(studentReferenceNumber))
+        {
+            Result<StudentReferenceNumber> srnResult = StudentReferenceNumber.Create(studentReferenceNumber);
+
+            if (srnResult.IsFailure)
+                return Result.Failure<(Application, EnrolmentStudent)>(srnResult.Error);
+
+            srn = srnResult.Value;
+        }
+
+        context.ExistingStudent.UpdateStudentReferenceNumber(srn);
+
+        Name? parentName = null;
+        if (!string.IsNullOrWhiteSpace(parentNameFirst) && !string.IsNullOrWhiteSpace(parentNameLast))
+        {
+            Result<Name> parentNameResult = Name.Create(
+                parentNameFirst,
+                string.Empty,
+                parentNameLast);
+
+            if (parentNameResult.IsFailure)
+                return Result.Failure<(Application, EnrolmentStudent)>(parentNameResult.Error);
+
+            parentName = parentNameResult.Value;
+        }
+
+        DateOnly? birthDate = null;
+        if (!string.IsNullOrWhiteSpace(dateOfBirth))
+        {
+            bool dateTimeOfBirth = DateTime.TryParse(
+                dateOfBirth,
+                CultureInfo.GetCultureInfo("en-AU"),
+                DateTimeStyles.None,
+                out DateTime parsed);
+
+            if (dateTimeOfBirth)
+            {
+                birthDate = DateOnly.FromDateTime(parsed);
+                context.ExistingStudent.UpdateDateOfBirth(birthDate.Value);
+            }
+            else
+                return Result.Failure<(Application, EnrolmentStudent)>(ImportErrors.ValueParseError(typeof(DateOnly), "Date Of Birth"));
+        }
+        
+        Gender gender = Gender.Empty;
+        if (!string.IsNullOrWhiteSpace(genderString))
+        {
+            Gender? genderValue = Gender.FromValue(genderString);
+
+            if (genderValue is null)
+                return Result.Failure<(Application, EnrolmentStudent)>(ImportErrors.ValueParseError(typeof(Gender), "Gender"));
+
+            gender = genderValue;
+        }
+
+        context.ExistingStudent.UpdateGender(gender);
+
+        EmailAddress? studentEmail = null;
+        if (!string.IsNullOrWhiteSpace(studentEmailAddress))
+        {
+            Result<EmailAddress> studentEmailAddressResult = EmailAddress.Create(studentEmailAddress);
+
+            if (studentEmailAddressResult.IsFailure)
+                return Result.Failure<(Application, EnrolmentStudent)>(studentEmailAddressResult.Error);
+
+            studentEmail = studentEmailAddressResult.Value;
+        }
+
+        context.ExistingStudent.UpdateStudentEmail(studentEmail);
+
+        EmailAddress? parentEmail = null;
+        if (!string.IsNullOrWhiteSpace(parentEmailAddress))
+        {
+            Result<EmailAddress> parentEmailAddressResult = EmailAddress.Create(parentEmailAddress);
+
+            if (parentEmailAddressResult.IsFailure)
+                return Result.Failure<(Application, EnrolmentStudent)>(parentEmailAddressResult.Error);
+
+            parentEmail = parentEmailAddressResult.Value;
+        }
+
+        PhoneNumber? parentPhone = null;
+        if (!string.IsNullOrWhiteSpace(parentPhoneNumber))
+        {
+            Result<PhoneNumber> parentPhoneNumberResult = PhoneNumber.Create(parentPhoneNumber);
+
+            if (parentPhoneNumberResult.IsFailure)
+                return Result.Failure<(Application, EnrolmentStudent)>(parentPhoneNumberResult.Error);
+
+            parentPhone = parentPhoneNumberResult.Value;
+        }
+
+        MailingAddress? address = null;
+        if (!string.IsNullOrWhiteSpace(mailingAddressStreet)
+            && !string.IsNullOrWhiteSpace(mailingAddressTown)
+            && !string.IsNullOrWhiteSpace(mailingAddressState)
+            && !string.IsNullOrWhiteSpace(mailingAddressPostcode))
+        {
+            Result<MailingAddress> mailingAddressResult = MailingAddress.Create(
+                mailingAddressStreet,
+                mailingAddressTown,
+                mailingAddressState,
+                mailingAddressPostcode);
+
+            if (mailingAddressResult.IsFailure)
+                return Result.Failure<(Application, EnrolmentStudent)>(mailingAddressResult.Error);
+
+            address = mailingAddressResult.Value;
+        }
+
+        EnrolmentParent? parent = context.ExistingStudent.Parents.FirstOrDefault(entry => entry.Name == parentName);
+
+        if (parent is null)
+        {
+            parent = EnrolmentParent.Create(
+                null,
+                parentName,
+                parentEmail,
+                parentPhone,
+                address);
         }
 
         SchoolCode? currentSchoolCode = null;
@@ -201,66 +457,57 @@ internal sealed class ApplicationImportRowMapper : IImportRowMapper<Application,
             School? foundSchool = await _schoolRepository.GetByName(destinationSchoolName, cancellationToken);
 
             if (foundSchool is null)
-                return Result.Failure<Application>(ImportErrors.ValueParseError(typeof(School), "Destination School"));
+                return Result.Failure<(Application, EnrolmentStudent)>(ImportErrors.ValueParseError(typeof(School), "Destination School"));
 
             destinationSchoolCode = foundSchool.Code;
             destinationSchool = foundSchool.Name;
         }
 
         Result<Application> application = Application.Create(
-            period.Id,
-            srn,
-            studentNameResult.Value,
-            gender,
-            birthDate,
-            studentEmail,
-            parentName,
-            parentEmail,
-            parentPhone,
-            address,
+            context.Period.Id,
+            context.ExistingStudent.Id,
+            parent,
             applicationReference,
             currentSchoolCode,
             currentSchool,
             destinationSchoolCode,
             destinationSchool,
-            period.Program,
+            context.Period.Program,
             gradeValue);
 
         if (application.IsFailure || courseList is null)
             return application;
-        
+
         string[] courses = courseList.Split(';');
         List<EnrolmentCourse> validCourses = EnrolmentCourse.GetOptions.ToList();
-        List<EnrolmentCourse> selectedCourses = [];
 
         foreach (string course in courses)
         {
+            string[] parts = course.Split(':');
+
             EnrolmentCourse? foundCourse = validCourses.FirstOrDefault(entry =>
-                entry.Value == course.Trim()
-                || entry.Name == course.Trim());
+                entry.Value == parts[0].Trim()
+                || entry.Name == parts[0].Trim());
 
             if (foundCourse is null)
-                return Result.Failure<Application>(ImportErrors.ValueParseError(typeof(EnrolmentCourse), "Courses"));
+                return Result.Failure<(Application, EnrolmentStudent)>(ImportErrors.ValueParseError(typeof(EnrolmentCourse), "Courses"));
 
-            selectedCourses.Add(foundCourse);
+            application.Value.AddCourse(foundCourse, parts[1]);
         }
-
-        foreach (EnrolmentCourse course in selectedCourses)
-        {
-            application.Value.AddCourse(course);
-            //application.Value.UpdateCourse(course, CourseSelectionStatus.Approved);
-        }
-
+        
         return application;
     }
-
+    
     public async Task<Result> ApplyUpdates(
-        Application existing, 
+        (Application, EnrolmentStudent) existing, 
         StagedImportRow row,
         IReadOnlyDictionary<string, string?> columnMapping,
-        EnrolmentPeriod context,
+        ApplicationImportContext context,
         CancellationToken cancellationToken = default)
     {
+        if (context.ExistingStudent is null)
+            return Result.Failure(ApplicationErrors.ArgumentNull(nameof(EnrolmentStudent)));
+
         bool IsMapped(string key) => ImportRowValueAccessor.IsMapped(columnMapping, key);
         string? Get(string key) => ImportRowValueAccessor.Get(row, columnMapping, key);
 
@@ -275,9 +522,7 @@ internal sealed class ApplicationImportRowMapper : IImportRowMapper<Application,
             if (nameResult.IsFailure)
                 return nameResult;
 
-            Result updateResult = existing.UpdateStudentName(nameResult.Value);
-            if (updateResult.IsFailure)
-                return updateResult;
+            context.ExistingStudent.UpdateStudentName(nameResult.Value);
         }
 
         if (IsMapped(EnrolmentApplicationImportFields.Grade))
@@ -287,7 +532,7 @@ internal sealed class ApplicationImportRowMapper : IImportRowMapper<Application,
             if (!gradeResult)
                 return Result.Failure(ImportErrors.ValueParseError(typeof(Grade), "Grade"));
 
-            Result updateResult = existing.UpdateGrade(gradeValue);
+            Result updateResult = existing.Item1.UpdateGrade(gradeValue);
             if (updateResult.IsFailure)
                 return updateResult;
         }
@@ -303,9 +548,7 @@ internal sealed class ApplicationImportRowMapper : IImportRowMapper<Application,
                 if (srnResult.IsFailure)
                     return srnResult;
 
-                Result updateResult = existing.UpdateStudentReferenceNumber(srnResult.Value);
-                if (updateResult.IsFailure)
-                    return updateResult;
+                context.ExistingStudent.UpdateStudentReferenceNumber(srnResult.Value);
             }
         }
 
@@ -340,9 +583,7 @@ internal sealed class ApplicationImportRowMapper : IImportRowMapper<Application,
                 if (!dateTimeOfBirth)
                     return Result.Failure(ImportErrors.ValueParseError(typeof(DateOnly), "Date Of Birth"));
 
-                Result updateResult = existing.UpdateDateOfBirth(DateOnly.FromDateTime(parsed));
-                if (updateResult.IsFailure)
-                    return updateResult;
+                context.ExistingStudent.UpdateDateOfBirth(DateOnly.FromDateTime(parsed));
             }
         }
 
@@ -357,9 +598,7 @@ internal sealed class ApplicationImportRowMapper : IImportRowMapper<Application,
                 if (genderResult.IsFailure)
                     return genderResult;
 
-                Result updateResult = existing.UpdateGender(genderResult.Value);
-                if (updateResult.IsFailure)
-                    return updateResult;
+                context.ExistingStudent.UpdateGender(genderResult.Value);
             }
         }
 
@@ -374,9 +613,7 @@ internal sealed class ApplicationImportRowMapper : IImportRowMapper<Application,
                 if (studentEmailAddress.IsFailure)
                     return studentEmailAddress;
 
-                Result updateResult = existing.UpdateStudentEmail(studentEmailAddress.Value);
-                if (updateResult.IsFailure)
-                    return updateResult;
+                context.ExistingStudent.UpdateStudentEmail(studentEmailAddress.Value);
             }
         }
 
@@ -461,7 +698,7 @@ internal sealed class ApplicationImportRowMapper : IImportRowMapper<Application,
                     : foundSchool.Code;
             }
 
-            Result updateResult = existing.UpdateCurrentSchool(schoolCode, currentSchool);
+            Result updateResult = existing.Item1.UpdateCurrentSchool(schoolCode, currentSchool);
             if (updateResult.IsFailure)
                 return updateResult;
         }
@@ -478,7 +715,7 @@ internal sealed class ApplicationImportRowMapper : IImportRowMapper<Application,
             if (foundSchool is null)
                 return Result.Failure(ImportErrors.ValueParseError(typeof(School), "Destination School"));
 
-            Result updateResult = existing.UpdateDestinationSchool(foundSchool.Code, foundSchool.Name);
+            Result updateResult = existing.Item1.UpdateDestinationSchool(foundSchool.Code, foundSchool.Name);
             if (updateResult.IsFailure)
                 return updateResult;
         }
@@ -489,7 +726,7 @@ internal sealed class ApplicationImportRowMapper : IImportRowMapper<Application,
 
             if (!string.IsNullOrWhiteSpace(applicationReference))
             {
-                Result updateResult = existing.UpdateApplicationReference(applicationReference);
+                Result updateResult = existing.Item1.UpdateApplicationReference(applicationReference);
                 if (updateResult.IsFailure)
                     return updateResult;
             }
@@ -498,12 +735,15 @@ internal sealed class ApplicationImportRowMapper : IImportRowMapper<Application,
         if (IsMapped(EnrolmentApplicationImportFields.Subjects))
         {
             string? courseList = Get(EnrolmentApplicationImportFields.Subjects);
-            string[] courses = courseList?.Split(';') ?? [];
+            string[] courseEntries = courseList?.Split(';') ?? [];
             List<EnrolmentCourse> validCourses = EnrolmentCourse.GetOptions.ToList();
-            List<EnrolmentCourse> selectedCourses = [];
 
-            foreach (string course in courses)
+            foreach (string courseEntry in courseEntries)
             {
+                var parts = courseEntry.Split(':');
+                var course = parts[0];
+                var line = parts[1];
+
                 EnrolmentCourse? foundCourse = validCourses.FirstOrDefault(entry =>
                     entry.Value == course.Trim()
                     || entry.Name == course.Trim());
@@ -511,25 +751,17 @@ internal sealed class ApplicationImportRowMapper : IImportRowMapper<Application,
                 if (foundCourse is null)
                     return Result.Failure<Application>(ImportErrors.ValueParseError(typeof(EnrolmentCourse), "Courses"));
 
-                selectedCourses.Add(foundCourse);
-            }
-
-            foreach (EnrolmentCourse course in selectedCourses)
-            {
-                CourseSelection? existingCourse = existing.SelectedCourses
-                    .FirstOrDefault(entry => entry.Course == course);
+                CourseSelection? existingCourse = existing.Item1.SelectedCourses
+                    .FirstOrDefault(entry => entry.Course == foundCourse);
 
                 if (existingCourse is null)
-                    existing.AddCourse(course);
-            }
-
-            foreach (CourseSelection course in existing.SelectedCourses)
-            {
-                if (selectedCourses.All(entry => entry != course.Course))
-                    existing.RemoveCourse(course.Course);
+                    existing.Item1.AddCourse(foundCourse, line);
+                else
+                    existing.Item1.UpdateCourse(existingCourse.Course, line, existingCourse.Status);
             }
         }
 
         return Result.Success();
     }
 }
+
