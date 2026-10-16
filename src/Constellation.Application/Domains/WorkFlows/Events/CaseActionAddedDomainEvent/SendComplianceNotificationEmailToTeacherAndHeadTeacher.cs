@@ -96,6 +96,10 @@ internal sealed class SendComplianceNotificationEmailToTeacherAndHeadTeacher
         if (action is not CaseDetailUpdateAction)
             return;
 
+        // Do not send alerts for Cases that have been marked completed
+        if (item.Status == CaseStatus.Completed)
+            return;
+
         ComplianceCaseDetail? detail = item.Detail as ComplianceCaseDetail;
         
         StaffMember? assignee = await _staffRepository.GetById(detail!.CreatedById, cancellationToken);
