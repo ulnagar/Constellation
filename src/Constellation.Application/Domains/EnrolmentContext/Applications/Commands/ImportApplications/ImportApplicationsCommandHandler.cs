@@ -27,7 +27,7 @@ internal sealed class ImportApplicationsCommandHandler
 : ICommandHandler<ImportApplicationsCommand, ImportRunResult<Application>>
 {
     private readonly IImportStagingCache _stagingCache;
-    private readonly IImportRowMapper<Application, ApplicationImportContext> _rowMapper;
+    private readonly IImportRowMapper<(Application Application, EnrolmentStudent Student), ApplicationImportContext> _rowMapper;
     private readonly IEnrolmentApplicationRepository _applicationRepository;
     private readonly IEnrolmentStudentRepository _studentRepository;
     private readonly IEnrolmentPeriodRepository _periodRepository;
@@ -35,7 +35,7 @@ internal sealed class ImportApplicationsCommandHandler
 
     public ImportApplicationsCommandHandler(
         IImportStagingCache stagingCache,
-        IImportRowMapper<Application, ApplicationImportContext> rowMapper,
+        IImportRowMapper<(Application Application, EnrolmentStudent Student), ApplicationImportContext> rowMapper,
         IEnrolmentApplicationRepository applicationRepository,
         IEnrolmentStudentRepository studentRepository,
         IEnrolmentPeriodRepository periodRepository,
@@ -76,7 +76,7 @@ internal sealed class ImportApplicationsCommandHandler
 
             if (match.Value.IsNew)
             {
-                Result<Application> mapped = await _rowMapper.MapNew(row, request.Mapping.Mappings, new(period), cancellationToken);
+                Result<(Application, EnrolmentStudent)> mapped = await _rowMapper.MapNew(row, request.Mapping.Mappings, new(period), cancellationToken);
 
                 if (mapped.IsFailure)
                 {
@@ -85,11 +85,12 @@ internal sealed class ImportApplicationsCommandHandler
                 }
 
                 succeeded++;
-                _applicationRepository.Insert(mapped.Value);
+                _applicationRepository.Insert(mapped.Value.Item1);
+                _studentRepository.Insert(mapped.Value.Item2);
             }
-            else if (match.Value.application is not null)
+            else if (match.Value.Application is not null)
             {
-                Result mapped = await _rowMapper.ApplyUpdates(match.Value.application!, row, request.Mapping.Mappings, new(period, match.Value.student), cancellationToken);
+                Result mapped = await _rowMapper.ApplyUpdates((match.Value.Application!, match.Value.Student!), row, request.Mapping.Mappings, new(period, match.Value.Student), cancellationToken);
 
                 if (mapped.IsFailure)
                 {
@@ -99,9 +100,22 @@ internal sealed class ImportApplicationsCommandHandler
 
                 succeeded++;
             }
-            else if (match.Value.student is not null)
+            else if (match.Value.Student is not null)
             {
-                goto break do while;
+                Result<(Application, EnrolmentStudent)> mapped = await _rowMapper.MapNewWithExistingStudent(row, request.Mapping.Mappings, new(period, match.Value.Student), cancellationToken);
+
+                if (mapped.IsFailure)
+                {
+                    failed.Add(new(row.RowNumber, mapped.Error));
+                    continue;
+                }
+
+                succeeded++;
+                _applicationRepository.Insert(mapped.Value.Item1);
+            }
+            else
+            {
+                failed.Add(new(row.RowNumber, ImportErrors.InvalidRow));
             }
         }
 
@@ -182,7 +196,7 @@ internal sealed class ImportApplicationsCommandHandler
         };
     }
 
-    private sealed record ApplicationMatchResult(Application? application, EnrolmentStudent? student, bool IsNew)
+    private sealed record ApplicationMatchResult(Application? Application, EnrolmentStudent? Student, bool IsNew)
     {
         public static ApplicationMatchResult New() => new(null, null, true);
         public static ApplicationMatchResult Existing(Application application, EnrolmentStudent student) => new(application, student, false);
