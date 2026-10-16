@@ -5,6 +5,10 @@ using System;
 
 public static class ImportErrors
 {
+    public static readonly Error InvalidRow = new(
+        "Import.Staging.InvalidRow",
+        "The row does not match expected values");
+
     public static readonly Error InvalidFileSignature = new(
         "Import.Staging.InvalidFileSignature",
         "The provided file is not in a recognisable format");
