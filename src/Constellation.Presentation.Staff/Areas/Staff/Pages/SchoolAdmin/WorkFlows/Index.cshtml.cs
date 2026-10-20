@@ -14,7 +14,7 @@ using Microsoft.AspNetCore.Mvc;
 using Presentation.Shared.Extensions;
 using Serilog;
 
-[HasPermission(AuthPermission.SchoolAdmin_WorkFlow_View_Value)]
+[Authorize(AuthPolicies.IsStaffMember)]
 public class IndexModel : BasePageModel
 {
     private readonly ISender _mediator;
@@ -55,9 +55,7 @@ public class IndexModel : BasePageModel
         if (isAdminTest.Succeeded)
             IsAdmin = true;
 
-        string claimStaffId = User.Claims.FirstOrDefault(claim => claim.Type == AuthClaimType.StaffEmployeeId)?.Value ?? string.Empty;
-        Guid guidStaffId = Guid.Parse(claimStaffId);
-        StaffId staffId = StaffId.FromValue(guidStaffId);
+        StaffId staffId = _currentUserService.StaffId;
 
         Result<List<CaseSummaryResponse>> request = await _mediator.Send(new GetCaseSummaryListQuery(IsAdmin, staffId, Filter));
 

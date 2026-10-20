@@ -26,6 +26,7 @@ using Core.Models.WorkFlow.Errors;
 using Core.Models.WorkFlow.Identifiers;
 using Core.Shared;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using Presentation.Shared.Extensions;
@@ -41,7 +42,7 @@ using Shared.PartialViews.AddSentralIncidentStatusAction;
 using Shared.PartialViews.ConfirmActionUpdateModal;
 using Shared.PartialViews.ReassignActionToStaffMemberModal;
 
-[HasPermission(AuthPermission.SchoolAdmin_WorkFlow_View_Value)]
+[Authorize(AuthPolicies.IsStaffMember)]
 public class DetailsModel : BasePageModel
 {
     private readonly ISender _mediator;

@@ -34,7 +34,7 @@ public class CurrentUserService : ICurrentUserService
 
     private StaffId GetStaffId()
     {
-        string? claimStaffId = User.Claims.FirstOrDefault(claim => claim.Type == AuthClaimType.StaffEmployeeId)?.Value;
+        string? claimStaffId = User?.Claims.FirstOrDefault(claim => claim.Type == AuthClaimType.StaffEmployeeId)?.Value;
 
         if (claimStaffId is null)
             return StaffId.Empty;
