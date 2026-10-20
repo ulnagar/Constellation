@@ -105,6 +105,55 @@ internal sealed class Gateway : ISMSGateway
         }
     }
 
+    public async Task<Result<List<IncomingSmsEntry>>> ReceiveSms(
+        string messageId,
+        CancellationToken cancellationToken = default)
+    {
+        if (_logOnly)
+        {
+            _logger.Information("ReceiveSms: messageId={@messageId}", messageId);
+
+            return new List<IncomingSmsEntry>();
+        }
+
+        _logger.Information("{id}: Downloading SMS");
+
+        try
+        {
+            HttpResponseMessage response =
+                await RequestAsync($"sms-incoming/{messageId}", cancellationToken: cancellationToken);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                _logger.Warning("{id}: Failed to retrieve sms with error {error}", messageId, response.ReasonPhrase);
+
+                return Result.Failure<List<IncomingSmsEntry>>(SMSGatewayErrors.IncorrectResponseFromServer);
+            }
+
+            IncomingSmsEntry? message = await response.Content.ReadFromJsonAsync<IncomingSmsEntry>(cancellationToken);
+
+            if (message is null)
+            {
+                return Result.Failure<List<IncomingSmsEntry>>(SMSGatewayErrors.IncorrectResponseFromServer);
+            }
+
+            List<IncomingSmsEntry> messages = [message];
+
+            if (message.IsMultipart)
+            {
+                // Download the other parts of the same message.
+            }
+
+            return messages;
+        }
+        catch (Exception ex)
+        {
+            _logger.Warning(ex, "{id}: FAILED with error", messageId);
+
+            return Result.Failure<List<IncomingSmsEntry>>(SMSGatewayErrors.IncorrectResponseFromServer);
+        }
+    }
+
     private async Task<HttpResponseMessage> RequestAsync(
         string path,
         string? filter = null,
