@@ -22,7 +22,7 @@ internal sealed class JsonColumnConverter<T> : ValueConverter<T, string?>
             {
                 TypeNameHandling = TypeNameHandling.All,
                 NullValueHandling = NullValueHandling.Ignore,
-                Converters = { new GradeNewtonsoftJsonConverter() }
+                Converters = { new GradeNewtonsoftJsonConverter(), new IntEnumerationJsonConverter() }
             });
 
     private static T JsonToType(string? value) =>
@@ -34,7 +34,7 @@ internal sealed class JsonColumnConverter<T> : ValueConverter<T, string?>
                 ConstructorHandling = ConstructorHandling.AllowNonPublicDefaultConstructor,
                 TypeNameHandling = TypeNameHandling.All,
                 NullValueHandling = NullValueHandling.Ignore,
-                Converters = { new GradeNewtonsoftJsonConverter() }
+                Converters = { new GradeNewtonsoftJsonConverter(), new IntEnumerationJsonConverter() }
             });
 }
 
