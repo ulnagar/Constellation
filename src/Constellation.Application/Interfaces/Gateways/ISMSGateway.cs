@@ -8,4 +8,6 @@ public interface ISMSGateway
 {
     Task<Result<double>> GetCreditBalance(CancellationToken cancellationToken = default);
     Task<Result<List<OutgoingSmsConfirmation>>> SendSms(OutgoingSms payload, CancellationToken cancellationToken = default);
+    Task<Result<IncomingSmsEntry>> ReceiveSms(string messageId, CancellationToken cancellationToken = default);
+
 }
