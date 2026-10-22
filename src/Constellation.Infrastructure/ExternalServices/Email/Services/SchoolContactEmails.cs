@@ -5,6 +5,7 @@ using Constellation.Application.Domains.AppSettings.Models;
 using Constellation.Application.Interfaces.Services;
 using Constellation.Core.Errors;
 using Core.Models.AppSettings.Enums;
+using Core.Models.Messaging.Enums;
 using Core.Models.SchoolContacts;
 using Core.Models.StaffMembers;
 using Core.Shared;
@@ -57,7 +58,7 @@ public sealed partial class Service : IEmailService
         await BuildAndSendEmail(
             viewModel,
             EmailRecipient.NoReply,
-            "School Contact",
+            MessageModule.SchoolContact,
             viewModel.Title,
             recipients,
             cancellationToken: cancellationToken);
@@ -104,7 +105,7 @@ public sealed partial class Service : IEmailService
         await BuildAndSendEmail(
             viewModel,
             EmailRecipient.NoReply,
-            "School Contact",
+            MessageModule.SchoolContact,
             viewModel.Title,
             recipients,
             cancellationToken: cancellationToken);
@@ -134,7 +135,7 @@ public sealed partial class Service : IEmailService
         SchoolContactRole role)
     {
         string viewModel = "<p>A new school contact has been registered via the Schools Portal:</p>";
-        viewModel += $"<p><strong>{contact.DisplayName}</strong> is the <strong>{role.Role}</strong> at <strong>{role.SchoolName}</strong></p>";
+        viewModel += $"<p><strong>{contact.DisplayName} ({contact.EmailAddress})</strong> is the <strong>{role.Role}</strong> at <strong>{role.SchoolName}</strong></p>";
         viewModel += $"<p>This user was registered at <strong>{role.CreatedAt.ToLongDateString()}</strong>.";
 
         await BuildAndSendEmail(

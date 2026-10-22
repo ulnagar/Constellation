@@ -5,6 +5,7 @@ using Core.Abstractions.Repositories;
 using Core.Enums;
 using Core.Extensions;
 using Core.Models.Families;
+using Core.Models.Messaging.Enums;
 using Core.Models.Messaging.Sms;
 using Core.Models.Messaging.Sms.Errors;
 using Core.Models.Messaging.Sms.Events;
@@ -17,7 +18,7 @@ using Core.ValueObjects;
 using Interfaces.Services;
 using Serilog;
 
-internal sealed class EmailSchoolAdmin
+internal sealed class SendNonReplyMessageToAdmin
 : IDomainEventHandler<SmsMessageReceivedDomainEvent>
 {
     private readonly IFamilyRepository _familyRepository;
@@ -26,7 +27,7 @@ internal sealed class EmailSchoolAdmin
     private readonly IEmailService _emailService;
     private readonly ILogger _logger;
 
-    public EmailSchoolAdmin(
+    public SendNonReplyMessageToAdmin(
         IFamilyRepository familyRepository,
         IStudentRepository studentRepository,
         ISmsRepository smsRepository,
@@ -55,6 +56,9 @@ internal sealed class EmailSchoolAdmin
             return;
         }
 
+        if (message.SendingModule == MessageModule.Absences)
+            return;
+        
         Result<PhoneNumber> parentPhoneNumber = PhoneNumber.Create(message.Sender.Number);
 
         if (parentPhoneNumber.IsFailure)

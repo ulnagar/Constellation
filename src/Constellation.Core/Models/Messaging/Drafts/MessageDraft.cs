@@ -15,7 +15,7 @@ public sealed class MessageDraft
         UpdatedAt = DateTime.UtcNow;
     }
 
-    public MessageDraft(Guid userId, string module)
+    public MessageDraft(Guid userId, MessageModule module)
     {
         UserId = userId;
         UpdatedAt = DateTime.UtcNow;
@@ -28,7 +28,7 @@ public sealed class MessageDraft
     public IReadOnlyList<MessageRecipient> Recipients => _recipients.AsReadOnly(); 
     public string? Subject { get; set; }
     public string Body { get; set; } = string.Empty;
-    public string SendingModule { get; init; } = "Messaging";
+    public MessageModule SendingModule { get; init; } = MessageModule.Messaging;
     public DateTimeOffset UpdatedAt { get; set; }
 
     public void AddRecipient(MessageRecipient recipient) =>

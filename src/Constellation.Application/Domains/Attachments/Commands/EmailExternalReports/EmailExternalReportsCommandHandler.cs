@@ -13,6 +13,7 @@ using Core.Models.Attachments.Services;
 using Core.Models.Families;
 using Core.Models.Families.Errors;
 using Core.Models.Messaging.Email;
+using Core.Models.Messaging.Enums;
 using Core.Models.Reports;
 using Core.Models.Reports.Repositories;
 using Core.Models.Students;
@@ -194,7 +195,7 @@ internal sealed class EmailExternalReportsCommandHandler
                 RenderedEmail rendered = await _razorService.RenderEmail("/Views/Emails/PlainEmail.cshtml", body);
 
                 EmailMessage message = new(
-                    "External Reports",
+                    MessageModule.ExternalReports,
                     EmailRecipient.AuroraCollege,
                     null,
                     subject,

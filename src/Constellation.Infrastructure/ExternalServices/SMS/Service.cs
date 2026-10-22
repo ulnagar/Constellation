@@ -66,7 +66,7 @@ public sealed class Service : ISMSService
         foreach (OutgoingSmsConfirmation confirmation in results.Value)
         {
             SmsMessage messageRecord = new(
-                "Messaging",
+                MessageModule.Messaging,
                 confirmation.Id ?? string.Empty,
                 sender,
                 receiver,
@@ -119,7 +119,7 @@ public sealed class Service : ISMSService
                 SmsRecipient receiver = recipient;
 
                 SmsMessage message = new(
-                    "Absences",
+                    MessageModule.Absences,
                     confirmation.Id ?? string.Empty,
                     sender,
                     receiver,

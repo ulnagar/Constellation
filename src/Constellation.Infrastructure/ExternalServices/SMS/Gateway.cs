@@ -89,8 +89,7 @@ internal sealed class Gateway : ISMSGateway
 
             _logger.Information("{id}: Sent successfully", messageId);
 
-            OutgoingSmsResponse? collection = await response.Content
-                .ReadFromJsonAsync<OutgoingSmsResponse>(cancellationToken);
+            OutgoingSmsResponse? collection = await response.Content.ReadFromJsonAsync<OutgoingSmsResponse>(cancellationToken);
 
             List<OutgoingSmsConfirmation> messages = collection?.Messages ?? [];
 
@@ -102,6 +101,49 @@ internal sealed class Gateway : ISMSGateway
 
             // This is an error, so return null so the caller knows it did not complete
             return Result.Failure<List<OutgoingSmsConfirmation>>(SMSGatewayErrors.IncorrectResponseFromServer);
+        }
+    }
+
+    public async Task<Result<IncomingSmsEntry>> ReceiveSms(
+        string messageId,
+        CancellationToken cancellationToken = default)
+    {
+        if (_logOnly)
+        {
+            _logger.Information("ReceiveSms: messageId={@messageId}", messageId);
+
+            return new IncomingSmsEntry();
+        }
+
+        _logger.Information("{id}: Downloading SMS");
+
+        try
+        {
+            HttpResponseMessage response = await RequestAsync($"sms-incoming/{messageId}", cancellationToken: cancellationToken);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                _logger.Warning("{id}: Failed to retrieve sms with error {error}", messageId, response.ReasonPhrase);
+
+                return Result.Failure<IncomingSmsEntry>(SMSGatewayErrors.IncorrectResponseFromServer);
+            }
+
+            IncomingSmsEntry? message = await response.Content.ReadFromJsonAsync<IncomingSmsEntry>(cancellationToken);
+
+            if (message is null)
+            {
+                _logger.Warning("{id}: Failed to retrieve sms with error {error}", messageId, response.ReasonPhrase);
+
+                return Result.Failure<IncomingSmsEntry>(SMSGatewayErrors.IncorrectResponseFromServer);
+            }
+
+            return message;
+        }
+        catch (Exception ex)
+        {
+            _logger.Warning(ex, "{id}: FAILED with error", messageId);
+
+            return Result.Failure<IncomingSmsEntry>(SMSGatewayErrors.IncorrectResponseFromServer);
         }
     }
 

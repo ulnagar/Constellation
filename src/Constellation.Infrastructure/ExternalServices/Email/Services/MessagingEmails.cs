@@ -4,6 +4,7 @@ using Constellation.Application.Interfaces.Services;
 using Constellation.Core.Shared;
 using Constellation.Infrastructure.Templates.Views.Emails.Messaging;
 using Core.Models.Messaging.Drafts;
+using Core.Models.Messaging.Enums;
 using Core.ValueObjects;
 
 public sealed partial class Service : IEmailService
@@ -13,7 +14,7 @@ public sealed partial class Service : IEmailService
         EmailRecipient receiver,
         string subject,
         string messageBody,
-        string module,
+        MessageModule module,
         CancellationToken cancellationToken = default)
     {
         EmergencyConsoleEmailViewModel viewModel = new()
@@ -51,7 +52,7 @@ public sealed partial class Service : IEmailService
         return await BuildAndSendEmail(
             viewModel,
             EmailRecipient.NoReply,
-            "Messaging",
+            MessageModule.Messaging,
             viewModel.Title,
             [receiver],
             cancellationToken: cancellationToken);

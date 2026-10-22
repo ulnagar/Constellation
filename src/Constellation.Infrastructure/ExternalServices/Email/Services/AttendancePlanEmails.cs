@@ -2,6 +2,7 @@
 
 using Constellation.Application.Interfaces.Services;
 using Constellation.Core.Models.Attendance;
+using Constellation.Core.Models.Messaging.Enums;
 using Constellation.Infrastructure.Templates.Views.Emails.AttendancePlans;
 using Core.Extensions;
 using Core.ValueObjects;
@@ -58,7 +59,7 @@ public sealed partial class Service : IEmailService
         await BuildAndSendEmail(
             viewModel,
             EmailRecipient.AbsencesMailbox,
-            "Attendance Plans",
+            MessageModule.AttendancePlans,
             viewModel.Title,
             recipients,
             cancellationToken: cancellationToken);
@@ -84,7 +85,7 @@ public sealed partial class Service : IEmailService
         await BuildAndSendEmail(
             viewModel,
             EmailRecipient.AbsencesMailbox,
-            "Attendance Plans",
+            MessageModule.AttendancePlans,
             viewModel.Title,
             recipients,
             cancellationToken: cancellationToken);

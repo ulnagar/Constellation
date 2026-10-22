@@ -11,7 +11,7 @@ public sealed class SmsMessage : AggregateRoot, IHasCreatedAt
     private SmsMessage() { }
 
     public SmsMessage(
-        string module,
+        MessageModule module,
         string? smsGlobalId,
         SmsRecipient sender,
         SmsRecipient receiver,
@@ -36,7 +36,7 @@ public sealed class SmsMessage : AggregateRoot, IHasCreatedAt
     }
 
     public SmsId Id { get; init; }
-    public string SendingModule { get; private set; }
+    public MessageModule SendingModule { get; private set; }
     public string? SmsGlobalId { get; private set; } // msgid from SMSGlobal (nullable - not known until sent/received)
     public string? OutgoingId { get; set; } // outgoing_id from delivery receipt
 

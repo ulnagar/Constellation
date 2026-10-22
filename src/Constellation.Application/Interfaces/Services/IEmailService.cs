@@ -14,6 +14,7 @@ using Core.Models.Assessments.Archive;
 using Core.Models.Assessments.Archive.Identifiers;
 using Core.Models.Messaging.Drafts;
 using Core.Models.Messaging.Email;
+using Core.Models.Messaging.Enums;
 using Core.Models.Messaging.Sms;
 using Core.Models.SchoolContacts;
 using Core.Models.StaffMembers;
@@ -95,7 +96,7 @@ public interface IEmailService
     Task<Result> SendEnrolmentOfferReceipt(Application application, Offer offer, string year, CancellationToken cancellationToken = default);
 
     // Messaging Emails
-    Task<Result> SendQueuedMessage(MessageSender sender, EmailRecipient receiver, string subject, string messageBody, string module, CancellationToken cancellationToken = default);
+    Task<Result> SendQueuedMessage(MessageSender sender, EmailRecipient receiver, string subject, string messageBody, MessageModule module, CancellationToken cancellationToken = default);
     Task<Result> SendQueuedMessageLog(EmailRecipient receiver, QueuedMessage message, CancellationToken cancellationToken = default);
 
     // RollMarking Emails

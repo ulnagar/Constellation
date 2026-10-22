@@ -13,6 +13,7 @@ using Core.Models.Assessments;
 using Core.Models.Assessments.Errors;
 using Core.Models.Families;
 using Core.Models.Identifiers;
+using Core.Models.Messaging.Enums;
 using Core.Models.Offerings;
 using Core.Models.Offerings.Enums;
 using Core.Models.SchoolContacts;
@@ -168,7 +169,7 @@ internal sealed class AddAssessmentRecipientsToDraftCommandHandler
             return Result.Success();
 
         await _draftRepository.DeleteDraft(request.UserId, cancellationToken);
-        await _draftRepository.GetDraft(request.UserId, "Assessments", cancellationToken);
+        await _draftRepository.GetDraft(request.UserId, MessageModule.Assessments, cancellationToken);
 
         foreach (var recipient in recipients)
             await _draftRepository.AddRecipient(recipient, request.UserId, cancellationToken);

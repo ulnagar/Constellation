@@ -52,5 +52,11 @@ internal sealed class MessageDraftConfiguration : IEntityTypeConfiguration<Messa
 
                     navigation.ToJson();
                 });
+
+        builder
+            .Property(draft => draft.SendingModule)
+            .HasConversion(
+                module => module.Value,
+                value => MessageModule.FromValue(value));
     }
 }

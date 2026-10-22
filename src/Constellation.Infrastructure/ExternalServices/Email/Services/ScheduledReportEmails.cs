@@ -1,6 +1,7 @@
 ﻿namespace Constellation.Infrastructure.ExternalServices.Email.Services;
 
 using Constellation.Application.Interfaces.Services;
+using Constellation.Core.Models.Messaging.Enums;
 using Core.Shared;
 using Core.ValueObjects;
 using System.Net.Mail;
@@ -26,7 +27,7 @@ public sealed partial class Service : IEmailService
         Result result = await BuildAndSendEmail(
             viewModel,
             EmailRecipient.NoReply,
-            "RollMarking",
+            MessageModule.ScheduledReport,
             viewModel.Title,
             [ recipient ],
             attachments: [ attachment ],
@@ -36,7 +37,7 @@ public sealed partial class Service : IEmailService
         {
             GetLogger()
                 .ForContext(nameof(Error), result.Error, true)
-                .Warning("Failed to send roll marking report email");
+                .Warning("Failed to send scheduled report report email");
         }
     }
 }

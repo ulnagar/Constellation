@@ -18,7 +18,7 @@ public sealed class EmailMessage : IHasCreatedAt
     private EmailMessage() { }
 
     public EmailMessage(
-        string sendingModule,
+        MessageModule sendingModule,
         MessageSender from,
         MessageSender? replyTo,
         string subject,
@@ -41,7 +41,7 @@ public sealed class EmailMessage : IHasCreatedAt
     }
 
     public EmailId Id { get; init; }
-    public string SendingModule { get; private set; }
+    public MessageModule SendingModule { get; private set; }
 
     public DateTimeOffset CreatedAt { get; private set; }
     public DateTimeOffset? SentAt { get; private set; }

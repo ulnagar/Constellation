@@ -10,6 +10,7 @@ using Constellation.Core.Shared;
 using Constellation.Infrastructure.Templates.Views.Emails.AwardNominations;
 using Constellation.Infrastructure.Templates.Views.Emails.Awards;
 using Core.Models.Messaging.Email;
+using Core.Models.Messaging.Enums;
 using Core.ValueObjects;
 using System;
 using System.Collections.Generic;
@@ -48,7 +49,7 @@ public sealed partial class Service : IEmailService
             await BuildAndSendEmail(
                 viewModel,
                 EmailRecipient.NoReply,
-                "Awards",
+                MessageModule.Awards,
                 viewModel.Title,
                 [recipient],
                 attachments: [attachment],
@@ -78,7 +79,7 @@ public sealed partial class Service : IEmailService
         return await BuildAndSendEmail(
             viewModel,
             EmailRecipient.AuroraCollege,
-            "Awards",
+            MessageModule.Awards,
             viewModel.Title,
             recipients,
             ccRecipients: ccRecipients,
@@ -102,7 +103,7 @@ public sealed partial class Service : IEmailService
         return await BuildAndSendEmail(
             viewModel,
             EmailRecipient.AuroraCollege,
-            "Awards",
+            MessageModule.Awards,
             viewModel.Title,
             recipients,
             cancellationToken: cancellationToken);
@@ -134,7 +135,7 @@ public sealed partial class Service : IEmailService
         return await BuildAndSendEmail(
             viewModel,
             EmailRecipient.AuroraCollege,
-            "Awards",
+            MessageModule.Awards,
             viewModel.Title,
             recipients,
             ccRecipients: ccRecipients,

@@ -13,4 +13,8 @@ public static class AbsenceErrors
     public static readonly Func<AbsenceId, Error> NotFound = id => new Error(
         "Absences.Absence.NotFound",
         $"Could not find any absence with the id {id}");
+
+    public static readonly Func<string?, Error> NoMatchingOutgoingId = id => new(
+        "Absences.Absence.NoMatchingOutgoingId",
+        $"Could not find an absence with a notification containing the Outgoing Id '{id}'");
 }

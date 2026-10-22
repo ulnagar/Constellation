@@ -40,6 +40,8 @@ public sealed class SmsRecipient : ValueObject<SmsRecipient, string>, IValueObje
     public string Name { get; private set; }
     public string Number => Value;
 
+    public override string ToString() => $"{Name} ({Number})";
+
     public static SmsRecipient FromValue(string value) =>
         _enumerations.GetValueOrDefault(value);
 

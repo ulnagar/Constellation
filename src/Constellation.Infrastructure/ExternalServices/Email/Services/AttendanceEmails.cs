@@ -3,6 +3,7 @@
 using Application.Domains.AppSettings.Models;
 using Constellation.Application.Interfaces.Services;
 using Core.Errors;
+using Core.Models.Messaging.Enums;
 using Core.Shared;
 using Core.ValueObjects;
 using System;
@@ -47,7 +48,7 @@ public sealed partial class Service : IEmailService
         return await BuildAndSendEmail(
             viewModel,
             EmailRecipient.AuroraCollege,
-            "Attendance",
+            MessageModule.Attendance,
             viewModel.Title,
             recipients, 
             attachments: attachments, 
@@ -86,7 +87,7 @@ public sealed partial class Service : IEmailService
         return await BuildAndSendEmail(
             viewModel,
             EmailRecipient.AuroraCollege,
-            "Attendance",
+            MessageModule.Attendance,
             viewModel.Title,
             recipients,
             attachments: attachments,

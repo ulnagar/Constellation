@@ -2,6 +2,7 @@
 
 using Application.DTOs;
 using Constellation.Application.Interfaces.Services;
+using Core.Models.Messaging.Enums;
 using Core.ValueObjects;
 using System.Collections.Generic;
 using System.Net.Mail;
@@ -39,7 +40,7 @@ public sealed partial class Service : IEmailService
             await BuildAndSendEmail(
                 viewModel,
                 EmailRecipient.AuroraCollege,
-                "Student Reports",
+                MessageModule.AcademicReports,
                 viewModel.Title,
                 recipients,
                 attachments: attachments,

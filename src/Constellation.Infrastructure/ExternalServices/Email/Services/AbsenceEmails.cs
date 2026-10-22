@@ -8,6 +8,7 @@ using Constellation.Application.Interfaces.Services;
 using Core.Errors;
 using Core.Models;
 using Core.Models.Messaging.Email;
+using Core.Models.Messaging.Enums;
 using Core.Models.Students;
 using Core.Shared;
 using Core.ValueObjects;
@@ -58,7 +59,7 @@ public sealed partial class Service : IEmailService
         Result<EmailMessage> result = await BuildAndSendEmail(
             viewModel, 
             EmailRecipient.AbsencesMailbox, 
-            "Absences",
+            MessageModule.Absences,
             $"Absence Explanation Received - {viewModel.StudentName}", 
             notificationEmail.Recipients);
 
@@ -109,7 +110,7 @@ public sealed partial class Service : IEmailService
         Result<EmailMessage> result = await BuildAndSendEmail(
             viewModel,
             EmailRecipient.AbsencesMailbox,
-            "Absences",
+            MessageModule.Absences,
             $"Non-Residential Parent Absence Explanation Received - {viewModel.StudentName}",
             notificationEmail.Recipients);
 
@@ -153,7 +154,7 @@ public sealed partial class Service : IEmailService
         Result<EmailMessage> result = await BuildAndSendEmail(
             viewModel,
             EmailRecipient.AbsencesMailbox,
-            "Absences",
+            MessageModule.Absences,
             viewModel.Title,
             emailAddresses,
             cancellationToken: cancellationToken);
@@ -202,7 +203,7 @@ public sealed partial class Service : IEmailService
         Result<EmailMessage> result = await BuildAndSendEmail(
             viewModel,
             EmailRecipient.AbsencesMailbox,
-            "Absences",
+            MessageModule.Absences,
             viewModel.Title,
             emailAddresses,
             cancellationToken: cancellationToken);
@@ -247,7 +248,7 @@ public sealed partial class Service : IEmailService
         Result<EmailMessage> result = await BuildAndSendEmail(
             viewModel,
             EmailRecipient.AbsencesMailbox,
-            "Absences",
+            MessageModule.Absences,
             viewModel.Title,
             recipients,
             cancellationToken: cancellationToken);
@@ -295,7 +296,7 @@ public sealed partial class Service : IEmailService
         Result<EmailMessage> result = await BuildAndSendEmail(
             viewModel,
             EmailRecipient.AbsencesMailbox,
-            "Absences",
+            MessageModule.Absences,
             viewModel.Title,
             recipients, 
             cancellationToken: cancellationToken);
@@ -347,7 +348,7 @@ public sealed partial class Service : IEmailService
         Result<EmailMessage> result = await BuildAndSendEmail(
             viewModel,
             EmailRecipient.AbsencesMailbox,
-            "Absences",
+            MessageModule.Absences,
             viewModel.Title,
             recipients,
             cancellationToken: cancellationToken);
@@ -396,7 +397,7 @@ public sealed partial class Service : IEmailService
         Result<EmailMessage> result = await BuildAndSendEmail(
             viewModel,
             EmailRecipient.AbsencesMailbox,
-            "Absences",
+            MessageModule.Absences,
             viewModel.Title,
             recipients, 
             cancellationToken: cancellationToken);
@@ -445,7 +446,7 @@ public sealed partial class Service : IEmailService
         Result<EmailMessage> result = await BuildAndSendEmail(
             viewModel,
             EmailRecipient.AbsencesMailbox,
-            "Absences",
+            MessageModule.Absences,
             viewModel.Title,
             recipients, 
             cancellationToken: cancellationToken);
