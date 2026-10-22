@@ -19,4 +19,8 @@ public static class SentralGatewayErrors
     public static readonly Error TermDatesNotFound = new(
         "SentralGateway.GetWeekForDate.NotFound",
         "Could not identify Term and Week from date");
+
+    public static readonly Error NoStudentFound = new(
+        "SentralGateway.NoStudentFound",
+        "Could not find a matching student");
 }

@@ -30,8 +30,10 @@ using System.Data;
 using System.Globalization;
 using System.IO;
 using System.Net.Http.Headers;
+using System.Net.Http.Json;
 using System.Text.Json;
 using System.Threading;
+using static System.Collections.Specialized.BitVector32;
 
 public class Gateway : ISentralGateway
 {
@@ -175,6 +177,27 @@ public class Gateway : ISentralGateway
         return await response.Content.ReadAsByteArrayAsync(cancellationToken);
     }
 
+
+    private async Task<Result> SendApiDelete(Uri path, CancellationToken cancellationToken = default)
+    {
+        HttpResponseMessage response = await _apiClient.DeleteAsync(path, cancellationToken);
+
+        if (response.IsSuccessStatusCode)
+            return Result.Success();
+
+        return Result.Failure(SentralGatewayErrors.IncorrectResponseFromServer);
+    }
+
+
+    private async Task<Result> SendApiPost(Uri path, string jsonPayload, CancellationToken cancellationToken = default)
+    {
+        HttpResponseMessage response = await _apiClient.PostAsJsonAsync(path, jsonPayload, cancellationToken);
+
+        if (response.IsSuccessStatusCode)
+            return Result.Success();
+
+        return Result.Failure(SentralGatewayErrors.IncorrectResponseFromServer);
+    }
     
     public async Task<ICollection<FamilyDetailsDto>> GetFamilyDetailsReportFromApi(ILogger logger, CancellationToken cancellationToken = default)
     {
@@ -386,6 +409,120 @@ public class Gateway : ISentralGateway
         }
 
         return response;
+    }
+
+    public async Task<Result> AddStudentUnavailabilities(
+        string sentralStudentId,
+        List<DateOnly> dates,
+        TimeOnly startTime,
+        TimeOnly endTime,
+        CancellationToken cancellationToken = default)
+    {
+        Result<string> timetableStudentId = await GetTimetableStudentId(sentralStudentId, cancellationToken);
+
+        if (timetableStudentId.IsFailure)
+            return timetableStudentId;
+
+        foreach (DateOnly date in dates)
+        {
+            Uri createPath = new($"{_settings.ApiUrl}/restapi/v1/timetables/student-unavailability");
+
+            var payload = new
+            {
+                data = new
+                {
+                    type = "studentUnavailability",
+                    attributes =
+                        new
+                        {
+                            date = date.ToString("yyyy-MM-dd"),
+                            startTime = startTime.ToString("T"),
+                            endTime = endTime.ToString("T")
+                        },
+                    relationships = new
+                    {
+                        timetableStudent = new
+                        {
+                            data = new { id = timetableStudentId.Value, type = "timetableStudent" }
+                        }
+                    }
+                }
+            };
+
+            string json = JsonSerializer.Serialize(payload);
+
+            Result createOperation = await SendApiPost(createPath, json, cancellationToken);
+
+            if (createOperation.IsFailure)
+            {
+
+            }
+        }
+    }
+
+    public async Task<Result> RemoveStudentUnavailabilities(
+        string sentralStudentId, 
+        DateOnly startDate, 
+        DateOnly endDate,
+        CancellationToken cancellationToken = default)
+    {
+        Result<string> timetableStudentId = await GetTimetableStudentId(sentralStudentId, cancellationToken);
+
+        if (timetableStudentId.IsFailure)
+            return timetableStudentId;
+
+        Uri listPath = new($"{_settings.ApiUrl}/restapi/v1/timetables/student-unavailability?timetableStudentIds={timetableStudentId.Value}");
+
+        Dictionary<JsonSection, List<JsonElement>> existingListResponse = await GetApiJsonResponse(listPath, cancellationToken);
+
+        List<StudentUnavailability> unavailabilities = [];
+
+        foreach (JsonElement item in existingListResponse[JsonSection.Data])
+        {
+            var unavailability = StudentUnavailability.ConvertFromJson(item);
+
+            if (unavailability.IsFailure)
+                continue;
+
+            unavailabilities.Add(unavailability.Value);
+        }
+
+        List<StudentUnavailability> toBeDeleted = unavailabilities
+            .Where(entry => 
+                entry.Date >= startDate 
+                && entry.Date <= endDate)
+            .ToList();
+
+        foreach (StudentUnavailability unavailability in toBeDeleted)
+        {
+            Uri deletePath = new($"{_settings.ApiUrl}/restapi/v1/timetables/student-unavailability/{unavailability.Id}");
+
+            Result deleteSuccess = await SendApiDelete(deletePath, cancellationToken);
+
+            if (deleteSuccess.IsFailure)
+                return deleteSuccess;
+        }
+
+        return Result.Success();
+    }
+
+    private async Task<Result<string>> GetTimetableStudentId(
+        string studentId, 
+        CancellationToken cancellationToken = default)
+    {
+        Uri path = new($"{_settings.ApiUrl}/restapi/v1/timetables/timetable-student?coreStudentIds={studentId}");
+
+        Dictionary<JsonSection, List<JsonElement>> studentResponse = await GetApiJsonResponse(path, cancellationToken);
+
+        foreach (JsonElement entry in studentResponse[JsonSection.Data])
+        {
+            string? timetableId = entry.ExtractString("id");
+
+            if (timetableId is not null)
+                return timetableId;
+        }
+
+        return Result.Failure<string>(SentralGatewayErrors.NoStudentFound);
     }
 
     #endregion
