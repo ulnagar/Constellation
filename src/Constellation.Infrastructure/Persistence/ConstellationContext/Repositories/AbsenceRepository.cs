@@ -37,6 +37,16 @@ public class AbsenceRepository : IAbsenceRepository
             .Include(absence => absence.Notifications)
             .FirstOrDefaultAsync(absence => absence.Id == absenceId, cancellationToken);
 
+    public async Task<Absence?> GetByNotificationOutgoingId(
+        string? outgoingId,
+        CancellationToken cancellationToken = default) =>
+        await _context
+            .Set<Absence>()
+            .Include(absence => absence.Responses)
+            .Include(absence => absence.Notifications)
+            .Where(absence => absence.Notifications.Any(entry => entry.OutgoingId == outgoingId))
+            .FirstOrDefaultAsync(cancellationToken);
+
     public void Insert(Absence absence) =>
         _context
             .Set<Absence>()

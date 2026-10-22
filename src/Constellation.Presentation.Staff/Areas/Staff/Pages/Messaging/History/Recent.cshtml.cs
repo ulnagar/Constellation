@@ -93,7 +93,7 @@ public class RecentModel : BasePageModel
             fromContact = message.From.Contact,
             recipientsHtml = BuildRecipientsHtml(message),
             subject = message.Subject,
-            module = message.SendingModule,
+            module = message.SendingModule.Value,
             status = message.Status.Name,
             viewUrl = Url.Page("/Messaging/History/ViewMessage", new { area = "Staff", id = message.Id, type = message.Type.Value })
         });

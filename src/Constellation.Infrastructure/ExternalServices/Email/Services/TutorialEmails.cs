@@ -2,6 +2,7 @@
 
 using Application.Interfaces.Services;
 using Constellation.Core.Shared;
+using Core.Models.Messaging.Enums;
 using Core.Models.Tutorials;
 using Core.ValueObjects;
 using System.Collections.Generic;
@@ -32,7 +33,7 @@ public sealed partial class Service : IEmailService
         return await BuildAndSendEmail(
             viewModel,
             EmailRecipient.AuroraCollege,
-            "Tutorial Support",
+            MessageModule.TutorialSupport,
             viewModel.Title,
             recipients,
             cancellationToken: cancellationToken);
@@ -61,7 +62,7 @@ public sealed partial class Service : IEmailService
         return await BuildAndSendEmail(
             viewModel,
             EmailRecipient.AuroraCollege,
-            "Tutorial Support",
+            MessageModule.TutorialSupport,
             viewModel.Title,
             recipients,
             cancellationToken: cancellationToken);
@@ -89,7 +90,7 @@ public sealed partial class Service : IEmailService
         return await BuildAndSendEmail(
             viewModel,
             EmailRecipient.AuroraCollege,
-            "Tutorial Support",
+            MessageModule.TutorialSupport,
             viewModel.Title,
             recipients,
             cancellationToken: cancellationToken);
@@ -117,7 +118,7 @@ public sealed partial class Service : IEmailService
         return await BuildAndSendEmail(
             viewModel,
             EmailRecipient.AuroraCollege,
-            "Tutorial Support",
+            MessageModule.TutorialSupport,
             viewModel.Title,
             recipients,
             cancellationToken: cancellationToken);
@@ -150,7 +151,7 @@ public sealed partial class Service : IEmailService
         return await BuildAndSendEmail(
             viewModel,
             EmailRecipient.AuroraCollege,
-            "Tutorial Support",
+            MessageModule.TutorialSupport,
             viewModel.Title,
             recipients,
             cancellationToken: cancellationToken);

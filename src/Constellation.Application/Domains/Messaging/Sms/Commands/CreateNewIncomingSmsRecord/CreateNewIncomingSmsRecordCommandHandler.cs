@@ -191,7 +191,7 @@ internal sealed class CreateNewIncomingSmsRecordCommandHandler
         sender ??= SmsRecipient.Create("Unknown", from).Value;
         
         SmsMessage inboundMessage = new(
-            string.Empty,
+            MessageModule.Empty,
             id,
             sender,
             receiver,

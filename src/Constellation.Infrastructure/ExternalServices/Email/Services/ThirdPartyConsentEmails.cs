@@ -1,6 +1,7 @@
 ﻿namespace Constellation.Infrastructure.ExternalServices.Email.Services;
 
 using Constellation.Application.Interfaces.Services;
+using Core.Models.Messaging.Enums;
 using Core.Models.ThirdPartyConsent;
 using Core.ValueObjects;
 using MimeKit;
@@ -33,7 +34,7 @@ public sealed partial class Service : IEmailService
         await BuildAndSendEmail(
             viewModel,
             EmailRecipient.AuroraCollege,
-            "Third Party Consent",
+            MessageModule.ThirdPartyConsent,
             viewModel.Title,
             recipients,
             attachments: [ attachment ],
@@ -61,7 +62,7 @@ public sealed partial class Service : IEmailService
         await BuildAndSendEmail(
             viewModel,
             EmailRecipient.AuroraCollege,
-            "Third Party Consent",
+            MessageModule.ThirdPartyConsent,
             viewModel.Title,
             recipients,
             cancellationToken: cancellationToken);

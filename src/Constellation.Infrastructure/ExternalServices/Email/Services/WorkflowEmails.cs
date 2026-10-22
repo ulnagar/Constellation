@@ -6,6 +6,7 @@ using Constellation.Core.Models.WorkFlow;
 using Constellation.Core.Models.WorkFlow.Identifiers;
 using Constellation.Infrastructure.Templates.Views.Emails.WorkFlow;
 using Core.Extensions;
+using Core.Models.Messaging.Enums;
 using Core.ValueObjects;
 using System.Collections.Generic;
 using System.Net.Mail;
@@ -38,7 +39,7 @@ public sealed partial class Service : IEmailService
         await BuildAndSendEmail(
             viewModel,
             EmailRecipient.NoReply,
-            "WorkFlows",
+            MessageModule.WorkFlows,
             viewModel.Title,
             recipients,
             cancellationToken: cancellationToken);
@@ -68,7 +69,7 @@ public sealed partial class Service : IEmailService
         await BuildAndSendEmail(
             viewModel,
             EmailRecipient.NoReply,
-            "WorkFlows",
+            MessageModule.WorkFlows,
             viewModel.Title,
             recipients,
             cancellationToken: cancellationToken);
@@ -104,7 +105,7 @@ public sealed partial class Service : IEmailService
         await BuildAndSendEmail(
             viewModel,
             EmailRecipient.NoReply,
-            "WorkFlows",
+            MessageModule.WorkFlows,
             viewModel.Title,
             recipients,
             cancellationToken: cancellationToken);
@@ -130,7 +131,7 @@ public sealed partial class Service : IEmailService
         await BuildAndSendEmail(
             viewModel,
             EmailRecipient.NoReply,
-            "WorkFlows",
+            MessageModule.WorkFlows,
             viewModel.Title,
             recipients,
             cancellationToken: cancellationToken);
@@ -154,7 +155,7 @@ public sealed partial class Service : IEmailService
         await BuildAndSendEmail(
             viewModel,
             EmailRecipient.NoReply,
-            "WorkFlows",
+            MessageModule.WorkFlows,
             viewModel.Title,
             recipients,
             cancellationToken: cancellationToken);

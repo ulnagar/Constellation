@@ -4,6 +4,7 @@ using Application.Domains.AppSettings.Models;
 using Application.DTOs;
 using Constellation.Application.Interfaces.Services;
 using Core.Errors;
+using Core.Models.Messaging.Enums;
 using Core.Shared;
 using Core.ValueObjects;
 using System;
@@ -42,7 +43,7 @@ public sealed partial class Service : IEmailService
         Result result = await BuildAndSendEmail(
             viewModel,
             EmailRecipient.NoReply,
-            "RollMarking",
+            MessageModule.RollMarking,
             viewModel.Title,
             recipients);
 
@@ -81,7 +82,7 @@ public sealed partial class Service : IEmailService
         Result result = await BuildAndSendEmail(
             viewModel,
             EmailRecipient.NoReply,
-            "RollMarking",
+            MessageModule.RollMarking,
             viewModel.Title,
             recipients);
 

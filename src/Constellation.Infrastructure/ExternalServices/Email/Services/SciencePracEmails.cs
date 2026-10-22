@@ -8,6 +8,7 @@ using Constellation.Core.Errors;
 using Constellation.Core.Models.Students;
 using Constellation.Core.Shared;
 using Constellation.Infrastructure.Templates.Views.Emails.Lessons;
+using Core.Models.Messaging.Enums;
 using Core.Models.StaffMembers;
 using Core.ValueObjects;
 using System.Threading;
@@ -64,7 +65,7 @@ public sealed partial class Service : IEmailService
         await BuildAndSendEmail(
             viewModel,
             configuration.Recipient,
-            "Science Practicals",
+            MessageModule.SciencePrac,
             viewModel.Title,
             notification.Recipients);
     }
@@ -96,7 +97,7 @@ public sealed partial class Service : IEmailService
         await BuildAndSendEmail(
             viewModel,
             configuration.Recipient,
-            "Science Practicals",
+            MessageModule.SciencePrac,
             viewModel.Title,
             notification.Recipients);
     }
@@ -128,7 +129,7 @@ public sealed partial class Service : IEmailService
         await BuildAndSendEmail(
             viewModel,
             configuration.Recipient,
-            "Science Practicals",
+            MessageModule.SciencePrac,
             viewModel.Title,
             notification.Recipients);
     }
@@ -160,7 +161,7 @@ public sealed partial class Service : IEmailService
         await BuildAndSendEmail(
             viewModel,
             configuration.Recipient,
-            "Science Practicals",
+            MessageModule.SciencePrac,
             viewModel.Title,
             notification.Recipients);
     }
@@ -192,7 +193,7 @@ public sealed partial class Service : IEmailService
         await BuildAndSendEmail(
             viewModel,
             configuration.Recipient,
-            "Science Practicals",
+            MessageModule.SciencePrac,
             viewModel.Title,
             notification.Recipients);
     }
@@ -242,7 +243,7 @@ public sealed partial class Service : IEmailService
         await BuildAndSendEmail(
             viewModel,
             EmailRecipient.NoReply,
-            "Science Practicals",
+            MessageModule.SciencePrac,
             viewModel.Title,
             [recipient.Value],
             cancellationToken: cancellationToken);

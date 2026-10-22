@@ -9,6 +9,7 @@ using Constellation.Core.Models.Messaging.Email.Enums;
 using Constellation.Core.Shared;
 using Core.Abstractions.Clock;
 using Core.Models.Messaging.Email.Repositories;
+using Core.Models.Messaging.Enums;
 using Core.ValueObjects;
 using System.Net.Mail;
 using System.Runtime.CompilerServices;
@@ -63,7 +64,7 @@ public sealed partial class Service : IEmailService
         RenderedEmail rendered = await _razorService.RenderEmail("/Views/Emails/PlainEmail.cshtml", body);
 
         EmailMessage message = new(
-            "System",
+            MessageModule.System,
             from,
             null,
             subject,
@@ -112,7 +113,7 @@ public sealed partial class Service : IEmailService
         RenderedEmail rendered = await _razorService.RenderEmail("/Views/Emails/PlainEmail.cshtml", body);
 
         EmailMessage message = new(
-            "System",
+            MessageModule.System,
             from,
             null,
             subject,
@@ -136,7 +137,7 @@ public sealed partial class Service : IEmailService
     private async Task<Result<EmailMessage>> BuildAndSendEmail<T>(
         T viewModel, 
         EmailRecipient from, 
-        string sendingModule, 
+        MessageModule sendingModule, 
         string subject, 
         List<string> recipients,
         List<string>? ccRecipients = null,
@@ -191,7 +192,7 @@ public sealed partial class Service : IEmailService
     private async Task<Result<EmailMessage>> BuildAndSendEmail<T>(
         T viewModel, 
         EmailRecipient from, 
-        string sendingModule, 
+        MessageModule sendingModule, 
         string subject, 
         List<EmailRecipient> recipients,
         List<EmailRecipient>? ccRecipients = null,

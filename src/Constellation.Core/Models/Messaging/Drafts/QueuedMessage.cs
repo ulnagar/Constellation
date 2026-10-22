@@ -39,7 +39,7 @@ public sealed class QueuedMessage
     public MessageSender? Sender { get; private set; }
     public string? Subject { get; private set; }
     public string Body { get; private set; } = string.Empty;
-    public string SendingModule { get; init; }
+    public MessageModule SendingModule { get; init; }
     public DateTimeOffset QueuedAt { get; private set; }
     public MessagePriority Priority { get; private set; } = MessagePriority.Normal;
     public DateTimeOffset? ProcessedAt { get; private set; }

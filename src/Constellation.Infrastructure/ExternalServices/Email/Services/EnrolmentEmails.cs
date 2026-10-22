@@ -9,6 +9,7 @@ using Core.Models.AppSettings.Enums;
 using Core.Models.EnrolmentContext.Application;
 using Core.Models.EnrolmentContext.Application.Enums;
 using Core.Models.EnrolmentContext.Offer;
+using Core.Models.Messaging.Enums;
 using Core.ValueObjects;
 
 public sealed partial class Service : IEmailService
@@ -57,7 +58,7 @@ public sealed partial class Service : IEmailService
         return await BuildAndSendEmail(
             viewModel,
             EmailRecipient.AuroraCollege,
-            "Enrolments",
+            MessageModule.EnrolmentsPortal,
             viewModel.Title,
             [recipient.Value],
             cancellationToken: cancellationToken);
@@ -103,7 +104,7 @@ public sealed partial class Service : IEmailService
         return await BuildAndSendEmail(
             viewModel,
             EmailRecipient.AuroraCollege,
-            "Enrolments",
+            MessageModule.EnrolmentsPortal,
             viewModel.Title,
             [recipient.Value],
             cancellationToken: cancellationToken);
@@ -153,7 +154,7 @@ public sealed partial class Service : IEmailService
         return await BuildAndSendEmail(
             viewModel,
             EmailRecipient.AuroraCollege,
-            "Enrolments",
+            MessageModule.EnrolmentsPortal,
             viewModel.Title,
             [recipient.Value],
             cancellationToken: cancellationToken);

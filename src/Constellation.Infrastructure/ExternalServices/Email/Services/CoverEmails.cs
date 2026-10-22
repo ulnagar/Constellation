@@ -8,6 +8,7 @@ using Constellation.Core.Models.Messaging.Email;
 using Constellation.Core.Models.Messaging.Email.Enums;
 using Constellation.Infrastructure.Templates.Views.Emails.Covers;
 using Core.Errors;
+using Core.Models.Messaging.Enums;
 using Core.Models.Offerings;
 using Core.Shared;
 using Core.ValueObjects;
@@ -78,7 +79,7 @@ public sealed partial class Service : IEmailService
             string icsData = _calendarService.CreateInvite(uid, coveringTeacher.Name, coveringTeacher.Email, summary, location, rendered.PlainText, appointmentStart, appointmentEnd, 0);
 
             EmailMessage message = new(
-                "Covers",
+                MessageModule.Covers,
                 EmailRecipient.AuroraCollege,
                 null,
                 viewModel.Title,
@@ -103,7 +104,7 @@ public sealed partial class Service : IEmailService
             await BuildAndSendEmail(
                 viewModel,
                 EmailRecipient.AuroraCollege,
-                "Covers",
+                MessageModule.Covers,
                 viewModel.Title,
                 primaryRecipients,
                 ccRecipients: secondaryRecipients,
@@ -173,7 +174,7 @@ public sealed partial class Service : IEmailService
             string icsData = _calendarService.CreateInvite(uid, coveringTeacher.Name, coveringTeacher.Email, summary, location, rendered.PlainText, appointmentStart, appointmentEnd, 0);
 
             EmailMessage message = new(
-                "Covers",
+                MessageModule.Covers,
                 EmailRecipient.AuroraCollege,
                 null,
                 viewModel.Title,
@@ -198,7 +199,7 @@ public sealed partial class Service : IEmailService
             await BuildAndSendEmail(
                 viewModel,
                 EmailRecipient.AuroraCollege,
-                "Covers",
+                MessageModule.Covers,
                 viewModel.Title,
                 primaryRecipients,
                 ccRecipients: secondaryRecipients,
@@ -263,7 +264,7 @@ public sealed partial class Service : IEmailService
             string icsData = _calendarService.CancelInvite(uid, coveringTeacher.Name, coveringTeacher.Email, summary, location, rendered.PlainText, appointmentStart, appointmentEnd, 0);
 
             EmailMessage message = new(
-                "Covers",
+                MessageModule.Covers,
                 EmailRecipient.AuroraCollege,
                 null,
                 viewModel.Title,
@@ -288,7 +289,7 @@ public sealed partial class Service : IEmailService
             await BuildAndSendEmail(
                 viewModel,
                 EmailRecipient.AuroraCollege,
-                "Covers",
+                MessageModule.Covers,
                 viewModel.Title,
                 primaryRecipients,
                 ccRecipients: secondaryRecipients,

@@ -6,6 +6,7 @@ using Constellation.Application.Models;
 using Constellation.Core.Models.Messaging.Email;
 using Constellation.Core.Models.Messaging.Email.Enums;
 using Constellation.Infrastructure.Templates.Views.Emails.Auth;
+using Core.Models.Messaging.Enums;
 using Core.ValueObjects;
 using System.Threading.Tasks;
 
@@ -27,7 +28,7 @@ public sealed partial class Service : IEmailService
         RenderedEmail rendered = await _razorService.RenderEmail("/Views/Emails/Auth/MagicLinkLoginEmail.cshtml", viewModel);
 
         EmailMessage message = new(
-            "Authentication",
+            MessageModule.Authentication,
             EmailRecipient.NoReply,
             null,
             viewModel.Title,

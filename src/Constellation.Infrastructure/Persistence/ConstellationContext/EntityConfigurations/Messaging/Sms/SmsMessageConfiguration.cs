@@ -90,5 +90,11 @@ internal class SmsMessageConfiguration : IEntityTypeConfiguration<SmsMessage>
                 message.Status, 
                 message.Direction
             }); // status filtering
+
+        builder
+            .Property(message => message.SendingModule)
+            .HasConversion(
+                module => module.Value,
+                value => MessageModule.FromValue(value));
     }
 }

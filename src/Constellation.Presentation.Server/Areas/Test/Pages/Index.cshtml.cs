@@ -3,6 +3,8 @@ namespace Constellation.Presentation.Server.Areas.Test.Pages;
 using Application.Domains.Assessments.Assessments.Queries.GetCanvasCoursesAndAssessments;
 using Application.Domains.LinkedSystems.Canvas.Models;
 using Application.Domains.MeritAwards.Awards.Queries.GetAwardDetailsFromSentral;
+using Application.Domains.Messaging.Sms.Commands.CreateNewIncomingSmsRecord;
+using Application.Domains.Messaging.Sms.Dtos;
 using Application.DTOs;
 using Application.Interfaces.Gateways;
 using Application.Models.Auth;
@@ -39,7 +41,18 @@ public class IndexModel : BasePageModel
     
     public async Task OnGet()
     {
-        await _mediator.Send(new GetAwardDetailsFromSentralQuery());
+        IncomingSms sms = new()
+        {
+            MsgId = "846122192",
+            From = "61417243239",
+            To = "61400896896",
+            Msg = "0709 we received email that that class was optional as its exam period",
+            Date = new DateTimeOffset(2026, 9, 8, 19, 23, 23, new TimeSpan(10, 0, 0))
+        };
+
+        CreateNewIncomingSmsRecordCommand command = new(sms);
+
+        await _mediator.Send(command);
     }
 
 }

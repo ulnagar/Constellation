@@ -45,6 +45,12 @@ internal sealed class QueuedMessageConfiguration : IEntityTypeConfiguration<Queu
         builder
             .Property(item => item.Priority)
             .HasConversion<string>();
+        
+        builder
+            .Property(item => item.SendingModule)
+            .HasConversion(
+                module => module.Value,
+                value => MessageModule.FromValue(value));
 
         builder
             .OwnsMany(item => item.Recipients,

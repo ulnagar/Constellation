@@ -3,6 +3,7 @@
 using Constellation.Application.Interfaces.Services;
 using Core.Models.Assessments.Archive;
 using Core.Models.Assessments.Archive.Identifiers;
+using Core.Models.Messaging.Enums;
 using Core.Models.SchoolContacts;
 using Core.Models.Students;
 using Core.Models.Subjects;
@@ -49,7 +50,7 @@ public sealed partial class Service : IEmailService
         return await BuildAndSendEmail(
             viewModel,
             EmailRecipient.NoReply,
-            "Assignments",
+            MessageModule.Assessments,
             viewModel.Title,
             [recipient.Value],
             cancellationToken: cancellationToken);

@@ -3,11 +3,11 @@
 using Constellation.Application.Interfaces.Services;
 using Constellation.Core.Models.Assessments;
 using Core.Models.Messaging.Email;
+using Core.Models.Messaging.Enums;
 using Core.Shared;
 using Core.ValueObjects;
 using System.Threading.Tasks;
 using Templates.Views.Emails.Assessments;
-using Templates.Views.Emails.Enrolments;
 
 public sealed partial class Service : IEmailService
 {
@@ -41,7 +41,7 @@ public sealed partial class Service : IEmailService
         return await BuildAndSendEmail(
             viewModel,
             EmailRecipient.AuroraCollege,
-            "Assessments",
+            MessageModule.Assessments,
             viewModel.Title,
             [ recipient.Value ],
             cancellationToken: cancellationToken);
@@ -70,7 +70,7 @@ public sealed partial class Service : IEmailService
             Result<EmailMessage> result = await BuildAndSendEmail(
                 viewModel,
                 EmailRecipient.AuroraCollege,
-                "Assessments",
+                MessageModule.Assessments,
                 viewModel.Title,
                 [ recipient ],
                 cancellationToken: cancellationToken);

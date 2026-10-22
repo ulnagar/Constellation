@@ -138,5 +138,11 @@ internal sealed class EmailMessageConfiguration : IEntityTypeConfiguration<Email
 
         builder
             .HasIndex(e => e.SentAt);
+
+        builder
+            .Property(e => e.SendingModule)
+            .HasConversion(
+                module => module.Value,
+                value => MessageModule.FromValue(value));
     }
 }

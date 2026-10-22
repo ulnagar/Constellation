@@ -1,12 +1,12 @@
 ﻿namespace Constellation.Infrastructure.Persistence.ConstellationContext.Repositories;
 
-using Application.Models.Identity;
 using Constellation.Core.Models.Messaging.Drafts.Errors;
 using Core.Models.Auth;
 using Core.Models.Messaging.Drafts;
 using Core.Models.Messaging.Drafts.Enums;
 using Core.Models.Messaging.Drafts.Identifiers;
 using Core.Models.Messaging.Drafts.Repositories;
+using Core.Models.Messaging.Enums;
 using Core.Shared;
 using Core.ValueObjects;
 using Microsoft.EntityFrameworkCore;
@@ -25,7 +25,7 @@ internal sealed class MessageDraftRepository : IMessageDraftRepository
     private async Task<MessageDraft> GetOrCreateDraft(
         ConstellationDbContext context,
         Guid userId,
-        string module = "",
+        string? module = null,
         CancellationToken cancellationToken = default)
     {
         MessageDraft? draft = await context
@@ -35,10 +35,12 @@ internal sealed class MessageDraftRepository : IMessageDraftRepository
         if (draft is not null)
             return draft;
 
-        if (string.IsNullOrWhiteSpace(module))
+        MessageModule? messageModule = MessageModule.FromValue(module);
+        
+        if (messageModule is null)
             draft = new(userId);
         else
-            draft = new(userId, module);
+            draft = new(userId, messageModule);
 
         AppUser? user = await context
             .Set<AppUser>()
@@ -60,7 +62,7 @@ internal sealed class MessageDraftRepository : IMessageDraftRepository
 
     public async Task<MessageDraft> GetDraft(
         Guid userId,
-        string module = "",
+        string? module = null,
         CancellationToken cancellationToken = default)
     {
         await using ConstellationDbContext context = await _dbContextFactory.CreateDbContextAsync(cancellationToken);
