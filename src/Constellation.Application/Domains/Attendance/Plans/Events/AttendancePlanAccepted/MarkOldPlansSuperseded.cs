@@ -40,7 +40,7 @@ internal sealed class MarkOldPlansSuperseded
 
     public async Task Handle(AttendancePlanAcceptedDomainEvent notification, CancellationToken cancellationToken)
     {
-        AttendancePlan currentPlan = await _planRepository.GetById(notification.PlanId, cancellationToken);
+        AttendancePlan? currentPlan = await _planRepository.GetById(notification.PlanId, cancellationToken);
 
         if (currentPlan is null)
         {

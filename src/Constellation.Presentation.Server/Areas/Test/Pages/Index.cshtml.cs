@@ -1,17 +1,10 @@
 namespace Constellation.Presentation.Server.Areas.Test.Pages;
 
-using Application.Domains.Assessments.Assessments.Queries.GetCanvasCoursesAndAssessments;
-using Application.Domains.LinkedSystems.Canvas.Models;
-using Application.Domains.MeritAwards.Awards.Queries.GetAwardDetailsFromSentral;
-using Application.Domains.Messaging.Sms.Commands.CreateNewIncomingSmsRecord;
-using Application.Domains.Messaging.Sms.Dtos;
-using Application.DTOs;
+using Application.Extensions;
 using Application.Interfaces.Gateways;
 using Application.Models.Auth;
 using BaseModels;
 using Core.Abstractions.Services;
-using Core.Models.Canvas.Models;
-using Core.Shared;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -21,18 +14,18 @@ using Serilog;
 public class IndexModel : BasePageModel
 {
     private readonly IMediator _mediator;
-    private readonly ICanvasGateway _canvasGateway;
+    private readonly ISentralGateway _sentralGateway;
     private readonly ICurrentUserService _currentUserService;
     private readonly ILogger _logger;
 
     public IndexModel(
         IMediator mediator,
-        ICanvasGateway canvasGateway,
+        ISentralGateway sentralGateway,
         ICurrentUserService currentUserService,
         ILogger logger)
     {
         _mediator = mediator;
-        _canvasGateway = canvasGateway;
+        _sentralGateway = sentralGateway;
         _currentUserService = currentUserService;
         _logger = logger;
     }
@@ -41,18 +34,33 @@ public class IndexModel : BasePageModel
     
     public async Task OnGet()
     {
-        IncomingSms sms = new()
+        // Create a recurring set:
+
+        //var result = await _sentralGateway.AddStudentUnavailabilities(
+        //    "2897",
+        //    [
+        //        new DateOnly(2026, 10, 19),
+        //        new DateOnly(2026, 11, 2),
+        //        new DateOnly(2026, 11, 16)
+        //    ],
+        //    new TimeOnly(9, 0, 0),
+        //    new TimeOnly(10, 0, 0));
+
+        // Delete between dates:
+
+        //var result = await _sentralGateway.RemoveStudentUnavailabilities(
+        //    "2897",
+        //    new DateOnly(2026, 10, 19),
+        //    new DateOnly(2026, 11, 16));
+
+        var result = await _sentralGateway.GetTermsAndWeeksFromApi("2026");
+
+        foreach (var entry in result)
         {
-            MsgId = "846122192",
-            From = "61417243239",
-            To = "61400896896",
-            Msg = "0709 we received email that that class was optional as its exam period",
-            Date = new DateTimeOffset(2026, 9, 8, 19, 23, 23, new TimeSpan(10, 0, 0))
-        };
+            entry.StartDate.GetDayNumber();
+        }
 
-        CreateNewIncomingSmsRecordCommand command = new(sms);
-
-        await _mediator.Send(command);
+        var activePage = result;
     }
 
 }

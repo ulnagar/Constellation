@@ -23,4 +23,8 @@ public static class SentralGatewayErrors
     public static readonly Error NoStudentFound = new(
         "SentralGateway.NoStudentFound",
         "Could not find a matching student");
+
+    public static readonly Func<string, Error> FailedToCreateUnavailabilities = dates => new(
+        "SentralGateway.FailedToCreateUnavailabilities",
+        $"Could not create an unavailability for the following date(s): {dates}");
 }

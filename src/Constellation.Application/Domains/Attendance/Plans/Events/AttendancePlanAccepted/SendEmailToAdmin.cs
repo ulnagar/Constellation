@@ -9,6 +9,7 @@ using Core.Shared;
 using Core.ValueObjects;
 using Interfaces.Services;
 using Serilog;
+using System.Numerics;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -44,6 +45,6 @@ internal sealed class SendEmailToAdmin
             return;
         }
         
-        await _emailService.SendAttendancePlanToAdmin([ EmailRecipient.AbsencesMailbox, EmailRecipient.AuroraCollege ], plan, cancellationToken);
+        //await _emailService.SendAttendancePlanToAdmin([ EmailRecipient.AbsencesMailbox, EmailRecipient.AuroraCollege ], plan, cancellationToken);
     }
 }

@@ -24,16 +24,14 @@ using Errors;
 using ExcelDataReader;
 using HtmlAgilityPack;
 using Microsoft.Extensions.Options;
-using Org.BouncyCastle.Bcpg;
 using System.Collections.Generic;
 using System.Data;
 using System.Globalization;
 using System.IO;
 using System.Net.Http.Headers;
-using System.Net.Http.Json;
+using System.Text;
 using System.Text.Json;
 using System.Threading;
-using static System.Collections.Specialized.BitVector32;
 
 public class Gateway : ISentralGateway
 {
@@ -191,10 +189,13 @@ public class Gateway : ISentralGateway
 
     private async Task<Result> SendApiPost(Uri path, string jsonPayload, CancellationToken cancellationToken = default)
     {
-        HttpResponseMessage response = await _apiClient.PostAsJsonAsync(path, jsonPayload, cancellationToken);
+        StringContent content = new StringContent(jsonPayload, Encoding.UTF8, "application/vnd.api+json");
+        HttpResponseMessage response = await _apiClient.PostAsync(path, content, cancellationToken);
 
         if (response.IsSuccessStatusCode)
             return Result.Success();
+
+        string errorBody = await response.Content.ReadAsStringAsync(cancellationToken);
 
         return Result.Failure(SentralGatewayErrors.IncorrectResponseFromServer);
     }
@@ -231,7 +232,6 @@ public class Gateway : ISentralGateway
         return familyDetails;
     }
 
-    
     public async Task<FamilyDetailsDto> GetParentContactEntryFromApi(string sentralStudentId, CancellationToken cancellationToken = default)
     {
         Uri path = new($"{_settings.ApiUrl}/restapi/v1/core/core-student/{sentralStudentId}?include=studentRelationships,contacts");
@@ -423,6 +423,8 @@ public class Gateway : ISentralGateway
         if (timetableStudentId.IsFailure)
             return timetableStudentId;
 
+        List<DateOnly> failedDates = [];
+
         foreach (DateOnly date in dates)
         {
             Uri createPath = new($"{_settings.ApiUrl}/restapi/v1/timetables/student-unavailability");
@@ -436,8 +438,8 @@ public class Gateway : ISentralGateway
                         new
                         {
                             date = date.ToString("yyyy-MM-dd"),
-                            startTime = startTime.ToString("T"),
-                            endTime = endTime.ToString("T")
+                            startTime = startTime.ToString("O"),
+                            endTime = endTime.ToString("O")
                         },
                     relationships = new
                     {
@@ -454,10 +456,13 @@ public class Gateway : ISentralGateway
             Result createOperation = await SendApiPost(createPath, json, cancellationToken);
 
             if (createOperation.IsFailure)
-            {
-
-            }
+                failedDates.Add(date);
         }
+
+        if (failedDates.Count == 0)
+            return Result.Success();
+
+        return Result.Failure(SentralGatewayErrors.FailedToCreateUnavailabilities(string.Join(", ", dates.Select(entry => entry.ToString("d")))));
     }
 
     public async Task<Result> RemoveStudentUnavailabilities(
