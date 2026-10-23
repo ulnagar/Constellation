@@ -44,10 +44,10 @@ internal sealed class CreateUnavailabilitiesInSentral
 
     private sealed class Unavailability
     {
-        public required PeriodWeek Week { get; set; }
-        public required PeriodDay Day { get; set; }
-        public required TimeOnly Start { get; set; }
-        public required TimeOnly End { get; set; }
+        public required PeriodWeek Week { get; init; }
+        public required PeriodDay Day { get; init; }
+        public required TimeOnly Start { get; init; }
+        public required TimeOnly End { get; init; }
     }
 
     public async Task Handle(AttendancePlanAcceptedDomainEvent notification, CancellationToken cancellationToken)
@@ -116,6 +116,20 @@ internal sealed class CreateUnavailabilitiesInSentral
             }
         }
 
+        // Remove any current Unavailabilities first
+        Result remove = await _sentralGateway.RemoveStudentUnavailabilities(sentralStudentId, _dateTime.Today, _dateTime.LastDayOfCurrentYear, cancellationToken);
+
+        if (remove.IsFailure)
+        {
+            _logger
+                .ForContext(nameof(AttendancePlanAcceptedDomainEvent), notification, true)
+                .ForContext(nameof(Error), remove.Error, true)
+                .Warning("Failed to create Sentral Unavailabilities from attendance plan");
+
+            return;
+        }
+
+        // Create new Unavailabilities
         List<SchoolCalendarWeek> validWeeks = await _sentralGateway.GetTermsAndWeeksFromApi(plan.CreatedAt.Year.ToString(), cancellationToken);
         
         foreach (Unavailability entry in unavailabilities)
