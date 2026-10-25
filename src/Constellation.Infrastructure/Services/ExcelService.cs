@@ -1463,6 +1463,13 @@ public class ExcelService : IExcelService
         using IExcelDataReader baseReader = ExcelReaderFactory.CreateReader(baseFile);
         DataSet baseResult = baseReader.AsDataSet(new ExcelDataSetConfiguration { UseColumnDataType = true });
 
+        Dictionary<(string Srn, string IncidentId), DataRow> baseLookup = baseResult.Tables[0].Rows
+            .Cast<DataRow>()
+            .GroupBy(r => (
+                Srn: r[0].ToString()?.Trim() ?? string.Empty,
+                IncidentId: r[5].ToString()?.FormatField ?? string.Empty))
+            .ToDictionary(g => g.Key, g => g.First());
+
         foreach (DataRow row in detailResult.Tables[0].Rows)
         {
             if (row.ItemArray.First()?.ToString() == "Student Id") // This is a header row
@@ -1523,13 +1530,23 @@ public class ExcelService : IExcelService
             // Index 17: Required Student Actions
             // Index 18: New Due Date
 
+            // Match on both SRN and IncidentId to handle situation where there are multiple students in the same incident
+            // Each student will have their own status and follow up requirements
             string incidentId = row[5].ToString()?.FormatField ?? string.Empty;
-
-            if (response.Any(entry => entry.IncidentId == incidentId))
-                continue;
-
             string srn = row[0].ToString() ?? string.Empty;
 
+            if (response.Any(entry => entry.IncidentId == incidentId && entry.StudentReferenceNumber == srn))
+                continue;
+
+            // The Sentral report has been set to only return "In Progress" incidents, however an incident that has
+            // multiple students may have some "Resolved" and some "In Progress". In this case the report shows all
+            // students linked to the incident but their individual status column has the correct data. Therefore,
+            // ignore all rows where the status is not set to "In Progress".
+            string status = row[14].ToString()?.FormatField ?? string.Empty;
+
+            if (status != "In Progress")
+                continue;
+            
             bool dateExtractionSucceeded = DateOnly.TryParse(row[6].ToString(), out DateOnly dateCreated);
 
             if (!dateExtractionSucceeded)
@@ -1548,10 +1565,12 @@ public class ExcelService : IExcelService
             bool gradeSuccess = Grade.TryParse(row[3].ToString(), out var gradeNum);
             Grade grade = gradeSuccess ? gradeNum : Grade.Empty;
 
-            DataRow? matchingRow = baseResult.Tables[0].Select($"Column5 = '{incidentId}'").FirstOrDefault();
-
-            if (matchingRow is null)
+            if (!baseLookup.TryGetValue((srn, incidentId), out DataRow? matchingRow))
                 continue;
+
+            var teacher = matchingRow[19].ToString()?.FormatField ?? string.Empty;
+            int index = teacher.IndexOf('(');
+            string teacherName = index >= 0 ? teacher[..index].TrimEnd() : teacher;
 
             response.Add(new(
                 srn,
@@ -1559,7 +1578,7 @@ public class ExcelService : IExcelService
                 row[5].ToString()?.FormatField ?? string.Empty,
                 row[11].ToString()?.FormatField ?? string.Empty,
                 row[13].ToString()?.FormatField ?? string.Empty,
-                matchingRow[19].ToString()?.FormatField ?? string.Empty,
+                teacherName,
                 row[1].ToString()?.FormatField ?? string.Empty,
                 row[2].ToString()?.FormatField ?? string.Empty,
                 grade,
