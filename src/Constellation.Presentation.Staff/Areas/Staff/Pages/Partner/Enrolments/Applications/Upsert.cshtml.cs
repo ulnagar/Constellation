@@ -108,9 +108,10 @@ public class UpsertModel : PeriodScopedPageModel
     [BindProperty]
     [ModelBinder(typeof(BaseFromValueBinder))]
     public Program Program { get; set; } = Program.Empty;
+
     [BindProperty]
     [ModelBinder(typeof(BaseFromValueBinder))]
-    public Grade Grade { get; set; }
+    public Grade Grade { get; set; } = Grade.Empty;
 
     [BindProperty]
     public List<EnrolmentCourse> SelectedCourses { get; set; } = [];
