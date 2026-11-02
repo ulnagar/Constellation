@@ -76,60 +76,59 @@
 
 <h4>Parent Details</h4>
 
-<dl class="row">
-    <dt class="col-md-2">
-        <label asp-for="Application.ParentName">Name</label>
-    </dt>
-    <dd class="col-md-10">
-        <span>@Model.Application.ParentName</span>
-    </dd>
+@foreach (var parent in Model.Application.Parents)
+{
+    <dl class="row">
+        <dt class="col-md-2">
+            <label asp-for="Application.Parents.First().Name">Name</label>
+        </dt>
+        <dd class="col-md-10">
+            <span>@parent.Name</span>
+        </dd>
 
-    <dt class="col-md-2">
-        <label asp-for="Application.ParentEmailAddress">Email Address</label>
-    </dt>
-    <dd class="col-md-10">
-        <span>@Model.Application.ParentEmailAddress</span>
-    </dd>
+        <dt class="col-md-2">
+            <label asp-for="Application.Parents.First().Email">Email Address</label>
+        </dt>
+        <dd class="col-md-10">
+            <span>@parent.Email</span>
+        </dd>
 
-    <dt class="col-md-2">
-        <label asp-for="Application.ParentPhoneNumber">Phone Number</label>
-    </dt>
-    <dd class="col-md-10">
-        <span>@Model.Application.ParentPhoneNumber</span>
-    </dd>
-</dl>
+        <dt class="col-md-2">
+            <label asp-for="Application.Parents.First().PhoneNumber">Phone Number</label>
+        </dt>
+        <dd class="col-md-10">
+            <span>@parent.PhoneNumber</span>
+        </dd>
+        
+        <dt class="col-md-2">
+            <label>Street Address</label>
+        </dt>
+        <dd class="col-md-10">
+            <span>@parent.MailingAddress?.Street</span>
+        </dd>
 
-<h4>Mailing Address</h4>
+        <dt class="col-md-2">
+            <label>Town</label>
+        </dt>
+        <dd class="col-md-10">
+            <span>@parent.MailingAddress?.Town</span>
+        </dd>
 
-<dl class="row">
-    <dt class="col-md-2">
-        <label asp-for="Application.MailingAddress.Street">Street Address</label>
-    </dt>
-    <dd class="col-md-10">
-        <span>@Model.Application.MailingAddress?.Street</span>
-    </dd>
+        <dt class="col-md-2">
+            <label>State</label>
+        </dt>
+        <dd class="col-md-10">
+            <span>@parent.MailingAddress?.State</span>
+        </dd>
 
-    <dt class="col-md-2">
-        <label asp-for="Application.MailingAddress.Town">Town</label>
-    </dt>
-    <dd class="col-md-10">
-        <span>@Model.Application.MailingAddress?.Town</span>
-    </dd>
-
-    <dt class="col-md-2">
-        <label asp-for="Application.MailingAddress.State">State</label>
-    </dt>
-    <dd class="col-md-10">
-        <span>@Model.Application.MailingAddress?.State</span>
-    </dd>
-
-    <dt class="col-md-2">
-        <label asp-for="Application.MailingAddress.Postcode">Post Code</label>
-    </dt>
-    <dd class="col-md-10">
-        <span>@Model.Application.MailingAddress?.Postcode</span>
-    </dd>
-</dl>
+        <dt class="col-md-2">
+            <label>Post Code</label>
+        </dt>
+        <dd class="col-md-10">
+            <span>@parent.MailingAddress?.Postcode</span>
+        </dd>
+    </dl>
+}
 
 <h4>Application Details</h4>
 
@@ -187,6 +186,7 @@
             <tr>
                 <th>Code</th>
                 <th>Name</th>
+                <th>Line</th>
                 <th>Status</th>
                 <th></th>
             </tr>
@@ -196,12 +196,14 @@
             <tr>
                 <td>@entry.Course.Value</td>
                 <td>@entry.Course.Name</td>
+                <td>@entry.Line</td>
                 <td>@entry.Status</td>
                 <td>
                     @if (entry.Status != CourseSelectionStatus.Withdrawn && canEditTest.Succeeded && !isArchived)
                     {
                         <form method="post">
                             <input type="hidden" name="course" value="@entry.Course.Value" />
+                            <input type="hidden" name="line" value="@entry.Line" />
                             <button type="submit" asp-page-handler="RejectApplication" asp-route-PeriodId="@Model.PeriodId" class="btn btn-danger">Reject</button>
                             <button type="submit" asp-page-handler="ApproveApplication" asp-route-PeriodId="@Model.PeriodId" class="btn btn-success">Approve</button>
                         </form>

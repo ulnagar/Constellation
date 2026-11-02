@@ -1,7 +1,7 @@
 ﻿namespace Constellation.Core.Models.EnrolmentContext.EnrolmentParent;
 
-using Constellation.Core.Models.EnrolmentContext.EnrolmentParent.Identifiers;
 using EnrolmentStudent;
+using Identifiers;
 using ValueObjects;
 
 public sealed class EnrolmentParent

@@ -149,9 +149,9 @@ public class DetailsModel : PeriodScopedPageModel
         return RedirectToPage(new { PeriodId });
     }
 
-    public async Task<IActionResult> OnPostRejectApplication(EnrolmentCourse course)
+    public async Task<IActionResult> OnPostRejectApplication(EnrolmentCourse course, string line)
     {
-        UpdateEnrolmentApplicationCourseCommand command = new(Id, course, CourseSelectionStatus.Rejected);
+        UpdateEnrolmentApplicationCourseCommand command = new(Id, course, line, CourseSelectionStatus.Rejected);
 
         _logger
             .ForContext(nameof(UpdateEnrolmentApplicationCourseCommand), command, true)
@@ -175,9 +175,9 @@ public class DetailsModel : PeriodScopedPageModel
         return RedirectToPage(new { PeriodId });
     }
 
-    public async Task<IActionResult> OnPostApproveApplication(EnrolmentCourse course)
+    public async Task<IActionResult> OnPostApproveApplication(EnrolmentCourse course, string line)
     {
-        UpdateEnrolmentApplicationCourseCommand command = new(Id, course, CourseSelectionStatus.Approved);
+        UpdateEnrolmentApplicationCourseCommand command = new(Id, course, line, CourseSelectionStatus.Approved);
 
         _logger
             .ForContext(nameof(UpdateEnrolmentApplicationCourseCommand), command, true)

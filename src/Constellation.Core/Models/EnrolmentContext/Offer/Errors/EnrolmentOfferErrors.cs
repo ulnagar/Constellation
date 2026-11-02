@@ -1,5 +1,6 @@
 ﻿namespace Constellation.Core.Models.EnrolmentContext.Offer.Errors;
 
+using EnrolmentParent.Identifiers;
 using Enums;
 using Identifiers;
 using Shared;
@@ -29,4 +30,8 @@ public static class EnrolmentOfferErrors
     public static readonly Func<OfferId, Error> NotFound = id => new(
         "Enrolment.Offer.NotFound",
         $"Could not find an Enrolment Offer with the Id '{id}'");
+
+    public static readonly Func<EnrolmentParentId, Error> InvalidParent = id => new(
+        "Enrolment.Offer.InvalidParent",
+        $"No parent found in Application matching Id '{id}'");
 }

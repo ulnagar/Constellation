@@ -3,6 +3,8 @@
 using Application;
 using Application.Enums;
 using Application.Identifiers;
+using EnrolmentParent.Errors;
+using EnrolmentParent.Identifiers;
 using EnrolmentPeriod.Identifiers;
 using Enums;
 using Errors;
@@ -13,7 +15,6 @@ using Shared;
 
 public sealed class Offer : AggregateRoot
 {
-
     private readonly List<OfferNote> _notes = [];
 
     public static TimeSpan ReminderPeriod => TimeSpan.FromDays(7);
@@ -37,6 +38,7 @@ public sealed class Offer : AggregateRoot
     public DateTimeOffset? OfferedAt { get; private set; }
     public DateTimeOffset? ReminderSentAt { get; private set; }
     public DateTimeOffset? RespondedAt { get; private set; }
+    public EnrolmentParentId RespondedBy { get; private set; } = EnrolmentParentId.Empty;
     public IReadOnlyList<OfferNote> Notes => _notes.AsReadOnly();
 
     /// <summary>
@@ -235,10 +237,14 @@ public sealed class Offer : AggregateRoot
 
     public Result Respond(
         ResponseStatus response, 
+        EnrolmentParentId parent,
         bool courtOrders = false, 
         bool healthConditions = false,
         bool requestedLaptop = true)
     {
+        if (parent == EnrolmentParentId.Empty)
+            return Result.Failure(EnrolmentParentErrors.InvalidId);
+
         OfferStatus newStatus = OfferStatus.Declined;
 
         if (response == ResponseStatus.Accepted)
@@ -251,6 +257,7 @@ public sealed class Offer : AggregateRoot
 
         Status = newStatus;
         RespondedAt = DateTime.UtcNow;
+        RespondedBy = parent;
         Response = response;
 
         if (Response != ResponseStatus.Accepted)
@@ -260,7 +267,7 @@ public sealed class Offer : AggregateRoot
         HasHealthConcerns = healthConditions;
         RequestedLaptop = requestedLaptop;
 
-        RaiseDomainEvent(new EnrolmentOfferRespondedDomainEvent(new(), Id));
+        RaiseDomainEvent(new EnrolmentOfferRespondedDomainEvent(new(), Id, parent));
 
         return Result.Success();
     }

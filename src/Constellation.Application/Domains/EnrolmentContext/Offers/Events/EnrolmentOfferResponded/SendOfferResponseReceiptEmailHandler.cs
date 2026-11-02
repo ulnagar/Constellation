@@ -12,6 +12,11 @@ using Constellation.Core.Models.EnrolmentContext.Offer.Errors;
 using Constellation.Core.Models.EnrolmentContext.Offer.Repositories;
 using Constellation.Core.Shared;
 using Core.Models.EnrolmentContext.Application;
+using Core.Models.EnrolmentContext.EnrolmentParent;
+using Core.Models.EnrolmentContext.EnrolmentParent.Errors;
+using Core.Models.EnrolmentContext.EnrolmentStudent;
+using Core.Models.EnrolmentContext.EnrolmentStudent.Errors;
+using Core.Models.EnrolmentContext.EnrolmentStudent.Repositories;
 using Core.Models.EnrolmentContext.Offer.Events;
 using Serilog;
 
@@ -21,6 +26,7 @@ internal sealed class SendOfferResponseReceiptEmailHandler
     private readonly IEnrolmentApplicationRepository _applicationRepository;
     private readonly IEnrolmentPeriodRepository _periodRepository;
     private readonly IEnrolmentOfferRepository _offerRepository;
+    private readonly IEnrolmentStudentRepository _studentRepository;
     private readonly IEmailService _emailService;
     private readonly ILogger _logger;
 
@@ -28,12 +34,14 @@ internal sealed class SendOfferResponseReceiptEmailHandler
         IEnrolmentApplicationRepository applicationRepository,
         IEnrolmentPeriodRepository periodRepository,
         IEnrolmentOfferRepository offerRepository,
+        IEnrolmentStudentRepository studentRepository,
         IEmailService emailService,
         ILogger logger)
     {
         _applicationRepository = applicationRepository;
         _periodRepository = periodRepository;
         _offerRepository = offerRepository;
+        _studentRepository = studentRepository;
         _emailService = emailService;
         _logger = logger
             .ForContext<EnrolmentOfferRespondedDomainEvent>();
@@ -65,6 +73,30 @@ internal sealed class SendOfferResponseReceiptEmailHandler
             return;
         }
 
+        EnrolmentParent? parent = application.Parents.FirstOrDefault(entry => entry.Id == notification.ParentId);
+
+        if (parent is null)
+        {
+            _logger
+                .ForContext(nameof(EnrolmentOfferRespondedDomainEvent), notification, true)
+                .ForContext(nameof(Error), EnrolmentParentErrors.NotFound(notification.ParentId), true)
+                .Warning("Failed to send Offer response receipt email to parent");
+
+            return;
+        }
+
+        EnrolmentStudent? student = await _studentRepository.GetById(application.StudentId, cancellationToken);
+
+        if (student is null)
+        {
+            _logger
+                .ForContext(nameof(EnrolmentOfferRespondedDomainEvent), notification, true)
+                .ForContext(nameof(Error), EnrolmentStudentErrors.NotFound(application.StudentId), true)
+                .Warning("Failed to send Offer response receipt email to parent");
+
+            return;
+        }
+
         EnrolmentPeriod? period = await _periodRepository.GetEnrolmentPeriodById(offer.PeriodId, cancellationToken);
 
         if (period is null)
@@ -80,6 +112,8 @@ internal sealed class SendOfferResponseReceiptEmailHandler
         // Send the email
         Result email = await _emailService.SendEnrolmentFormReceipt(
             application,
+            parent,
+            student,
             offer,
             period.Year,
             cancellationToken);
