@@ -5,6 +5,7 @@ using Constellation.Core.Models.Offerings;
 using Constellation.Core.Models.Offerings.Repositories;
 using Constellation.Core.Models.Subjects.Identifiers;
 using Constellation.Core.Shared;
+using Core.Abstractions.Clock;
 using Serilog;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,13 +16,16 @@ internal sealed class GetFilteredOfferingsForSelectionListQueryHandler
     : IQueryHandler<GetFilteredOfferingsForSelectionListQuery, List<OfferingForSelectionList>>
 {
     private readonly IOfferingRepository _offeringRepository;
+    private readonly IDateTimeProvider _dateTime;
     private readonly ILogger _logger;
 
     public GetFilteredOfferingsForSelectionListQueryHandler(
         IOfferingRepository offeringRepository,
+        IDateTimeProvider dateTime,
         ILogger logger)
     {
         _offeringRepository = offeringRepository;
+        _dateTime = dateTime;
         _logger = logger.ForContext<GetFilteredOfferingsForSelectionListQuery>();
     }
 
@@ -34,7 +38,9 @@ internal sealed class GetFilteredOfferingsForSelectionListQueryHandler
             List<Offering> offerings = await _offeringRepository.GetByCourseId(courseId, cancellationToken);
 
             offerings = offerings
-                .Where(offering => offering.IsCurrent)
+                .Where(offering => 
+                    offering.EndDate >= _dateTime.FirstDayOfCurrentYear &&
+                    offering.EndDate <= _dateTime.LastDayOfCurrentYear)
                 .ToList();
 
             foreach (Offering offering in offerings)
