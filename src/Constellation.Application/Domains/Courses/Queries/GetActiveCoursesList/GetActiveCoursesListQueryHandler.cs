@@ -1,10 +1,11 @@
 ﻿namespace Constellation.Application.Domains.Courses.Queries.GetActiveCoursesList;
 
 using Abstractions.Messaging;
+using Constellation.Application.Domains.Courses.Queries.GetCoursesForSelectionList;
 using Constellation.Core.Models.Faculties.Errors;
 using Constellation.Core.Models.Faculties.Repositories;
-using Constellation.Core.Models.Subjects.Errors;
 using Constellation.Core.Models.Subjects;
+using Constellation.Core.Models.Subjects.Errors;
 using Constellation.Core.Models.Subjects.Repositories;
 using Core.Models.Faculties;
 using Core.Models.Offerings;
@@ -16,7 +17,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Constellation.Application.Domains.Courses.Queries.GetCoursesForSelectionList;
 
 internal sealed class GetActiveCoursesListQueryHandler
 : IQueryHandler<GetActiveCoursesListQuery, List<CourseSelectListItemResponse>>

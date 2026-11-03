@@ -49,7 +49,7 @@ public sealed class UpdateAuditableEntitiesInterceptor
             switch (entityEntry.State)
             {
                 case EntityState.Added:
-                    if (!string.IsNullOrWhiteSpace(entityEntry.Entity.CreatedBy))
+                    if (string.IsNullOrWhiteSpace(entityEntry.Entity.CreatedBy))
                         entityEntry.Entity.CreatedBy = currentUserService.UserName;
                     if (entityEntry.Entity.CreatedAt == DateTime.MinValue)
                         entityEntry.Entity.CreatedAt = dateTimeProvider.Now;

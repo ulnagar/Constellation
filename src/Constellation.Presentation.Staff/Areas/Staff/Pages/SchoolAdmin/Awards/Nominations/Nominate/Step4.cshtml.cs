@@ -1,6 +1,7 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.SchoolAdmin.Awards.Nominations.Nominate;
 
 using Application.Common.PresentationModels;
+using Application.Domains.Courses.Queries.GetCoursesActiveThisYear;
 using Application.Models.Auth;
 using Constellation.Application.Domains.Courses.Models;
 using Constellation.Application.Domains.Courses.Queries.GetActiveCoursesList;
@@ -129,7 +130,7 @@ public class Step4Model : BasePageModel
 
         if (CourseId != CourseId.Empty)
         {
-            Result<List<CourseSelectListItemResponse>> coursesRequest = await _mediator.Send(new GetActiveCoursesListQuery());
+            Result<List<CourseSelectListItemResponse>> coursesRequest = await _mediator.Send(new GetCoursesActiveThisYearQuery());
 
             if (coursesRequest.IsFailure)
             {

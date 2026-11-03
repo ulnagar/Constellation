@@ -2,6 +2,7 @@ namespace Constellation.Presentation.Staff.Areas.Staff.Pages.SchoolAdmin.Awards.
 
 using Application.Common.PresentationModels;
 using Application.Domains.Courses.Queries.GetActiveCoursesList;
+using Application.Domains.Courses.Queries.GetCoursesActiveThisYear;
 using Application.Models.Auth;
 using Constellation.Application.Domains.Courses.Models;
 using Constellation.Application.Domains.MeritAwards.Nominations.Queries.GetNominationPeriod;
@@ -94,7 +95,7 @@ public class Step3Model : BasePageModel
             return Page();
         }
 
-        Result<List<CourseSelectListItemResponse>> coursesRequest = await _mediator.Send(new GetActiveCoursesListQuery());
+        Result<List<CourseSelectListItemResponse>> coursesRequest = await _mediator.Send(new GetCoursesActiveThisYearQuery());
 
         if (coursesRequest.IsFailure)
         {

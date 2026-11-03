@@ -143,6 +143,18 @@ internal sealed class OfferingRepository : IOfferingRepository
                 offering.EndDate >= _dateTime.Today)
             .ToListAsync(cancellationToken);
 
+    public async Task<List<Offering>> GetActiveThisYearByCourseId(
+        CourseId courseId,
+        CancellationToken cancellationToken = default) =>
+        await _context
+            .Set<Offering>()
+            .Include(offering => offering.Sessions)
+            .Where(offering =>
+                offering.CourseId == courseId &&
+                offering.EndDate >= _dateTime.FirstDayOfCurrentYear &&
+                offering.EndDate <= _dateTime.LastDayOfCurrentYear)
+            .ToListAsync(cancellationToken);
+
     public async Task<List<Offering>> GetCurrentEnrolmentsFromStudentForDate(
         StudentId studentId,
         DateTime absenceDate,

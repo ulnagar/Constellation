@@ -39,6 +39,7 @@ public interface IOfferingRepository
     Task<List<Offering>> GetAllTypesActiveForTeacher(StaffId staffId, CancellationToken cancellationToken = default);
     Task<List<Offering>> GetAll(CancellationToken cancellationToken = default);
     Task<List<Offering>> GetActiveByCourseId(CourseId courseId, CancellationToken cancellationToken = default);
+    Task<List<Offering>> GetActiveThisYearByCourseId(CourseId courseId, CancellationToken cancellationToken = default);
     Task<List<Offering>> GetActiveByGrade(Grade grade, CancellationToken cancellationToken = default);
     Task<List<Offering>> GetByCourseId(CourseId courseId, CancellationToken cancellationToken = default);
     Task<List<Offering>> GetCurrentEnrolmentsFromStudentForDate(StudentId studentId, DateTime AbsenceDate, PeriodWeek week, PeriodDay day, CancellationToken cancellationToken = default);

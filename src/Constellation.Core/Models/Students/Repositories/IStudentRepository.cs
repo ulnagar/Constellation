@@ -23,6 +23,7 @@ public interface IStudentRepository
     Task<List<Student>> GetListFromIds(List<StudentId> studentIds, CancellationToken cancellationToken = default);
     Task<List<Student>> GetCurrentEnrolmentsForOffering(OfferingId offeringId, CancellationToken cancellationToken = default);
     Task<List<Student>> GetCurrentEnrolmentsForCourse(CourseId courseId, CancellationToken cancellationToken = default);
+    Task<List<Student>> GetEnrolmentsForCourseThisYear(CourseId courseId, CancellationToken cancellationToken = default);
     Task<bool> IsValidStudentId(StudentId studentId, CancellationToken cancellationToken = default);
     Task<List<Student>> GetFilteredStudents(List<OfferingId> offeringIds, List<CourseId> courseIds, List<Grade> grades, List<SchoolCode> schoolCodes, CancellationToken cancellationToken = default);
     Task<List<Student>> GetCurrentStudentsFromSchool(SchoolCode schoolCode, CancellationToken cancellationToken = default);

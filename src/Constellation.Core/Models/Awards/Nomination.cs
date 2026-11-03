@@ -11,7 +11,6 @@ using Extensions;
 using Primitives;
 using Shared;
 using System;
-using ValueObjects;
 
 public abstract class Nomination : IFullyAuditableEntity
 {
