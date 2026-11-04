@@ -2,7 +2,6 @@
 @model Constellation.Presentation.Staff.Areas.Staff.Pages.Partner.Enrolments.Applications.UpsertModel
 
 @using ApplicationId = Constellation.Core.Models.EnrolmentContext.Application.Identifiers.ApplicationId
-@using Constellation.Core.Enums
 @using Constellation.Core.Models.Identifiers
 
 @{
@@ -22,132 +21,196 @@
         @Html.ValidationSummary(true, "", new { @class = "text-danger" })
         
         <h4>Student Details</h4>
+        
+        @if (newItem)
+        {
+            <div class="mb-3 row">
+                <label asp-for="StudentReferenceNumber" class="col-md-2">SRN</label>
+                <div class="col-md-3">
+                    <input asp-for="StudentReferenceNumber" class="form-control" readonly />
+                    <span asp-validation-for="StudentReferenceNumber" class="text-danger"></span>
+                </div>
+            </div>
 
-        <div class="mb-3 row">
-            <label asp-for="StudentReferenceNumber" class="col-md-2">SRN</label>
-            <div class="col-md-3">
-                <input asp-for="StudentReferenceNumber" class="form-control" />
-                <span asp-validation-for="StudentReferenceNumber" class="text-danger"></span>
+            <div class="mb-3 row">
+                <label asp-for="StudentFirstName" class="col-md-2">First Name</label>
+                <div class="col-md-3">
+                    <input asp-for="StudentFirstName" class="form-control" readonly />
+                    <span asp-validation-for="StudentFirstName" class="text-danger"></span>
+                </div>
             </div>
-        </div>
 
-        <div class="mb-3 row">
-            <label asp-for="StudentFirstName" class="col-md-2">First Name</label>
-            <div class="col-md-3">
-                <input asp-for="StudentFirstName" class="form-control" />
-                <span asp-validation-for="StudentFirstName" class="text-danger"></span>
+            <div class="mb-3 row">
+                <label asp-for="StudentPreferredName" class="col-md-2">Preferred Name</label>
+                <div class="col-md-3">
+                    <input asp-for="StudentPreferredName" class="form-control" readonly />
+                    <span asp-validation-for="StudentPreferredName" class="text-danger"></span>
+                </div>
             </div>
-        </div>
 
-        <div class="mb-3 row">
-            <label asp-for="StudentPreferredName" class="col-md-2">Preferred Name</label>
-            <div class="col-md-3">
-                <input asp-for="StudentPreferredName" class="form-control" />
-                <span asp-validation-for="StudentPreferredName" class="text-danger"></span>
+            <div class="mb-3 row">
+                <label asp-for="StudentLastName" class="col-md-2">Last Name</label>
+                <div class="col-md-3">
+                    <input asp-for="StudentLastName" class="form-control" readonly />
+                    <span asp-validation-for="StudentLastName" class="text-danger"></span>
+                </div>
             </div>
-        </div>
 
-        <div class="mb-3 row">
-            <label asp-for="StudentLastName" class="col-md-2">Last Name</label>
-            <div class="col-md-3">
-                <input asp-for="StudentLastName" class="form-control" />
-                <span asp-validation-for="StudentLastName" class="text-danger"></span>
+            <div class="mb-3 row">
+                <label asp-for="StudentGender" class="col-md-2">Gender</label>
+                <div class="col-md-3">
+                    <input asp-for="StudentGender" class="form-control" readonly />
+                    <span asp-validation-for="StudentGender" class="text-danger"></span>
+                </div>
             </div>
-        </div>
-        
-        <div class="mb-3 row">
-            <label asp-for="StudentGender" class="col-md-2">Gender</label>
-            <div class="col-md-3">
-                <select id="StudentGender" name="StudentGender" asp-items="@Model.GenderList" class="form-control select2">
-                    <option value=""> -- Select -- </option>
-                </select>
-                <span asp-validation-for="StudentGender" class="text-danger"></span>
-            </div>
-        </div>
 
-        <div class="mb-3 row">
-            <label asp-for="DateOfBirth" class="col-md-2">Date Of Birth</label>
-            <div class="col-md-3">
-                <input asp-for="DateOfBirth" type="date" class="form-control" />
-                <span asp-validation-for="DateOfBirth" class="text-danger"></span>
+            <div class="mb-3 row">
+                <label asp-for="DateOfBirth" class="col-md-2">Date Of Birth</label>
+                <div class="col-md-3">
+                    <input asp-for="DateOfBirth" type="date" class="form-control" readonly />
+                    <span asp-validation-for="DateOfBirth" class="text-danger"></span>
+                </div>
             </div>
-        </div>
 
-        <div class="mb-3 row">
-            <label asp-for="StudentEmailAddress" class="col-md-2">Email Address</label>
-            <div class="col-md-3">
-                <input asp-for="StudentEmailAddress" class="form-control" />
-                <span asp-validation-for="StudentEmailAddress" class="text-danger"></span>
+            <div class="mb-3 row">
+                <label asp-for="StudentEmailAddress" class="col-md-2">Email Address</label>
+                <div class="col-md-3">
+                    <input asp-for="StudentEmailAddress" class="form-control" readonly />
+                    <span asp-validation-for="StudentEmailAddress" class="text-danger"></span>
+                </div>
             </div>
-        </div>
-        
-        <h4>Parent Details</h4>
-        
-        <div class="mb-3 row">
-            <label asp-for="ParentFirstName" class="col-md-2">First Name</label>
-            <div class="col-md-3">
-                <input asp-for="ParentFirstName" class="form-control" />
-                <span asp-validation-for="ParentFirstName" class="text-danger"></span>
+        }
+        else
+        {
+            <div class="mb-3 row">
+                <label asp-for="StudentReferenceNumber" class="col-md-2">SRN</label>
+                <div class="col-md-3">
+                    <input asp-for="StudentReferenceNumber" class="form-control" />
+                    <span asp-validation-for="StudentReferenceNumber" class="text-danger"></span>
+                </div>
             </div>
-        </div>
-        
-        <div class="mb-3 row">
-            <label asp-for="ParentLastName" class="col-md-2">Last Name</label>
-            <div class="col-md-3">
-                <input asp-for="ParentLastName" class="form-control" />
-                <span asp-validation-for="ParentLastName" class="text-danger"></span>
-            </div>
-        </div>
-        
-        <div class="mb-3 row">
-            <label asp-for="ParentEmailAddress" class="col-md-2">Email Address</label>
-            <div class="col-md-3">
-                <input asp-for="ParentEmailAddress" class="form-control" />
-                <span asp-validation-for="ParentEmailAddress" class="text-danger"></span>
-            </div>
-        </div>
-        
-        <div class="mb-3 row">
-            <label asp-for="ParentPhoneNumber" class="col-md-2">Mobile Number</label>
-            <div class="col-md-3">
-                <input asp-for="ParentPhoneNumber" class="form-control" />
-                <span asp-validation-for="ParentPhoneNumber" class="text-danger"></span>
-            </div>
-        </div>
-        
-        <h4>Mailing Address</h4>
 
-        <div class="mb-3 row">
-            <label asp-for="MailingAddressStreet" class="col-md-2">Street</label>
-            <div class="col-md-3">
-                <input asp-for="MailingAddressStreet" class="form-control" />
-                <span asp-validation-for="MailingAddressStreet" class="text-danger"></span>
+            <div class="mb-3 row">
+                <label asp-for="StudentFirstName" class="col-md-2">First Name</label>
+                <div class="col-md-3">
+                    <input asp-for="StudentFirstName" class="form-control" />
+                    <span asp-validation-for="StudentFirstName" class="text-danger"></span>
+                </div>
             </div>
-        </div>
-        
-        <div class="mb-3 row">
-            <label asp-for="MailingAddressTown" class="col-md-2">Town</label>
-            <div class="col-md-3">
-                <input asp-for="MailingAddressTown" class="form-control" />
-                <span asp-validation-for="MailingAddressTown" class="text-danger"></span>
+
+            <div class="mb-3 row">
+                <label asp-for="StudentPreferredName" class="col-md-2">Preferred Name</label>
+                <div class="col-md-3">
+                    <input asp-for="StudentPreferredName" class="form-control" />
+                    <span asp-validation-for="StudentPreferredName" class="text-danger"></span>
+                </div>
             </div>
-        </div>
-        
-        <div class="mb-3 row">
-            <label asp-for="MailingAddressState" class="col-md-2">State</label>
-            <div class="col-md-3">
-                <input asp-for="MailingAddressState" class="form-control" />
-                <span asp-validation-for="MailingAddressState" class="text-danger"></span>
+
+            <div class="mb-3 row">
+                <label asp-for="StudentLastName" class="col-md-2">Last Name</label>
+                <div class="col-md-3">
+                    <input asp-for="StudentLastName" class="form-control" />
+                    <span asp-validation-for="StudentLastName" class="text-danger"></span>
+                </div>
             </div>
-        </div>
-        
-        <div class="mb-3 row">
-            <label asp-for="MailingAddressPostCode" class="col-md-2">Post Code</label>
-            <div class="col-md-3">
-                <input asp-for="MailingAddressPostCode" class="form-control" />
-                <span asp-validation-for="MailingAddressPostCode" class="text-danger"></span>
+
+            <div class="mb-3 row">
+                <label asp-for="StudentGender" class="col-md-2">Gender</label>
+                <div class="col-md-3">
+                    <select id="StudentGender" name="StudentGender" asp-items="@Model.GenderList" class="form-control select2">
+                        <option value=""> -- Select -- </option>
+                    </select>
+                    <span asp-validation-for="StudentGender" class="text-danger"></span>
+                </div>
             </div>
-        </div>
+
+            <div class="mb-3 row">
+                <label asp-for="DateOfBirth" class="col-md-2">Date Of Birth</label>
+                <div class="col-md-3">
+                    <input asp-for="DateOfBirth" type="date" class="form-control" />
+                    <span asp-validation-for="DateOfBirth" class="text-danger"></span>
+                </div>
+            </div>
+
+            <div class="mb-3 row">
+                <label asp-for="StudentEmailAddress" class="col-md-2">Email Address</label>
+                <div class="col-md-3">
+                    <input asp-for="StudentEmailAddress" class="form-control" />
+                    <span asp-validation-for="StudentEmailAddress" class="text-danger"></span>
+                </div>
+            </div>
+        }
+
+        @if (newItem)
+        {
+            <h4>Parent Details</h4>
+
+            <div class="mb-3 row">
+                <label asp-for="ParentFirstName" class="col-md-2">First Name</label>
+                <div class="col-md-3">
+                    <input asp-for="ParentFirstName" class="form-control" />
+                    <span asp-validation-for="ParentFirstName" class="text-danger"></span>
+                </div>
+            </div>
+
+            <div class="mb-3 row">
+                <label asp-for="ParentLastName" class="col-md-2">Last Name</label>
+                <div class="col-md-3">
+                    <input asp-for="ParentLastName" class="form-control" />
+                    <span asp-validation-for="ParentLastName" class="text-danger"></span>
+                </div>
+            </div>
+
+            <div class="mb-3 row">
+                <label asp-for="ParentEmailAddress" class="col-md-2">Email Address</label>
+                <div class="col-md-3">
+                    <input asp-for="ParentEmailAddress" class="form-control" />
+                    <span asp-validation-for="ParentEmailAddress" class="text-danger"></span>
+                </div>
+            </div>
+
+            <div class="mb-3 row">
+                <label asp-for="ParentPhoneNumber" class="col-md-2">Mobile Number</label>
+                <div class="col-md-3">
+                    <input asp-for="ParentPhoneNumber" class="form-control" />
+                    <span asp-validation-for="ParentPhoneNumber" class="text-danger"></span>
+                </div>
+            </div>
+
+            <h4>Mailing Address</h4>
+
+            <div class="mb-3 row">
+                <label asp-for="MailingAddressStreet" class="col-md-2">Street</label>
+                <div class="col-md-3">
+                    <input asp-for="MailingAddressStreet" class="form-control" />
+                    <span asp-validation-for="MailingAddressStreet" class="text-danger"></span>
+                </div>
+            </div>
+
+            <div class="mb-3 row">
+                <label asp-for="MailingAddressTown" class="col-md-2">Town</label>
+                <div class="col-md-3">
+                    <input asp-for="MailingAddressTown" class="form-control" />
+                    <span asp-validation-for="MailingAddressTown" class="text-danger"></span>
+                </div>
+            </div>
+
+            <div class="mb-3 row">
+                <label asp-for="MailingAddressState" class="col-md-2">State</label>
+                <div class="col-md-3">
+                    <input asp-for="MailingAddressState" class="form-control" />
+                    <span asp-validation-for="MailingAddressState" class="text-danger"></span>
+                </div>
+            </div>
+
+            <div class="mb-3 row">
+                <label asp-for="MailingAddressPostCode" class="col-md-2">Post Code</label>
+                <div class="col-md-3">
+                    <input asp-for="MailingAddressPostCode" class="form-control" />
+                    <span asp-validation-for="MailingAddressPostCode" class="text-danger"></span>
+                </div>
+            </div>
+        }
         
         <h4>Application Details</h4>
         
@@ -218,17 +281,58 @@
         @if (Model.Period.AvailableCourses.Count > 0)
         {
             <div class="mb-3 row">
-                <label asp-for="SelectedCourses" class="col-md-2">Subjects</label>
-                <div class="col-md-3">
-                    <select asp-for="SelectedCourses" class="form-control custom-select2" multiple="multiple">
-                        <option value=""> -- Select -- </option>
-                        @foreach (var entry in Model.CoursesList)
-                        {
-                            <option value="@entry.Value" selected="@entry.Selected">@entry.Text</option>
-                        }
-                    </select>
-                    <span asp-validation-for="SelectedCourses" class="text-danger"></span>
-                </div>
+                <label asp-for="SelectedCourses" class="col-md">Subjects</label>
+                
+                <div class="w-100"></div>
+                
+                <button class="btn btn-success" type="button" onclick="addCourse()">Add Subject</button>
+                
+                <div class="w-100"></div>
+                
+                <label class="col-md-6">Course</label>
+                <label class="col-md-3">Line</label>
+                
+                <div class="w-100"></div>
+
+                @foreach (var course in Model.SelectedCourses)
+                {
+                    Guid key = Guid.NewGuid();
+                    <div data-course-row>
+                        <div class="col-md-6">
+                            <input type="hidden" name="SelectedCourses.index" value="@key" />
+                            <input type="hidden" name="SelectedCourses[@key].Course" value="@course.Course.Value" />
+                            <input class="form-control" value="@course.Course.Name" readonly />
+                        </div>
+                        <div class="col-md-3">
+                            <input type="hidden" name="SelectedCourses[@key].Line" value="@course.Line" />
+                            <input class="form-control" value="@course.Line" readonly />
+                        </div>
+                        <div class="col-md-3">
+                            <button class="btn btn-warning" type="button" onclick="removeCourse(this)">Remove</button>
+                        </div>
+                    </div>
+                }
+                
+                <template id="newCourse">
+                    <div data-course-row>
+                        <div class="col-md-6">
+                            <input type="hidden" name="SelectedCourses.index" value="__key__" />
+                            <select name="SelectedCourses[__key__].Course" class="form-control custom-select2">
+                                <option value=""> -- Select -- </option>
+                                @foreach (var entry in Model.CoursesList)
+                                {
+                                    <option value="@entry.Value">@entry.Text</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <input name="SelectedCourses[__key__].Line" class="form-control" />
+                        </div>
+                        <div class="col-md-3">
+                            <button class="btn btn-warning" type="button" onclick="removeCourse(this)">Remove</button>
+                        </div>
+                    </div>
+                </template>
             </div>
         }
         
@@ -331,5 +435,28 @@
                 theme: 'bootstrap-5'
             });
         }());
+
+        function newKey() {
+            // crypto.randomUUID needs https or localhost, so fall back if it's unavailable
+            return (window.crypto && crypto.randomUUID)
+                ? crypto.randomUUID()
+                : 'k' + Date.now().toString(36) + Math.random().toString(36).slice(2);
+        }
+
+        function addCourse() {
+            const template = document.getElementById('newCourse');
+            const html = template.innerHTML.replaceAll('__KEY__', newKey());
+
+            // Insert the new row directly before the <template>
+            template.insertAdjacentHTML('beforebegin', html);
+            const row = template.previousElementSibling;
+
+            // If you use select2 on .custom-select2, initialise the new select here
+            $(row).find('.custom-select2').select2();
+        }
+
+        function removeCourse(button) {
+            button.closest('[data-course-row]').remove();
+        }
     </script>
 }

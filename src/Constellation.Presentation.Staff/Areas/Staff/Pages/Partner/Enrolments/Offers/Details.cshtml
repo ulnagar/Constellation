@@ -125,65 +125,59 @@
         <h4>Parent Details</h4>
     </div>
     <div class="collapse card-body" id="ParentDetails">
-        <dl class="row">
-            <dt class="col-md-2">
-                <label asp-for="Offer.ParentName">Name</label>
-            </dt>
-            <dd class="col-md-10">
-                <span>@Model.Offer.ParentName</span>
-            </dd>
+        @foreach (var parent in Model.Offer.Parents)
+        {
+            <dl class="row">
+                <dt class="col-md-2">
+                    <label asp-for="Offer.Parents.First().Name">Name</label>
+                </dt>
+                <dd class="col-md-10">
+                    <span>@parent.Name</span>
+                </dd>
 
-            <dt class="col-md-2">
-                <label asp-for="Offer.ParentEmailAddress">Email Address</label>
-            </dt>
-            <dd class="col-md-10">
-                <span>@Model.Offer.ParentEmailAddress</span>
-            </dd>
+                <dt class="col-md-2">
+                    <label asp-for="Offer.Parents.First().Email">Email Address</label>
+                </dt>
+                <dd class="col-md-10">
+                    <span>@parent.Email</span>
+                </dd>
 
-            <dt class="col-md-2">
-                <label asp-for="Offer.ParentPhoneNumber">Phone Number</label>
-            </dt>
-            <dd class="col-md-10">
-                <span>@Model.Offer.ParentPhoneNumber</span>
-            </dd>
-        </dl>
-    </div>
-</div>
+                <dt class="col-md-2">
+                    <label asp-for="Offer.Parents.First().PhoneNumber">Phone Number</label>
+                </dt>
+                <dd class="col-md-10">
+                    <span>@parent.PhoneNumber</span>
+                </dd>
+                
+                <dt class="col-md-2">
+                    <label asp-for="Offer.Parents.First().MailingAddress.Street">Street Address</label>
+                </dt>
+                <dd class="col-md-10">
+                    <span>@parent.MailingAddress?.Street</span>
+                </dd>
 
-<div class="card mt-3">
-    <div class="card-header cursor-pointer" data-bs-toggle="collapse" data-bs-target="#MailingAddress">
-        <h4>Mailing Address</h4>
-    </div>
-    <div class="collapse card-body" id="MailingAddress">
-        <dl class="row">
-            <dt class="col-md-2">
-                <label asp-for="Offer.MailingAddress.Street">Street Address</label>
-            </dt>
-            <dd class="col-md-10">
-                <span>@Model.Offer.MailingAddress?.Street</span>
-            </dd>
+                <dt class="col-md-2">
+                    <label asp-for="Offer.Parents.First().MailingAddress.Town">Town</label>
+                </dt>
+                <dd class="col-md-10">
+                    <span>@parent.MailingAddress?.Town</span>
+                </dd>
 
-            <dt class="col-md-2">
-                <label asp-for="Offer.MailingAddress.Town">Town</label>
-            </dt>
-            <dd class="col-md-10">
-                <span>@Model.Offer.MailingAddress?.Town</span>
-            </dd>
+                <dt class="col-md-2">
+                    <label asp-for="Offer.Parents.First().MailingAddress.State">State</label>
+                </dt>
+                <dd class="col-md-10">
+                    <span>@parent.MailingAddress?.State</span>
+                </dd>
 
-            <dt class="col-md-2">
-                <label asp-for="Offer.MailingAddress.State">State</label>
-            </dt>
-            <dd class="col-md-10">
-                <span>@Model.Offer.MailingAddress?.State</span>
-            </dd>
-
-            <dt class="col-md-2">
-                <label asp-for="Offer.MailingAddress.Postcode">Post Code</label>
-            </dt>
-            <dd class="col-md-10">
-                <span>@Model.Offer.MailingAddress?.Postcode</span>
-            </dd>
-        </dl>
+                <dt class="col-md-2">
+                    <label asp-for="Offer.Parents.First().MailingAddress.Postcode">Post Code</label>
+                </dt>
+                <dd class="col-md-10">
+                    <span>@parent.MailingAddress?.Postcode</span>
+                </dd>
+            </dl>
+        }
     </div>
 </div>
 

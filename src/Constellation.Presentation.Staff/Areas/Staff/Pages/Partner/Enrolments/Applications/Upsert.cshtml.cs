@@ -3,8 +3,6 @@ namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Partner.Enrolments.
 using Application.Common.PresentationModels;
 using Application.Domains.EnrolmentContext.Applications.Models;
 using Application.Domains.EnrolmentContext.Applications.Queries.GetEnrolmentApplicationById;
-using Application.Domains.EnrolmentContext.EnrolmentPeriods.Models;
-using Application.Domains.EnrolmentContext.EnrolmentPeriods.Queries.GetCurrentEnrolmentPeriods;
 using Application.Models.Auth;
 using Constellation.Application.Domains.EnrolmentContext.Applications.Commands.CreateEnrolmentApplication;
 using Constellation.Application.Domains.EnrolmentContext.Applications.Commands.UpdateEnrolmentApplication;
@@ -14,12 +12,9 @@ using Constellation.Core.Abstractions.Services;
 using Constellation.Core.Enums;
 using Constellation.Core.Models.EnrolmentContext.EnrolmentPeriod.Errors;
 using Constellation.Core.Models.Identifiers;
-using Constellation.Core.Models.Offerings.Identifiers;
 using Constellation.Core.Models.Students.Enums;
 using Core.Models.EnrolmentContext.Application;
-using Core.Models.EnrolmentContext.Application.Enums;
 using Core.Models.EnrolmentContext.EnrolmentPeriod.Enums;
-using Core.Models.EnrolmentContext.EnrolmentPeriod.Identifiers;
 using Core.Models.Students.ValueObjects;
 using Core.Shared;
 using Core.ValueObjects;
@@ -114,7 +109,7 @@ public class UpsertModel : PeriodScopedPageModel
     public Grade Grade { get; set; } = Grade.Empty;
 
     [BindProperty]
-    public List<EnrolmentCourse> SelectedCourses { get; set; } = [];
+    public List<CourseSelection> SelectedCourses { get; set; } = [];
 
     public IEnumerable<SelectListItem> SchoolList { get; set; }
     public SelectList ProgramList { get; set; }
@@ -172,14 +167,6 @@ public class UpsertModel : PeriodScopedPageModel
         StudentGender = application.Value.StudentGender;
         DateOfBirth = application.Value.DateOfBirth;
         StudentEmailAddress = application.Value.StudentEmailAddress?.Email;
-        ParentFirstName = application.Value.ParentName?.FirstName;
-        ParentLastName = application.Value.ParentName?.LastName;
-        ParentEmailAddress = application.Value.ParentEmailAddress?.Email;
-        ParentPhoneNumber = application.Value.ParentPhoneNumber?.Value;
-        MailingAddressStreet = application.Value.MailingAddress?.Street;
-        MailingAddressTown = application.Value.MailingAddress?.Town;
-        MailingAddressState = application.Value.MailingAddress?.State;
-        MailingAddressPostCode = application.Value.MailingAddress?.Postcode;
         ApplicationReference = application.Value.ApplicationReference;
         CurrentSchoolCode = application.Value.CurrentSchoolCode ?? SchoolCode.Empty;
         CurrentSchool = application.Value.CurrentSchool;
@@ -187,7 +174,7 @@ public class UpsertModel : PeriodScopedPageModel
         DestinationSchool = application.Value.DestinationSchool;
         Program = application.Value.Program;
         Grade = application.Value.Grade;
-        SelectedCourses = application.Value.SelectedCourses.Select(entry => entry.Course).ToList();
+        SelectedCourses = application.Value.SelectedCourses.ToList();
 
         await PreparePage();
     }
@@ -233,7 +220,7 @@ public class UpsertModel : PeriodScopedPageModel
             CoursesList = Period.AvailableCourses
                 .OrderBy(s => s.Name)
                 .Select(s =>
-                    new SelectListItem { Value = s.Value, Text = s.Name, Selected = SelectedCourses.Contains(s) })
+                    new SelectListItem { Value = s.Value, Text = s.Name })
                 .ToList();
         }
     }
@@ -310,15 +297,6 @@ public class UpsertModel : PeriodScopedPageModel
 
         UpdateEnrolmentApplicationCommand command = new(
             Id,
-            values.StudentReferenceNumber,
-            values.StudentName,
-            StudentGender,
-            DateOfBirth,
-            values.StudentEmailAddress,
-            values.ParentName,
-            values.ParentEmailAddress,
-            values.ParentPhoneNumber,
-            values.MailingAddress,
             ApplicationReference ?? string.Empty,
             CurrentSchoolCode,
             CurrentSchool ?? string.Empty,
