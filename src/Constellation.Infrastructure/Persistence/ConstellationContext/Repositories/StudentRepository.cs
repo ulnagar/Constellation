@@ -135,6 +135,34 @@ public class StudentRepository : IStudentRepository
             .ToListAsync(cancellationToken);
     }
 
+    public async Task<List<Student>> GetEnrolmentsForCourseThisYear(
+        CourseId courseId,
+        CancellationToken cancellationToken = default)
+    {
+        List<OfferingId> offeringIds = await _context
+            .Set<Offering>()
+            .Where(offering =>
+                offering.CourseId == courseId &&
+                offering.EndDate >= _dateTime.FirstDayOfCurrentYear &&
+                offering.EndDate <= _dateTime.LastDayOfCurrentYear)
+            .Select(offering => offering.Id)
+            .ToListAsync(cancellationToken);
+
+        List<StudentId> studentIds = await _context
+            .Set<Enrolment>()
+            .OfType<OfferingEnrolment>()
+            .Where(enrolment =>
+                offeringIds.Contains(enrolment.OfferingId) &&
+                !enrolment.IsDeleted)
+            .Select(enrolment => enrolment.StudentId)
+            .ToListAsync(cancellationToken);
+
+        return await _context
+            .Set<Student>()
+            .Where(student => studentIds.Contains(student.Id))
+            .ToListAsync(cancellationToken);
+    }
+
     public async Task<Dictionary<string, List<Student>>> GetCurrentEnrolmentsForCourseWithOfferingName(
         CourseId courseId,
         CancellationToken cancellationToken = default)

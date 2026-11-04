@@ -35,7 +35,7 @@ internal sealed class NominationConfiguration
             .HasConversion(
                 entity => entity.Value,
                 value => AwardType.FromValue(value));
-
+        
         builder
             .HasDiscriminator(nomination => nomination.AwardType)
             .HasValue<FirstInSubjectNomination>(AwardType.FirstInSubject)

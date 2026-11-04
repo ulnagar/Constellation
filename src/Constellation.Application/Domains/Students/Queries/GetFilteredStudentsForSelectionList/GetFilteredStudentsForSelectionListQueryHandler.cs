@@ -60,7 +60,7 @@ internal sealed class GetFilteredStudentsForSelectionListQueryHandler
         {
             foreach (CourseId courseId in request.FromCourse)
             {
-                List<Student> courseStudents = await _studentRepository.GetCurrentEnrolmentsForCourse(courseId, cancellationToken);
+                List<Student> courseStudents = await _studentRepository.GetEnrolmentsForCourseThisYear(courseId, cancellationToken);
 
                 studentsFromCourse.AddRange(courseStudents);
             }

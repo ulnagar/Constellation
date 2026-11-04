@@ -6,7 +6,6 @@ using Constellation.Core.Models.Offerings.Identifiers;
 using Constellation.Core.Models.Subjects.Identifiers;
 using Core.Models.Awards.Enums;
 using Core.Models.Students.Identifiers;
-using Core.ValueObjects;
 
 public sealed record CreateAwardNominationCommand(
     AwardNominationPeriodId PeriodId,

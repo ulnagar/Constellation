@@ -23,6 +23,7 @@ internal sealed class FirstInSubjectScienceTechnologyNominationConfiguration :
 
         builder
             .Property(nomination => nomination.Grade)
-            .HasColumnName(nameof(FirstInSubjectNomination.Grade));
+            .HasColumnName(nameof(FirstInSubjectNomination.Grade))
+            .IsRequired(false);
     }
 }

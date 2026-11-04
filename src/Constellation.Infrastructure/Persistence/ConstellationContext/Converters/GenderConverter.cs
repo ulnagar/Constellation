@@ -9,7 +9,7 @@ internal sealed class GenderConverter : ValueConverter<Gender, string?>
         : base(
             gender => GenderToString(gender),
             value => StringToGender(value),
-            new ConverterMappingHints())
+            new ConverterMappingHints(size: 3))
     { }
 
     private static string? GenderToString(Gender? gender) =>
