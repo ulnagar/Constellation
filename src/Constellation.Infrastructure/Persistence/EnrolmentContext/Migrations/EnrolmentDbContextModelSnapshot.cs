@@ -18,10 +18,25 @@ namespace Constellation.Infrastructure.Persistence.EnrolmentContext.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "10.0.2")
+                .HasAnnotation("ProductVersion", "10.0.14")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
+
+            modelBuilder.Entity("ApplicationEnrolmentParent", b =>
+                {
+                    b.Property<Guid>("ApplicationId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("ParentsId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("ApplicationId", "ParentsId");
+
+                    b.HasIndex("ParentsId");
+
+                    b.ToTable("ApplicationEnrolmentParent");
+                });
 
             modelBuilder.Entity("Constellation.Core.Models.EnrolmentContext.Application.Application", b =>
                 {
@@ -37,9 +52,6 @@ namespace Constellation.Infrastructure.Persistence.EnrolmentContext.Migrations
                     b.Property<string>("CurrentSchoolCode")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<DateOnly?>("DateOfBirth")
-                        .HasColumnType("date");
-
                     b.Property<string>("DestinationSchool")
                         .HasColumnType("nvarchar(max)");
 
@@ -48,13 +60,7 @@ namespace Constellation.Infrastructure.Persistence.EnrolmentContext.Migrations
 
                     b.Property<string>("Grade")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("ParentEmailAddress")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("ParentPhoneNumber")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(3)");
 
                     b.Property<Guid>("PeriodId")
                         .HasColumnType("uniqueidentifier");
@@ -71,38 +77,14 @@ namespace Constellation.Infrastructure.Persistence.EnrolmentContext.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("StudentEmailAddress")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("StudentGender")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("StudentReferenceNumber")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.ComplexProperty(typeof(Dictionary<string, object>), "StudentName", "Constellation.Core.Models.EnrolmentContext.Application.Application.StudentName#Name", b1 =>
-                        {
-                            b1.IsRequired();
-
-                            b1.Property<string>("FirstName")
-                                .IsRequired()
-                                .HasColumnType("nvarchar(max)")
-                                .HasColumnName("Student_FirstName");
-
-                            b1.Property<string>("LastName")
-                                .IsRequired()
-                                .HasColumnType("nvarchar(max)")
-                                .HasColumnName("Student_LastName");
-
-                            b1.Property<string>("PreferredName")
-                                .HasColumnType("nvarchar(max)")
-                                .HasColumnName("Student_PreferredName");
-                        });
+                    b.Property<Guid>("StudentId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.HasKey("Id");
 
                     b.HasIndex("PeriodId");
+
+                    b.HasIndex("StudentId");
 
                     b.ToTable("Applications", (string)null);
                 });
@@ -167,6 +149,44 @@ namespace Constellation.Infrastructure.Persistence.EnrolmentContext.Migrations
                     b.ToTable("AuditLogs", (string)null);
                 });
 
+            modelBuilder.Entity("Constellation.Core.Models.EnrolmentContext.EnrolmentParent.EnrolmentParent", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Email")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid?>("EnrolmentUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("PhoneNumber")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.ComplexProperty(typeof(Dictionary<string, object>), "Name", "Constellation.Core.Models.EnrolmentContext.EnrolmentParent.EnrolmentParent.Name#Name", b1 =>
+                        {
+                            b1.IsRequired();
+
+                            b1.Property<string>("FirstName")
+                                .IsRequired()
+                                .HasColumnType("nvarchar(max)")
+                                .HasColumnName("FirstName");
+
+                            b1.Property<string>("LastName")
+                                .IsRequired()
+                                .HasColumnType("nvarchar(max)")
+                                .HasColumnName("LastName");
+
+                            b1.Property<string>("PreferredName")
+                                .HasColumnType("nvarchar(max)")
+                                .HasColumnName("PreferredName");
+                        });
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Parents", (string)null);
+                });
+
             modelBuilder.Entity("Constellation.Core.Models.EnrolmentContext.EnrolmentPeriod.EnrolmentPeriod", b =>
                 {
                     b.Property<Guid>("Id")
@@ -208,6 +228,48 @@ namespace Constellation.Infrastructure.Persistence.EnrolmentContext.Migrations
                     b.ToTable("Periods", (string)null);
                 });
 
+            modelBuilder.Entity("Constellation.Core.Models.EnrolmentContext.EnrolmentStudent.EnrolmentStudent", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateOnly?>("DateOfBirth")
+                        .HasColumnType("date");
+
+                    b.Property<string>("Email")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Gender")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("StudentReferenceNumber")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.ComplexProperty(typeof(Dictionary<string, object>), "Name", "Constellation.Core.Models.EnrolmentContext.EnrolmentStudent.EnrolmentStudent.Name#Name", b1 =>
+                        {
+                            b1.IsRequired();
+
+                            b1.Property<string>("FirstName")
+                                .IsRequired()
+                                .HasColumnType("nvarchar(max)")
+                                .HasColumnName("FirstName");
+
+                            b1.Property<string>("LastName")
+                                .IsRequired()
+                                .HasColumnType("nvarchar(max)")
+                                .HasColumnName("LastName");
+
+                            b1.Property<string>("PreferredName")
+                                .HasColumnType("nvarchar(max)")
+                                .HasColumnName("PreferredName");
+                        });
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Students", (string)null);
+                });
+
             modelBuilder.Entity("Constellation.Core.Models.EnrolmentContext.Offer.Offer", b =>
                 {
                     b.Property<Guid>("Id")
@@ -236,6 +298,9 @@ namespace Constellation.Infrastructure.Persistence.EnrolmentContext.Migrations
 
                     b.Property<DateTimeOffset?>("RespondedAt")
                         .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid>("RespondedBy")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Response")
                         .IsRequired()
@@ -322,6 +387,36 @@ namespace Constellation.Infrastructure.Persistence.EnrolmentContext.Migrations
                     b.ToTable("OutboxMessageConsumer", (string)null);
                 });
 
+            modelBuilder.Entity("EnrolmentParentEnrolmentStudent", b =>
+                {
+                    b.Property<Guid>("ParentsId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("StudentsId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("ParentsId", "StudentsId");
+
+                    b.HasIndex("StudentsId");
+
+                    b.ToTable("EnrolmentParentEnrolmentStudent");
+                });
+
+            modelBuilder.Entity("ApplicationEnrolmentParent", b =>
+                {
+                    b.HasOne("Constellation.Core.Models.EnrolmentContext.Application.Application", null)
+                        .WithMany()
+                        .HasForeignKey("ApplicationId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Constellation.Core.Models.EnrolmentContext.EnrolmentParent.EnrolmentParent", null)
+                        .WithMany()
+                        .HasForeignKey("ParentsId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("Constellation.Core.Models.EnrolmentContext.Application.Application", b =>
                 {
                     b.HasOne("Constellation.Core.Models.EnrolmentContext.EnrolmentPeriod.EnrolmentPeriod", null)
@@ -330,9 +425,18 @@ namespace Constellation.Infrastructure.Persistence.EnrolmentContext.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
+                    b.HasOne("Constellation.Core.Models.EnrolmentContext.EnrolmentStudent.EnrolmentStudent", null)
+                        .WithMany()
+                        .HasForeignKey("StudentId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Constellation.Core.Models.EnrolmentContext.EnrolmentParent.EnrolmentParent", b =>
+                {
                     b.OwnsOne("Constellation.Core.ValueObjects.MailingAddress", "MailingAddress", b1 =>
                         {
-                            b1.Property<Guid>("ApplicationId")
+                            b1.Property<Guid>("EnrolmentParentId")
                                 .HasColumnType("uniqueidentifier");
 
                             b1.Property<string>("Postcode")
@@ -359,44 +463,15 @@ namespace Constellation.Infrastructure.Persistence.EnrolmentContext.Migrations
                                 .HasColumnType("nvarchar(100)")
                                 .HasColumnName("Town");
 
-                            b1.HasKey("ApplicationId");
+                            b1.HasKey("EnrolmentParentId");
 
-                            b1.ToTable("Applications");
-
-                            b1.WithOwner()
-                                .HasForeignKey("ApplicationId");
-                        });
-
-                    b.OwnsOne("Constellation.Core.ValueObjects.Name", "ParentName", b1 =>
-                        {
-                            b1.Property<Guid>("ApplicationId")
-                                .HasColumnType("uniqueidentifier");
-
-                            b1.Property<string>("FirstName")
-                                .IsRequired()
-                                .HasColumnType("nvarchar(max)")
-                                .HasColumnName("Parent_FirstName");
-
-                            b1.Property<string>("LastName")
-                                .IsRequired()
-                                .HasColumnType("nvarchar(max)")
-                                .HasColumnName("Parent_LastName");
-
-                            b1.Property<string>("PreferredName")
-                                .HasColumnType("nvarchar(max)")
-                                .HasColumnName("Parent_PreferredName");
-
-                            b1.HasKey("ApplicationId");
-
-                            b1.ToTable("Applications");
+                            b1.ToTable("Parents");
 
                             b1.WithOwner()
-                                .HasForeignKey("ApplicationId");
+                                .HasForeignKey("EnrolmentParentId");
                         });
 
                     b.Navigation("MailingAddress");
-
-                    b.Navigation("ParentName");
                 });
 
             modelBuilder.Entity("Constellation.Core.Models.EnrolmentContext.Offer.Offer", b =>
@@ -419,6 +494,21 @@ namespace Constellation.Infrastructure.Persistence.EnrolmentContext.Migrations
                     b.HasOne("Constellation.Core.Models.EnrolmentContext.Offer.Offer", null)
                         .WithMany("Notes")
                         .HasForeignKey("OfferId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("EnrolmentParentEnrolmentStudent", b =>
+                {
+                    b.HasOne("Constellation.Core.Models.EnrolmentContext.EnrolmentParent.EnrolmentParent", null)
+                        .WithMany()
+                        .HasForeignKey("ParentsId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Constellation.Core.Models.EnrolmentContext.EnrolmentStudent.EnrolmentStudent", null)
+                        .WithMany()
+                        .HasForeignKey("StudentsId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });

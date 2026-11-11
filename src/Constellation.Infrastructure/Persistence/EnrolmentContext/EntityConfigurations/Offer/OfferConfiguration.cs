@@ -1,7 +1,9 @@
 ﻿namespace Constellation.Infrastructure.Persistence.EnrolmentContext.EntityConfigurations.Offer;
 
+using ConstellationContext.Converters;
 using Converters;
 using Core.Models.EnrolmentContext.Application;
+using Core.Models.EnrolmentContext.EnrolmentParent.Identifiers;
 using Core.Models.EnrolmentContext.EnrolmentPeriod;
 using Core.Models.EnrolmentContext.Offer;
 using Microsoft.EntityFrameworkCore;
@@ -35,6 +37,10 @@ internal sealed class OfferConfiguration : IEntityTypeConfiguration<Offer>
         builder
             .Property(entry => entry.Response)
             .HasConversion<ResponseStatusConverter>();
+
+        builder
+            .Property(entry => entry.RespondedBy)
+            .HasConversion<StronglyTypedIdValueConverter<EnrolmentParentId, Guid>>();
 
         builder
             .HasMany(entry => entry.Notes)

@@ -2,6 +2,8 @@
 
 using Constellation.Core.Enums;
 using Constellation.Infrastructure.Persistence.ConstellationContext.Converters;
+using Core.Models.EnrolmentContext.EnrolmentParent.Identifiers;
+using Core.Primitives;
 using Microsoft.EntityFrameworkCore;
 using Shared.EntityConfigurations.Outbox;
 using System;
@@ -17,9 +19,9 @@ public sealed class EnrolmentDbContext : DbContext
     protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
     {
         configurationBuilder.Conventions.Add(_ => new StronglyTypedIdConvention());
-        //configurationBuilder.Conventions.Add(_ => new GradeConvention());
-        base.ConfigureConventions(configurationBuilder);
         configurationBuilder.Properties<Grade>().HaveConversion<GradeConverter>();
+
+        base.ConfigureConventions(configurationBuilder);
     }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)

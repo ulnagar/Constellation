@@ -19,6 +19,11 @@ internal sealed class EnrolmentParentConfiguration : IEntityTypeConfiguration<En
             .HasKey(entry => entry.Id);
 
         builder
+            .ComplexProperty(entry => entry.Name)
+            .IsRequired()
+            .ConfigureName();
+
+        builder
             .Property(entry => entry.Email)
             .HasConversion<EmailAddressConverter>()
             .IsRequired(false);

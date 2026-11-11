@@ -13,7 +13,7 @@ internal sealed class GradeConverter : ValueConverter<Grade, string>
         : base(
             grade => GradeToString(grade),
             value => StringToGrade(value),
-            new ConverterMappingHints())
+            new ConverterMappingHints(size: 3))
     { }
 
     private static string GradeToString(Grade grade) =>
