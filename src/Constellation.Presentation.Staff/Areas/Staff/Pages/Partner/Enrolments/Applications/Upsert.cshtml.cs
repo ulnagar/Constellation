@@ -119,7 +119,7 @@ public class UpsertModel : PeriodScopedPageModel
     public IEnumerable<SelectListItem> SchoolList { get; set; }
     public SelectList ProgramList { get; set; }
     public SelectList GenderList { get; set; }
-    public SelectList GradeList { get; set; }
+    public List<Grade> GradeList { get; set; }
     public IEnumerable<SelectListItem> CoursesList { get; set; }
 
     public async Task OnGet()
@@ -222,11 +222,7 @@ public class UpsertModel : PeriodScopedPageModel
             nameof(Gender.Name),
             StudentGender?.Value);
 
-        GradeList = new SelectList(
-            Grade.GetOptions.Where(grade => grade.Order > 0),
-            nameof(Grade.Value),
-            nameof(Grade.Name),
-            Grade.Value);
+        GradeList = Grade.GetOptions.Where(grade => grade.Order > 0).ToList();
 
         if (Period.AvailableCourses.Count > 0)
         {
