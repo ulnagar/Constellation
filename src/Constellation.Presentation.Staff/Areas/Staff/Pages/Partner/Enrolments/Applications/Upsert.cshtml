@@ -271,8 +271,19 @@
         <div class="mb-3 row">
             <label asp-for="Grade" class="col-md-2">Grade</label>
             <div class="col-md-3">
-                <select asp-for="Grade" asp-items="@Model.GradeList" class="form-control custom-select2">
+                <select asp-for="Grade" class="form-control custom-select2">
                     <option value=""> -- Select -- </option>
+                    @foreach (var grade in Model.GradeList)
+                    {
+                        if (grade == Model.Grade)
+                        {
+                            <option value="@grade.Value" selected>@grade.Name</option>
+                        }
+                        else
+                        {
+                            <option value="@grade.Value">@grade.Name</option>
+                        }
+                    }
                 </select>
                 <span asp-validation-for="Grade" class="text-danger"></span>
             </div>

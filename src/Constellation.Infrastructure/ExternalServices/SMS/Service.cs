@@ -68,7 +68,7 @@ public sealed class Service : ISMSService
             SmsMessage messageRecord = new(
                 MessageModule.Messaging,
                 confirmation.Id ?? string.Empty,
-                sender,
+                SmsRecipient.FromValue(sender.Destination),
                 receiver,
                 confirmation.Message ?? string.Empty,
                 MessageDirection.Outbound,
