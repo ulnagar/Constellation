@@ -43,7 +43,7 @@ public sealed class SmsRecipient : ValueObject<SmsRecipient, string>, IValueObje
     public override string ToString() => $"{Name} ({Number})";
 
     public static SmsRecipient FromValue(string value) =>
-        _enumerations.GetValueOrDefault(value);
+        _enumerations.GetValueOrDefault(value, Unknown);
 
     private static Dictionary<string, SmsRecipient> CreateEnumerations()
     {
