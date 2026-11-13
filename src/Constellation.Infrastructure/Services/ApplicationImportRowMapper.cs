@@ -13,6 +13,7 @@ using Core.Models;
 using Core.Models.EnrolmentContext.Application;
 using Core.Models.EnrolmentContext.Application.Enums;
 using Core.Models.EnrolmentContext.EnrolmentParent;
+using Core.Models.EnrolmentContext.EnrolmentParent.Repositories;
 using Core.Models.EnrolmentContext.EnrolmentStudent;
 using Core.Models.Identifiers;
 using Core.Models.Students.Enums;
@@ -25,11 +26,14 @@ using System.Globalization;
 internal sealed class ApplicationImportRowMapper : IImportRowMapper<(Application Application, EnrolmentStudent Student), ApplicationImportContext>
 {
     private readonly ISchoolRepository _schoolRepository;
+    private readonly IEnrolmentParentRepository _parentRepository;
 
     public ApplicationImportRowMapper(
-        ISchoolRepository schoolRepository)
+        ISchoolRepository schoolRepository,
+        IEnrolmentParentRepository parentRepository)
     {
         _schoolRepository = schoolRepository;
+        _parentRepository = parentRepository;
     }
 
     public async Task<Result<(Application Application, EnrolmentStudent Student)>> MapNew(
@@ -192,13 +196,27 @@ internal sealed class ApplicationImportRowMapper : IImportRowMapper<(Application
             address = mailingAddressResult.Value;
         }
 
-        EnrolmentParent parent = EnrolmentParent.Create(
-            null,
-            parentName,
-            parentEmail,
-            parentPhone,
-            address);
+        EnrolmentParent? parent = null;
 
+        // Does this parent already exist in the system? If so, we should link them to the student instead of creating a new parent.
+        if (parentEmail is not null)
+        {
+            EnrolmentParent? existingParent = await _parentRepository.GetByEmail(parentEmail, cancellationToken);
+
+            if (existingParent is not null)
+                parent = existingParent;
+        }
+
+        if (parent is null)
+        {
+            parent = EnrolmentParent.Create(
+                null,
+                parentName,
+                parentEmail,
+                parentPhone,
+                address);
+        }
+        
         SchoolCode? currentSchoolCode = null;
         string? currentSchool = null;
         if (!string.IsNullOrWhiteSpace(currentSchoolName))
@@ -238,6 +256,8 @@ internal sealed class ApplicationImportRowMapper : IImportRowMapper<(Application
 
         if (application.IsFailure)
             return Result.Failure<(Application, EnrolmentStudent)>(application.Error);
+
+        student.AddParent(parent);
 
         if (string.IsNullOrWhiteSpace(courseList))
             return (application.Value, student);
@@ -364,6 +384,8 @@ internal sealed class ApplicationImportRowMapper : IImportRowMapper<(Application
                 parentEmail,
                 parentPhone,
                 address);
+
+            context.ExistingStudent.AddParent(parent);
         }
 
         SchoolCode? currentSchoolCode = null;
@@ -405,7 +427,7 @@ internal sealed class ApplicationImportRowMapper : IImportRowMapper<(Application
 
         if (application.IsFailure)
             return Result.Failure<(Application, EnrolmentStudent)>(application.Error);
-
+        
         if (IsMapped(EnrolmentApplicationImportFields.StudentNameFirst)
             || IsMapped(EnrolmentApplicationImportFields.StudentNameLast)
             || IsMapped(EnrolmentApplicationImportFields.StudentNamePreferred)
@@ -640,6 +662,7 @@ internal sealed class ApplicationImportRowMapper : IImportRowMapper<(Application
             {
                 parent = EnrolmentParent.Create(null, nameResult.Value, null, null, null);
                 existing.Application.AddParent(parent);
+                existing.Student.AddParent(parent);
             }
         }
 

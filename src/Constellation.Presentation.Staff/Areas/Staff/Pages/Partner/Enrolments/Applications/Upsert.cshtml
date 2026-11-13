@@ -292,42 +292,42 @@
         @if (Model.Period.AvailableCourses.Count > 0)
         {
             <div class="mb-3 row">
-                <label asp-for="SelectedCourses" class="col-md">Subjects</label>
-                
-                <div class="w-100"></div>
-                
-                <button class="btn btn-success" type="button" onclick="addCourse()">Add Subject</button>
-                
-                <div class="w-100"></div>
-                
-                <label class="col-md-6">Course</label>
-                <label class="col-md-3">Line</label>
-                
-                <div class="w-100"></div>
-
+                <div class="mb-3 row">
+                    <label asp-for="SelectedCourses" class="col">Subjects</label>
+                </div>
+                <div class="mb-3 row">
+                    <div class="col-3">
+                        <button class="btn btn-success" type="button" onclick="addCourse()">Add Subject</button>
+                    </div>
+                </div>
+                <div class="mb-3 row">
+                    <label class="col-md-6">Course</label>
+                    <label class="col-md-3">Line</label>
+                </div>
+              
                 @foreach (var course in Model.SelectedCourses)
                 {
                     Guid key = Guid.NewGuid();
-                    <div data-course-row>
+                    <div data-course-row class="mb-3 row">
                         <div class="col-md-6">
-                            <input type="hidden" name="SelectedCourses.index" value="@key" />
-                            <input type="hidden" name="SelectedCourses[@key].Course" value="@course.Course.Value" />
-                            <input class="form-control" value="@course.Course.Name" readonly />
+                            <input type="hidden" name="SelectedCourses.index" value="@key"/>
+                            <input type="hidden" name="SelectedCourses[@key].Course" value="@course.Course.Value"/>
+                            <input class="form-control" value="@course.Course.Name" readonly/>
                         </div>
                         <div class="col-md-3">
-                            <input type="hidden" name="SelectedCourses[@key].Line" value="@course.Line" />
-                            <input class="form-control" value="@course.Line" readonly />
+                            <input type="hidden" name="SelectedCourses[@key].Line" value="@course.Line"/>
+                            <input class="form-control" value="@course.Line" readonly/>
                         </div>
                         <div class="col-md-3">
                             <button class="btn btn-warning" type="button" onclick="removeCourse(this)">Remove</button>
                         </div>
                     </div>
                 }
-                
+
                 <template id="newCourse">
-                    <div data-course-row>
+                    <div data-course-row class="mb-3 row">
                         <div class="col-md-6">
-                            <input type="hidden" name="SelectedCourses.index" value="__key__" />
+                            <input type="hidden" name="SelectedCourses.index" value="__key__"/>
                             <select name="SelectedCourses[__key__].Course" class="form-control custom-select2">
                                 <option value=""> -- Select -- </option>
                                 @foreach (var entry in Model.CoursesList)
@@ -337,7 +337,7 @@
                             </select>
                         </div>
                         <div class="col-md-3">
-                            <input name="SelectedCourses[__key__].Line" class="form-control" />
+                            <input name="SelectedCourses[__key__].Line" class="form-control"/>
                         </div>
                         <div class="col-md-3">
                             <button class="btn btn-warning" type="button" onclick="removeCourse(this)">Remove</button>
@@ -463,7 +463,9 @@
             const row = template.previousElementSibling;
 
             // If you use select2 on .custom-select2, initialise the new select here
-            $(row).find('.custom-select2').select2();
+            $(row).find('.custom-select2').select2({
+                theme: 'bootstrap-5'
+            });
         }
 
         function removeCourse(button) {

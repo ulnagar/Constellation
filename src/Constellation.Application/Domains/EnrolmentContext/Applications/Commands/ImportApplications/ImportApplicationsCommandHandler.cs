@@ -8,6 +8,7 @@ using Constellation.Core.Models.Students.ValueObjects;
 using Core.Models.EnrolmentContext.Application;
 using Core.Models.EnrolmentContext.Application.Errors;
 using Core.Models.EnrolmentContext.Application.Repositories;
+using Core.Models.EnrolmentContext.EnrolmentParent;
 using Core.Models.EnrolmentContext.EnrolmentPeriod;
 using Core.Models.EnrolmentContext.EnrolmentPeriod.Identifiers;
 using Core.Models.EnrolmentContext.EnrolmentPeriod.Repositories;
@@ -76,7 +77,7 @@ internal sealed class ImportApplicationsCommandHandler
 
             if (match.Value.IsNew)
             {
-                Result<(Application, EnrolmentStudent)> mapped = await _rowMapper.MapNew(row, request.Mapping.Mappings, new(period), cancellationToken);
+                Result<(Application Application, EnrolmentStudent Student)> mapped = await _rowMapper.MapNew(row, request.Mapping.Mappings, new(period), cancellationToken);
 
                 if (mapped.IsFailure)
                 {
@@ -85,8 +86,8 @@ internal sealed class ImportApplicationsCommandHandler
                 }
 
                 succeeded++;
-                _applicationRepository.Insert(mapped.Value.Item1);
-                _studentRepository.Insert(mapped.Value.Item2);
+                _applicationRepository.Insert(mapped.Value.Application);
+                _studentRepository.Insert(mapped.Value.Student);
             }
             else if (match.Value.Application is not null)
             {

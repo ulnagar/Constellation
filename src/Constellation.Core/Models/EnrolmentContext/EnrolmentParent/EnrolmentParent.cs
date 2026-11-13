@@ -1,10 +1,12 @@
 ﻿namespace Constellation.Core.Models.EnrolmentContext.EnrolmentParent;
 
 using EnrolmentStudent;
+using Events;
 using Identifiers;
+using Primitives;
 using ValueObjects;
 
-public sealed class EnrolmentParent
+public sealed class EnrolmentParent : AggregateRoot
 {
     private readonly List<EnrolmentStudent> _students = [];
 
@@ -46,12 +48,16 @@ public sealed class EnrolmentParent
         PhoneNumber? phoneNumber = null,
         MailingAddress? mailingAddress = null)
     {
-        return new(
+        EnrolmentParent parent = new(
             userId,
             name,
             email ?? EmailAddress.None,
             phoneNumber ?? ValueObjects.PhoneNumber.Empty,
             mailingAddress);
+
+        parent.RaiseDomainEvent(new EnrolmentParentCreatedDomainEvent(new(), parent.Id));
+
+        return parent;
     }
 
     public void UpdateUserLink(Guid? userId)
@@ -79,4 +85,6 @@ public sealed class EnrolmentParent
 
     public void RemoveStudent(EnrolmentStudent student)
         => _students.Remove(student);
+
+
 }
