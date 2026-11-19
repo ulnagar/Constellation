@@ -48,6 +48,9 @@ public class RolloverModel : BasePageModel
 
     public async Task<IActionResult> OnPost()
     {
+        if (!ModelState.IsValid)
+            return Page();
+
         if (Statuses.Any())
         {
             foreach (RolloverDecision decision in Statuses)
@@ -95,6 +98,7 @@ public class RolloverModel : BasePageModel
         {
             Statuses.Add(new(
                 entry.StudentId,
+                entry.StudentReferenceNumber,
                 entry.Name.DisplayName,
                 grade,
                 entry.School));
