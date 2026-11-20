@@ -11,6 +11,8 @@ using Constellation.Core.Models.Rollover.Repositories;
 using Constellation.Core.Shared;
 using Constellation.Presentation.Server.BaseModels;
 using Constellation.Presentation.Shared.Helpers.Attributes;
+using Core.Models.Rollover.Enums;
+using Core.Models.Students.Identifiers;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
@@ -31,68 +33,107 @@ public class RolloverModel : BasePageModel
     [ViewData] public string ActivePage => Models.ActivePage.Rollover;
     [ViewData] public string PageTitle => "Annual Rollover";
 
-    [BindProperty] 
-    public List<RolloverDecision> Statuses { get; set; } = new();
-
-    public List<RolloverResult> ProcessResults { get; set; } = new();
-
     [BindProperty(SupportsGet = true)]
-    public Grade CurrentGrade { get; set; }
+    public Grade CurrentGrade { get; set; } = Grade.Empty;
 
-    public async Task OnGetAsync()
+    public List<RolloverDecision> Statuses { get; set; } = new();
+    public List<RolloverResult> ProcessResults { get; set; } = new();
+    
+    public record RolloverRequest(
+        string CurrentGrade, 
+        Dictionary<Guid, string> Statuses);
+
+    public async Task<IActionResult> OnGet()
     {
-        _rolloverRepository.Reset();
+        if (CurrentGrade == Grade.Empty)
+        {
+            _rolloverRepository.Reset();
 
-        await GetStudents(Grade.Y12);
+            return RedirectToPage(routeValues: new { CurrentGrade = Grade.Y12.Value });
+        }
+
+        Result result = await GetStudents(CurrentGrade);
+
+        if (result.IsFailure)
+            ModalContent = ErrorDisplay.Create(result.Error);
+
+        return Page();
     }
 
-    public async Task<IActionResult> OnPost()
+    public async Task<IActionResult> OnPost([FromBody] RolloverRequest request)
     {
         if (!ModelState.IsValid)
             return Page();
 
-        if (Statuses.Any())
+        Result<Grade> currentGrade = Grade.FromValue(request.CurrentGrade);
+
+        if (currentGrade.IsFailure)
         {
-            foreach (RolloverDecision decision in Statuses)
+            ModalContent = ErrorDisplay.Create(currentGrade.Error);
+            return Page();
+        }
+
+        if (request.Statuses.Any())
+        {
+            Result<List<StudentResponse>> attempt = await _mediator.Send(new GetCurrentStudentsFromGradeQuery(currentGrade.Value));
+
+            if (attempt.IsFailure)
+                return BadRequest(attempt.Error.Code + ": " + attempt.Error.Message);
+
+            foreach (KeyValuePair<Guid, string> kvp in request.Statuses)
             {
+                StudentId studentId = StudentId.FromValue(kvp.Key);
+                bool successParse = Enum.TryParse(typeof(RolloverStatus), kvp.Value, out object? status);
+
+                if (!successParse)
+                    return BadRequest($"Invalid rollover status: {kvp.Value}");
+
+                StudentResponse? student = attempt.Value.FirstOrDefault(entry => entry.StudentId == studentId);
+
+                if (student is null)
+                    continue;
+
+                RolloverDecision decision = new(
+                    student.StudentId,
+                    student.StudentReferenceNumber,
+                    student.Name.DisplayName,
+                    currentGrade.Value,
+                    student.School)
+                {
+                    Decision = (RolloverStatus)status!
+                };
+
                 Result registerAttempt = _rolloverRepository.RegisterDecision(decision);
 
                 if (registerAttempt.IsFailure)
-                {
-                    ModalContent = ErrorDisplay.Create(registerAttempt.Error);
-
-                    return Page();
-                }
-
+                    return BadRequest(registerAttempt.Error.Code + ": " + registerAttempt.Error.Message);
             }
 
             Statuses = new();
         }
 
-        return CurrentGrade switch
+        string? nextGrade = currentGrade.Value.Value switch
         {
-            { Value: "Y12" } => await GetStudents(Grade.Y11),
-            { Value: "Y11" } => await GetStudents(Grade.Y10),
-            { Value: "Y10" } => await GetStudents(Grade.Y09),
-            { Value: "Y09" } => await GetStudents(Grade.Y08),            
-            { Value: "Y08" } => await GetStudents(Grade.Y07),
-            { Value: "Y07" } => await GetStudents(Grade.Y06),
-            { Value: "Y06" } => await GetStudents(Grade.Y05),
-            { Value: "Y05" } => await Finalise(),
+            "Y12" => Grade.Y11.Value,
+            "Y11" => Grade.Y10.Value,
+            "Y10" => Grade.Y09.Value,
+            "Y09" => Grade.Y08.Value,
+            "Y08" => Grade.Y07.Value,
+            "Y07" => Grade.Y06.Value,
+            "Y06" => Grade.Y05.Value,
+            "Y05" => null,
             _ => throw new ArgumentOutOfRangeException()
         };
+
+        return new JsonResult(new { nextGrade });
     }
 
-    public async Task<IActionResult> GetStudents(Grade grade)
+    private async Task<Result> GetStudents(Grade grade)
     {
         Result<List<StudentResponse>> attempt = await _mediator.Send(new GetCurrentStudentsFromGradeQuery(grade));
 
         if (attempt.IsFailure)
-        {
-            ModalContent = ErrorDisplay.Create(attempt.Error);
-
-            return Page();
-        }
+            return attempt;
 
         foreach (StudentResponse entry in attempt.Value.OrderBy(student => student.Name.SortOrder))
         {
@@ -106,19 +147,15 @@ public class RolloverModel : BasePageModel
 
         CurrentGrade = grade;
 
-        return Page();
+        return Result.Success();
     }
 
-    public async Task<IActionResult> Finalise()
+    public async Task<IActionResult> OnPostFinalise()
     {
         Result<List<RolloverResult>> results = await _mediator.Send(new ProcessRolloverDecisionsCommand());
 
         if (results.IsFailure)
-        {
-            ModalContent = ErrorDisplay.Create(results.Error);
-
-            return Page();
-        }
+            return BadRequest(results.Error.Code + ": " + results.Error.Message);
 
         ProcessResults = results.Value;
 
