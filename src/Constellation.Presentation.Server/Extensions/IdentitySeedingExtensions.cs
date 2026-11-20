@@ -2,6 +2,7 @@
 
 using Constellation.Application.Models.Identity;
 using Constellation.Infrastructure.DependencyInjection;
+using Core.Models.Auth;
 using Microsoft.AspNetCore.Identity;
 
 public static class IdentitySeedingExtensions
@@ -13,7 +14,11 @@ public static class IdentitySeedingExtensions
         {
             RoleManager<AppRole> roleManager = scope.ServiceProvider
                 .GetRequiredService<RoleManager<AppRole>>();
+            UserManager<AppUser> userManager = scope.ServiceProvider
+                .GetRequiredService<UserManager<AppUser>>();
+
             await IdentityDefaults.SeedRoles(roleManager);
+            await IdentityDefaults.SeedUsers(userManager);
         }
         catch
         {

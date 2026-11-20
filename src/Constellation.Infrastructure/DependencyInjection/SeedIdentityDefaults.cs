@@ -4,6 +4,7 @@ namespace Constellation.Infrastructure.DependencyInjection;
 using Application.Models.Identity.Enums;
 using Constellation.Application.Models.Auth;
 using Constellation.Application.Models.Identity;
+using Core.Models.Auth;
 using Core.Models.SchoolContacts.Enums;
 using Microsoft.AspNetCore.Identity;
 using System.Security.Claims;
@@ -24,6 +25,25 @@ public static class IdentityDefaults
         await CreateRole(roleManager, AppRole.Parent, AppRoleType.Parent);
         await CreateRole(roleManager, AppRole.Student, AppRoleType.Student);
         await CreateRole(roleManager, AppRole.Staff, AppRoleType.Staff);
+    }
+
+    public static async Task SeedUsers(UserManager<AppUser> userManager)
+    {
+        if (!userManager.Users.Any())
+        {
+            // New implementation. Add a default super admin user to the system.
+
+            AppUser superAdmin = new AppUser
+            {
+                UserName = "superadmin",
+                Email = "superadmin@aurora.nsw.edu.au"
+            };
+
+            IdentityResult result = await userManager.CreateAsync(superAdmin);
+
+            if (result.Succeeded)
+                await userManager.AddToRoleAsync(superAdmin, AppRole.SuperAdminRole);
+        }
     }
 
     private static async Task<AppRole?> CreateRole(RoleManager<AppRole> roleManager, string roleName, AppRoleType type)
