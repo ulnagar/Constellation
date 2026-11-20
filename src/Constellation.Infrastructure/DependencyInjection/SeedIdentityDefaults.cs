@@ -6,6 +6,7 @@ using Constellation.Application.Models.Auth;
 using Constellation.Application.Models.Identity;
 using Core.Models.Auth;
 using Core.Models.SchoolContacts.Enums;
+using Core.ValueObjects;
 using Microsoft.AspNetCore.Identity;
 using System.Security.Claims;
 
@@ -36,7 +37,8 @@ public static class IdentityDefaults
             AppUser superAdmin = new AppUser
             {
                 UserName = "superadmin",
-                Email = "superadmin@aurora.nsw.edu.au"
+                Email = "superadmin@aurora.nsw.edu.au",
+                Name = Name.Create("Super Admin").Value
             };
 
             IdentityResult result = await userManager.CreateAsync(superAdmin);
