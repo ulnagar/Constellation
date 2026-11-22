@@ -18,7 +18,7 @@ namespace Constellation.Infrastructure.Persistence.EnrolmentContext.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "10.0.2")
+                .HasAnnotation("ProductVersion", "10.0.14")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
@@ -361,7 +361,7 @@ namespace Constellation.Infrastructure.Persistence.EnrolmentContext.Migrations
 
                             b1.HasKey("ApplicationId");
 
-                            b1.ToTable("Applications");
+                            b1.ToTable("Applications", (string)null);
 
                             b1.WithOwner()
                                 .HasForeignKey("ApplicationId");
@@ -388,7 +388,7 @@ namespace Constellation.Infrastructure.Persistence.EnrolmentContext.Migrations
 
                             b1.HasKey("ApplicationId");
 
-                            b1.ToTable("Applications");
+                            b1.ToTable("Applications", (string)null);
 
                             b1.WithOwner()
                                 .HasForeignKey("ApplicationId");
