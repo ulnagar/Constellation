@@ -127,7 +127,7 @@ public sealed partial class Service : IEmailService
             viewModel,
             EmailRecipient.NoReply,
             "School Contact change requested",
-            [EmailRecipient.InfoTechTeam, EmailRecipient.AuroraCollege, EmailRecipient.AbsencesMailbox]);
+            [EmailRecipient.InfoTechTeam, EmailRecipient.AuroraCollege]);
     }
 
     public async Task SendSchoolContactAddedNotification(
@@ -142,6 +142,6 @@ public sealed partial class Service : IEmailService
             viewModel,
             EmailRecipient.NoReply,
             "New School Contact registered",
-            [EmailRecipient.InfoTechTeam, EmailRecipient.AuroraCollege, EmailRecipient.AbsencesMailbox]);
+            [EmailRecipient.InfoTechTeam, EmailRecipient.AuroraCollege]);
     }
 }
