@@ -2,12 +2,16 @@
 
 using Errors;
 using Microsoft.AspNetCore.Identity;
+using Primitives;
 using Shared;
 using System;
 using ValueObjects;
 
-public sealed class EnrolmentUser : IdentityUser<Guid>
+public sealed class EnrolmentUser : IdentityUser<Guid>, IHasDomainEvents
 {
+    private readonly List<IDomainEvent> _domainEvents = [];
+
+
     public EnrolmentUser()
     { }
 
@@ -65,4 +69,13 @@ public sealed class EnrolmentUser : IdentityUser<Guid>
 
         return Result.Success();
     }
+
+    public IReadOnlyCollection<IDomainEvent> GetDomainEvents()
+        => _domainEvents.ToList();
+
+    public void ClearDomainEvents() 
+        => _domainEvents.Clear();
+
+    public void RaiseDomainEvent(IDomainEvent domainEvent) 
+        => _domainEvents.Add(domainEvent);
 }

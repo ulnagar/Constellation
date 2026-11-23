@@ -23,4 +23,8 @@ public static class EnrolmentUserErrors
     public static readonly Error PhoneUnchanged = new(
         "PortalAccount.PhoneUnchanged",
         "The new phone number must be different from the current one.");
+
+    public static readonly Func<Guid, Error> NotFound = userId => new(
+        "PortalAccount.NotFound",
+        $"No portal account was found with the ID '{userId}'.");
 }

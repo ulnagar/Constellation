@@ -23,7 +23,7 @@ public sealed class ConvertDomainEventsToOutboxMessagesInterceptor
         }
 
         List<OutboxMessage> outboxMessages = dbContext.ChangeTracker
-            .Entries<AggregateRoot>()
+            .Entries<IHasDomainEvents>()
             .Select(x => x.Entity)
             .SelectMany(aggregateRoot =>
             {

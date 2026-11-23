@@ -3,9 +3,9 @@
 using System.Collections.Generic;
 using System.Linq;
 
-public abstract class AggregateRoot
+public abstract class AggregateRoot : IHasDomainEvents
 {
-    private readonly List<IDomainEvent> _domainEvents = new();
+    private readonly List<IDomainEvent> _domainEvents = [];
 
     public IReadOnlyCollection<IDomainEvent> GetDomainEvents() => _domainEvents.ToList();
 
