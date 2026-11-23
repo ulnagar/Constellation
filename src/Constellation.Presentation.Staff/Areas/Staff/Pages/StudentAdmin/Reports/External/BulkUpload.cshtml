@@ -167,6 +167,7 @@
                     theme: 'bootstrap',
                     dropdownParent: $('#page-modal .combo').parent()
                 });
+            });
         });
 
         $('.bulk-publish-button').click(function (event) {
@@ -184,7 +185,7 @@
             });
         });
 
-        $('.publish-button').click(function (event) {
+        $(document).on('click', '.publish-button', function (event) {
             var reportId = $(this).data('reportId');
             var fileName = $(this).data('fileName');
             var xsrfHeader = $('input:hidden[name="__RequestVerificationToken"]').val();
@@ -203,7 +204,7 @@
             });
         });
 
-        $('.delete-button').click(function (event) {
+        $(document).on('click', '.delete-button', function (event) {
             var reportId = $(this).data('reportId');
             var fileName = $(this).data('fileName');
             var xsrfHeader = $('input:hidden[name="__RequestVerificationToken"]').val();
@@ -222,7 +223,7 @@
             });
         });
 
-        $('.email-button').click(function (event) {
+        $(document).on('click', '.email-button', function (event) {
             var xsrfHeader = $('input:hidden[name="__RequestVerificationToken"]').val();
 
             $.ajax({

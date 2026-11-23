@@ -4,7 +4,9 @@ using Errors;
 using Helpers;
 using Primitives;
 using Shared;
+using System.ComponentModel;
 
+[TypeConverter(typeof(StudentReferenceNumberTypeConverter))]
 public sealed class StudentReferenceNumber : ValueObject<StudentReferenceNumber, string>, IValueObject<StudentReferenceNumber, string>
 {
     public static readonly StudentReferenceNumber Empty = new(string.Empty);
@@ -44,4 +46,19 @@ public sealed class StudentReferenceNumber : ValueObject<StudentReferenceNumber,
 
     public static implicit operator string(StudentReferenceNumber? studentReferenceNumber) =>
         studentReferenceNumber is null ? string.Empty : studentReferenceNumber.ToString();
+}
+
+public sealed class StudentReferenceNumberTypeConverter : TypeConverter
+{
+    public override bool CanConvertFrom(ITypeDescriptorContext? context, Type sourceType) =>
+        sourceType == typeof(string) || base.CanConvertFrom(context, sourceType);
+
+    public override object? ConvertFrom(ITypeDescriptorContext? context, System.Globalization.CultureInfo? culture,
+        object value)
+    {
+        if (value is string stringValue)
+            return StudentReferenceNumber.FromValue(stringValue);
+
+        return base.ConvertFrom(context, culture, value);
+    }
 }

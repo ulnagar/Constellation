@@ -243,7 +243,12 @@ public class LoginModel : PageModel
             _logger.Information(" - DEBUG code found. Bypass login check.");
             await _signInManager.SignInAsync(user, false);
             
-            string? redirectUri = Url.IsLocalUrl(ReturnUrl) ? ReturnUrl : "/Index";
+            string? redirectUri = user.Email == "superadmin@aurora.nsw.edu.au"
+                ? "/Admin/Auth/Users"
+                : Url.IsLocalUrl(ReturnUrl) 
+                    ? ReturnUrl 
+                    : "/Index";
+            
             return LocalRedirect(redirectUri);
         }
 #endif

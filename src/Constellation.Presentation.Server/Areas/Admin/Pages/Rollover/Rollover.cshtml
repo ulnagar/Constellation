@@ -8,105 +8,91 @@
 
 @if (Model.ProcessResults.Count == 0)
 {
-    <div class="page-menu">
-        <button class="btn btn-primary" onclick="MarkAllWithdrawn()">Mark All Withdrawn</button>
-        <button class="btn btn-primary" onclick="MarkAllRemain()">Mark All Remain</button>
-        <button class="btn btn-primary" onclick="MarkAllRollover()">Mark All Rollover</button>
-    </div>
+	<div class="page-menu">
+		<button class="btn btn-primary" onclick="MarkAllWithdrawn()">Mark All Withdrawn</button>
+		<button class="btn btn-primary" onclick="MarkAllRemain()">Mark All Remain</button>
+		<button class="btn btn-primary" onclick="MarkAllRollover()">Mark All Rollover</button>
+	</div>
 
-    <hr />
+	<hr />
 
-    <form method="post">
-        <input type="hidden" asp-for="CurrentGrade" value="@Model.CurrentGrade" />
+	@Html.AntiForgeryToken()
+	<input type="hidden" id="current-grade" value="@Model.CurrentGrade.Value" />
 
-        <table class="table">
-            <thead>
-            <tr>
-                <th>SRN</th>
-                <th>Student</th>
-                <th>Grade</th>
-                <th>School</th>
-                <th>Action</th>
-            </tr>
-            </thead>
-            <tbody>
-            @foreach (var entry in Model.Statuses)
-            {
-                <tr>
-                    <td>
-                        <input type="hidden" name="Recipients.Index" value="@entry.StudentId" />
-                        <input type="hidden" name="Recipients[@entry.StudentId].StudentId" value="@entry.StudentId" />
-                        @entry.StudentId
-                    </td>
-                    <td>
-                        <input type="hidden" name="Recipients[@entry.StudentId].StudentName" value="@entry.StudentName" />
-                        @entry.StudentName
-                    </td>
-                    <td>
-                        <input type="hidden" name="Recipients[@entry.StudentId].Grade" value="@entry.Grade" />
-                        @entry.Grade.AsName()
-                    </td>
-                    <td>
-                        <input type="hidden" name="Recipients[@entry.StudentId].SchoolName" value="@entry.SchoolName" />
-                        @entry.SchoolName
-                    </td>
-                    <td>
-                        <select class="waiting-value" name="Recipients[@entry.StudentId].Decision">
-                            <option value="@RolloverStatus.Rollover">Rollover</option>
-                            <option value="@RolloverStatus.Withdraw">Withdraw</option>
-                            <option value="@RolloverStatus.Remain">Remain</option>
-                        </select>
-                    </td>
-                </tr>
-            }
-            </tbody>
-        </table>
+	<table class="table" id="rollover-table">
+		<thead>
+		<tr>
+			<th>SRN</th>
+			<th>Student</th>
+			<th>Grade</th>
+			<th>School</th>
+			<th>Action</th>
+		</tr>
+		</thead>
+		<tbody>
+		@foreach (var entry in Model.Statuses)
+		{
+			<tr data-student-id="@entry.StudentId">
+				<td>@entry.StudentReferenceNumber</td>
+				<td>@entry.StudentName</td>
+				<td>@entry.Grade.AsName()</td>
+				<td>@entry.SchoolName</td>
+				<td>
+					<select class="waiting-value">
+						<option value="@RolloverStatus.Rollover">Rollover</option>
+						<option value="@RolloverStatus.Withdraw">Withdraw</option>
+						<option value="@RolloverStatus.Remain">Remain</option>
+					</select>
+				</td>
+			</tr>
+		}
+		</tbody>
+	</table>
 
-        <div>
-            <button type="submit" class="btn btn-large btn-success">Submit</button>
-        </div>
-    </form>
+	<div>
+		<button type="button" id="submit-rollover" class="btn btn-large btn-success">Submit</button>
+	</div>
 }
 else
 {
-    <div class="page-menu">
+	<div class="page-menu">
 
-    </div>
+	</div>
 
-    <hr />
+	<hr/>
 
-    <table class="table table-striped table-hover data-table">
-        <thead>
-            <tr>
-                <th></th>
-                <th>Student Name</th>
-                <th>Previous Grade</th>
-                <th>School</th>
-                <th>Error</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var entry in Model.ProcessResults)
-            {
-                <tr>
-                    <td>
-                        @if (entry.Result.IsSuccess)
-                        {
-                            <i class="fal fa-check"></i>
-                        }
-                        else
-                        {
-                            <i class="fal fa-times"></i>
-                        }
-                    </td>
-                    <td>@entry.Decision.StudentName</td>
-                    <td>@entry.Decision.Grade.AsName()</td>
-                    <td>@entry.Decision.SchoolName</td>
-                    <td>@entry.Result?.Error</td>
-                </tr>
-            }
-        </tbody>
-    </table>
+	<table class="table table-striped table-hover data-table">
+		<thead>
+			<tr>
+				<th></th>
+				<th>Student Name</th>
+				<th>Previous Grade</th>
+				<th>School</th>
+				<th>Error</th>
+			</tr>
+		</thead>
+		<tbody>
+			@foreach (var entry in Model.ProcessResults)
+			{
+				<tr>
+					<td>
+						@if (entry.Result.IsSuccess)
+						{
+							<i class="fal fa-check"></i>
+						}
+						else
+						{
+							<i class="fal fa-times"></i>
+						}
+					</td>
+					<td>@entry.Decision.StudentName</td>
+					<td>@entry.Decision.Grade.AsName()</td>
+					<td>@entry.Decision.SchoolName</td>
+					<td>@entry.Result?.Error</td>
+				</tr>
+			}
+		</tbody>
+	</table>
 }
 
 @section scripts
@@ -121,7 +107,68 @@ else
         }
 
         function MarkAllRollover() {
-            $('.waiting-value').val("@RolloverStatus.Rollover").change();
+			$('.waiting-value').val("@RolloverStatus.Rollover").change();
         }
+
+        function collectDecisions() {
+			const decisions = {};
+			document.querySelectorAll('#rollover-table tbody tr').forEach(row => {
+				decisions[row.dataset.studentId] = row.querySelector('select.waiting-value').value;
+			});
+			return decisions;
+        }
+
+        async function submitRollover(btn) {
+            btn.disabled = true;
+
+            try {
+                const token = document.querySelector('input[name="__RequestVerificationToken"]').value;
+
+                const res = await fetch(window.location.href, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'RequestVerificationToken': token
+                    },
+                    body: JSON.stringify({
+                        currentGrade: document.getElementById('current-grade').value,
+                        statuses: collectDecisions()
+                    })
+                });
+
+				if (!res.ok) throw new Error(`HTTP ${res.status} - ${res.statusText}`);
+				
+				const result = await res.json();
+
+				console.log(result);
+
+				const url = new URL(window.location.pathname, window.location.origin);
+				if (result.nextGrade) {
+					url.searchParams.set('CurrentGrade', result.nextGrade);
+					window.location.replace(url);
+				} else {
+					showLoader();
+
+					const form = document.createElement('form');
+					form.method = 'post';
+					form.action = '?handler=Finalise';
+					const t = document.createElement('input');
+					t.type = 'hidden'; t.name = '__RequestVerificationToken'; t.value = token;
+					form.append(t);
+					document.body.append(form);
+					form.submit();
+				}
+            } catch (err) {
+                console.error(err);
+                alert('Rollover failed. Check the console for details.');
+                btn.disabled = false;
+            }
+	    }
+
+		document.addEventListener('click', e => {
+			const btn = e.target.closest('#submit-rollover');
+			if (btn) submitRollover(btn);
+		});
+
     </script>
 }

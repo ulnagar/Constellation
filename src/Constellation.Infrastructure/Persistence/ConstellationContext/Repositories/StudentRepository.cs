@@ -445,13 +445,16 @@ public class StudentRepository : IStudentRepository
                 student.Name.LastName.Contains(name));
         }
 
-        if (matchedStudents.Any())
+        List<Student> students = await matchedStudents.ToListAsync(cancellationToken);
+
+        // If no students are found or more than one student is found, return an empty StudentId
+        if (!students.Any() || students.Count > 1)
             return StudentId.Empty;
 
-        if (matchedStudents.Count() > 1)
-            return StudentId.Empty;
+        Student? firstEntry = students.FirstOrDefault();
 
-        Student firstEntry = await matchedStudents.FirstAsync(cancellationToken);
+        if (firstEntry is null)
+            return StudentId.Empty;
 
         return firstEntry.Id;
     }

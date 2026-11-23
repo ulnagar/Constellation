@@ -3,29 +3,9 @@ namespace Constellation.Core.Enums;
 using Common;
 using Errors;
 using Shared;
+using System.ComponentModel;
 
-//public enum Grade
-//{
-//    [Display(Name="Year 5")]
-//    Y05 = 5,
-//    [Display(Name = "Year 6")]
-//    Y06 = 6,
-//    [Display(Name = "Year 7")]
-//    Y07 = 7,
-//    [Display(Name = "Year 8")]
-//    Y08 = 8,
-//    [Display(Name = "Year 9")]
-//    Y09 = 9,
-//    [Display(Name = "Year 10")]
-//    Y10 = 10,
-//    [Display(Name = "Year 11")]
-//    Y11 = 11,
-//    [Display(Name = "Year 12")]
-//    Y12 = 12,
-//    [Display(Name = "Special")]
-//    SpecialProgram = 13
-//}
-
+[TypeConverter(typeof(GradeTypeConverter))]
 public sealed class Grade : StringEnumeration<Grade>
 {
     public static readonly Grade Empty = new("", "", 0);
@@ -85,4 +65,32 @@ public sealed class Grade : StringEnumeration<Grade>
 
     public Result<Grade> Next() => 
         FromNumber(Order + 1);
+}
+
+public sealed class GradeTypeConverter : TypeConverter
+{
+    public override bool CanConvertFrom(ITypeDescriptorContext? context, Type sourceType) =>
+        sourceType == typeof(string) || base.CanConvertFrom(context, sourceType);
+
+    public override object? ConvertFrom(ITypeDescriptorContext? context, System.Globalization.CultureInfo? culture, object value)
+    {
+        if (value is string stringValue)
+        {
+            if (string.IsNullOrWhiteSpace(stringValue)) return Grade.Empty;
+
+            return Grade.TryParse(stringValue, out Grade grade)
+                ? grade
+                : throw new FormatException($"Invalid grade value: {stringValue}");
+        }
+
+        return base.ConvertFrom(context, culture, value);
+    }
+
+    public override bool CanConvertTo(ITypeDescriptorContext? context, Type? destinationType) =>
+        destinationType == typeof(string) || base.CanConvertTo(context, destinationType);
+
+    public override object? ConvertTo(ITypeDescriptorContext? context, System.Globalization.CultureInfo? culture, object? value, Type destinationType) =>
+            destinationType == typeof(string) && value is Grade grade
+            ? grade.Value
+            : base.ConvertTo(context, culture, value, destinationType);
 }
