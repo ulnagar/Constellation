@@ -1,0 +1,264 @@
+﻿@page
+@model Constellation.Presentation.Enrolments.Areas.Enrolments.Pages.Account.LoginModel
+
+@{
+	Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    @await Html.PartialAsync("_FavIcons")
+    <title>Aurora College Enrolments</title>
+    <link rel="stylesheet" href="~/lib/bootstrap5/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/glyphicon.css" />
+    <link rel="stylesheet" href="~/css/login.css" />
+	
+    <style>
+		.form-box {
+			height: 600px;
+		}
+
+		.form-value > button,
+		.form-value > .button {
+			margin-bottom: 1rem;
+		}
+
+		.button {
+			display: flex;
+			align-items: center; /* vertical centering */
+			justify-content: center; /* horizontal centering */
+			box-sizing: border-box;
+			margin: 0;
+			width: 100%;
+			height: 40px;
+			border-radius: 40px;
+			background: #fff;
+			border: none;
+			outline: none;
+			cursor: pointer;
+			font-family: inherit;
+			font-size: 1em;
+			font-weight: 600;
+			line-height: normal;
+			text-align: center;
+			text-decoration: none; /* removes the link underline */
+			text-transform: none;
+			color: black;
+		}
+
+			.button:hover,
+			.button:focus,
+			.button:visited {
+				color: black;
+				text-decoration: none;
+			}
+
+		@@media (max-width: 830px) {
+			.title-box {
+				max-width: 75%;
+				width: 75%;
+			}
+
+				.title-box .title {
+					text-align: center;
+				}
+
+					.title-box .title h1 {
+						font-size: 4rem;
+						line-height: revert;
+					}
+		}
+
+		@@media (max-width: 520px) {
+			.title-box {
+				max-width: 90%;
+				width: 90%;
+			}
+
+			.title-box .title h1 {
+				font-size: 3rem;
+				line-height: revert;
+			}
+		}
+
+		@@media (max-width: 420px) {
+			.school-name {
+				display: none;
+			}
+		}
+    </style>
+</head>
+<body style="padding: 0; margin: 0;">
+<section>
+	<div class="title-box">
+		<div class="title-container">
+			<div class="title">
+					<h1><span class="school-name">Aurora College </span>Enrolments</h1>
+			</div>
+		</div>
+	</div>
+        
+	<div class="content-box">
+
+		@if (Model.Status is LoginModel.LoginStatus.Start)
+		{
+			<div class="form-box">
+				<div class="form-value">
+					<h2>Login</h2>
+					<div class="login-text">
+						<p>Sign in for Aurora College Enrolments Portal.</p>
+					</div>
+					<a asp-route-status="@LoginModel.LoginStatus.PromptForEmail" class="button">Log in with Email</a>
+					<a asp-route-status="@LoginModel.LoginStatus.PromptForPhone" class="button">Log in with Sms</a>
+					<button type="button" id="passkey-signin-button">Log in with PassKey</button>
+				</div>
+				<div class="form-value">
+					<h2>Register</h2>
+					<div class="login-text">
+						<p>Don't have an account? Register here.</p>
+					</div>
+					<a asp-page="/Account/Register" asp-area="Enrolments" class="button">Register</a>
+				</div>
+			</div>
+		}
+
+		@if (Model.Status == LoginModel.LoginStatus.PromptForEmail)
+		{
+			<form asp-page-handler="LoginViaEmail" method="post">
+				<div class="form-box">
+					<div class="form-value">
+						<h2>Login</h2>
+						<div class="login-text">
+							<p>Sign in for Aurora College Enrolments Portal.</p>
+						</div>
+						<div class="inputbox">
+							<span class="glyphicon glyphicon-envelope" aria-hidden="true"></span>
+							<input name="Email" placeholder=" " />
+							<label>Email</label>
+						</div>
+					</div>
+					<div class="form-value">
+						<button type="submit">Log in</button>
+					</div>
+				</div>
+			</form>
+		}
+
+		@if (Model.Status == LoginModel.LoginStatus.PromptForPhone)
+		{
+			<form asp-page-handler="LoginViaSms" method="post">
+				<div class="form-box">
+					<div class="form-value">
+						<h2>Login</h2>
+						<div class="login-text">
+							<p>Sign in for Aurora College Enrolments Portal.</p>
+						</div>
+						<div class="inputbox">
+							<span class="glyphicon glyphicon-phone" aria-hidden="true"></span>
+							<input name="PhoneNumber" placeholder=" "/>
+							<label>Mobile Number</label>
+						</div>
+					</div>
+					<div class="form-value">
+						<button type="submit">Log in</button>
+					</div>
+				</div>
+			</form>
+		}
+
+		@if (Model.Status == LoginModel.LoginStatus.PromptForToken)
+		{
+			<form asp-page-handler="ValidateSmsToken" method="post">
+				<div class="form-box">
+					<div class="form-value">
+						<h2>Login</h2>
+						<div class="login-text">
+							<p>Please enter the code sent to your phone.</p>
+						</div>
+						<div class="inputbox">
+							<input type="hidden" name="userId" value="@Model.UserId" />
+							<span class="glyphicon glyphicon-question-sign" aria-hidden="true"></span>
+							<input name="Token" placeholder=" "/>
+							<label>Token</label>
+						</div>
+					</div>
+				</div>
+			</form>
+		}
+		
+		@if (Model.Status == LoginModel.LoginStatus.ShowMessage)
+		{
+			<div class="form-box">
+				<div class="form-value">
+					<h2>Login</h2>
+					<div class="login-text">
+						<p>@Model.Message</p>
+					</div>
+				</div>
+			</div>
+		}
+
+	</div>
+</section>
+
+<div class="modal fade" tabindex="-1" id="page-modal">
+	<div class="modal-dialog" style="max-width: 600px;">
+		<div id="modal-content" class="modal-content">
+		</div>
+	</div>
+</div>
+
+<script src="~/lib/jquery/jquery.min.js"></script>
+    <partial name="_ValidationScriptsPartial"/>
+    <script src="~/js/passkeys.js"></script>
+    <script>
+        const passkeyButton = document.getElementById('passkey-signin-button');
+
+        // Hide the button where passkeys aren't supported
+        if (!window.PublicKeyCredential) {
+            passkeyButton.hidden = true;
+        }
+
+        passkeyButton.addEventListener('click', async () => {
+            passkeyButton.disabled = true;
+
+            try {
+                const optionsRes = await fetch('/passkey/login/options', { method: 'POST' });
+                if (!optionsRes.ok) throw new Error('options');
+
+                const options = await optionsRes.json();
+                options.challenge = PasskeyUtils.base64UrlToBuffer(options.challenge);
+
+                let assertion;
+                try {
+                    assertion = await navigator.credentials.get({ publicKey: options });
+                } catch (e) {
+                    // User dismissed or cancelled the browser prompt - not an error
+                    if (e.name === 'NotAllowedError' || e.name === 'AbortError') return;
+                    throw e;
+                }
+
+                const completeRes = await fetch('/passkey/login/enrolments', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(PasskeyUtils.serializeAssertionCredential(assertion))
+                });
+
+                if (completeRes.ok) {
+                    window.location.href = '/';
+                    return;
+                }
+
+                throw new Error('complete');
+            } catch {
+                await AppModal.notify('Login Failed', 'Passkey login failed. Please try again.');
+            } finally {
+                passkeyButton.disabled = false;
+            }
+        });
+    </script>
+</body>
+</html>

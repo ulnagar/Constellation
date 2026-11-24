@@ -1,6 +1,8 @@
 ﻿namespace Constellation.Core.Models.EnrolmentContext.EnrolmentUser;
 
+using Auth.Enums;
 using Errors;
+using Events;
 using Microsoft.AspNetCore.Identity;
 using Primitives;
 using Shared;
@@ -10,6 +12,7 @@ using ValueObjects;
 public sealed class EnrolmentUser : IdentityUser<Guid>, IHasDomainEvents
 {
     private readonly List<IDomainEvent> _domainEvents = [];
+    private readonly List<EnrolmentUserLoginAttempt> _logins = [];
 
 
     public EnrolmentUser()
@@ -20,6 +23,9 @@ public sealed class EnrolmentUser : IdentityUser<Guid>, IHasDomainEvents
     public EmailAddress PendingEmail { get; private set; } = EmailAddress.None;
 
     public PhoneNumber PendingPhone { get; private set; } = Core.ValueObjects.PhoneNumber.Empty;
+
+    public IReadOnlyList<EnrolmentUserLoginAttempt> Logins => _logins.AsReadOnly();
+    public ICollection<EnrolmentUserPasskey> PasskeyCredentials { get; set; } = [];
 
     public Result UpdatePreferredName(string name)
     {
@@ -47,6 +53,8 @@ public sealed class EnrolmentUser : IdentityUser<Guid>, IHasDomainEvents
         if (PendingEmail != EmailAddress.None)
             PendingEmail = EmailAddress.None;
 
+        RaiseDomainEvent(new EnrolmentUserEmailConfirmedDomainEvent(new(), Id));
+
         return Result.Success();
     }
 
@@ -69,6 +77,9 @@ public sealed class EnrolmentUser : IdentityUser<Guid>, IHasDomainEvents
 
         return Result.Success();
     }
+
+    public void AddLogin(DateTime dateTime, LoginStatus status)
+        => _logins.Add(new(Id, dateTime, status));
 
     public IReadOnlyCollection<IDomainEvent> GetDomainEvents()
         => _domainEvents.ToList();

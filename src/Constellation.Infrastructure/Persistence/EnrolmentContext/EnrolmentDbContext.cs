@@ -1,15 +1,20 @@
 ﻿namespace Constellation.Infrastructure.Persistence.EnrolmentContext;
 
+using Constellation.Application.Models.Identity;
 using Constellation.Core.Enums;
+using Constellation.Core.Models.Auth;
 using Constellation.Infrastructure.Persistence.ConstellationContext.Converters;
 using Core.Models.EnrolmentContext.EnrolmentParent.Identifiers;
+using Core.Models.EnrolmentContext.EnrolmentUser;
 using Core.Primitives;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Shared.EntityConfigurations.Outbox;
 using System;
 using System.Reflection;
 
-public sealed class EnrolmentDbContext : DbContext
+public sealed class EnrolmentDbContext : IdentityDbContext<EnrolmentUser, IdentityRole<Guid>, Guid>
 {
     public EnrolmentDbContext(
         DbContextOptions<EnrolmentDbContext> options)

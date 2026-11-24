@@ -109,6 +109,9 @@ public static class ServicesRegistration
             });
         });
 
+        services.AddScoped<EnrolmentDbContext>(sp =>
+            sp.GetRequiredService<IDbContextFactory<EnrolmentDbContext>>().CreateDbContext());
+
         services.Decorate(typeof(INotificationHandler<>), typeof(IdempotentDomainEventHandler<>));
 
         // Add Hangfire Jobs

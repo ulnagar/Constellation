@@ -4,7 +4,7 @@ using Constellation.Core.DomainEvents;
 using Constellation.Core.Models.Identifiers;
 using System;
 
-public sealed record EnrolmentUserCreatedDomainEvent(
+public sealed record EnrolmentUserEmailConfirmedDomainEvent(
     DomainEventId Id,
     Guid UserId)
     : DomainEvent(Id);

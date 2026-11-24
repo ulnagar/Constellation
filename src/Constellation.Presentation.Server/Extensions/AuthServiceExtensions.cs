@@ -1,11 +1,16 @@
 ﻿namespace Constellation.Presentation.Server.Extensions;
 
+using Application.Domains.EnrolmentContext.Helpers;
 using Constellation.Application.Models.Identity;
 using Constellation.Core.Models.Auth;
+using Constellation.Infrastructure.Identity;
 using Constellation.Infrastructure.Identity.Authorization;
 using Constellation.Infrastructure.Identity.ClaimsPrincipalFactories;
+using Constellation.Infrastructure.Identity.Enrolments;
 using Constellation.Infrastructure.Identity.MagicLink;
 using Constellation.Infrastructure.Persistence.ConstellationContext;
+using Constellation.Infrastructure.Persistence.EnrolmentContext;
+using Core.Models.EnrolmentContext.EnrolmentUser;
 using Helpers.Identity;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
@@ -14,6 +19,40 @@ using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 
 public static class AuthServiceExtensions
 {
+    public static IServiceCollection AddEnrolmentsAuth(
+        this IServiceCollection services)
+    {
+        services.Configure<EnrolmentsTokenProviderOptions>(o =>
+        {
+            o.Name = "EnrolmentsDataProtectorTokenProvider";
+            o.TokenLifespan = TimeSpan.FromHours(24);
+        });
+            
+        services
+            .AddIdentityCore<EnrolmentUser>()
+            .AddEntityFrameworkStores<EnrolmentDbContext>()
+            .AddTokenProvider<EnrolmentsDataProtectorTokenProvider<EnrolmentUser>>(EnrolmentsIdentityConstants.EmailTokenProvider)
+            .AddTokenProvider<PhoneNumberTokenProvider<EnrolmentUser>>(EnrolmentsIdentityConstants.PhoneTokenProvider)
+            .AddUserManager<EnrolmentUserManager>()
+            .AddSignInManager<EnrolmentSignInManager>();
+
+        services
+            .AddAuthentication()
+            .AddCookie(EnrolmentsIdentityConstants.AuthenticationScheme, options =>
+            {
+                options.Cookie.Name = ".Enrolments.Portal";
+                options.Cookie.HttpOnly = true;
+                options.Cookie.SameSite = SameSiteMode.Lax;
+                options.LoginPath = "/Enrolments/Account/Login";
+                options.LogoutPath = "/Enrolments/Account/Logout";
+                options.AccessDeniedPath = "/Enrolments/Account/AccessDenied";
+                options.ExpireTimeSpan = TimeSpan.FromDays(14);
+                options.SlidingExpiration = true;
+            });
+
+        return services;
+    }
+
     public static IServiceCollection AddConstellationAuth(
         this IServiceCollection services,
         IConfiguration configuration)

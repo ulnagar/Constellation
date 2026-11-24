@@ -22,6 +22,7 @@ builder.Services
     .AddApplication()
     .AddInfrastructure(builder.Configuration, builder.Environment)
     .AddConstellationAuth(builder.Configuration)
+    .AddEnrolmentsAuth()
     .AddConstellationHangfire(builder.Configuration)
     .AddConstellationPresentation();
 

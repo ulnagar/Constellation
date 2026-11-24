@@ -43,4 +43,18 @@ internal sealed class EnrolmentUserRepository
             .Set<EnrolmentUser>()
             .Where(user => userIds.Contains(user.Id))
             .ToListAsync(cancellationToken);
+
+    public async Task<EnrolmentUserPasskey?> GetPasskeyById(
+        byte[] id,
+        CancellationToken cancellationToken = default) =>
+        await _context
+            .Set<EnrolmentUserPasskey>()
+            .FirstOrDefaultAsync(entry => entry.CredentialId == id, cancellationToken);
+
+    public async Task<bool> DoesCredentialAlreadyExist(
+        byte[] id,
+        CancellationToken cancellationToken = default) =>
+        await _context
+            .Set<EnrolmentUserPasskey>()
+            .AnyAsync(entry => entry.CredentialId == id, cancellationToken);
 }

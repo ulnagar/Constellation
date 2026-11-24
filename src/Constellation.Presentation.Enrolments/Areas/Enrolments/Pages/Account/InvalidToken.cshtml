@@ -1,0 +1,127 @@
+﻿@page
+@model Constellation.Presentation.Enrolments.Areas.Enrolments.Pages.Account.InvalidTokenModel
+
+@{
+	Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    @await Html.PartialAsync("_FavIcons")
+    <title>Aurora College Enrolments</title>
+    <link rel="stylesheet" href="~/lib/bootstrap5/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/glyphicon.css" />
+    <link rel="stylesheet" href="~/css/login.css" />
+	
+    <style>
+		.form-box {
+			height: 600px;
+		}
+
+		.form-value > button,
+		.form-value > .button {
+			margin-bottom: 1rem;
+		}
+
+		.button {
+			display: flex;
+			align-items: center; /* vertical centering */
+			justify-content: center; /* horizontal centering */
+			box-sizing: border-box;
+			margin: 0;
+			width: 100%;
+			height: 40px;
+			border-radius: 40px;
+			background: #fff;
+			border: none;
+			outline: none;
+			cursor: pointer;
+			font-family: inherit;
+			font-size: 1em;
+			font-weight: 600;
+			line-height: normal;
+			text-align: center;
+			text-decoration: none; /* removes the link underline */
+			text-transform: none;
+			color: black;
+		}
+
+			.button:hover,
+			.button:focus,
+			.button:visited {
+				color: black;
+				text-decoration: none;
+			}
+
+		@@media (max-width: 830px) {
+			.title-box {
+				max-width: 75%;
+				width: 75%;
+			}
+
+				.title-box .title {
+					text-align: center;
+				}
+
+					.title-box .title h1 {
+						font-size: 4rem;
+						line-height: revert;
+					}
+		}
+
+		@@media (max-width: 520px) {
+			.title-box {
+				max-width: 90%;
+				width: 90%;
+			}
+
+			.title-box .title h1 {
+				font-size: 3rem;
+				line-height: revert;
+			}
+		}
+
+		@@media (max-width: 420px) {
+			.school-name {
+				display: none;
+			}
+		}
+    </style>
+</head>
+<body style="padding: 0; margin: 0;">
+<section>
+	<div class="title-box">
+		<div class="title-container">
+			<div class="title">
+					<h1><span class="school-name">Aurora College </span>Enrolments</h1>
+			</div>
+		</div>
+	</div>
+        
+	<div class="content-box">
+		<div class="form-box">
+			<div class="form-value">
+				<h2>Invalid Token</h2>
+				
+				<div class="login-text">
+				<p>This token is no longer valid. Tokens expire after a short time and can only be used once.</p>
+					</div>
+				<a asp-page="/Account/Login" asp-area="Enrolments" class="button">Send me a new token</a>
+			</div>
+		</div>
+	</div>
+
+</section>
+
+<div class="modal fade" tabindex="-1" id="page-modal">
+	<div class="modal-dialog" style="max-width: 600px;">
+		<div id="modal-content" class="modal-content">
+		</div>
+	</div>
+</div>
+
+</body>
+</html>
