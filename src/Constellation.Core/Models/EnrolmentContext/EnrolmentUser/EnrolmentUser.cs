@@ -18,7 +18,7 @@ public sealed class EnrolmentUser : IdentityUser<Guid>, IHasDomainEvents
     public EnrolmentUser()
     { }
 
-    public string PreferredName { get; private set; } = string.Empty;
+    public Name Name { get; set; }
 
     public EmailAddress PendingEmail { get; private set; } = EmailAddress.None;
 
@@ -26,15 +26,6 @@ public sealed class EnrolmentUser : IdentityUser<Guid>, IHasDomainEvents
 
     public IReadOnlyList<EnrolmentUserLoginAttempt> Logins => _logins.AsReadOnly();
     public ICollection<EnrolmentUserPasskey> PasskeyCredentials { get; set; } = [];
-
-    public Result UpdatePreferredName(string name)
-    {
-        if (string.IsNullOrWhiteSpace(name))
-            return Result.Failure(EnrolmentUserErrors.PreferredNameRequired);
-
-        PreferredName = name.Trim();
-        return Result.Success();
-    }
 
     public Result RequestEmailChange(EmailAddress newEmail)
     {

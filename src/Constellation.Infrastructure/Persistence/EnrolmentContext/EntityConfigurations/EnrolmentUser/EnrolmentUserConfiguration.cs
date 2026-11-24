@@ -1,5 +1,6 @@
 ﻿namespace Constellation.Infrastructure.Persistence.EnrolmentContext.EntityConfigurations.EnrolmentUser;
 
+using Constellation.Core.ValueObjects;
 using ConstellationContext.Converters;
 using Core.Models.EnrolmentContext.EnrolmentUser;
 using Microsoft.EntityFrameworkCore;
@@ -9,6 +10,28 @@ internal sealed class EnrolmentUserConfiguration : IEntityTypeConfiguration<Enro
 {
     public void Configure(EntityTypeBuilder<EnrolmentUser> builder)
     {
+        builder
+            .ComplexProperty(user => user.Name)
+            .IsRequired();
+
+        builder
+            .ComplexProperty(user => user.Name)
+            .Property(name => name.FirstName)
+            .HasColumnName(nameof(Name.FirstName))
+            .IsRequired();
+
+        builder
+            .ComplexProperty(user => user.Name)
+            .Property(name => name.PreferredName)
+            .HasColumnName(nameof(Name.PreferredName))
+            .IsRequired(false);
+
+        builder
+            .ComplexProperty(user => user.Name)
+            .Property(name => name.LastName)
+            .HasColumnName(nameof(Name.LastName))
+            .IsRequired();
+
         builder
             .Property(user => user.PendingEmail)
             .HasConversion<EmailAddressConverter>();
