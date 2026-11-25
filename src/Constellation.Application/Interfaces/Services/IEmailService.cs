@@ -93,6 +93,7 @@ public interface IEmailService
     Task SendUpdatedCoverEmail(Cover cover, Offering offering, EmailRecipient coveringTeacher, List<EmailRecipient> primaryRecipients, List<EmailRecipient> secondaryRecipients, DateOnly originalStartDate, TimeOnly startTime, TimeOnly endTime, string teamLink, List<Attachment> attachments, CancellationToken cancellationToken = default);
 
     // Enrolment Emails
+    Task<Result> SendRegistrationConfirmationEmail(Name name, EmailAddress emailAddress, string link, CancellationToken cancellationToken = default);
     Task<Result> SendEnrolmentFormNotification(Application application, EnrolmentParent parent, EnrolmentStudent student, Offer offer, string year, CancellationToken cancellationToken = default);
     Task<Result> SendEnrolmentFormReminder(Application application, EnrolmentParent parent, EnrolmentStudent student, Offer offer, string year, CancellationToken cancellationToken = default);
     Task<Result> SendEnrolmentFormReceipt(Application application, EnrolmentParent parent, EnrolmentStudent student, Offer offer, string year, CancellationToken cancellationToken = default);

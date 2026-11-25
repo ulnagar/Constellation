@@ -1,5 +1,6 @@
 ﻿namespace Constellation.Infrastructure.Services;
 
+using Application.Abstractions;
 using Application.Domains.Messaging.Tracking.Models;
 using Application.Interfaces.Services;
 using Core.Models.Messaging.Email.Identifiers;
@@ -7,7 +8,7 @@ using HtmlAgilityPack;
 
 internal sealed class EmailTrackingInjectorService : IEmailTrackingInjectorService
 {
-    private readonly string _baseUrl = "https://acos.aurora.nsw.edu.au";
+    private readonly string _baseUrl = AppConstants.BaseUrl;
 
     public InjectionResult InjectTracking(string bodyHtml, EmailId emailId)
     {

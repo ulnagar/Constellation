@@ -23,28 +23,31 @@ public class IndexModel : PageModel
 
     public async Task<IActionResult> OnGet()
     {
-        AuthorizationResult parentPortal = await _authService.AuthorizeAsync(User, AuthPolicies.IsParent);
-        AuthorizationResult schoolPortal = await _authService.AuthorizeAsync(User, AuthPolicies.IsSchoolContact);
-        AuthorizationResult staffPortal = await _authService.AuthorizeAsync(User, AuthPolicies.IsStaffMember);
-        AuthorizationResult studentPortal = await _authService.AuthorizeAsync(User, AuthPolicies.IsStudent);
+        CanAccessParentPortal = await IsAuthorizedAsync(AuthPolicies.IsParent);
+        CanAccessSchoolPortal = await IsAuthorizedAsync(AuthPolicies.IsSchoolContact);
+        CanAccessStaffPortal = await IsAuthorizedAsync(AuthPolicies.IsStaffMember);
+        CanAccessStudentPortal = await IsAuthorizedAsync(AuthPolicies.IsStudent);
 
-        CanAccessParentPortal = parentPortal.Succeeded;
-        CanAccessSchoolPortal = schoolPortal.Succeeded;
-        CanAccessStaffPortal = staffPortal.Succeeded;
-        CanAccessStudentPortal = studentPortal.Succeeded;
+        var portals = new List<(string Page, string Area)>();
 
-        if (CanAccessParentPortal && !CanAccessSchoolPortal && !CanAccessStaffPortal && !CanAccessStudentPortal)
-            return RedirectToPage("/Index", new { area = "Parents" });
+        if (CanAccessParentPortal) portals.Add(("/Index", "Parents"));
+        if (CanAccessSchoolPortal) portals.Add(("/Dashboard", "Schools"));
+        if (CanAccessStaffPortal) portals.Add(("/Dashboard", "Staff"));
+        if (CanAccessStudentPortal) portals.Add(("/Index", "Students"));
 
-        if (!CanAccessParentPortal && CanAccessSchoolPortal && !CanAccessStaffPortal && !CanAccessStudentPortal)
-            return RedirectToPage("/Dashboard", new { area = "Schools" });
-
-        if (!CanAccessParentPortal && !CanAccessSchoolPortal && CanAccessStaffPortal && !CanAccessStudentPortal)
-            return RedirectToPage("/Dashboard", new { area = "Staff" });
-
-        if (!CanAccessParentPortal && !CanAccessSchoolPortal && !CanAccessStaffPortal && CanAccessStudentPortal)
-            return RedirectToPage("/Index", new { area = "Students" });
+        // Only one portal available: skip the chooser and go straight there
+        if (portals.Count == 1)
+        {
+            var (page, area) = portals[0];
+            return RedirectToPage(page, new { area });
+        }
 
         return Page();
+    }
+
+    private async Task<bool> IsAuthorizedAsync(string policy)
+    {
+        var result = await _authService.AuthorizeAsync(User, policy);
+        return result.Succeeded;
     }
 }

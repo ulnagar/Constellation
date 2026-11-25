@@ -1,7 +1,7 @@
-﻿namespace Constellation.Presentation.Shared.Extensions;
+﻿namespace Constellation.Application.Extensions;
 
-using Application.Domains.EnrolmentContext.Helpers;
-using Core.Models.EnrolmentContext.EnrolmentUser;
+using Constellation.Application.Domains.EnrolmentContext.Helpers;
+using Constellation.Core.Models.EnrolmentContext.EnrolmentUser;
 using Microsoft.AspNetCore.Identity;
 
 public static class EnrolmentUserManagerExtensions

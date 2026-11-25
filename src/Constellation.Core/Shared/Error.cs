@@ -1,6 +1,7 @@
 ﻿#nullable enable
 namespace Constellation.Core.Shared;
 
+using Microsoft.AspNetCore.Identity;
 using System;
 
 public class Error : IEquatable<Error>
@@ -51,4 +52,50 @@ public class Error : IEquatable<Error>
     public override int GetHashCode() => HashCode.Combine(Code, Message);
 
     public override string ToString() => $"{Code}: {Message}";
+
+    /// <summary>
+    /// Converts a single <see cref="IdentityError"/> into an <see cref="Error"/>.
+    /// The Identity error code is prefixed with "Identity." so it can't collide
+    /// with domain error codes.
+    /// </summary>
+    public static Error FromIdentityError(IdentityError identityError)
+    {
+        ArgumentNullException.ThrowIfNull(identityError);
+
+        var code = string.IsNullOrWhiteSpace(identityError.Code)
+            ? "Identity.Unknown"
+            : $"Identity.{identityError.Code}";
+
+        var message = string.IsNullOrWhiteSpace(identityError.Description)
+            ? "An identity error occurred."
+            : identityError.Description;
+
+        return new Error(code, message);
+    }
+
+    /// <summary>
+    /// Converts a failed <see cref="IdentityResult"/> into a single <see cref="Error"/>,
+    /// so it can be passed to <c>Result.Failure(Error)</c>.
+    /// </summary>
+    /// <remarks>
+    /// One error maps directly. Several errors are combined into an
+    /// "Identity.Multiple" error with the messages joined, because the Result
+    /// type carries a single error. If a failed result has no errors, an
+    /// "Identity.Unknown" error is returned.
+    /// </remarks>
+    public static Error FromIdentityResult(IdentityResult identityResult)
+    {
+        ArgumentNullException.ThrowIfNull(identityResult);
+
+        var errors = identityResult.Errors.ToList();
+
+        return errors.Count switch
+        {
+            0 => new Error("Identity.Unknown", "An identity operation failed."),
+            1 => FromIdentityError(errors[0]),
+            _ => new Error(
+                "Identity.Multiple",
+                string.Join(" ", errors.Select(e => e.Description)))
+        };
+    }
 }

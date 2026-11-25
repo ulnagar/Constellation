@@ -1,9 +1,11 @@
 ﻿namespace Constellation.Infrastructure.Templates.Views.Shared;
 
+using Application.Abstractions;
+
 public abstract class EmailLayoutBaseViewModel
 {
     public abstract string ViewLocation { get; }
-    public const string BaseUrl = "https://acos.aurora.nsw.edu.au";
+    public const string BaseUrl = AppConstants.BaseUrl;
 
     public string Preheader { get; set; }
     public string Title { get; set; }

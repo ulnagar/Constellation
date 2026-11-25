@@ -2,6 +2,7 @@
 
 using Application.Domains.AppSettings.Models;
 using Constellation.Application.Interfaces.Services;
+using Constellation.Application.Models;
 using Constellation.Core.Shared;
 using Constellation.Infrastructure.Templates.Views.Emails.Enrolments;
 using Core.Errors;
@@ -11,11 +12,47 @@ using Core.Models.EnrolmentContext.Application.Enums;
 using Core.Models.EnrolmentContext.EnrolmentParent;
 using Core.Models.EnrolmentContext.EnrolmentStudent;
 using Core.Models.EnrolmentContext.Offer;
+using Core.Models.Messaging.Email.Enums;
 using Core.Models.Messaging.Enums;
 using Core.ValueObjects;
 
 public sealed partial class Service : IEmailService
 {
+
+    public async Task<Result> SendRegistrationConfirmationEmail(
+        Name name,
+        EmailAddress emailAddress,
+        string link,
+        CancellationToken cancellationToken = default)
+    {
+        EnrolmentUserRegistrationConfirmationEmailViewModel viewModel = new()
+        {
+            Title = $"Account Confirmation",
+            Preheader = "",
+            UserName = name,
+            Link = link
+        };
+        
+        RenderedEmail rendered = await _razorService.RenderEmail(viewModel.ViewLocation, viewModel);
+
+        EmailMessage message = new(
+            MessageModule.Authentication,
+            EmailRecipient.NoReply,
+            null,
+            viewModel.Title,
+            rendered.PlainText,
+            rendered.Html);
+
+        Result<EmailRecipient> recipient = EmailRecipient.Create(name, emailAddress);
+
+        if (recipient.IsFailure)
+            return recipient;
+
+        message.AddRecipient(recipient.Value, EmailRecipientType.To);
+
+        return await _emailSender.Send(message, includeTracking: false, cancellationToken: cancellationToken);
+    }
+    
     public async Task<Result> SendEnrolmentFormNotification(
         Application application,
         EnrolmentParent parent,

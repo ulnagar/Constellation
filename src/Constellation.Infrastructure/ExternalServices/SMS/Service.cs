@@ -1,5 +1,6 @@
 ﻿namespace Constellation.Infrastructure.ExternalServices.SMS;
 
+using Application.Abstractions;
 using Application.Domains.Messaging.Sms.Dtos;
 using Application.Interfaces.Gateways;
 using Constellation.Application.Interfaces.Services;
@@ -35,7 +36,7 @@ public sealed class Service : ISMSService
         _configuration = configuration.Value;
 
         _deliveryReceiptUri = httpContextAccessor.HttpContext == null 
-            ? "https://acos.aurora.nsw.edu.au/api/sms"
+            ? $"{AppConstants.BaseUrl}/api/sms"
             : linkGenerator.GetUriByName(
                 httpContextAccessor.HttpContext!,
                 "SmsDeliveryReceipt",   // matches the .WithName() registration
