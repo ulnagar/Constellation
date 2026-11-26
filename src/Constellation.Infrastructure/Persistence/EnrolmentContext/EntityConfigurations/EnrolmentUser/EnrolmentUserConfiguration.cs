@@ -33,11 +33,17 @@ internal sealed class EnrolmentUserConfiguration : IEntityTypeConfiguration<Enro
             .IsRequired();
 
         builder
+            .Property(user => user.CreatedAt)
+            .IsRequired();
+
+        builder
             .Property(user => user.PendingEmail)
+            .IsRequired(false)
             .HasConversion<EmailAddressConverter>();
 
         builder
             .Property(user => user.PendingPhone)
+            .IsRequired(false)
             .HasConversion<PhoneNumberConverter>();
 
         builder

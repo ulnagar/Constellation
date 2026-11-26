@@ -124,6 +124,7 @@ public static class ServicesRegistration
         services.AddScoped<IAwardDigestJob, AwardDigestJob>();
         services.AddScoped<IClassMonitorJob, ClassMonitorJob>();
         services.AddScoped<IEnrolmentTimingJob, EnrolmentTimingJob>();
+        services.AddScoped<IEnrolmentUserManagementJob, EnrolmentUserManagementJob>();
         services.AddScoped<IGroupTutorialExpiryScanJob, GroupTutorialExpiryScanJob>();
         services.AddScoped<ILessonNotificationsJob, LessonNotificationsJob>();
         services.AddScoped<ILessonUpdateJob, LessonUpdateJob>();

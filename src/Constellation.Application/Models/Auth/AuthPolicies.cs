@@ -11,4 +11,7 @@ public static class AuthPolicies
     public const string CanSubmitGroupTutorialRolls = "CanSubmitGroupTutorialRolls";
     public const string IsSiteAdmin = "IsSiteAdmin";
     public const string CanEditWorkFlowAction = "CanEditWorkFlowAction";
+
+
+    public const string IsEnrolmentsPortalUser = "IsEnrolmentsPortalUser";
 }

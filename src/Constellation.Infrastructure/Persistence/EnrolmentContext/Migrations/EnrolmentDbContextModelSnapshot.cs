@@ -283,6 +283,9 @@ namespace Constellation.Infrastructure.Persistence.EnrolmentContext.Migrations
                         .IsConcurrencyToken()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("datetimeoffset");
+
                     b.Property<string>("Email")
                         .HasMaxLength(256)
                         .HasColumnType("nvarchar(256)");
@@ -308,11 +311,9 @@ namespace Constellation.Infrastructure.Persistence.EnrolmentContext.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("PendingEmail")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("PendingPhone")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("PhoneNumber")
@@ -320,10 +321,6 @@ namespace Constellation.Infrastructure.Persistence.EnrolmentContext.Migrations
 
                     b.Property<bool>("PhoneNumberConfirmed")
                         .HasColumnType("bit");
-
-                    b.Property<string>("PreferredName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("SecurityStamp")
                         .HasColumnType("nvarchar(max)");
@@ -334,6 +331,25 @@ namespace Constellation.Infrastructure.Persistence.EnrolmentContext.Migrations
                     b.Property<string>("UserName")
                         .HasMaxLength(256)
                         .HasColumnType("nvarchar(256)");
+
+                    b.ComplexProperty(typeof(Dictionary<string, object>), "Name", "Constellation.Core.Models.EnrolmentContext.EnrolmentUser.EnrolmentUser.Name#Name", b1 =>
+                        {
+                            b1.IsRequired();
+
+                            b1.Property<string>("FirstName")
+                                .IsRequired()
+                                .HasColumnType("nvarchar(max)")
+                                .HasColumnName("FirstName");
+
+                            b1.Property<string>("LastName")
+                                .IsRequired()
+                                .HasColumnType("nvarchar(max)")
+                                .HasColumnName("LastName");
+
+                            b1.Property<string>("PreferredName")
+                                .HasColumnType("nvarchar(max)")
+                                .HasColumnName("PreferredName");
+                        });
 
                     b.HasKey("Id");
 

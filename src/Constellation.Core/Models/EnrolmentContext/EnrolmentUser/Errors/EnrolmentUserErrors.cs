@@ -1,6 +1,7 @@
 ﻿namespace Constellation.Core.Models.EnrolmentContext.EnrolmentUser.Errors;
 
 using Shared;
+using ValueObjects;
 
 public static class EnrolmentUserErrors
 {
@@ -27,4 +28,8 @@ public static class EnrolmentUserErrors
     public static readonly Func<Guid, Error> NotFound = userId => new(
         "PortalAccount.NotFound",
         $"No portal account was found with the ID '{userId}'.");
+
+    public static readonly Func<EmailAddress, Error> NotFoundByEmail = email => new(
+        "PortalAccount.NotFoundByEmail",
+        $"No portal account was found with the Email '{email}'.");
 }

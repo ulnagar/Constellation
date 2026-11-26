@@ -12,6 +12,7 @@ using Core.Models.EnrolmentContext.Application.Enums;
 using Core.Models.EnrolmentContext.EnrolmentParent;
 using Core.Models.EnrolmentContext.EnrolmentStudent;
 using Core.Models.EnrolmentContext.Offer;
+using Core.Models.Messaging.Email;
 using Core.Models.Messaging.Email.Enums;
 using Core.Models.Messaging.Enums;
 using Core.ValueObjects;

@@ -1,0 +1,22 @@
+@model Constellation.Infrastructure.Templates.Views.Emails.Enrolments.EnrolmentUserRegistrationConfirmationEmailViewModel
+
+@{
+    Layout = "/Views/Shared/EmailLayout.cshtml";
+
+    ViewData["Preheader"] = Model.Preheader;
+    ViewData["Title"] = Model.Title;
+    ViewData["SenderName"] = Model.SenderName;
+    ViewData["SenderTitle"] = Model.SenderTitle;
+}
+
+<p>Dear @Model.UserName.ToString()</p>
+
+<p>Thank you for registering for the Enrolments Portal at Aurora College. To complete your registration, please confirm your email address by clicking the link below:</p>
+
+<a href="@Model.Link" target="_blank">Confirm Email Address</a>
+
+<p>Please be advised that this link will expire 24 hours after this email was sent. Once it has expired, your registration will be cancelled and you will need to register again.</p>
+
+<p>If you did not request this registration, no action is required and you may disregard this email. No account will be created without confirmation.</p>
+
+<p>Should you require any assistance, please contact Aurora College on 1300 610 733 or email <a href="mailto:support@aurora.nsw.edu.au">support@aurora.nsw.edu.au</a>.</p>

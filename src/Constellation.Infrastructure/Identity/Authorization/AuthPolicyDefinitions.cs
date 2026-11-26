@@ -1,8 +1,8 @@
 ﻿namespace Constellation.Infrastructure.Identity.Authorization;
 
+using Application.Domains.EnrolmentContext.Helpers;
 using Application.Models.Identity;
 using Constellation.Application.Models.Auth;
-using DependencyInjection;
 using Microsoft.AspNetCore.Authorization;
 
 public static class AuthPolicyDefinitions
@@ -38,6 +38,15 @@ public static class AuthPolicyDefinitions
         options.AddPolicy(AuthPolicies.CanEditWorkFlowAction, policy =>
             policy.Requirements.Add(new CanEditWorkFlowActionRequirement()));
        
+        return options;
+    }
+
+    public static AuthorizationOptions AddEnrolmentsPolicies(this AuthorizationOptions options)
+    {
+        options.AddPolicy(AuthPolicies.IsEnrolmentsPortalUser, policy =>
+            policy.AddAuthenticationSchemes(EnrolmentsIdentityConstants.AuthenticationScheme)
+                .RequireAuthenticatedUser());
+
         return options;
     }
 }

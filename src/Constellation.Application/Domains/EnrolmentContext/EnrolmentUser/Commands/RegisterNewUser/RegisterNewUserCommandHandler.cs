@@ -33,9 +33,12 @@ internal sealed class RegisterNewUserCommandHandler
 
     public async Task<Result> Handle(RegisterNewUserCommand request, CancellationToken cancellationToken)
     {
-        EnrolmentUser user = new EnrolmentUser();
-        user.UserName = request.UserName;
-        user.Email = request.Email;
+        EnrolmentUser user = new EnrolmentUser()
+        {
+            UserName = request.Email,
+            Email = request.Email,
+            Name = request.UserName
+        };
 
         if (request.Mobile is not null && request.Mobile != PhoneNumber.Empty)
             user.PhoneNumber = request.Mobile.Value;

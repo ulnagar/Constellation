@@ -3,7 +3,6 @@
 using Application.Domains.EnrolmentContext.Helpers;
 using Constellation.Application.Models.Identity;
 using Constellation.Core.Models.Auth;
-using Constellation.Infrastructure.Identity;
 using Constellation.Infrastructure.Identity.Authorization;
 using Constellation.Infrastructure.Identity.ClaimsPrincipalFactories;
 using Constellation.Infrastructure.Identity.Enrolments;
@@ -12,7 +11,6 @@ using Constellation.Infrastructure.Persistence.ConstellationContext;
 using Constellation.Infrastructure.Persistence.EnrolmentContext;
 using Core.Models.EnrolmentContext.EnrolmentUser;
 using Helpers.Identity;
-using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
@@ -86,7 +84,9 @@ public static class AuthServiceExtensions
         });
 
         services
-            .AddAuthorization(opt => opt.AddApplicationPolicies())
+            .AddAuthorization(opt => 
+                opt.AddApplicationPolicies()
+                    .AddEnrolmentsPolicies())
             .AddAuthorizationPolicies();
 
         services.ConfigureApplicationCookie(options =>

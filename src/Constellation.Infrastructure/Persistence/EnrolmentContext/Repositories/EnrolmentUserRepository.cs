@@ -57,4 +57,11 @@ internal sealed class EnrolmentUserRepository
         await _context
             .Set<EnrolmentUserPasskey>()
             .AnyAsync(entry => entry.CredentialId == id, cancellationToken);
+
+    public async Task<List<EnrolmentUser>> GetAccountsNotVerified(
+        CancellationToken cancellationToken = default) =>
+        await _context
+            .Set<EnrolmentUser>()
+            .Where(user => !user.EmailConfirmed)
+            .ToListAsync(cancellationToken);
 }

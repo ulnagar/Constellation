@@ -1,6 +1,7 @@
 namespace Constellation.Presentation.Enrolments.Areas.Enrolments.Pages.Account;
 
 using Application.Domains.EnrolmentContext.Interfaces;
+using Application.Extensions;
 using Application.Interfaces.Services;
 using Core.Models.Auth.Enums;
 using Core.Models.EnrolmentContext.EnrolmentUser;
@@ -8,7 +9,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using Presentation.Shared.Extensions;
+using OfficeOpenXml.FormulaParsing.LexicalAnalysis;
 using Serilog;
 
 [AllowAnonymous]
@@ -57,6 +58,18 @@ public class ConfirmModel : PageModel
         user.AddLogin(DateTime.UtcNow, LoginStatus.Success);
         await _signInManager.SignInAsync(user, isPersistent: true);
         await _unitOfWork.CompleteAsync();
+
+        return RedirectToPage("/Index", routeValues: new { area = "Enrolments" });
+    }
+
+    public async Task<IActionResult> OnGetBypass(string email)
+    {
+        EnrolmentUser? user = await _userManager.FindByEmailAsync(email);
+
+        if (user is null)
+            return InvalidLink("Enrolment User Not Found", null);
+
+        await _signInManager.SignInAsync(user, isPersistent: true);
 
         return RedirectToPage("/Index", routeValues: new { area = "Enrolments" });
     }

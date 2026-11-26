@@ -24,8 +24,13 @@ public sealed class EnrolmentUser : IdentityUser<Guid>, IHasDomainEvents
 
     public PhoneNumber PendingPhone { get; private set; } = Core.ValueObjects.PhoneNumber.Empty;
 
+    public DateTimeOffset CreatedAt { get; private set; } = DateTimeOffset.UtcNow;
+
     public IReadOnlyList<EnrolmentUserLoginAttempt> Logins => _logins.AsReadOnly();
     public ICollection<EnrolmentUserPasskey> PasskeyCredentials { get; set; } = [];
+
+    public bool IsExpiredUnconfirmed(DateTimeOffset now) =>
+        !EmailConfirmed && now - CreatedAt >= TimeSpan.FromHours(25);
 
     public Result RequestEmailChange(EmailAddress newEmail)
     {

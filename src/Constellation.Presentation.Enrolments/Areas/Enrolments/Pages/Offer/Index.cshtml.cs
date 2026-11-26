@@ -2,6 +2,7 @@ namespace Constellation.Presentation.Enrolments.Areas.Enrolments.Pages.Offer;
 
 using Application.Domains.EnrolmentContext.Offers.Commands.RecordParentResponseToOffer;
 using Application.Domains.EnrolmentContext.Offers.Queries.GetOfferForResponse;
+using Application.Models.Auth;
 using Constellation.Core.Abstractions.Services;
 using Constellation.Core.Shared;
 using Core.Abstractions.Clock;
@@ -14,9 +15,8 @@ using Microsoft.AspNetCore.Routing;
 using Models;
 using Presentation.Shared.Extensions;
 using Serilog;
-using OfferResponse = Application.Domains.EnrolmentContext.Offers.Queries.GetOfferForResponse.OfferResponse;
 
-[AllowAnonymous]
+[Authorize(Policy = AuthPolicies.IsEnrolmentsPortalUser)]
 public class IndexModel : BasePageModel
 {
     private readonly ISender _mediator;
