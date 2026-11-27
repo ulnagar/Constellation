@@ -5,8 +5,6 @@ using Application.Domains.EnrolmentContext.Interfaces;
 using Application.Extensions;
 using Application.Interfaces.Services;
 using Constellation.Application.DTOs.EmailRequests;
-using Constellation.Core.Enums;
-using Constellation.Core.Models.Auth.Enums;
 using Core.Models.EnrolmentContext.EnrolmentUser;
 using Core.Models.EnrolmentContext.EnrolmentUser.Errors;
 using Core.Shared;
@@ -86,5 +84,54 @@ internal sealed class EnrolmentAuthService
     public Task<Result> SendLoginTokenViaSms(PhoneNumber number, CancellationToken cancellationToken = default)
     {
         throw new NotImplementedException();
+    }
+
+    public async Task<Result> RegisterNewUser(
+        Name name,
+        EmailAddress emailAddress,
+        PhoneNumber mobile,
+        CancellationToken cancellationToken = default)
+    {
+        EnrolmentUser user = new EnrolmentUser()
+        {
+            UserName = emailAddress,
+            Email = emailAddress,
+            Name = name
+        };
+
+        if (mobile != PhoneNumber.Empty)
+            user.PhoneNumber = mobile.ToString(PhoneNumber.Format.None);
+
+        IdentityResult result = await _userManager.CreateAsync(user);
+
+        if (!result.Succeeded)
+        {
+            _logger
+                .ForContext(nameof(Name), name, true)
+                .ForContext(nameof(EmailAddress), emailAddress, true)
+                .ForContext(nameof(IdentityResult), result, true)
+                .Warning("Failed to create new user");
+
+            return Result.Failure(Error.FromIdentityResult(result));
+        }
+
+        string token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+
+        string link = QueryHelpers.AddQueryString(
+            $"{AppConstants.BaseUrl}/Enrolments/Account/Confirm",
+            new Dictionary<string, string?> { ["userId"] = user.Id.ToString(), ["token"] = token });
+
+        Result emailResult = await _emailService.SendRegistrationConfirmationEmail(name, emailAddress, link, cancellationToken);
+
+        if (emailResult.IsFailure)
+        {
+            _logger
+                .ForContext(nameof(Name), name, true)
+                .ForContext("Token", token)
+                .ForContext(nameof(Error), emailResult.Error, true)
+                .Error("Failed to send registration confirmation email");
+        }
+
+        return Result.Success();
     }
 }

@@ -1,12 +1,11 @@
 namespace Constellation.Presentation.Enrolments.Areas.Enrolments.Pages.Account;
 
-using Application.Domains.EnrolmentContext.EnrolmentUser.Commands.RegisterNewUser;
+using Application.Domains.EnrolmentContext.Interfaces;
 using Core.Shared;
 using Core.ValueObjects;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.RazorPages;
 using Models;
 using Serilog;
 
@@ -14,13 +13,16 @@ using Serilog;
 public class RegisterModel : BasePageModel
 {
     private readonly ISender _mediator;
+    private readonly IEnrolmentAuthService _authService;
     private readonly ILogger _logger;
 
     public RegisterModel(
         ISender mediator,
+        IEnrolmentAuthService authService,
         ILogger logger)
     {
         _mediator = mediator;
+        _authService = authService;
         _logger = logger
             .ForContext<RegisterModel>();
     }
@@ -42,7 +44,7 @@ public class RegisterModel : BasePageModel
     {
     }
 
-    public async Task<IActionResult> OnPost()
+    public async Task<IActionResult> OnPost(CancellationToken cancellationToken = default)
     {
         PhoneNumber mobile = PhoneNumber.Empty;
 
@@ -70,17 +72,11 @@ public class RegisterModel : BasePageModel
             return Page();
         
         // Process the registration.
-        RegisterNewUserCommand command = new(
-            name.Value,
-            emailAddress.Value,
-            mobile);
-
-        Result result = await _mediator.Send(command);
+        Result result = await _authService.RegisterNewUser(name.Value, emailAddress.Value, mobile, cancellationToken);
 
         if (result.IsFailure)
         {
             _logger
-                .ForContext(nameof(RegisterNewUserCommand), command, true)
                 .ForContext(nameof(Error), result.Error, true)
                 .Warning("Failed to process new user registration");
 
