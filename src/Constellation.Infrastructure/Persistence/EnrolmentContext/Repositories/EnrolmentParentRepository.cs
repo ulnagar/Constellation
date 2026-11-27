@@ -18,18 +18,27 @@ internal sealed class EnrolmentParentRepository : IEnrolmentParentRepository
     }
 
     public async Task<EnrolmentParent?> GetById(
-        EnrolmentParentId parentId, 
+        EnrolmentParentId parentId,
         CancellationToken cancellationToken = default) =>
-    await _context
-        .Set<EnrolmentParent>()
-        .FirstOrDefaultAsync(p => p.Id == parentId, cancellationToken);
+        await _context
+            .Set<EnrolmentParent>()
+            .FirstOrDefaultAsync(p => p.Id == parentId, cancellationToken);
 
-    public async Task<EnrolmentParent?> GetByEmail(
+    public async Task<List<EnrolmentParent>> GetByUserId(
+        Guid userId,
+        CancellationToken cancellationToken = default) =>
+        await _context
+            .Set<EnrolmentParent>()
+            .Where(p => p.EnrolmentUserId == userId)
+            .ToListAsync(cancellationToken);
+
+    public async Task<List<EnrolmentParent>> GetByEmail(
         EmailAddress email,
         CancellationToken cancellationToken = default) =>
         await _context
             .Set<EnrolmentParent>()
-            .FirstOrDefaultAsync(p => p.Email == email, cancellationToken);
+            .Where(p => p.Email == email)
+            .ToListAsync(cancellationToken);
 
     public async Task<List<EnrolmentParent>> GetListFromIds(
         List<EnrolmentParentId> parentIds,

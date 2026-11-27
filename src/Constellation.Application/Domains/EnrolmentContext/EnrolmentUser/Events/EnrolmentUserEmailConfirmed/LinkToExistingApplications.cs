@@ -60,30 +60,29 @@ internal sealed class LinkToExistingApplications
             return;
         }
 
-        EnrolmentParent? parent = await _parentRepository.GetByEmail(parentEmail.Value, cancellationToken);
+        List<EnrolmentParent> existingParents = await _parentRepository.GetByUserId(user.Id, cancellationToken);
 
-        if (parent is null)
+        foreach (EnrolmentParent parent in existingParents)
+            parent.UpdateParentEmail(parentEmail.Value);
+
+        List<EnrolmentParent> parents = await _parentRepository.GetByEmail(parentEmail.Value, cancellationToken);
+
+        foreach (EnrolmentParent parent in parents)
         {
-            _logger
-                .ForContext(nameof(EnrolmentUserEmailConfirmedDomainEvent), notification, true)
-                .ForContext(nameof(Error), EnrolmentParentErrors.NotFoundByEmail(parentEmail.Value), true)
-                .Warning("Failed to link user to existing applications.");
+            if (parent.EnrolmentUserId.HasValue && parent.EnrolmentUserId.Value != user.Id)
+            {
+                _logger
+                    .ForContext(nameof(EnrolmentUserEmailConfirmedDomainEvent), notification, true)
+                    .ForContext(nameof(EnrolmentParent), parent, true)
+                    .ForContext(nameof(Error), EnrolmentParentErrors.ParentAlreadyLinkedToUser, true)
+                    .Warning("Failed to link user to existing applications.");
 
-            return;
+                continue;
+            }
+
+            parent.UpdateUserLink(user.Id);
         }
-
-        if (parent.EnrolmentUserId.HasValue && parent.EnrolmentUserId.Value != user.Id)
-        {
-            _logger
-                .ForContext(nameof(EnrolmentUserEmailConfirmedDomainEvent), notification, true)
-                .ForContext(nameof(Error), EnrolmentParentErrors.InvalidId, true)
-                .Warning("Failed to link user to existing applications.");
-
-            return;
-        }
-
-        parent.UpdateUserLink(user.Id);
-
+        
         await _unitOfWork.CompleteAsync(cancellationToken);
     }
 }

@@ -92,31 +92,41 @@ internal sealed class EnrolmentAuthService
         PhoneNumber mobile,
         CancellationToken cancellationToken = default)
     {
-        EnrolmentUser user = new EnrolmentUser()
+        EnrolmentUser? user = await _userManager.FindByEmailAsync(emailAddress);
+        string token;
+
+        if (user is null)
         {
-            UserName = emailAddress,
-            Email = emailAddress,
-            Name = name
-        };
+            user = new EnrolmentUser()
+            {
+                UserName = emailAddress,
+                Email = emailAddress,
+                Name = name
+            };
 
-        if (mobile != PhoneNumber.Empty)
-            user.PhoneNumber = mobile.ToString(PhoneNumber.Format.None);
+            if (mobile != PhoneNumber.Empty)
+                user.PhoneNumber = mobile.ToString(PhoneNumber.Format.None);
 
-        IdentityResult result = await _userManager.CreateAsync(user);
+            IdentityResult result = await _userManager.CreateAsync(user);
 
-        if (!result.Succeeded)
-        {
-            _logger
-                .ForContext(nameof(Name), name, true)
-                .ForContext(nameof(EmailAddress), emailAddress, true)
-                .ForContext(nameof(IdentityResult), result, true)
-                .Warning("Failed to create new user");
+            if (!result.Succeeded)
+            {
+                _logger
+                    .ForContext(nameof(Name), name, true)
+                    .ForContext(nameof(EmailAddress), emailAddress, true)
+                    .ForContext(nameof(IdentityResult), result, true)
+                    .Warning("Failed to create new user");
 
-            return Result.Failure(Error.FromIdentityResult(result));
+                return Result.Failure(Error.FromIdentityResult(result));
+            }
+
+            token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
         }
-
-        string token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
-
+        else
+        {
+            token = await _userManager.GenerateEmailLoginTokenAsync(user);
+        }
+        
         string link = QueryHelpers.AddQueryString(
             $"{AppConstants.BaseUrl}/Enrolments/Account/Confirm",
             new Dictionary<string, string?> { ["userId"] = user.Id.ToString(), ["token"] = token });
